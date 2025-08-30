@@ -16,6 +16,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Required Practices
 
 -  **Component library**: Use shadcn/ui components exclusively
+-  **Form handling**: Use React Hook Form with Zod validation
 -  **Generic components**: Create reusable components in `@/components/ui/` when shadcn equivalent doesn't exist
 -  **Authentication**: use `const session = await getTypedSession();` (see lib/auth-helpers.ts) to check auth and redirect if needed ; check user auth in actions with `authenticatedAction` (see lib/actions/safe-action.ts)
 -  **Internationalization**: Implement `next-intl` for French/English translations
