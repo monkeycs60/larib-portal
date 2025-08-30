@@ -1,10 +1,9 @@
 'use server';
 
 import { z } from 'zod';
-import { authClient } from '@/lib/auth-client';
+import { auth } from '@/lib/auth';
 import { unauthenticatedAction } from '@/actions/safe-action';
-import { getTranslations, getLocale } from 'next-intl/server';
-import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -17,9 +16,11 @@ export const loginAction = unauthenticatedAction
     const t = await getTranslations('auth');
     
     try {
-      const result = await authClient.signIn.email({
-        email,
-        password,
+      const result = await auth.api.signInEmail({
+        body: {
+          email,
+          password,
+        },
       });
 
       if ('error' in result && result.error) {
@@ -29,8 +30,9 @@ export const loginAction = unauthenticatedAction
         };
       }
 
-      const locale = await getLocale();
-      redirect(`/${locale}/dashboard`);
+      return {
+        success: true,
+      };
     } catch (error) {
       console.error('Login error:', error);
       return {

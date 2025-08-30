@@ -26,6 +26,8 @@ model User {
 
   sessions      Session[]
   accounts      Account[]
+  
+  @@map("User")
 }
 
 model Session {
@@ -39,6 +41,8 @@ model Session {
 
   userId        String
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("Session")
 }
 
 model Account {
@@ -56,6 +60,8 @@ model Account {
   password        String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  
+  @@map("Account")
 }
 
 model Verification {
@@ -65,4 +71,6 @@ model Verification {
   expiresAt     DateTime
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  
+  @@map("Verification")
 }

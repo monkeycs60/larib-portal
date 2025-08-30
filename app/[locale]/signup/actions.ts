@@ -1,10 +1,9 @@
 'use server';
 
 import { z } from 'zod';
-import { authClient } from '@/lib/auth-client';
+import { auth } from '@/lib/auth';
 import { unauthenticatedAction } from '@/actions/safe-action';
-import { getTranslations, getLocale } from 'next-intl/server';
-import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -18,21 +17,27 @@ export const signupAction = unauthenticatedAction
     const t = await getTranslations('auth');
     
     try {
-      const result = await authClient.signUp.email({
-        email,
-        password,
-        name,
+      const result = await auth.api.signUpEmail({
+        body: {
+          email,
+          password,
+          name,
+        },
       });
 
+      console.log('result', result);
+
       if ('error' in result && result.error) {
+        console.log('result.error', result.error);
         return {
           success: false,
           error: result.error.message || t('authenticationFailed'),
         };
       }
 
-      const locale = await getLocale();
-      redirect(`/${locale}/dashboard`);
+      return {
+        success: true,
+      };
     } catch (error) {
       console.error('Signup error:', error);
       return {

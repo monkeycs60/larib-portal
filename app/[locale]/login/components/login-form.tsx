@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { AlertCircle, LogIn, Eye, EyeOff } from 'lucide-react';
 import { loginAction } from '../actions';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface LoginFormProps {
   showSignupLink?: boolean;
@@ -21,6 +22,7 @@ interface LoginFormProps {
 export function LoginForm({ showSignupLink = true }: LoginFormProps) {
   const t = useTranslations('auth');
   const locale = useLocale();
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
 
   const formSchema = z.object({
@@ -47,8 +49,10 @@ export function LoginForm({ showSignupLink = true }: LoginFormProps) {
         setError('root', { message: t('invalidCredentials') });
       }
     },
-    onSuccess: () => {
-      // Redirect is handled in the server action
+    onSuccess: ({ data }) => {
+      if (data?.success) {
+        router.push(`/${locale}/dashboard`);
+      }
     },
   });
 
