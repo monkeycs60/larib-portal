@@ -1,0 +1,42 @@
+{
+	"mcpServers": {
+		"playwright": {
+			"command": "npx",
+			"args": ["@playwright/mcp@latest"],
+			"env": {}
+		},
+		"brave-search": {
+			"command": "npx",
+			"args": ["@modelcontextprotocol/server-brave-search", "-e"],
+			"env": {
+				"BRAVE_API_KEY": "{{BRAVE_API_KEY}}"
+			}
+		},
+		"context7": {
+			"command": "npx",
+			"args": ["-y", "@upstash/context7-mcp"],
+			"env": {}
+		},
+		"browsermcp": {
+			"command": "npx",
+			"args": ["@browsermcp/mcp@latest"],
+			"env": {}
+		},
+		"postgres": {
+			"command": "npx",
+			"args": [
+				"-y",
+				"@modelcontextprotocol/server-postgres",
+				"{{DATABASE_URL}}"
+			],
+			"env": {}
+		},
+		"figma": {
+			"command": "npx",
+			"args": ["-y", "figma-developer-mcp", "--stdio"],
+			"env": {
+				"FIGMA_API_KEY": "{{FIGMA_API_KEY}}"
+			}
+		}
+	}
+}

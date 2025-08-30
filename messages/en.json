@@ -1,0 +1,46 @@
+{
+  "navigation": {
+    "home": "Home",
+    "profile": "Profile",
+    "login": "Login",
+    "logout": "Logout",
+    "signup": "Sign up",
+    "loading": "Loading...",
+    "loggingOut": "Logging out...",
+    "appName": "App Name"
+  },
+  "home": {
+    "title": "Hello World"
+  },
+  "auth": {
+    "loginTitle": "Login",
+    "signupTitle": "Sign up",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "name": "Name",
+    "loginButton": "Login",
+    "signupButton": "Sign up",
+    "alreadyHaveAccount": "Already have an account?",
+    "noAccount": "Don't have an account?",
+    "switchToLogin": "Login here",
+    "switchToSignup": "Sign up here",
+    "invalidCredentials": "Invalid credentials",
+    "nameRequired": "Name is required for signup",
+    "authenticationFailed": "Authentication failed",
+    "googleLoginFailed": "Google login failed",
+    "loading": "Loading...",
+    "orContinueWith": "Or continue with",
+    "nameMinLength": "Name must be at least 2 characters",
+    "invalidEmail": "Invalid email address",
+    "passwordMinLength": "Password must be at least 6 characters"
+  },
+  "profile": {
+    "title": "Profile",
+    "welcome": "Welcome to your profile"
+  },
+  "metadata": {
+    "title": "FeedbackApp",
+    "description": "User feedback application"
+  }
+}

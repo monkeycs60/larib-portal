@@ -1,0 +1,46 @@
+{
+	"navigation": {
+		"home": "Accueil",
+		"profile": "Profil",
+		"login": "Connexion",
+		"logout": "Déconnexion",
+		"signup": "S'inscrire",
+		"loading": "Chargement...",
+		"loggingOut": "Déconnexion en cours...",
+		"appName": "Nom de l'application"
+	},
+	"home": {
+		"title": "Bonjour le monde"
+	},
+	"auth": {
+		"loginTitle": "Connexion",
+		"signupTitle": "Inscription",
+		"email": "E-mail",
+		"password": "Mot de passe",
+		"confirmPassword": "Confirmer le mot de passe",
+		"name": "Nom",
+		"loginButton": "Se connecter",
+		"signupButton": "S'inscrire",
+		"alreadyHaveAccount": "Vous avez déjà un compte ?",
+		"noAccount": "Vous n'avez pas de compte ?",
+		"switchToLogin": "Connectez-vous ici",
+		"switchToSignup": "Inscrivez-vous ici",
+		"invalidCredentials": "Identifiants invalides",
+		"nameRequired": "Le nom est requis pour l'inscription",
+		"authenticationFailed": "Échec de l'authentification",
+		"googleLoginFailed": "Échec de la connexion Google",
+		"loading": "Chargement...",
+		"orContinueWith": "Ou continuer avec",
+		"nameMinLength": "Le nom doit contenir au moins 2 caractères",
+		"invalidEmail": "Adresse e-mail invalide",
+		"passwordMinLength": "Le mot de passe doit contenir au moins 6 caractères"
+	},
+	"profile": {
+		"title": "Profil",
+		"welcome": "Bienvenue sur votre profil"
+	},
+	"metadata": {
+		"title": "FeedbackApp",
+		"description": "Application de feedback utilisateur"
+	}
+}
