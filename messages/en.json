@@ -23,7 +23,9 @@
     "profile": "Profile",
     "profileDescription": "Manage your profile and settings.",
     "settings": "Settings",
-    "settingsDescription": "Configure your application preferences."
+    "settingsDescription": "Configure your application preferences.",
+    "signIn": "Sign in",
+    "signUp": "Sign up"
   },
   "auth": {
     "loginTitle": "Login",
@@ -57,7 +59,20 @@
     "or": "or",
     "demoCredentials": "Demo Credentials:",
     "userCredentials": "User",
-    "adminCredentials": "Admin"
+    "adminCredentials": "Admin",
+    "welcomeToTeam": "Welcome to the team!",
+    "invitedByMessage": "You've been invited by Sarah Smith to join the platform",
+    "yourInformation": "Your Information",
+    "role": "Role",
+    "department": "Department",
+    "createPassword": "Create Password",
+    "confirmPassword": "Confirm Password",
+    "createAccount": "Create Account",
+    "namePlaceholder": "Enter your full name",
+    "createPasswordPlaceholder": "Enter your password",
+    "confirmPasswordPlaceholder": "Confirm your password",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "passwordRequirements": "Password must be at least 8 characters and include uppercase, lowercase, and numbers."
   },
   "profile": {
     "title": "Profile",

@@ -14,7 +14,8 @@ export async function getTypedSession(): Promise<BetterAuthSession | null> {
 		}
 
 		return session as BetterAuthSession;
-	} catch (error) {
+	} catch (error: unknown) {
+		console.error('Error getting session:', error);
 		return null;
 	}
 }

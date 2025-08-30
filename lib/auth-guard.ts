@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getTypedSession } from './auth-helpers';
 import { BetterAuthSession } from '@/types/session';
+import { getLocale } from 'next-intl/server';
 
 /**
  * Authentication guard for protected pages
@@ -11,7 +12,8 @@ export async function requireAuth(): Promise<BetterAuthSession> {
   const session = await getTypedSession();
   
   if (!session) {
-    redirect('/login');
+    const locale = await getLocale();
+    redirect(`/${locale}/login`);
   }
   
   return session;
@@ -23,9 +25,11 @@ export async function requireAuth(): Promise<BetterAuthSession> {
  */
 export async function redirectIfAuthenticated(): Promise<void> {
   const session = await getTypedSession();
+  console.log('session', session);
   
   if (session) {
-    redirect('/dashboard');
+    const locale = await getLocale();
+    redirect(`/${locale}/dashboard`);
   }
 }
 

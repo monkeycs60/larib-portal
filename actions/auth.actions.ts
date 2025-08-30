@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import { authClient } from '@/lib/auth-client';
 import { unauthenticatedAction } from './safe-action';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, getLocale } from 'next-intl/server';
 import { redirect } from 'next/navigation';
 
 const loginSchema = z.object({
@@ -35,7 +35,8 @@ export const loginAction = unauthenticatedAction
         };
       }
 
-      redirect('/dashboard');
+      const locale = await getLocale();
+      redirect(`/${locale}/dashboard`);
     } catch (error) {
       console.error('Login error:', error);
       return {
@@ -64,7 +65,8 @@ export const signupAction = unauthenticatedAction
         };
       }
 
-      redirect('/dashboard');
+      const locale = await getLocale();
+      redirect(`/${locale}/dashboard`);
     } catch (error) {
       console.error('Signup error:', error);
       return {

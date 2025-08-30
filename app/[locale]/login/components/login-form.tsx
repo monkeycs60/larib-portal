@@ -3,14 +3,13 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useAction } from 'next-safe-action/hooks';
 import { z } from 'zod';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { AlertCircle, LogIn, Eye, EyeOff } from 'lucide-react';
 import { loginAction } from '@/actions/auth.actions';
 import Link from 'next/link';
@@ -21,6 +20,7 @@ interface LoginFormProps {
 
 export function LoginForm({ showSignupLink = true }: LoginFormProps) {
   const t = useTranslations('auth');
+  const locale = useLocale();
   const [showPassword, setShowPassword] = useState(false);
 
   const formSchema = z.object({
@@ -157,7 +157,7 @@ export function LoginForm({ showSignupLink = true }: LoginFormProps) {
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
                 {t('noAccount')}{' '}
-                <Link href="/signup" className="font-medium text-primary hover:underline">
+                <Link href={`/${locale}/signup`} className="font-medium text-primary hover:underline">
                   {t('signUp')}
                 </Link>
               </p>
