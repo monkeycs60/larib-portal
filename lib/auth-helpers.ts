@@ -3,9 +3,18 @@ import { headers } from 'next/headers';
 import { BetterAuthSession } from '@/types/session';
 
 export async function getTypedSession(): Promise<BetterAuthSession | null> {
-	const session = await auth.api.getSession({
-		headers: await headers(),
-	});
+	try {
+		const session = await auth.api.getSession({
+			headers: await headers(),
+		});
 
-	return session as BetterAuthSession;
+		// Return null if no session or invalid session
+		if (!session || !session.user) {
+			return null;
+		}
+
+		return session as BetterAuthSession;
+	} catch (error) {
+		return null;
+	}
 }

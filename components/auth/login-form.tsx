@@ -13,12 +13,13 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { AlertCircle, LogIn, Eye, EyeOff } from 'lucide-react';
 import { loginAction } from '@/actions/auth.actions';
+import Link from 'next/link';
 
 interface LoginFormProps {
-  onToggleToSignup?: () => void;
+  showSignupLink?: boolean;
 }
 
-export function LoginForm({ onToggleToSignup }: LoginFormProps) {
+export function LoginForm({ showSignupLink = true }: LoginFormProps) {
   const t = useTranslations('auth');
   const [showPassword, setShowPassword] = useState(false);
 
@@ -61,7 +62,6 @@ export function LoginForm({ onToggleToSignup }: LoginFormProps) {
 
   const handleForgotPassword = () => {
     // TODO: Implement forgot password functionality
-    console.log('Forgot password clicked');
   };
 
   return (
@@ -146,28 +146,22 @@ export function LoginForm({ onToggleToSignup }: LoginFormProps) {
             </Button>
           </form>
 
-          {onToggleToSignup && (
-            <>
-              <div className="relative">
-                <Separator />
-                <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-4 text-sm text-muted-foreground">
-                  {t('or')}
-                </span>
-              </div>
+          {/* Demo credentials info */}
+          <div className="p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground">
+            <p className="font-medium mb-1">{t('demoCredentials')}</p>
+            <p>{t('userCredentials')}: demo@company.com / password</p>
+            <p>{t('adminCredentials')}: admin@company.com / admin123</p>
+          </div>
 
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground">
-                  {t('noAccount')}{' '}
-                  <Button
-                    variant="link"
-                    className="px-0 h-auto"
-                    onClick={onToggleToSignup}
-                  >
-                    {t('signUp')}
-                  </Button>
-                </p>
-              </div>
-            </>
+          {showSignupLink && (
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground">
+                {t('noAccount')}{' '}
+                <Link href="/signup" className="font-medium text-primary hover:underline">
+                  {t('signUp')}
+                </Link>
+              </p>
+            </div>
           )}
         </CardContent>
       </Card>

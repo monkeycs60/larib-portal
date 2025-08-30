@@ -35,7 +35,7 @@ export const loginAction = unauthenticatedAction
         };
       }
 
-      redirect('/profile');
+      redirect('/dashboard');
     } catch (error) {
       console.error('Login error:', error);
       return {
@@ -64,7 +64,7 @@ export const signupAction = unauthenticatedAction
         };
       }
 
-      redirect('/profile');
+      redirect('/dashboard');
     } catch (error) {
       console.error('Signup error:', error);
       return {

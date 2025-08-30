@@ -10,7 +10,20 @@
     "appName": "App Name"
   },
   "home": {
-    "title": "Hello World"
+    "title": "Hello World",
+    "welcome": "Welcome",
+    "welcomeMessage": "You are successfully logged in to your account.",
+    "welcomeToApp": "Welcome to FeedbackApp",
+    "appDescription": "The best way to collect and manage user feedback.",
+    "whatToDo": "What would you like to do?",
+    "goToDashboard": "Go to Dashboard",
+    "goToProfile": "View Profile",
+    "dashboard": "Dashboard",
+    "dashboardDescription": "View your dashboard and analytics.",
+    "profile": "Profile",
+    "profileDescription": "Manage your profile and settings.",
+    "settings": "Settings",
+    "settingsDescription": "Configure your application preferences."
   },
   "auth": {
     "loginTitle": "Login",
@@ -41,11 +54,30 @@
     "passwordPlaceholder": "Enter your password",
     "signIn": "Sign In",
     "signUp": "Sign up",
-    "or": "or"
+    "or": "or",
+    "demoCredentials": "Demo Credentials:",
+    "userCredentials": "User",
+    "adminCredentials": "Admin"
   },
   "profile": {
     "title": "Profile",
     "welcome": "Welcome to your profile"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome to your dashboard",
+    "analytics": "Analytics",
+    "analyticsDescription": "View detailed analytics and insights.",
+    "feedback": "Feedback",
+    "feedbackDescription": "Manage user feedback and responses.",
+    "settings": "Settings",
+    "settingsDescription": "Configure your dashboard preferences.",
+    "reports": "Reports",
+    "reportsDescription": "Generate and view detailed reports.",
+    "users": "Users",
+    "usersDescription": "Manage user accounts and permissions.",
+    "integrations": "Integrations",
+    "integrationsDescription": "Connect with third-party services."
   },
   "metadata": {
     "title": "FeedbackApp",

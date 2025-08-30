@@ -10,7 +10,20 @@
 		"appName": "Nom de l'application"
 	},
 	"home": {
-		"title": "Bonjour le monde"
+		"title": "Bonjour le monde",
+		"welcome": "Bienvenue",
+		"welcomeMessage": "Vous êtes connecté(e) avec succès à votre compte.",
+		"welcomeToApp": "Bienvenue sur FeedbackApp",
+		"appDescription": "La meilleure façon de collecter et gérer les commentaires des utilisateurs.",
+		"whatToDo": "Que souhaitez-vous faire ?",
+		"goToDashboard": "Accéder au tableau de bord",
+		"goToProfile": "Voir le profil",
+		"dashboard": "Tableau de bord",
+		"dashboardDescription": "Consultez votre tableau de bord et vos analyses.",
+		"profile": "Profil",
+		"profileDescription": "Gérez votre profil et vos paramètres.",
+		"settings": "Paramètres",
+		"settingsDescription": "Configurez vos préférences d'application."
 	},
 	"auth": {
 		"loginTitle": "Connexion",
@@ -41,11 +54,30 @@
 		"passwordPlaceholder": "Saisissez votre mot de passe",
 		"signIn": "Se connecter",
 		"signUp": "S'inscrire",
-		"or": "ou"
+		"or": "ou",
+		"demoCredentials": "Identifiants de démonstration :",
+		"userCredentials": "Utilisateur",
+		"adminCredentials": "Administrateur"
 	},
 	"profile": {
 		"title": "Profil",
 		"welcome": "Bienvenue sur votre profil"
+	},
+	"dashboard": {
+		"title": "Tableau de bord",
+		"welcome": "Bienvenue sur votre tableau de bord",
+		"analytics": "Analytiques",
+		"analyticsDescription": "Consultez des analyses et insights détaillés.",
+		"feedback": "Commentaires",
+		"feedbackDescription": "Gérez les commentaires et réponses des utilisateurs.",
+		"settings": "Paramètres",
+		"settingsDescription": "Configurez vos préférences de tableau de bord.",
+		"reports": "Rapports",
+		"reportsDescription": "Générez et consultez des rapports détaillés.",
+		"users": "Utilisateurs",
+		"usersDescription": "Gérez les comptes utilisateurs et les permissions.",
+		"integrations": "Intégrations",
+		"integrationsDescription": "Connectez-vous à des services tiers."
 	},
 	"metadata": {
 		"title": "FeedbackApp",
