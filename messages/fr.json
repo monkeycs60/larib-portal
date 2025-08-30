@@ -33,7 +33,15 @@
 		"orContinueWith": "Ou continuer avec",
 		"nameMinLength": "Le nom doit contenir au moins 2 caractères",
 		"invalidEmail": "Adresse e-mail invalide",
-		"passwordMinLength": "Le mot de passe doit contenir au moins 6 caractères"
+		"passwordMinLength": "Le mot de passe doit contenir au moins 6 caractères",
+		"welcomeBack": "Bon retour",
+		"signInToAccount": "Connectez-vous à votre compte pour continuer",
+		"forgotPassword": "Mot de passe oublié ?",
+		"emailPlaceholder": "Saisissez votre e-mail",
+		"passwordPlaceholder": "Saisissez votre mot de passe",
+		"signIn": "Se connecter",
+		"signUp": "S'inscrire",
+		"or": "ou"
 	},
 	"profile": {
 		"title": "Profil",

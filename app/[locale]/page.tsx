@@ -1,16 +1,22 @@
-import { getTranslations } from 'next-intl/server';
+import { getTypedSession } from '@/lib/auth-helpers';
+import { redirect } from 'next/navigation';
+import { LoginForm } from '@/components/auth/login-form';
 
 export default async function Home({
   params
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'home' });
+  const session = await getTypedSession();
+  
+  // If user is already authenticated, redirect to dashboard
+  if (session) {
+    redirect('/dashboard');
+  }
   
   return (
-    <div>
-      <h1>{t('title')}</h1>
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <LoginForm />
     </div>
   );
 }

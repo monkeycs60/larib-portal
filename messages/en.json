@@ -33,7 +33,15 @@
     "orContinueWith": "Or continue with",
     "nameMinLength": "Name must be at least 2 characters",
     "invalidEmail": "Invalid email address",
-    "passwordMinLength": "Password must be at least 6 characters"
+    "passwordMinLength": "Password must be at least 6 characters",
+    "welcomeBack": "Welcome back",
+    "signInToAccount": "Sign in to your account to continue",
+    "forgotPassword": "Forgot password?",
+    "emailPlaceholder": "Enter your email",
+    "passwordPlaceholder": "Enter your password",
+    "signIn": "Sign In",
+    "signUp": "Sign up",
+    "or": "or"
   },
   "profile": {
     "title": "Profile",
