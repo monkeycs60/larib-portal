@@ -14,6 +14,7 @@ import { AlertCircle, LogIn, Eye, EyeOff } from 'lucide-react';
 import { loginAction } from '../actions';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { authClient } from '@/lib/auth-client';
 
 interface LoginFormProps {
   showSignupLink?: boolean;
@@ -24,6 +25,8 @@ export function LoginForm({ showSignupLink = true }: LoginFormProps) {
   const locale = useLocale();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+ 	const { refetch: refetchSession } = authClient.useSession();
+
 
   const formSchema = z.object({
     email: z.string().email(t('invalidEmail')),
@@ -51,6 +54,8 @@ export function LoginForm({ showSignupLink = true }: LoginFormProps) {
     },
     onSuccess: ({ data }) => {
       if (data?.success) {
+        refetchSession();
+        router.refresh();
         router.push(`/${locale}/dashboard`);
       }
     },

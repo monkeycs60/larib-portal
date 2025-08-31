@@ -14,6 +14,7 @@ import { AlertCircle, Mail, Eye, EyeOff } from 'lucide-react';
 import { signupAction } from '../actions';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { authClient } from '@/lib/auth-client';
 
 export function SignupForm() {
   const t = useTranslations('auth');
@@ -21,6 +22,7 @@ export function SignupForm() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { refetch: refetchSession } = authClient.useSession();
 
   const formSchema = z.object({
     name: z.string().min(2, t('nameMinLength')),
@@ -53,6 +55,8 @@ export function SignupForm() {
     },
     onSuccess: ({ data }) => {
       if (data?.success) {
+        refetchSession();
+        router.refresh();
         router.push(`/${locale}/dashboard`);
       }
     },
