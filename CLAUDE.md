@@ -87,6 +87,7 @@ Next.js 15 application with modern stack and strict development standards:
 -  **Playwright** for E2E testing
 -  **Shadcn UI** for component library
 -  **Next-safe-action** for server actions
+-  **Localized links**: Build all internal hrefs with `applicationLink(locale, path)` from `lib/application-link.ts` to ensure the locale prefix is always present (e.g., `applicationLink(locale, '/dashboard')`). Combine with the i18n `Link`/`useRouter` helpers from `app/i18n/navigation`.
 -  **Next-intl** for internationalization (French & English)
 -  **Zustand** for global state management
 

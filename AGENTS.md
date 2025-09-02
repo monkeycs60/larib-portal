@@ -34,6 +34,7 @@
 
 -  **Prisma types**: Always use types from `schema.prisma`
 -  **Server actions**: Use `next-safe-action` for all mutations
+-  **Links with locale**: Use `applicationLink(locale, path)` from `lib/application-link.ts` to build hrefs that always include the active locale. Prefer the i18n `Link`/`useRouter` from `app/i18n/navigation` and pass `applicationLink(locale, '/some/path')` when constructing manual strings.
 -  **Type safety**: Strong typing required (no `any` type)
 -  **Global state**: Use Zustand stores in `lib/stores/` for state shared across distant components
 -  **Store structure**: Separate state and actions interfaces, use TypeScript strict typing

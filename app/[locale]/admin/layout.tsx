@@ -1,7 +1,6 @@
 import { ReactNode } from "react"
 import { getTranslations } from "next-intl/server"
 import { getTypedSession } from "@/lib/auth-helpers"
-import { getUserRole } from "@/lib/services/users"
 import { notFound, redirect } from "next/navigation"
 import { Sidebar } from "@/components/ui/sidebar"
 
@@ -18,9 +17,7 @@ export default async function AdminLayout({
   if (!session) {
     redirect(`/${locale}/login`)
   }
-  const role = await getUserRole(session.user.id)
-  console.log('role sidebar', role)
-  if (role !== 'ADMIN') notFound()
+  if (session.user.role !== 'ADMIN') notFound()
 
   const t = await getTranslations({ locale, namespace: 'admin' })
 

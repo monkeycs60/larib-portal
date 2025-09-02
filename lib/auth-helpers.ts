@@ -15,21 +15,22 @@ export async function getTypedSession(): Promise<BetterAuthSession | null> {
 		}
 
 
-		// Ensure role (and other DB-backed fields) are present on the user
-		try {
-			const dbUser = await prisma.user.findUnique({
-				where: { id: session.user.id },
-				select: { role: true, language: true },
-			});
-			if (dbUser) {
-				(session.user as any).role = dbUser.role;
-				(session.user as any).language = dbUser.language;
-			}
-		} catch (e) {
-			console.error('Error hydrating session user from DB:', e);
-		}
-
-		return session as BetterAuthSession;
+        // Ensure role (and other DB-backed fields) are present on the user
+        try {
+            const dbUser = await prisma.user.findUnique({
+                where: { id: session.user.id },
+                select: { role: true, language: true },
+            });
+            const base = session as unknown as BetterAuthSession;
+            const mergedUser: BetterAuthSession['user'] = {
+                ...base.user,
+                ...(dbUser ?? {}),
+            } as BetterAuthSession['user'];
+            return { user: mergedUser, session: base.session } satisfies BetterAuthSession;
+        } catch (e) {
+            console.error('Error hydrating session user from DB:', e);
+            return session as unknown as BetterAuthSession;
+        }
 	} catch (error: unknown) {
 		console.error('Error getting session:', error);
 		return null;
