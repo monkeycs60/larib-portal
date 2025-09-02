@@ -2,7 +2,6 @@ import { requireAuth } from '@/lib/auth-guard';
 import { Link } from '@/app/i18n/navigation';
 import { getTranslations } from 'next-intl/server';
 import { Sidebar } from '@/components/ui/sidebar';
-import { applicationLink } from '@/lib/application-link';
 // no redirect; only show admin link conditionally
 
 export default async function DashboardPage({
@@ -16,11 +15,9 @@ export default async function DashboardPage({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'dashboard' });
   
-  const sidebarItems = [
-    ...(session.user.role === 'ADMIN'
-      ? [{ href: applicationLink(locale, '/admin/users'), label: 'User management' }]
-      : []),
-  ]
+  const sidebarItems = session.user.role === 'ADMIN'
+    ? [{ href: '/admin/users', label: 'User management' }]
+    : []
 
   return (
     <div className="min-h-screen">
@@ -64,7 +61,7 @@ export default async function DashboardPage({
               <p className="text-gray-600 mb-3">{t('usersDescription')}</p>
               {session.user.role === 'ADMIN' && (
                 <Link
-                  href={`/${locale}/admin/users`}
+                  href={'/admin/users'}
                   className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-secondary text-secondary-foreground hover:bg-secondary/80 h-9 px-4 py-2"
                 >
                   User management
