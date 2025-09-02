@@ -1,24 +1,18 @@
-# CLAUDE.md
+# Repository Guidelines
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
--  Always run `laser-lewis` agent after writing code
--  Always run `playwright` agent after writing code
-
-## Development Standards
+- Always document new feature in CHANGELOG.md: document name + what it does + how to use it. The objective is to have a clear and concise documentation of all app features.
 
 ### Prohibited Practices
 
 -  **No useEffect**: Use fetch in server components via services, or handle side effects via event handlers
--  **No TypeScript any**: Always use strong typing (not any or as any) ; if you need custom types, reuse them via @/types/
+-  **No TypeScript any**: Always use strong typing (not any or as any) ; if you need custom types, reuse them via @/types/ ; never use ts ignore comments.
 -  **No OOP patterns**: Avoid classes or object-oriented approaches
--  **No specific components in @components folder (only generic ones). Specific components should be in @/app/[locale]/[feature]/components`
+-  **No Bad naming**: Use descriptive names for variables, functions, and components, it has to be explicit
+-  **No Bad comments**: Never use comments to explain the code, it has to be explicit
 
 ### Required Practices
 
 -  **Component library**: Use shadcn/ui components exclusively
--  **Form handling**: Use React Hook Form with Zod validation
--  **Folder Architecture**: if components only related to feature/page, put them in `@/app/[locale]/[feature]/components`
 -  **Generic components**: Create reusable components in `@/components/ui/` when shadcn equivalent doesn't exist
 -  **Authentication**: use `const session = await getTypedSession();` (see lib/auth-helpers.ts) to check auth and redirect if needed ; check user auth in actions with `authenticatedAction` (see actions/safe-action.ts)
 -  **Internationalization**: Implement `next-intl` for French/English translations
@@ -50,7 +44,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 -  **Client components**: Only when interactivity is required
 -  **Form handling**: Use React Hook Form with Zod validation
 -  **State management**: Prefer server state over client state when possible
--  **Zustand usage**: 
+-  **Zustand usage**:
    -  Use for global state shared between distant components
    -  Create domain-specific stores (user, theme, preferences)
    -  Use selectors to optimize re-renders: `const user = useUserStore(state => state.user)`
