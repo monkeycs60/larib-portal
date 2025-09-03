@@ -59,6 +59,15 @@ enum Application {
   CARDIOLARIB
 }
 
+model Position {
+  id        String   @id
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("Position")
+}
+
 model Session {
   id            String   @id
   expiresAt     DateTime

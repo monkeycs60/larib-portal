@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server"
 import { getTypedSession } from "@/lib/auth-helpers"
 import { redirect, notFound } from "next/navigation"
 import { listUsers } from "@/lib/services/users"
+import { listPositions } from "@/lib/services/positions"
 import { UserTable, type UserRow } from "./user-table"
 
 export default async function AdminUsersPage({
@@ -18,6 +19,7 @@ export default async function AdminUsersPage({
 
   const t = await getTranslations({ locale, namespace: 'admin' })
   const users = await listUsers()
+  const positions = await listPositions()
 
   return (
     <div className="space-y-4">
@@ -25,7 +27,7 @@ export default async function AdminUsersPage({
         <h1 className="text-2xl font-semibold">{t('usersTitle')}</h1>
         <p className="text-muted-foreground">{t('usersSubtitle')}</p>
       </div>
-      <UserTable users={users as unknown as UserRow[]} />
+      <UserTable users={users as unknown as UserRow[]} positions={positions} locale={locale} />
     </div>
   )
 }

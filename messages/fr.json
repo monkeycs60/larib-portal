@@ -92,11 +92,20 @@
 		"integrations": "Intégrations",
 		"integrationsDescription": "Connectez-vous à des services tiers."
 	},
-	"metadata": {
+  "metadata": {
 		"title": "FeedbackApp",
 		"description": "Application de feedback utilisateur"
-	},
-	"admin": {
+  },
+  "welcome": {
+    "title": "Définissez votre mot de passe",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmez le mot de passe",
+    "setPassword": "Définir le mot de passe",
+    "saving": "Enregistrement...",
+    "errorTitle": "Une erreur est survenue",
+    "genericError": "Nous n'avons pas pu terminer votre demande. Veuillez réessayer."
+  },
+  "admin": {
 		"title": "Admin",
 		"usersNav": "Gestion des utilisateurs",
 		"usersTitle": "Gestion des utilisateurs",
@@ -127,7 +136,21 @@
 		"app_BESTOF_LARIB": "bestof-larib",
 		"app_CONGES": "conges",
 		"app_CARDIOLARIB": "cardiolarib",
-		"firstName": "Prénom",
-		"lastName": "Nom de famille"
-	}
+    "firstName": "Prénom",
+    "lastName": "Nom de famille",
+    "addUser": "Ajouter un utilisateur",
+    "addNewUser": "Ajouter un nouvel utilisateur",
+    "addNewPosition": "+ Ajouter un poste",
+    "addNewPositionPrompt": "Nom du nouveau poste",
+    "selectPlaceholder": "Sélectionner...",
+    "accessEndDate": "Date de fin d'accès",
+    "welcomeEmailPreview": "Aperçu de l'e-mail de bienvenue",
+    "welcomeEmailSubject": "Bienvenue sur la plateforme Clinical Case Training",
+    "welcomeEmailBodyLine1": "Bienvenue ! Votre compte a été créé en tant qu'utilisateur avec le poste de {position}.",
+    "passwordSetupLink": "Lien de définition du mot de passe",
+    "welcomeEmailBodyEndDate": "L'accès à votre compte expirera le {date}.",
+    "createAndSend": "Créer l'utilisateur et envoyer l'e-mail",
+    "creating": "Création...",
+    "positionGeneric": "Poste"
+  }
 }

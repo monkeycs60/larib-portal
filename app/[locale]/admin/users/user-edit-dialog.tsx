@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select } from "@/components/ui/select"
 import { useState } from "react"
-import { updateUserAction } from "./actions"
+import { updateUserAction, createPositionAction } from "./actions"
 import { useAction } from 'next-safe-action/hooks'
 
 const FormSchema = z.object({
@@ -30,7 +30,7 @@ const FormSchema = z.object({
 
 export type UserFormValues = z.infer<typeof FormSchema>
 
-export function UserEditDialog({ initial }: { initial: UserFormValues }) {
+export function UserEditDialog({ initial, positions }: { initial: UserFormValues, positions: Array<{ id: string; name: string }> }) {
   const t = useTranslations('admin')
   const locale = useLocale()
   const [open, setOpen] = useState(false)
@@ -44,6 +44,10 @@ export function UserEditDialog({ initial }: { initial: UserFormValues }) {
   const { register, handleSubmit, setValue, watch } = useForm<UserFormValues>({
     resolver: zodResolver(FormSchema),
     defaultValues: initial,
+  })
+  const [posList, setPosList] = useState(positions)
+  const { execute: execCreatePos, isExecuting: creatingPos } = useAction(createPositionAction, {
+    onSuccess(res) { setPosList((prev) => [...prev.filter(p => p.id !== res.data?.id), res.data!]) },
   })
 
   const apps = new Set(watch('applications'))
@@ -111,8 +115,26 @@ export function UserEditDialog({ initial }: { initial: UserFormValues }) {
               </Select>
             </div>
             <div>
-              <label className="block text-sm mb-1">{t('position')}</label>
-              <Input {...register('position')} />
+              <div className="flex items-center justify-between">
+                <label className="block text-sm mb-1">{t('position')}</label>
+                <button type="button" className="text-xs text-blue-600" onClick={async () => {
+                  const name = prompt(t('addNewPositionPrompt'))
+                  if (!name) return
+                  const res = await execCreatePos({ name })
+                  const created = res?.data
+                  if (created) {
+                    setValue('position', created.name)
+                  }
+                }} disabled={creatingPos}>
+                  {t('addNewPosition')}
+                </button>
+              </div>
+              <Select {...register('position')}>
+                <option value="">{t('selectPlaceholder')}</option>
+                {posList.map((p) => (
+                  <option key={p.id} value={p.name}>{p.name}</option>
+                ))}
+              </Select>
             </div>
             <div>
               <label className="block text-sm mb-1">{t('arrivalDate')}</label>

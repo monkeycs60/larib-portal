@@ -29,3 +29,18 @@
 - Only `ADMIN` users can access `/{locale}/admin/*` routes and actions. Non-admins get a 404 from those routes.
 - The Dashboard’s “Users” card now shows a “User management” button for admins linking to the admin panel.
 - After saving or deleting, the list refreshes. You can further enhance UX with optimistic updates if desired.
+
+## Feature: Admin Invite User + Welcome Email + Positions
+
+- Name: Admin User Invitations
+- What it does: Adds an “Add user” button on `/{locale}/admin/users` to invite a user by email, choose role, select or create a Position, pick allowed applications, and set an access end date. Sends a Resend welcome email containing a link to set a password. A placeholder user is created immediately for visibility; during password setup the placeholder is replaced by the actual account.
+- How to use:
+  - On `/{locale}/admin/users`, click “Add user”. Fill in the form and submit “Create User & Send Welcome Email”.
+  - The invited user receives an email with a link to `/{locale}/welcome/[token]` to set the password and finalize the account.
+- Files:
+  - UI: `app/[locale]/admin/users/user-add-dialog.tsx`, integrated in `user-table.tsx`.
+  - Actions: `createUserInviteAction`, `createPositionAction` in `app/[locale]/admin/users/actions.ts`.
+  - Services: `lib/services/positions.ts`, `lib/services/invitations.ts`, `lib/services/email.ts`, updates in `lib/services/users.ts`.
+  - Password setup: `app/[locale]/welcome/[token]/page.tsx` and `app/[locale]/welcome/actions.ts`.
+- i18n: Added new keys under `admin` and a `welcome` namespace for the setup page.
+- Resend: Uses `RESEND_API_KEY` and optional `RESEND_FROM` env vars to send the email via HTTPS API.

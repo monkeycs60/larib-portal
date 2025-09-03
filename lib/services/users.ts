@@ -105,3 +105,51 @@ export async function updateUser(data: UpdateUserInput): Promise<UserWithAdminFi
     },
   })
 }
+
+export type CreatePlaceholderUserInput = {
+  email: string
+  role: 'ADMIN' | 'USER'
+  firstName?: string | null
+  lastName?: string | null
+  language?: 'EN' | 'FR'
+  position?: string | null
+  applications?: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'>
+  departureDate?: Date | null
+}
+
+export async function createPlaceholderUser(data: CreatePlaceholderUserInput): Promise<UserWithAdminFields> {
+  const id = crypto.randomUUID()
+  const created = await prisma.user.create({
+    data: {
+      id,
+      email: data.email,
+      role: data.role,
+      firstName: data.firstName ?? null,
+      lastName: data.lastName ?? null,
+      language: data.language ?? 'EN',
+      position: data.position ?? null,
+      applications: data.applications ?? [],
+      departureDate: data.departureDate ?? null,
+    },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      firstName: true,
+      lastName: true,
+      phoneNumber: true,
+      role: true,
+      country: true,
+      birthDate: true,
+      language: true,
+      position: true,
+      arrivalDate: true,
+      departureDate: true,
+      profilePhoto: true,
+      applications: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  })
+  return created
+}

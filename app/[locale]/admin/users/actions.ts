@@ -1,6 +1,9 @@
 "use server"
 import { z } from "zod"
-import { deleteUserById, updateUser } from "@/lib/services/users"
+import { deleteUserById, updateUser, createPlaceholderUser } from "@/lib/services/users"
+import { listPositions, ensurePosition } from '@/lib/services/positions'
+import { createInvitation } from '@/lib/services/invitations'
+import { sendWelcomeEmail } from '@/lib/services/email'
 import { adminOnlyAction } from "@/actions/safe-action"
 
 const UpdateUserSchema = z.object({
@@ -59,4 +62,83 @@ export const deleteUserAction = adminOnlyAction
     }
     await deleteUserById(parsedInput.id)
     return { ok: true }
+  })
+
+const CreateInviteSchema = z.object({
+  email: z.string().email(),
+  role: z.enum(["ADMIN", "USER"]),
+  firstName: z.string().trim().optional().nullable(),
+  lastName: z.string().trim().optional().nullable(),
+  position: z.string().trim().optional().nullable(),
+  applications: z.array(z.enum(["BESTOF_LARIB", "CONGES", "CARDIOLARIB"]))
+    .default([]),
+  accessEndDate: z.string().optional().nullable(), // ISO date
+  locale: z.enum(["en","fr"]),
+})
+
+export const createUserInviteAction = adminOnlyAction
+  .inputSchema(CreateInviteSchema)
+  .action(async ({ parsedInput }) => {
+    const departureDate = parsedInput.accessEndDate ? new Date(parsedInput.accessEndDate) : null
+
+    // Create or ensure the position exists if provided
+    let positionName: string | null = parsedInput.position ?? null
+    if (positionName) {
+      const pos = await ensurePosition(positionName)
+      positionName = pos.name
+    }
+
+    // Create a placeholder user so the admin can see it immediately
+    await createPlaceholderUser({
+      email: parsedInput.email,
+      role: parsedInput.role,
+      firstName: parsedInput.firstName ?? null,
+      lastName: parsedInput.lastName ?? null,
+      language: parsedInput.locale === 'fr' ? 'FR' : 'EN',
+      position: positionName,
+      applications: parsedInput.applications,
+      departureDate,
+    })
+
+    // Create invitation token
+    const { token, expiresAt } = await createInvitation({
+      email: parsedInput.email,
+      locale: parsedInput.locale,
+      firstName: parsedInput.firstName ?? undefined,
+      lastName: parsedInput.lastName ?? undefined,
+      role: parsedInput.role,
+      position: positionName,
+      applications: parsedInput.applications,
+      departureDate,
+    })
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || ''
+    const setupLink = `${appUrl}/${parsedInput.locale}/welcome/${token}`
+
+    // Send welcome email via Resend
+    await sendWelcomeEmail({
+      to: parsedInput.email,
+      locale: parsedInput.locale,
+      firstName: parsedInput.firstName ?? undefined,
+      lastName: parsedInput.lastName ?? undefined,
+      position: positionName,
+      setupLink,
+      accessEndDate: departureDate,
+    })
+
+    return { ok: true, expiresAt }
+  })
+
+export const listPositionsAction = adminOnlyAction
+  .inputSchema(z.object({}).optional())
+  .action(async () => {
+    const positions = await listPositions()
+    return positions
+  })
+
+export const createPositionAction = adminOnlyAction
+  .inputSchema(z.object({ name: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    const pos = await ensurePosition(parsedInput.name)
+    return pos
   })

@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import { useTranslations } from "next-intl"
 import { UserEditDialog, type UserFormValues } from "./user-edit-dialog"
+import { AddUserDialog } from './user-add-dialog'
 import { deleteUserAction } from "./actions"
 import { useState } from "react"
 import { useAction } from 'next-safe-action/hooks'
@@ -12,7 +13,7 @@ export type UserRow = UserFormValues & {
   createdAt?: string
 }
 
-export function UserTable({ users }: { users: UserRow[] }) {
+export function UserTable({ users, positions, locale }: { users: UserRow[]; positions: Array<{ id: string; name: string }>; locale: string }) {
   const t = useTranslations('admin')
   const [deleting, setDeleting] = useState<string | null>(null)
   const { execute: executeDelete } = useAction(deleteUserAction, {
@@ -30,6 +31,9 @@ export function UserTable({ users }: { users: UserRow[] }) {
 
   return (
     <div className="bg-white rounded-md border">
+      <div className="flex items-center justify-end p-3">
+        <AddUserDialog positions={positions} locale={locale} />
+      </div>
       <Table>
         <TableHeader>
           <TableRow>
@@ -75,6 +79,7 @@ export function UserTable({ users }: { users: UserRow[] }) {
               </TableCell>
               <TableCell className="text-right space-x-2">
                 <UserEditDialog
+                  positions={positions}
                   initial={{
                     id: u.id,
                     email: u.email,

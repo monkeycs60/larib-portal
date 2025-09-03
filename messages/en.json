@@ -98,6 +98,15 @@
     "title": "FeedbackApp",
     "description": "User feedback application"
   },
+  "welcome": {
+    "title": "Set your password",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "setPassword": "Set password",
+    "saving": "Saving...",
+    "errorTitle": "Something went wrong",
+    "genericError": "We couldn't complete your request. Please try again."
+  },
   "admin": {
     "title": "Admin",
     "usersNav": "User management",
@@ -130,6 +139,20 @@
     "app_CONGES": "conges",
     "app_CARDIOLARIB": "cardiolarib",
     "firstName": "First name",
-    "lastName": "Last name"
+    "lastName": "Last name",
+    "addUser": "Add user",
+    "addNewUser": "Add New User",
+    "addNewPosition": "+ Add New Position",
+    "addNewPositionPrompt": "New position name",
+    "selectPlaceholder": "Select...",
+    "accessEndDate": "Access end date",
+    "welcomeEmailPreview": "Welcome Email Preview",
+    "welcomeEmailSubject": "Welcome to Clinical Case Training Platform",
+    "welcomeEmailBodyLine1": "Welcome! Your account has been created as a User with the position of {position}.",
+    "passwordSetupLink": "Password Setup Link",
+    "welcomeEmailBodyEndDate": "Your account access will expire on {date}.",
+    "createAndSend": "Create User & Send Welcome Email",
+    "creating": "Creating...",
+    "positionGeneric": "Position"
   }
 }
