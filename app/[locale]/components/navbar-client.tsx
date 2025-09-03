@@ -61,7 +61,7 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+      <div className="container mx-auto flex h-20 items-center justify-between px-4">
         <div className="flex items-center gap-3">
           {user && (
             <div className="hidden md:flex items-center gap-3">
@@ -75,7 +75,7 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
                 <div className="font-semibold text-sm md:text-base">
                   {t("welcomeBackUser", { name: displayName })}
                 </div>
-                <div className="mt-0.5 flex items-center gap-2">
+                <div className="mt-2 flex items-center gap-2">
                   {user.position && (
                     <Badge variant="secondary">{user.position}</Badge>
                   )}
