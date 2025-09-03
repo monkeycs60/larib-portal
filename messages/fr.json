@@ -7,7 +7,9 @@
 		"signup": "S'inscrire",
 		"loading": "Chargement...",
 		"loggingOut": "Déconnexion en cours...",
-		"appName": "Nom de l'application"
+		"appName": "Nom de l'application",
+		"editProfile": "Modifier le profil",
+		"welcomeBackUser": "Bon retour, {name}"
 	},
 	"home": {
 		"title": "Bonjour le monde",

@@ -7,7 +7,9 @@
     "signup": "Sign up",
     "loading": "Loading...",
     "loggingOut": "Logging out...",
-    "appName": "App Name"
+    "appName": "App Name",
+    "editProfile": "Edit Profile",
+    "welcomeBackUser": "Welcome back, {name}"
   },
   "home": {
     "title": "Hello World",

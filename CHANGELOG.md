@@ -44,3 +44,10 @@
   - Password setup: `app/[locale]/welcome/[token]/page.tsx` and `app/[locale]/welcome/actions.ts`.
 - i18n: Added new keys under `admin` and a `welcome` namespace for the setup page.
 - Resend: Uses `RESEND_API_KEY` and optional `RESEND_FROM` env vars to send the email via HTTPS API.
+## Feature: Enhanced Navbar UI
+
+- Name: Enhanced Navbar (Avatar + Welcome + Actions)
+- What it does: Updates the top navigation to include a user avatar with initials, a “Welcome back, {name}” title, a position badge when available, and the user role. Adds a compact outline language toggle, a gear/icon link to edit the profile, and a logout button with icon. Uses shadcn/ui components (Avatar, Badge, Button) and next-intl for bilingual labels.
+- How to use it:
+  - When authenticated, the left side shows your avatar and welcome line with your `position` (if set) and your `role` (Admin/User). On the right, use “Edit Profile” to open your profile and “Logout” to sign out.
+  - When not authenticated, the navbar shows “Login” and “Sign up” buttons.

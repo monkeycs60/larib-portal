@@ -19,7 +19,7 @@ export async function getTypedSession(): Promise<BetterAuthSession | null> {
         try {
             const dbUser = await prisma.user.findUnique({
                 where: { id: session.user.id },
-                select: { role: true, language: true },
+                select: { role: true, language: true, position: true, firstName: true, lastName: true },
             });
             const base = session as unknown as BetterAuthSession;
             const mergedUser: BetterAuthSession['user'] = {
