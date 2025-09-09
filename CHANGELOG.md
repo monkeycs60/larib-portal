@@ -51,3 +51,14 @@
 - How to use it:
   - When authenticated, the left side shows your avatar and welcome line with your `position` (if set) and your `role` (Admin/User). On the right, use “Edit Profile” to open your profile and “Logout” to sign out.
   - When not authenticated, the navbar shows “Login” and “Sign up” buttons.
+
+## Feature: Account Menu & Profile Modal
+
+- Name: Account Dropdown + Edit Profile
+- What it does: Centralizes profile actions on the right side of the navbar, next to the locale switcher. The round user avatar opens a dropdown showing the user’s name, role, and position. The menu contains an Edit Profile modal, links to each assigned application, and a Logout action. The Edit Profile modal allows regular users to update photo URL, phone, birth date, and language; admins can additionally manage role, position, and applications. Email cannot be changed from this modal.
+- How to use:
+  - Click the round avatar at the top-right (beside the EN/FR toggle) to open the account menu.
+  - Select “Edit Profile” to open the modal, update fields, and save.
+  - Application links appear in the menu based on the user’s allowed applications.
+  - Use “Logout” at the bottom of the menu to sign out.
+  - Fully localized (EN/FR) via next-intl.

@@ -9,7 +9,8 @@
     "loggingOut": "Logging out...",
     "appName": "App Name",
     "editProfile": "Edit Profile",
-    "welcomeBackUser": "Welcome back, {name}"
+    "welcomeBackUser": "Welcome back, {name}",
+    "applications": "Applications"
   },
   "home": {
     "title": "Hello World",

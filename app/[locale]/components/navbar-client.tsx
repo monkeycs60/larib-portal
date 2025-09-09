@@ -5,9 +5,12 @@ import { useTranslations, useLocale } from "next-intl";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel, DropdownMenuGroup } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { LogOut, Settings } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { ProfileEditDialog } from "./profile-edit-dialog";
+import { applicationLink } from "@/lib/application-link";
 
 type NavbarUser = {
   id: string;
@@ -18,6 +21,7 @@ type NavbarUser = {
   role?: "ADMIN" | "USER";
   firstName?: string | null;
   lastName?: string | null;
+  applications?: Array<"BESTOF_LARIB" | "CONGES" | "CARDIOLARIB"> | null;
 };
 
 export function NavbarClient({ user }: { user?: NavbarUser | null }) {
@@ -26,6 +30,7 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
   const locale = useLocale();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
 
   const displayName = useMemo(() => {
     if (!user) return "";
@@ -62,31 +67,7 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <div className="container mx-auto flex h-20 items-center justify-between px-4">
-        <div className="flex items-center gap-3">
-          {user && (
-            <div className="hidden md:flex items-center gap-3">
-              <Avatar className="size-10 bg-black text-white">
-                <AvatarImage src={user.image ?? undefined} alt={displayName} />
-                <AvatarFallback className="bg-[#0a0a1a] text-white font-semibold">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-              <div className="leading-tight">
-                <div className="font-semibold text-sm md:text-base">
-                  {t("welcomeBackUser", { name: displayName })}
-                </div>
-                <div className="mt-2 flex items-center gap-2">
-                  {user.position && (
-                    <Badge variant="secondary">{user.position}</Badge>
-                  )}
-                  {user.role === "ADMIN" && (
-                    <Badge variant="default">{tAdmin("roleAdmin")}</Badge>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        <div />
 
         <div className="flex items-center gap-2 md:gap-3">
           <Button
@@ -100,25 +81,90 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
 
           {user ? (
             <>
-              <Link href="/profile" aria-label={t("profile")}>
-                <Button variant="ghost" size="sm">
-                  <Settings />
-                  <span className="hidden sm:inline">{t("editProfile")}</span>
-                </Button>
-              </Link>
-              <Button onClick={handleLogout} disabled={isLoggingOut} variant="outline" size="sm">
-                {isLoggingOut ? (
-                  <>
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
-                    <span>{t("loggingOut")}</span>
-                  </>
-                ) : (
-                  <>
-                    <LogOut />
-                    <span>{t("logout")}</span>
-                  </>
-                )}
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    aria-label="Account menu"
+                    className="inline-flex items-center gap-2 rounded-full border px-1.5 py-1 hover:bg-gray-50 focus:outline-none"
+                  >
+                    <Avatar className="size-9 bg-black text-white">
+                      <AvatarImage src={user.image ?? undefined} alt={displayName} />
+                      <AvatarFallback className="bg-[#0a0a1a] text-white font-semibold">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-72">
+                  <DropdownMenuLabel className="flex items-start gap-3 py-2">
+                    <Avatar className="size-10 bg-black text-white">
+                      <AvatarImage src={user.image ?? undefined} alt={displayName} />
+                      <AvatarFallback className="bg-[#0a0a1a] text-white font-semibold">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <div className="truncate font-medium">{displayName}</div>
+                      <div className="truncate text-xs text-gray-500">{user.email}</div>
+                      <div className="mt-1 flex flex-wrap items-center gap-1">
+                        {user.role === "ADMIN" && (
+                          <Badge variant="default" className="text-[10px]">{tAdmin('roleAdmin')}</Badge>
+                        )}
+                        {user.position && (
+                          <Badge variant="secondary" className="text-[10px]">{user.position}</Badge>
+                        )}
+                      </div>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem onSelect={() => setOpenEdit(true)}>
+                      <Settings className="mr-2 size-4" /> {t("editProfile")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile">{t("profile")}</Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                  {(user.applications ?? []).length > 0 && (
+                    <>
+                      <DropdownMenuLabel className="text-xs text-gray-500">{t("applications")}</DropdownMenuLabel>
+                      {(user.applications ?? []).map((app) => {
+                        const slug = app === 'BESTOF_LARIB' ? '/bestof-larib' : app === 'CONGES' ? '/conges' : '/cardiolarib'
+                        return (
+                          <DropdownMenuItem key={app} asChild>
+                            <Link href={applicationLink(locale, slug)}>
+                              {tAdmin(`app_${app}`)}
+                            </Link>
+                          </DropdownMenuItem>
+                        )
+                      })}
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
+                  <DropdownMenuItem onSelect={handleLogout} disabled={isLoggingOut}>
+                    <LogOut className="mr-2 size-4" /> {isLoggingOut ? t("loggingOut") : t("logout")}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <ProfileEditDialog
+                open={openEdit}
+                onOpenChange={setOpenEdit}
+                initial={{
+                  email: user.email,
+                  isAdmin: user.role === 'ADMIN',
+                  firstName: user.firstName ?? undefined,
+                  lastName: user.lastName ?? undefined,
+                  phoneNumber: undefined,
+                  birthDate: undefined,
+                  language: undefined,
+                  position: user.position ?? undefined,
+                  profilePhoto: undefined,
+                  role: user.role,
+                  applications: user.applications ?? undefined,
+                }}
+              />
             </>
           ) : (
             <div className="flex items-center gap-2">
@@ -135,4 +181,3 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
     </nav>
   );
 }
-

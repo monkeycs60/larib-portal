@@ -9,7 +9,8 @@
 		"loggingOut": "Déconnexion en cours...",
 		"appName": "Nom de l'application",
 		"editProfile": "Modifier le profil",
-		"welcomeBackUser": "Bon retour, {name}"
+		"welcomeBackUser": "Bon retour, {name}",
+		"applications": "Applications"
 	},
 	"home": {
 		"title": "Bonjour le monde",
