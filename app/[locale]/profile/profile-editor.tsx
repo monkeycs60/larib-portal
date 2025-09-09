@@ -2,14 +2,15 @@
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { useTranslations, useLocale } from "next-intl"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select } from "@/components/ui/select"
 import { useAction } from "next-safe-action/hooks"
 import { updateSelfProfileAction } from "@/actions/profile"
-import { useState, useMemo } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
+import { COUNTRIES } from "@/lib/countries"
 
 const Schema = z.object({
   firstName: z.string().optional().nullable(),
@@ -37,7 +38,6 @@ type Props = {
 export function ProfileEditor({ initial }: Props) {
   const tAdmin = useTranslations('admin')
   const tProfile = useTranslations('profile')
-  const locale = useLocale()
   const [saving, setSaving] = useState(false)
 
   const form = useForm<ProfileEditorValues>({
@@ -49,10 +49,10 @@ export function ProfileEditor({ initial }: Props) {
     onSuccess() {
       toast.success(tProfile('saved'))
     },
-    onError({ serverError, validationErrors }) {
+    onError({ error: { serverError, validationErrors } }) {
       let msg: string | undefined
       if (validationErrors && typeof validationErrors === 'object') {
-        const first = Object.values(validationErrors)[0] as any
+        const first = Object.values(validationErrors)[0] as { _errors?: string[] }
         const firstErr = first?._errors?.[0]
         if (typeof firstErr === 'string') msg = firstErr
       }
@@ -61,7 +61,6 @@ export function ProfileEditor({ initial }: Props) {
     },
   })
 
-  const adminOnly = useMemo(() => !initial.isAdmin, [initial.isAdmin])
 
   function toNullIfEmpty(v: unknown): unknown {
     if (typeof v === 'string') {
@@ -76,19 +75,18 @@ export function ProfileEditor({ initial }: Props) {
 
     // Build payload ensuring optional empties are treated as null and
     // non-editable fields are preserved from initial values.
-    const payload: any = {
+    const payload: ProfileEditorValues = {
       firstName: initial.firstName ?? null,
       lastName: initial.lastName ?? null,
-      phoneNumber: toNullIfEmpty(v.phoneNumber),
-      birthDate: toNullIfEmpty(v.birthDate),
+      phoneNumber: toNullIfEmpty(v.phoneNumber) as string | null | undefined,
+      birthDate: toNullIfEmpty(v.birthDate) as string | null | undefined,
       language: v.language,
-      position: initial.isAdmin ? toNullIfEmpty(v.position) : (initial.position ?? null),
-      country: toNullIfEmpty(v.country),
-      profilePhoto: toNullIfEmpty(v.profilePhoto),
+      position: initial.isAdmin ? toNullIfEmpty(v.position) as string | null | undefined : (initial.position ?? null),
+      country: toNullIfEmpty(v.country) as string | null | undefined,
+      profilePhoto: toNullIfEmpty(v.profilePhoto) as string | null | undefined,
       // role and applications only for admins
       ...(initial.isAdmin ? { role: v.role } : {}),
       ...(initial.isAdmin ? { applications: v.applications } : {}),
-      locale: locale as 'en' | 'fr',
     }
 
     setSaving(true)
@@ -110,32 +108,7 @@ export function ProfileEditor({ initial }: Props) {
     return v ?? undefined
   }
 
-  const COUNTRIES = [
-    "Afghanistan","Albania","Algeria","Andorra","Angola","Antigua and Barbuda","Argentina","Armenia","Australia","Austria","Azerbaijan",
-    "Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi",
-    "Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Congo (Congo-Brazzaville)","Costa Rica","Côte d’Ivoire","Croatia","Cuba","Cyprus","Czechia",
-    "Democratic Republic of the Congo","Denmark","Djibouti","Dominica","Dominican Republic",
-    "Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia",
-    "Fiji","Finland","France",
-    "Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana",
-    "Haiti","Honduras","Hungary",
-    "Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy",
-    "Jamaica","Japan","Jordan",
-    "Kazakhstan","Kenya","Kiribati","Kuwait","Kyrgyzstan",
-    "Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg",
-    "Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar",
-    "Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Korea","North Macedonia","Norway",
-    "Oman",
-    "Pakistan","Palau","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal",
-    "Qatar",
-    "Romania","Russia","Rwanda",
-    "Saint Kitts and Nevis","Saint Lucia","Saint Vincent and the Grenadines","Samoa","San Marino","Sao Tome and Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria",
-    "Taiwan","Tajikistan","Tanzania","Thailand","Timor-Leste","Togo","Tonga","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu",
-    "Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan",
-    "Vanuatu","Vatican City","Venezuela","Vietnam",
-    "Yemen",
-    "Zambia","Zimbabwe"
-  ] as const
+  
 
   return (
     <div className="space-y-6">

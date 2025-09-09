@@ -98,6 +98,7 @@
 ### Update
 - Admins can now edit their Position from the Profile page (users do not see this field).
 - Added Country field for both users and admins, with a full country list selector. Empty values are allowed and saved as null.
+- Extracted reusable country list to `lib/countries.ts` and reused in Admin User Edit dialog (`/{locale}/admin/users`).
 ## Feature: Dashboard Applications Cards + Sidebar Removal
 
 - Name: Dashboard Applications Cards

@@ -10,6 +10,7 @@ import { Select } from "@/components/ui/select"
 import { useState } from "react"
 import { updateUserAction, createPositionAction } from "./actions"
 import { useAction } from 'next-safe-action/hooks'
+import { COUNTRIES } from "@/lib/countries"
 
 const FormSchema = z.object({
   id: z.string(),
@@ -61,7 +62,8 @@ export function UserEditDialog({ initial, positions }: { initial: UserFormValues
   }
 
   const onSubmit = handleSubmit(async (values) => {
-    await executeUpdate({ ...values, locale })
+    const country = values.country?.trim() ? values.country : undefined
+    await executeUpdate({ ...values, country, locale })
   })
 
   return (
@@ -101,7 +103,12 @@ export function UserEditDialog({ initial, positions }: { initial: UserFormValues
             </div>
             <div>
               <label className="block text-sm mb-1">{t('country')}</label>
-              <Input {...register('country')} />
+              <Select {...register('country')} defaultValue={initial.country ?? ''}>
+                <option value="">{t('selectPlaceholder')}</option>
+                {COUNTRIES.map((name) => (
+                  <option key={name} value={name}>{name}</option>
+                ))}
+              </Select>
             </div>
             <div>
               <label className="block text-sm mb-1">{t('birthDate')}</label>
