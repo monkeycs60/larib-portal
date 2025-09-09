@@ -74,3 +74,14 @@
   - Updated navbar logout handler to push using `applicationLink(locale, '/')` and call `router.refresh()`.
   - Updated login/signup forms to use the i18n router and `applicationLink(locale, '/dashboard')`, then call `router.refresh()`.
   - Marked `app/[locale]/components/navbar.tsx` as `dynamic = 'force-dynamic'` so it re-renders on each request.
+
+## Feature: Auth-Centric Home Routing
+
+- Name: Home Redirect to Dashboard + Login as Root
+- What it does: Authenticated users hitting `/{locale}` are redirected to `/{locale}/dashboard`. Unauthenticated users see the Login form directly at `/{locale}` (no sign-up link shown).
+- How to use it:
+  - Visiting `/{locale}` while logged in lands you on the Dashboard.
+  - Visiting `/{locale}` while logged out shows the Login form.
+- Technical details:
+  - `app/[locale]/page.tsx`: Redirects to dashboard when a session exists; otherwise renders `<LoginForm showSignupLink={false} />`.
+  - `app/[locale]/components/navbar-client.tsx`: Removes the Sign up button for guests; adds a clickable logo linking to `/{locale}` (uses `/public/portal-logo.png`).
