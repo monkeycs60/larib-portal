@@ -79,23 +79,19 @@
   },
   "profile": {
     "title": "Profile",
-    "welcome": "Welcome to your profile"
+    "welcome": "Welcome to your profile",
+    "saved": "Profile updated",
+    "saveError": "Could not save profile"
   },
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome to your dashboard",
-    "analytics": "Analytics",
-    "analyticsDescription": "View detailed analytics and insights.",
-    "feedback": "Feedback",
-    "feedbackDescription": "Manage user feedback and responses.",
-    "settings": "Settings",
-    "settingsDescription": "Configure your dashboard preferences.",
-    "reports": "Reports",
-    "reportsDescription": "Generate and view detailed reports.",
-    "users": "Users",
-    "usersDescription": "Manage user accounts and permissions.",
-    "integrations": "Integrations",
-    "integrationsDescription": "Connect with third-party services."
+    "appsSectionTitle": "Access applications",
+    "openApp": "Open",
+    "adminSectionTitle": "Administration",
+    "appDesc_BESTOF_LARIB": "Clinical cases and learning content from Best of Larib.",
+    "appDesc_CONGES": "Manage your leave requests and absences.",
+    "appDesc_CARDIOLARIB": "Resources and tools dedicated to CardioLarib."
   },
   "metadata": {
     "title": "FeedbackApp",

@@ -1,8 +1,9 @@
-import { requireAuth } from '@/lib/auth-guard';
-import { Link } from '@/app/i18n/navigation';
-import { getTranslations } from 'next-intl/server';
-import { Sidebar } from '@/components/ui/sidebar';
-// no redirect; only show admin link conditionally
+import { requireAuth } from '@/lib/auth-guard'
+import { Link } from '@/app/i18n/navigation'
+import { getTranslations } from 'next-intl/server'
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { applicationLink } from '@/lib/application-link'
 
 export default async function DashboardPage({
   params
@@ -10,20 +11,22 @@ export default async function DashboardPage({
   params: Promise<{ locale: string }>;
 }) {
   // Require authentication - will redirect to login if not authenticated
-  const session = await requireAuth();
+  const session = await requireAuth()
   
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'dashboard' });
-  
-  const sidebarItems = session.user.role === 'ADMIN'
-    ? [{ href: '/admin/users', label: 'User management' }]
-    : []
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: 'dashboard' })
+
+  const adminT = await getTranslations({ locale, namespace: 'admin' })
+
+  const apps = (session.user.applications ?? []) as Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'>
+
+  function appSlug(app: 'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'): string {
+    return app === 'BESTOF_LARIB' ? '/bestof-larib' : app === 'CONGES' ? '/conges' : '/cardiolarib'
+  }
 
   return (
     <div className="min-h-screen">
-      <div className="flex">
-        <Sidebar items={sidebarItems} activePath={''} title={t('title')} />
-        <div className="flex-1 p-8">
+      <div className="p-8">
       <div className="max-w-6xl mx-auto">
         <header className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
@@ -35,49 +38,48 @@ export default async function DashboardPage({
         </header>
         
         <main>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-semibold mb-2">{t('analytics')}</h2>
-              <p className="text-gray-600">{t('analyticsDescription')}</p>
+          {/* Applications */}
+          <section className="mb-10">
+            <h2 className="text-2xl font-semibold mb-4">{t('appsSectionTitle')}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {apps.map((app) => (
+                <Card key={app} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <CardTitle>{adminT(`app_${app}`)}</CardTitle>
+                    <CardDescription>{t(`appDesc_${app}`)}</CardDescription>
+                  </CardHeader>
+                  <div className="px-6 pb-6">
+                    <Link href={applicationLink(locale, appSlug(app))}>
+                      <Button variant="default">{t('openApp')}</Button>
+                    </Link>
+                  </div>
+                </Card>
+              ))}
             </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-semibold mb-2">{t('feedback')}</h2>
-              <p className="text-gray-600">{t('feedbackDescription')}</p>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-semibold mb-2">{t('settings')}</h2>
-              <p className="text-gray-600">{t('settingsDescription')}</p>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-semibold mb-2">{t('reports')}</h2>
-              <p className="text-gray-600">{t('reportsDescription')}</p>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-semibold mb-2">{t('users')}</h2>
-              <p className="text-gray-600 mb-3">{t('usersDescription')}</p>
-              {session.user.role === 'ADMIN' && (
-                <Link
-                  href={'/admin/users'}
-                  className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-secondary text-secondary-foreground hover:bg-secondary/80 h-9 px-4 py-2"
-                >
-                  User management
-                </Link>
-              )}
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-semibold mb-2">{t('integrations')}</h2>
-              <p className="text-gray-600">{t('integrationsDescription')}</p>
-            </div>
-          </div>
+          </section>
+
+          {/* Admin-only section */}
+          {session.user.role === 'ADMIN' && (
+            <section>
+              <h2 className="text-2xl font-semibold mb-4">{t('adminSectionTitle')}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <Card className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <CardTitle>{adminT('usersNav')}</CardTitle>
+                    <CardDescription>{adminT('usersSubtitle')}</CardDescription>
+                  </CardHeader>
+                  <div className="px-6 pb-6">
+                    <Link href={applicationLink(locale, '/admin/users')}>
+                      <Button variant="secondary">{adminT('usersNav')}</Button>
+                    </Link>
+                  </div>
+                </Card>
+              </div>
+            </section>
+          )}
         </main>
       </div>
         </div>
-      </div>
     </div>
   );
 }

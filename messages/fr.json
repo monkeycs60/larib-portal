@@ -77,23 +77,19 @@
 	},
 	"profile": {
 		"title": "Profil",
-		"welcome": "Bienvenue sur votre profil"
+		"welcome": "Bienvenue sur votre profil",
+		"saved": "Profil mis à jour",
+		"saveError": "Échec de l'enregistrement du profil"
 	},
 	"dashboard": {
 		"title": "Tableau de bord",
 		"welcome": "Bienvenue sur votre tableau de bord",
-		"analytics": "Analytiques",
-		"analyticsDescription": "Consultez des analyses et insights détaillés.",
-		"feedback": "Commentaires",
-		"feedbackDescription": "Gérez les commentaires et réponses des utilisateurs.",
-		"settings": "Paramètres",
-		"settingsDescription": "Configurez vos préférences de tableau de bord.",
-		"reports": "Rapports",
-		"reportsDescription": "Générez et consultez des rapports détaillés.",
-		"users": "Utilisateurs",
-		"usersDescription": "Gérez les comptes utilisateurs et les permissions.",
-		"integrations": "Intégrations",
-		"integrationsDescription": "Connectez-vous à des services tiers."
+		"appsSectionTitle": "Accéder aux applications",
+		"openApp": "Accéder",
+		"adminSectionTitle": "Administration",
+		"appDesc_BESTOF_LARIB": "Cas cliniques et contenus pédagogiques Best of Larib.",
+		"appDesc_CONGES": "Gérez vos congés et demandes d'absences.",
+		"appDesc_CARDIOLARIB": "Ressources et outils dédiés à CardioLarib."
 	},
   "metadata": {
 		"title": "FeedbackApp",

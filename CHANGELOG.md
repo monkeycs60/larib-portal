@@ -94,3 +94,14 @@
   - Open the avatar menu and click “Profile” (now locale-aware).
   - On the Profile page, update an individual field and click “Save” next to it. Regular users can edit profile details like name, phone, birth date, language, position, and photo URL. Admins can additionally change role and allowed applications.
   - The page is fully localized (EN/FR) and uses shadcn/ui components with React Hook Form + Zod.
+## Feature: Dashboard Applications Cards + Sidebar Removal
+
+- Name: Dashboard Applications Cards
+- What it does: On `/{locale}/dashboard`, shows a section titled “Accéder aux applications” listing one attractive card per application assigned to the signed-in user. Each card displays the localized app name and a short description, with a button to open the app. Below, an admin-only section displays a “User management” card linking to `/{locale}/admin/users`. The sidebar is removed from the Dashboard and Admin areas to simplify navigation.
+- How to use it:
+  - Visit `/{locale}/dashboard`. You’ll see as many cards as your allowed applications (e.g., Best of Larib, Congés, CardioLarib).
+  - Admins will also see a “User management” card leading to the admin users list.
+- Files:
+  - UI: `app/[locale]/dashboard/page.tsx` now renders shadcn `Card` components per application; `app/[locale]/admin/layout.tsx` no longer uses the sidebar.
+  - i18n: Added `dashboard.appsSectionTitle`, `dashboard.openApp`, `dashboard.adminSectionTitle`, and per-app descriptions (`dashboard.appDesc_*`) in `messages/{en,fr}.json`.
+  - Links: All links use `applicationLink(locale, path)` to preserve the active locale.

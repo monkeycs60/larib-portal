@@ -4,6 +4,7 @@ import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/app/i18n/routing';
+import { Toaster } from 'sonner'
 import "../globals.css";
 import { Navbar } from "./components/navbar";
 
@@ -65,6 +66,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Navbar />
           {children}
+          <Toaster richColors position="top-right" />
         </NextIntlClientProvider>
       </body>
     </html>

@@ -9,6 +9,7 @@ import { Select } from "@/components/ui/select"
 import { useAction } from "next-safe-action/hooks"
 import { updateSelfProfileAction } from "@/actions/profile"
 import { useState, useMemo } from "react"
+import { toast } from "sonner"
 
 const Schema = z.object({
   firstName: z.string().optional().nullable(),
@@ -34,6 +35,7 @@ type Props = {
 
 export function ProfileEditor({ initial }: Props) {
   const tAdmin = useTranslations('admin')
+  const tProfile = useTranslations('profile')
   const locale = useLocale()
   const [saving, setSaving] = useState(false)
 
@@ -44,17 +46,52 @@ export function ProfileEditor({ initial }: Props) {
 
   const { execute } = useAction(updateSelfProfileAction, {
     onSuccess() {
-      window.location.reload()
+      toast.success(tProfile('saved'))
+    },
+    onError({ serverError, validationErrors }) {
+      let msg: string | undefined
+      if (validationErrors && typeof validationErrors === 'object') {
+        const first = Object.values(validationErrors)[0] as any
+        const firstErr = first?._errors?.[0]
+        if (typeof firstErr === 'string') msg = firstErr
+      }
+      if (!msg && typeof serverError === 'string') msg = serverError
+      toast.error(msg ? `${tProfile('saveError')}: ${msg}` : tProfile('saveError'))
     },
   })
 
   const adminOnly = useMemo(() => !initial.isAdmin, [initial.isAdmin])
 
+  function toNullIfEmpty(v: unknown): unknown {
+    if (typeof v === 'string') {
+      const s = v.trim()
+      return s === '' ? null : s
+    }
+    return v
+  }
+
   async function saveAll() {
-    const values = form.getValues()
+    const v = form.getValues()
+
+    // Build payload ensuring optional empties are treated as null and
+    // non-editable fields are preserved from initial values.
+    const payload: any = {
+      firstName: initial.firstName ?? null,
+      lastName: initial.lastName ?? null,
+      phoneNumber: toNullIfEmpty(v.phoneNumber),
+      birthDate: toNullIfEmpty(v.birthDate),
+      language: v.language,
+      position: initial.position ?? null,
+      profilePhoto: toNullIfEmpty(v.profilePhoto),
+      // role and applications only for admins
+      ...(initial.isAdmin ? { role: v.role } : {}),
+      ...(initial.isAdmin ? { applications: v.applications } : {}),
+      locale: locale as 'en' | 'fr',
+    }
+
     setSaving(true)
     try {
-      await execute({ ...values, locale: locale as 'en' | 'fr' })
+      await execute(payload)
     } finally {
       setSaving(false)
     }
@@ -80,11 +117,11 @@ export function ProfileEditor({ initial }: Props) {
         </div>
         <div className="space-y-1">
           <div className="text-sm text-gray-500">{tAdmin('firstName')}</div>
-          <Input {...form.register('firstName')} placeholder="John" />
+          <Input value={initial.firstName ?? ''} disabled />
         </div>
         <div className="space-y-1">
           <div className="text-sm text-gray-500">{tAdmin('lastName')}</div>
-          <Input {...form.register('lastName')} placeholder="Doe" />
+          <Input value={initial.lastName ?? ''} disabled />
         </div>
         <div className="space-y-1">
           <div className="text-sm text-gray-500">{tAdmin('phone')}</div>
@@ -101,10 +138,7 @@ export function ProfileEditor({ initial }: Props) {
             <option value="FR">Français</option>
           </Select>
         </div>
-        <div className="space-y-1">
-          <div className="text-sm text-gray-500">{tAdmin('position')}</div>
-          <Input {...form.register('position')} placeholder={tAdmin('positionGeneric')} />
-        </div>
+        {/* Position hidden per requirements */}
         <div className="md:col-span-2 space-y-1">
           <div className="text-sm text-gray-500">{tAdmin('profilePhoto')}</div>
           <Input placeholder="https://..." {...form.register('profilePhoto')} />
