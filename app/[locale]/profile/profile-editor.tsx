@@ -18,6 +18,7 @@ const Schema = z.object({
   birthDate: z.string().optional().nullable(),
   language: z.enum(["EN","FR"]).optional(),
   position: z.string().optional().nullable(),
+  country: z.string().optional().nullable(),
   profilePhoto: z.string().url().optional().nullable(),
   role: z.enum(["ADMIN","USER"]).optional(),
   applications: z.array(z.enum(["BESTOF_LARIB","CONGES","CARDIOLARIB"]))
@@ -81,7 +82,8 @@ export function ProfileEditor({ initial }: Props) {
       phoneNumber: toNullIfEmpty(v.phoneNumber),
       birthDate: toNullIfEmpty(v.birthDate),
       language: v.language,
-      position: initial.position ?? null,
+      position: initial.isAdmin ? toNullIfEmpty(v.position) : (initial.position ?? null),
+      country: toNullIfEmpty(v.country),
       profilePhoto: toNullIfEmpty(v.profilePhoto),
       // role and applications only for admins
       ...(initial.isAdmin ? { role: v.role } : {}),
@@ -108,6 +110,33 @@ export function ProfileEditor({ initial }: Props) {
     return v ?? undefined
   }
 
+  const COUNTRIES = [
+    "Afghanistan","Albania","Algeria","Andorra","Angola","Antigua and Barbuda","Argentina","Armenia","Australia","Austria","Azerbaijan",
+    "Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi",
+    "Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Congo (Congo-Brazzaville)","Costa Rica","Côte d’Ivoire","Croatia","Cuba","Cyprus","Czechia",
+    "Democratic Republic of the Congo","Denmark","Djibouti","Dominica","Dominican Republic",
+    "Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia",
+    "Fiji","Finland","France",
+    "Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana",
+    "Haiti","Honduras","Hungary",
+    "Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy",
+    "Jamaica","Japan","Jordan",
+    "Kazakhstan","Kenya","Kiribati","Kuwait","Kyrgyzstan",
+    "Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg",
+    "Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar",
+    "Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Korea","North Macedonia","Norway",
+    "Oman",
+    "Pakistan","Palau","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal",
+    "Qatar",
+    "Romania","Russia","Rwanda",
+    "Saint Kitts and Nevis","Saint Lucia","Saint Vincent and the Grenadines","Samoa","San Marino","Sao Tome and Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria",
+    "Taiwan","Tajikistan","Tanzania","Thailand","Timor-Leste","Togo","Tonga","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu",
+    "Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan",
+    "Vanuatu","Vatican City","Venezuela","Vietnam",
+    "Yemen",
+    "Zambia","Zimbabwe"
+  ] as const
+
   return (
     <div className="space-y-6">
       <div className="grid md:grid-cols-2 gap-4">
@@ -128,6 +157,15 @@ export function ProfileEditor({ initial }: Props) {
           <Input {...form.register('phoneNumber')} placeholder="+33..." />
         </div>
         <div className="space-y-1">
+          <div className="text-sm text-gray-500">{tAdmin('country')}</div>
+          <Select defaultValue={initial.country ?? ''} {...form.register('country')}>
+            <option value="">{tAdmin('selectPlaceholder')}</option>
+            {COUNTRIES.map((name) => (
+              <option key={name} value={name}>{name}</option>
+            ))}
+          </Select>
+        </div>
+        <div className="space-y-1">
           <div className="text-sm text-gray-500">{tAdmin('birthDate')}</div>
           <Input type="date" defaultValue={dateValue()} {...form.register('birthDate')} />
         </div>
@@ -138,7 +176,12 @@ export function ProfileEditor({ initial }: Props) {
             <option value="FR">Français</option>
           </Select>
         </div>
-        {/* Position hidden per requirements */}
+        {initial.isAdmin && (
+          <div className="space-y-1">
+            <div className="text-sm text-gray-500">{tAdmin('position')}</div>
+            <Input {...form.register('position')} placeholder={tAdmin('positionGeneric')} />
+          </div>
+        )}
         <div className="md:col-span-2 space-y-1">
           <div className="text-sm text-gray-500">{tAdmin('profilePhoto')}</div>
           <Input placeholder="https://..." {...form.register('profilePhoto')} />

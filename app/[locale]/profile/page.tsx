@@ -33,6 +33,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ locale
                 birthDate: birthDate ?? undefined,
                 language: (session.user.language ?? (locale === 'fr' ? 'FR' : 'EN')) as 'EN' | 'FR',
                 position: session.user.position ?? undefined,
+                country: session.user.country ?? undefined,
                 profilePhoto: session.user.profilePhoto ?? undefined,
                 role: session.user.role,
                 applications: (session.user.applications ?? []) as ['BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'] | undefined,

@@ -94,6 +94,10 @@
   - Open the avatar menu and click “Profile” (now locale-aware).
   - On the Profile page, update an individual field and click “Save” next to it. Regular users can edit profile details like name, phone, birth date, language, position, and photo URL. Admins can additionally change role and allowed applications.
   - The page is fully localized (EN/FR) and uses shadcn/ui components with React Hook Form + Zod.
+
+### Update
+- Admins can now edit their Position from the Profile page (users do not see this field).
+- Added Country field for both users and admins, with a full country list selector. Empty values are allowed and saved as null.
 ## Feature: Dashboard Applications Cards + Sidebar Removal
 
 - Name: Dashboard Applications Cards
