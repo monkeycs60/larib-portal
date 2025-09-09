@@ -85,3 +85,12 @@
 - Technical details:
   - `app/[locale]/page.tsx`: Redirects to dashboard when a session exists; otherwise renders `<LoginForm showSignupLink={false} />`.
   - `app/[locale]/components/navbar-client.tsx`: Removes the Sign up button for guests; adds a clickable logo linking to `/{locale}` (uses `/public/portal-logo.png`).
+  - Update: Logo moved to the left side of the navbar and increased to 40x40 for better visibility.
+## Feature: Profile Page Editing + Simplified Navbar
+
+- Name: Profile Editing on Profile Page
+- What it does: Removes the separate “Edit Profile” action from the navbar and keeps a single localized link to the Profile page. On the Profile page, users can edit only the fields allowed by their role. Disallowed fields are disabled (greyed out). Saving is done per-field, so you can change a single field without validating the whole form.
+- How to use:
+  - Open the avatar menu and click “Profile” (now locale-aware).
+  - On the Profile page, update an individual field and click “Save” next to it. Regular users can edit profile details like name, phone, birth date, language, position, and photo URL. Admins can additionally change role and allowed applications.
+  - The page is fully localized (EN/FR) and uses shadcn/ui components with React Hook Form + Zod.

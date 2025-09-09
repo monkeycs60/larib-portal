@@ -63,7 +63,6 @@
 
 ### Code Review Process
 
--  **Automated checking**: Always run `laser-lewis` agent after writing code
 -  **Standards verification**: Ensure all guidelines are followed before commits
 -  **Clean codebase**: Maintain high code quality and consistency
 

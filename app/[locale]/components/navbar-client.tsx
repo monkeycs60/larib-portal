@@ -15,9 +15,8 @@ import {
 	DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Settings } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { authClient } from '@/lib/auth-client';
-import { ProfileEditDialog } from './profile-edit-dialog';
 import { applicationLink } from '@/lib/application-link';
 import Image from 'next/image';
 
@@ -39,7 +38,7 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
 	const locale = useLocale();
 	const router = useRouter();
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
-	const [openEdit, setOpenEdit] = useState(false);
+	// edit handled on dedicated profile page
 
 	const displayName = useMemo(() => {
 		if (!user) return '';
@@ -78,21 +77,23 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
 	return (
 		<nav className='sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60'>
 			<div className='container mx-auto flex h-20 items-center justify-between px-4'>
-				<div className='flex items-center' />
-
-				<div className='flex items-center gap-2 md:gap-3'>
+				<div className='flex items-center'>
 					<Link
 						href={applicationLink(locale, '/')}
 						title='Larib Portal Home'
 						className='inline-flex items-center'>
 						<Image
-							src='/portal-logo.png'
+							src='/logo-app.png'
 							alt='Larib Portal logo'
-							width={28}
-							height={28}
+							width={90}
+							height={90}
 							className='rounded'
 						/>
 					</Link>
+				</div>
+
+				<div className='flex items-center gap-2 md:gap-3'>
+					{/* language toggle comes first */}
 
 					<Button
 						variant='outline'
@@ -160,14 +161,12 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
 									</DropdownMenuLabel>
 									<DropdownMenuSeparator />
 									<DropdownMenuGroup>
-										<DropdownMenuItem
-											onSelect={() => setOpenEdit(true)}>
-											<Settings className='mr-2 size-4' />{' '}
-											{t('editProfile')}
-										</DropdownMenuItem>
-										<DropdownMenuItem asChild>
-											<Link href='/profile'>{t('profile')}</Link>
-										</DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                    {/* Use i18n Link without locale prefix to avoid double /{locale} */}
+                                    <Link href='/profile'>
+                                        {t('profile')}
+                                    </Link>
+                                </DropdownMenuItem>
 									</DropdownMenuGroup>
 									<DropdownMenuSeparator />
 									{(user.applications ?? []).length > 0 && (
@@ -205,24 +204,6 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
 									</DropdownMenuItem>
 								</DropdownMenuContent>
 							</DropdownMenu>
-
-							<ProfileEditDialog
-								open={openEdit}
-								onOpenChange={setOpenEdit}
-								initial={{
-									email: user.email,
-									isAdmin: user.role === 'ADMIN',
-									firstName: user.firstName ?? undefined,
-									lastName: user.lastName ?? undefined,
-									phoneNumber: undefined,
-									birthDate: undefined,
-									language: undefined,
-									position: user.position ?? undefined,
-									profilePhoto: undefined,
-									role: user.role,
-									applications: user.applications ?? undefined,
-								}}
-							/>
 						</>
 					) : (
 						<div className='flex items-center gap-2'>
