@@ -13,7 +13,8 @@ import { Label } from '@/components/ui/label';
 import { AlertCircle, LogIn, Eye, EyeOff } from 'lucide-react';
 import { loginAction } from '../actions';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/app/i18n/navigation';
+import { applicationLink } from '@/lib/application-link';
 import { authClient } from '@/lib/auth-client';
 
 interface LoginFormProps {
@@ -55,8 +56,9 @@ export function LoginForm({ showSignupLink = true }: LoginFormProps) {
     onSuccess: ({ data }) => {
       if (data?.success) {
         refetchSession();
+        // Navigate within current locale, then refresh server components
+        router.push(applicationLink(locale, '/dashboard'));
         router.refresh();
-        router.push(`/${locale}/dashboard`);
       }
     },
   });

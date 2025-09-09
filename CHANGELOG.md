@@ -62,3 +62,15 @@
   - Application links appear in the menu based on the user’s allowed applications.
   - Use “Logout” at the bottom of the menu to sign out.
   - Fully localized (EN/FR) via next-intl.
+
+## Fix: Navbar Not Updating After Auth Changes
+
+- Name: Live Navbar Auth Refresh
+- What it does: Ensures the navbar immediately reflects authentication changes (sign in, sign up, sign out) without a hard refresh.
+- How to use it:
+  - Logging in or signing up now navigates to `/{locale}/dashboard` and refreshes server components automatically.
+  - Logging out from the navbar now redirects to the localized home and refreshes server components, so the Login/Signup buttons reappear instantly.
+- Technical details:
+  - Updated navbar logout handler to push using `applicationLink(locale, '/')` and call `router.refresh()`.
+  - Updated login/signup forms to use the i18n router and `applicationLink(locale, '/dashboard')`, then call `router.refresh()`.
+  - Marked `app/[locale]/components/navbar.tsx` as `dynamic = 'force-dynamic'` so it re-renders on each request.
