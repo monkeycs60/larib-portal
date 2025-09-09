@@ -3,7 +3,7 @@ import { Link } from '@/app/i18n/navigation'
 import { getTranslations } from 'next-intl/server'
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { applicationLink } from '@/lib/application-link'
+// Note: i18n Link auto-prefixes the active locale; pass non-localized paths
 
 export default async function DashboardPage({
   params
@@ -49,9 +49,9 @@ export default async function DashboardPage({
                     <CardDescription>{t(`appDesc_${app}`)}</CardDescription>
                   </CardHeader>
                   <div className="px-6 pb-6">
-                    <Link href={applicationLink(locale, appSlug(app))}>
-                      <Button variant="default">{t('openApp')}</Button>
-                    </Link>
+                    <Button asChild variant="default">
+                      <Link href={appSlug(app)}>{t('openApp')}</Link>
+                    </Button>
                   </div>
                 </Card>
               ))}
@@ -69,9 +69,9 @@ export default async function DashboardPage({
                     <CardDescription>{adminT('usersSubtitle')}</CardDescription>
                   </CardHeader>
                   <div className="px-6 pb-6">
-                    <Link href={applicationLink(locale, '/admin/users')}>
-                      <Button variant="secondary">{adminT('usersNav')}</Button>
-                    </Link>
+                    <Button asChild variant="secondary">
+                      <Link href={'/admin/users'}>{adminT('usersNav')}</Link>
+                    </Button>
                   </div>
                 </Card>
               </div>

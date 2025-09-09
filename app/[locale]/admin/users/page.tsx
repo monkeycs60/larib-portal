@@ -22,7 +22,7 @@ export default async function AdminUsersPage({
   const positions = await listPositions()
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-7xl mx-auto">
       <div>
         <h1 className="text-2xl font-semibold">{t('usersTitle')}</h1>
         <p className="text-muted-foreground">{t('usersSubtitle')}</p>
