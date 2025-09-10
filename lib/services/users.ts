@@ -74,6 +74,7 @@ export type UpdateUserInput = {
   arrivalDate?: Date | null
   departureDate?: Date | null
   profilePhoto?: string | null
+  profilePhotoKey?: string | null
   applications?: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'>
 }
 

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { getTypedSession } from "@/lib/auth-helpers";
 import { ProfileEditor } from "./profile-editor";
+import { listPositions } from "@/lib/services/positions";
 
 export default async function ProfilePage({ params }: { params: Promise<{ locale: string }> }) {
   const session = await getTypedSession()
@@ -13,6 +14,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ locale
   const birthDate = session.user.birthDate
     ? new Date(session.user.birthDate).toISOString().slice(0,10)
     : null
+
+  const positions = session.user.role === 'ADMIN' ? await listPositions() : []
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -38,6 +41,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ locale
                 role: session.user.role,
                 applications: (session.user.applications ?? []) as ['BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'] | undefined,
               }}
+              positions={positions}
             />
           </div>
         </div>

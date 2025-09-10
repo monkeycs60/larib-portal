@@ -11,6 +11,8 @@ import { updateSelfProfileAction } from "@/actions/profile"
 import { useState } from "react"
 import { toast } from "sonner"
 import { COUNTRIES } from "@/lib/countries"
+import { createPositionAction } from "@/actions/positions"
+import { FileUpload } from "@/components/ui/file-upload"
 
 const Schema = z.object({
   firstName: z.string().optional().nullable(),
@@ -33,12 +35,14 @@ type Props = {
     email: string
     isAdmin: boolean
   }
+  positions?: Array<{ id: string; name: string }>
 }
 
-export function ProfileEditor({ initial }: Props) {
+export function ProfileEditor({ initial, positions = [] }: Props) {
   const tAdmin = useTranslations('admin')
   const tProfile = useTranslations('profile')
   const [saving, setSaving] = useState(false)
+  const [posList, setPosList] = useState(positions)
 
   const form = useForm<ProfileEditorValues>({
     resolver: zodResolver(Schema),
@@ -108,8 +112,28 @@ export function ProfileEditor({ initial }: Props) {
     return v ?? undefined
   }
 
-  
+  const { execute: execCreatePos, isExecuting: creatingPos } = useAction(createPositionAction, {
+    onSuccess(res) {
+      const created = res.data
+      if (created) {
+        setPosList((prev) => [...prev.filter(p => p.id !== created.id), created])
+        form.setValue('position', created.name)
+        toast.success(tAdmin('positionCreated'))
+      }
+    },
+    onError() {
+      toast.error(tAdmin('actionError'))
+    }
+  })
 
+  async function onAddPosition() {
+    const name = prompt(tAdmin('addNewPositionPrompt'))
+    if (!name) return
+    await execCreatePos({ name })
+  }
+
+  
+  
   return (
     <div className="space-y-6">
       <div className="grid md:grid-cols-2 gap-4">
@@ -151,13 +175,33 @@ export function ProfileEditor({ initial }: Props) {
         </div>
         {initial.isAdmin && (
           <div className="space-y-1">
-            <div className="text-sm text-gray-500">{tAdmin('position')}</div>
-            <Input {...form.register('position')} placeholder={tAdmin('positionGeneric')} />
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-500">{tAdmin('position')}</div>
+              <button type="button" className="text-xs text-blue-600" onClick={onAddPosition} disabled={creatingPos}>
+                {tAdmin('addNewPosition')}
+              </button>
+            </div>
+            <Select defaultValue={initial.position ?? ''} {...form.register('position')}>
+              <option value="">{tAdmin('selectPlaceholder')}</option>
+              {posList.map((p) => (
+                <option key={p.id} value={p.name}>{p.name}</option>
+              ))}
+            </Select>
           </div>
         )}
-        <div className="md:col-span-2 space-y-1">
+        <div className="md:col-span-2 space-y-2">
           <div className="text-sm text-gray-500">{tAdmin('profilePhoto')}</div>
-          <Input placeholder="https://..." {...form.register('profilePhoto')} />
+          <FileUpload
+            accept="image/*"
+            maxSize={5 * 1024 * 1024}
+            valueUrl={form.watch('profilePhoto') ?? null}
+            onUploaded={({ url }) => {
+              form.setValue('profilePhoto', url)
+              toast.success(tProfile('saved'))
+            }}
+          />
+          {/* Keep the value in form state for server action */}
+          <input type="hidden" {...form.register('profilePhoto')} />
         </div>
       </div>
 

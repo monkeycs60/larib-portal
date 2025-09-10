@@ -10,6 +10,7 @@ import { Select } from '@/components/ui/select'
 import { useState } from 'react'
 import { useAction } from 'next-safe-action/hooks'
 import { createUserInviteAction, createPositionAction } from './actions'
+import { toast } from 'sonner'
 
 const AddUserSchema = z.object({
   email: z.string().email(),
@@ -28,7 +29,20 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
   const [open, setOpen] = useState(false)
   const [posList, setPosList] = useState(positions)
   const { execute, isExecuting } = useAction(createUserInviteAction, {
-    onSuccess() { window.location.reload() },
+    onSuccess() {
+      toast.success(t('created'))
+      window.location.reload()
+    },
+    onError({ error: { serverError, validationErrors } }) {
+      let msg: string | undefined
+      if (validationErrors && typeof validationErrors === 'object') {
+        const first = Object.values(validationErrors)[0] as { _errors?: string[] }
+        const firstErr = first?._errors?.[0]
+        if (typeof firstErr === 'string') msg = firstErr
+      }
+      if (!msg && typeof serverError === 'string') msg = serverError
+      toast.error(msg ? `${t('actionError')}: ${msg}` : t('actionError'))
+    }
   })
   const { execute: execCreatePos, isExecuting: creatingPos } = useAction(createPositionAction, {
     onSuccess(res) { setPosList((prev) => [...prev.filter(p => p.id !== res.data?.id), res.data!]) },
@@ -163,4 +177,3 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
     </Dialog>
   )
 }
-

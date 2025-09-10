@@ -20,6 +20,7 @@
    -  Server components: `getTranslations` function
 -  **Error handling**: Translate all Zod/API errors in both languages
 -  **Self-explanatory code**: Avoid unnecessary comments
+-  **User feedback (Sonner)**: For mutations (server actions) that change data, trigger a `sonner` toast on success and on error when it improves UX. Use `next-intl` for toast messages.
 
 ## Architecture & Code Organization
 

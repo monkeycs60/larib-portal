@@ -11,6 +11,7 @@ import { useState } from "react"
 import { updateUserAction, createPositionAction } from "./actions"
 import { useAction } from 'next-safe-action/hooks'
 import { COUNTRIES } from "@/lib/countries"
+import { toast } from 'sonner'
 
 const FormSchema = z.object({
   id: z.string(),
@@ -37,9 +38,20 @@ export function UserEditDialog({ initial, positions }: { initial: UserFormValues
   const [open, setOpen] = useState(false)
   const { execute: executeUpdate, isExecuting } = useAction(updateUserAction, {
     onSuccess() {
+      toast.success(t('saved'))
       setOpen(false)
       // simple refresh to reflect changes
       window.location.reload()
+    },
+    onError({ error: { serverError, validationErrors } }) {
+      let msg: string | undefined
+      if (validationErrors && typeof validationErrors === 'object') {
+        const first = Object.values(validationErrors)[0] as { _errors?: string[] }
+        const firstErr = first?._errors?.[0]
+        if (typeof firstErr === 'string') msg = firstErr
+      }
+      if (!msg && typeof serverError === 'string') msg = serverError
+      toast.error(msg ? `${t('actionError')}: ${msg}` : t('actionError'))
     },
   })
   const { register, handleSubmit, setValue, watch } = useForm<UserFormValues>({

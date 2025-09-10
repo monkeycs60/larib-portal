@@ -7,6 +7,7 @@ import { AddUserDialog } from './user-add-dialog'
 import { deleteUserAction } from "./actions"
 import { useState } from "react"
 import { useAction } from 'next-safe-action/hooks'
+import { toast } from 'sonner'
 
 export type UserRow = UserFormValues & {
   name?: string | null
@@ -18,8 +19,13 @@ export function UserTable({ users, positions, locale }: { users: UserRow[]; posi
   const [deleting, setDeleting] = useState<string | null>(null)
   const { execute: executeDelete } = useAction(deleteUserAction, {
     onSuccess() {
+      toast.success(t('deleted'))
       window.location.reload()
     },
+    onError({ error: { serverError } }) {
+      const msg = typeof serverError === 'string' ? serverError : undefined
+      toast.error(msg ? `${t('actionError')}: ${msg}` : t('actionError'))
+    }
   })
 
   async function handleDelete(id: string) {
