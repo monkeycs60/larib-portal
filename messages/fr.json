@@ -130,7 +130,7 @@
 		"position": "Poste",
 		"arrivalDate": "Date d'arrivée",
 		"departureDate": "Date de départ",
-		"profilePhoto": "URL de la photo de profil",
+		"profilePhoto": "Photo de profil",
 		"applications": "Applications autorisées",
 		"app_BESTOF_LARIB": "bestof-larib",
 		"app_CONGES": "conges",
@@ -150,6 +150,23 @@
     "welcomeEmailBodyEndDate": "L'accès à votre compte expirera le {date}.",
     "createAndSend": "Créer l'utilisateur et envoyer l'e-mail",
     "creating": "Création...",
-    "positionGeneric": "Poste"
+    "positionGeneric": "Poste",
+    "saved": "Modifications enregistrées",
+    "created": "Utilisateur créé",
+    "deleted": "Utilisateur supprimé",
+    "actionError": "Échec de l'action",
+    "positionCreated": "Poste créé"
+  }
+  ,
+  "upload": {
+    "selectFile": "Choisir une image",
+    "changeImage": "Changer l'image",
+    "remove": "Retirer",
+    "upload": "Uploader",
+    "uploading": "Téléversement...",
+    "uploadFailed": "Échec de l'upload",
+    "fileTooLarge": "Fichier trop volumineux",
+    "invalidType": "Type de fichier invalide",
+    "hint": "PNG, JPG ou WEBP jusqu'à 5 Mo"
   }
 }

@@ -110,3 +110,92 @@
   - UI: `app/[locale]/dashboard/page.tsx` now renders shadcn `Card` components per application; `app/[locale]/admin/layout.tsx` no longer uses the sidebar.
   - i18n: Added `dashboard.appsSectionTitle`, `dashboard.openApp`, `dashboard.adminSectionTitle`, and per-app descriptions (`dashboard.appDesc_*`) in `messages/{en,fr}.json`.
   - Links: All links use `applicationLink(locale, path)` to preserve the active locale.
+
+## Feature: Admin Position Select in Profile + Sonner Toasters
+
+- Name: Admin Profile Position Select & Toasters
+- What it does:
+  - On `/{locale}/profile`, when the user is an admin, the Position field is now a Select with the ability to add a new position inline (same UX as Edit User). Options are provided server-side; creation uses a secured server action.
+  - Adds Sonner toast notifications on key mutations: Edit User, Add User, and Delete User. Errors are translated and surfaced via toasts.
+  - Documents the expectation to show Sonner toasts for meaningful mutations in `AGENTS.md`.
+- How to use it:
+  - As an admin, open `/{locale}/profile`. Use the Position select. Click “+ Add New Position” to create one and auto-select it.
+  - In `/{locale}/admin/users`, toasts appear on success or error for Edit, Add, and Delete actions.
+- Files:
+  - `app/[locale]/profile/page.tsx`: Fetches positions server-side for admins and passes them to the editor.
+  - `app/[locale]/profile/profile-editor.tsx`: Switches Position to Select for admins and enables inline add via `createPositionAction`.
+  - `actions/positions.ts`: Shared server actions for creating/listing positions (admin-only).
+  - `app/[locale]/admin/users/user-edit-dialog.tsx`: Adds success/error toasts.
+  - `app/[locale]/admin/users/user-add-dialog.tsx`: Adds success/error toasts.
+  - `app/[locale]/admin/users/user-table.tsx`: Adds success/error toasts for delete.
+  - `messages/{en,fr}.json`: Adds i18n keys for toast messages.
+  - `AGENTS.md`: Adds guidance to trigger Sonner toasts on impactful mutations.
+## Feature: Cloudflare R2 Profile Image Upload
+
+- Name: Real Profile Photo Upload (R2)
+- What it does: Replaces raw URL input with a true image upload flow including local preview, direct client upload to Cloudflare R2 via presigned URL, and storage of the public image URL in the user profile.
+- How to use:
+  - On `/{locale}/profile`, click “Choisir une image/Select image”, pick a file (PNG/JPG/WEBP up to 5MB), then “Upload”. The preview updates and the image URL is saved in the form; click “Save” to persist.
+  - Admin-only wording is unchanged; only the input changed to an uploader.
+
+### Technical Details
+
+- Service: `lib/services/storage.ts` implements R2 SigV4 presign and public URL builder.
+- API: `app/api/uploads/avatar/route.ts` handles authenticated image upload via server-side proxy to R2 (5MB, image-only).
+- UI: `components/ui/file-upload.tsx` (shadcn-style) with local preview and upload.
+- Integration: `app/[locale]/profile/profile-editor.tsx` now renders the uploader and binds the resulting URL to the `profilePhoto` field.
+- Config: `next.config.ts` updated to allow `next/image` remote patterns for R2; `.env.example` includes `R2_*` variables.
+- Prisma: Added optional `User.profilePhotoKey` for future deletion/rotation needs.
+
+### Update: Switch to Server Proxy Upload (AWS SDK)
+
+- Name: Move R2 Upload to API Route
+- What it does: Replaces client-side presigned PUT with a Next.js API route that streams the file to R2 server-side (no CORS required).
+- How to use:
+  - The Profile page uploader works the same; it now posts `multipart/form-data` to `/api/uploads/avatar`.
+- Technical details:
+  - Added `app/api/uploads/avatar/route.ts` with auth via `getTypedSession()`.
+  - Uses `@aws-sdk/client-s3` `PutObjectCommand` with endpoint `https://<ACCOUNT_ID>.r2.cloudflarestorage.com`, `forcePathStyle: true`.
+  - Reads credentials and bucket from `R2_*` env vars; no browser CORS needed.
+  - `components/ui/file-upload.tsx` now envoie un `FormData` vers l'API.
+  - Supprime `actions/storage.ts` (obsolète).
+
+## Fix: R2 Presign CORS Compatibility Toggle
+
+- Name: Virtual-Hosted R2 Presign Toggle
+- What it does: Adds an opt-in env flag to generate virtual-hosted style presigned URLs for R2 uploads. Some environments report failed preflight (no `Access-Control-Allow-Origin`) against path-style URLs; switching to virtual-hosted often resolves it.
+- How to use it:
+  - Set `R2_VIRTUAL_HOSTED="true"` in `.env.local`.
+  - Restart the dev server; new presigned URLs will look like `https://<BUCKET>.<ACCOUNT_ID>.r2.cloudflarestorage.com/<key>?...`.
+  - No UI changes required.
+- Technical details:
+  - `lib/services/storage.ts`: Chooses host/`canonicalUri` based on `R2_VIRTUAL_HOSTED`.
+  - `next.config.ts`: Allows `next/image` to load from both path-style and virtual-hosted R2 hostnames.
+  - `.env.example`: Documents `R2_VIRTUAL_HOSTED`.
+
+Recommended R2 CORS policy for local dev (bucket Settings → CORS Policy):
+
+```
+[
+  {
+    "AllowedOrigins": ["http://localhost:3000"],
+    "AllowedMethods": ["GET", "PUT", "HEAD", "OPTIONS"],
+    "AllowedHeaders": ["*"],
+    "ExposeHeaders": ["ETag", "Content-Length"],
+    "MaxAgeSeconds": 3000
+  }
+]
+```
+
+Notes:
+- Ensure `OPTIONS` is included (preflight), and widen `AllowedHeaders` to `*` in case the browser sends additional `Access-Control-Request-Headers`.
+- After saving CORS, wait ~1–2 minutes; cached results can linger.
+
+## Fix: Include Content-Type In Presigned PUT
+
+- Name: Content-Type Signed Header for R2 PUT
+- What it does: The presigned URL now signs `Content-Type` when provided, matching the exact header sent by the browser. This resolves cases where R2/S3 rejects the request or omits CORS headers during preflight/PUT when `Content-Type` isn’t part of the signature.
+- How to use it: No UI change. The upload still sets `Content-Type` from the selected file; the server action forwards it to the presigner.
+- Technical details:
+  - `lib/services/storage.ts#createPresignedPutUrl(key, expires, contentType?)` adds `content-type` to `SignedHeaders` and canonical headers when provided.
+  - API route forwards the file `Content-Type` to the presigner.
