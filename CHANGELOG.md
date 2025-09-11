@@ -237,3 +237,17 @@ Notes:
 - Technical details:
   - `lib/services/storage.ts#createPresignedPutUrl(key, expires, contentType?)` adds `content-type` to `SignedHeaders` and canonical headers when provided.
   - API route forwards the file `Content-Type` to the presigner.
+## Feature: Rich Text Paste (Word/Docs) + Font Size
+
+- Name: Bestof Rich Text Editor Upgrades
+- What it does: Enhances the text editor in bestof-larib so users can paste content directly from Microsoft Word or Google Docs and preserve formatting (bold, italic, underline, lists, headings). Adds a font size control to edit selected text without losing other styles. Pasted inline sizes (px/pt) are kept.
+- How to use it:
+  - In Create Case, choose the Text content option and paste from Word/Google Docs; formatting is preserved.
+  - Use the toolbar to toggle Bold/Italic/Underline, lists, headings, and choose a font size from the Size dropdown or Reset to remove size.
+  - PDF selection still disables text editing to keep the exclusive content rule.
+
+### Technical Details
+
+- Editor: TipTap with `StarterKit`, `Underline`, `Link`, `Placeholder`, `TextStyle`, and a `FontSize` extension to parse/render `font-size` inline styles.
+- UI: Adds a Size dropdown (shadcn `Select`) to set or reset font size on the current selection; maintains strong typing and removes `any`/ignore patterns.
+- Files updated: `components/ui/rich-text-editor.tsx`.
