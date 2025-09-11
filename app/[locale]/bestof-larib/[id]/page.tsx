@@ -16,7 +16,7 @@ export default async function CaseViewPage({ params }: { params: { locale: strin
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">{c.name}</h1>
-        <Link href={applicationLink(params.locale, '/bestof-larib')}><Button variant="outline">{t('back')}</Button></Link>
+        <Link href={'/bestof-larib'}><Button variant="outline">{t('back')}</Button></Link>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">

@@ -119,7 +119,7 @@ export function RichTextEditor({ value, onChange, placeholder, disabled, classNa
           <span className="mx-1 w-px h-6 bg-border" />
           <Select
             aria-label="Font size"
-            className="h-8 w-[90px]"
+            className="w-[92px]"
             disabled={!editor || disabled}
             onChange={(e) => {
               const v = e.target.value

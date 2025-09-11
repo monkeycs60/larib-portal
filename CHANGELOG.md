@@ -257,3 +257,9 @@ Notes:
 - Name: Bestof Case View (Details + Content)
 - What it does: The Case “View” page now shows all case details on the left (exam type, disease, difficulty, tags, created date) and the content on the right. If a PDF was uploaded, it shows a PDF viewer; otherwise it renders the formatted text content.
 - Files updated: `app/[locale]/bestof-larib/[id]/page.tsx`.
+
+## Fixes: i18n Links + Font Size Select
+
+- Name: Bestof Links & UI Polish
+- What it does: Avoids duplicated locale in links by using i18n `Link` with locale-less paths for View/Edit, preventing `/en/en/...`. Adjusts the font-size dropdown styling so the value is not clipped.
+- Files updated: `app/[locale]/bestof-larib/page.tsx`, `app/[locale]/bestof-larib/[id]/page.tsx`, `components/ui/rich-text-editor.tsx`.

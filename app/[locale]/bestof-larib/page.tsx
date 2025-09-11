@@ -59,11 +59,11 @@ export default async function BestofLaribPage({ params }: { params: { locale: st
                   <TableCell>{t(`status.${(c.status === 'DRAFT' ? 'draft' : 'published')}`)}</TableCell>
                   <TableCell>{new Date(c.createdAt).toLocaleDateString()}</TableCell>
                   <TableCell className="text-right space-x-2">
-                    <Link href={applicationLink(params.locale, `/bestof-larib/${c.id}`)}>
+                    <Link href={`/bestof-larib/${c.id}`}>
                       <Button size="sm" variant="secondary">{t('view')}</Button>
                     </Link>
                     {isAdmin ? (
-                      <Link href={applicationLink(params.locale, `/bestof-larib/${c.id}/edit`)}>
+                      <Link href={`/bestof-larib/${c.id}/edit`}>
                         <Button size="sm" variant="outline">{t('edit')}</Button>
                       </Link>
                     ) : null}
