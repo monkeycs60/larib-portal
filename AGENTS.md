@@ -30,6 +30,7 @@
 -  **Services layer**: Write all API/Prisma calls in `lib/services/`
 -  **Component splitting**: Refactor components/pages when > 350 lines
 -  **Server-first approach**: Fetch data in `page.tsx` (server-side) and prop drill to client components
+-  **sub-apps**: As the app is a portal, there are multiple apps (bestof, conges, cardiolarib, etc.) ; each app has its own folder in `app/` and its own `page.tsx` and `layout.tsx` ; each app has its own `lib/` folder with its own services and utils (if logic specific to app). You need to maintain the global navbar and footer for these apps. In the prisma schema, make sure that when you add infos to user, add a column in the user table for this app, so that the user can have different infos for each app and it is easier to manage and maintain.
 
 ### Data Management
 
