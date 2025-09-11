@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Link } from '@/app/i18n/navigation'
 import { applicationLink } from '@/lib/application-link'
-import CreateCaseDialog from './ui/create-case-dialog'
+import CreateCaseDialog from './components/create-case-dialog'
 
 export default async function BestofLaribPage({ params }: { params: { locale: string } }) {
   const t = await getTranslations('bestof')
@@ -18,7 +18,7 @@ export default async function BestofLaribPage({ params }: { params: { locale: st
   const isAdmin = session?.user?.role === 'ADMIN'
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 p-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">{t('title')}</h1>
