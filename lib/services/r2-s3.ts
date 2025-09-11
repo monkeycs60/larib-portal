@@ -6,7 +6,11 @@ let s3Client: S3Client | null = null
 function client(): S3Client {
   if (s3Client) return s3Client
   const cfg = getR2Config()
-  const endpoint = `https://${cfg.accountId}.r2.cloudflarestorage.com`
+  const endpointOverride = process.env.R2_S3_ENDPOINT?.trim()
+  const host = cfg.region && cfg.region !== 'auto'
+    ? `${cfg.accountId}.${cfg.region}.r2.cloudflarestorage.com`
+    : `${cfg.accountId}.r2.cloudflarestorage.com`
+  const endpoint = endpointOverride && endpointOverride.length > 0 ? endpointOverride : `https://${host}`
   s3Client = new S3Client({
     region: cfg.region || 'auto',
     endpoint,
@@ -36,4 +40,3 @@ export async function r2PutObject(
   )
   return { key, url: r2PublicUrlForKey(key) }
 }
-

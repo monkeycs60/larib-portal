@@ -42,8 +42,9 @@ export async function POST(req: NextRequest) {
   try {
     const uploaded = await r2PutObject(key, buf, contentType)
     return NextResponse.json({ url: uploaded.url, key: uploaded.key })
-  } catch (e) {
+  } catch (e: unknown) {
     console.error('Avatar upload failed', e)
-    return NextResponse.json({ error: 'upload_failed' }, { status: 500 })
+    const err = e as { name?: string; message?: string; Code?: string }
+    return NextResponse.json({ error: 'upload_failed', code: err?.['Code'] ?? err?.name, message: err?.message }, { status: 500 })
   }
 }
