@@ -171,4 +171,76 @@
     "invalidType": "Invalid file type",
     "hint": "PNG, JPG, or WEBP up to 5MB"
   }
+  ,
+  "bestof": {
+    "title": "Clinical Cases",
+    "subtitle": "Browse and practice on clinical cases.",
+    "createCase": "Create Case",
+    "view": "View",
+    "edit": "Edit",
+    "back": "Back",
+    "created": "Case created",
+    "actionError": "Action failed",
+    "empty": "No cases yet",
+    "notFound": "Case not found",
+    "saveProgress": "Save Progress",
+    "create": "Create Case",
+    "creating": "Creating...",
+    "saving": "Saving...",
+    "remove": "Remove",
+    "selectPlaceholder": "Select...",
+    "table": {
+      "case": "Case",
+      "examType": "Exam Type",
+      "disease": "Disease Tag",
+      "difficulty": "Difficulty",
+      "status": "Status",
+      "createdAt": "Created",
+      "actions": "Actions"
+    },
+    "difficulty": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "status": {
+      "draft": "Draft",
+      "published": "Published"
+    },
+    "fields": {
+      "caseName": "Case Name",
+      "examType": "Exam Type",
+      "disease": "Disease Tag",
+      "difficulty": "Difficulty",
+      "customTags": "Custom Tags"
+    },
+    "placeholders": {
+      "customTags": "Enter comma-separated tags",
+      "textContent": "Enter the clinical case content here (optional if PDF is provided)..."
+    },
+    "hints": { "tags": "Up to 10 tags, comma separated." },
+    "addNewExam": "+ Add New Exam Type",
+    "addNewDisease": "+ Add New Disease",
+    "addNewExamPrompt": "New exam type name",
+    "addNewDiseasePrompt": "New disease name",
+    "createDialog": { "title": "Create New Clinical Case" },
+    "content": {
+      "section": "Case Content",
+      "helper": "Provide either a PDF file, text content, or both. At least one is required.",
+      "pdf": "Clinical Case PDF",
+      "text": "Text Content",
+      "pdfDrop": "Click to upload PDF file (optional)",
+      "pdfSelected": "PDF uploaded",
+      "pdfHint": "Maximum file size: 10MB"
+    },
+    "pdfUploaded": "PDF uploaded",
+    "errors": {
+      "contentRequired": "Please provide either a PDF file or text content",
+      "invalidPdf": "Invalid PDF file",
+      "pdfTooLarge": "PDF is too large",
+      "uploadFailed": "Upload failed"
+    },
+    "editCaseTitle": "Edit: {name}",
+    "editPlaceholder": "Editing UI coming soon"
+  }
 }

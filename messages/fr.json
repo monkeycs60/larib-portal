@@ -169,4 +169,76 @@
     "invalidType": "Type de fichier invalide",
     "hint": "PNG, JPG ou WEBP jusqu'à 5 Mo"
   }
+  ,
+  "bestof": {
+    "title": "Cas cliniques",
+    "subtitle": "Consultez et entraînez-vous sur des cas cliniques.",
+    "createCase": "Créer un cas",
+    "view": "Voir",
+    "edit": "Éditer",
+    "back": "Retour",
+    "created": "Cas créé",
+    "actionError": "Échec de l'action",
+    "empty": "Aucun cas pour le moment",
+    "notFound": "Cas introuvable",
+    "saveProgress": "Enregistrer comme brouillon",
+    "create": "Créer le cas",
+    "creating": "Création...",
+    "saving": "Enregistrement...",
+    "remove": "Retirer",
+    "selectPlaceholder": "Sélectionner...",
+    "table": {
+      "case": "Cas",
+      "examType": "Type d'examen",
+      "disease": "Catégorie / maladie",
+      "difficulty": "Difficulté",
+      "status": "Statut",
+      "createdAt": "Créé le",
+      "actions": "Actions"
+    },
+    "difficulty": {
+      "beginner": "Débutant",
+      "intermediate": "Intermédiaire",
+      "advanced": "Avancé"
+    },
+    "status": {
+      "draft": "Brouillon",
+      "published": "Publié"
+    },
+    "fields": {
+      "caseName": "Nom du cas",
+      "examType": "Type d'examen",
+      "disease": "Catégorie / maladie",
+      "difficulty": "Niveau de difficulté",
+      "customTags": "Tags personnalisés"
+    },
+    "placeholders": {
+      "customTags": "Entrez des tags séparés par des virgules",
+      "textContent": "Saisissez le contenu du cas ici (optionnel si un PDF est fourni)..."
+    },
+    "hints": { "tags": "Jusqu'à 10 tags, séparés par des virgules." },
+    "addNewExam": "+ Ajouter un type d'examen",
+    "addNewDisease": "+ Ajouter une catégorie",
+    "addNewExamPrompt": "Nom du nouveau type d'examen",
+    "addNewDiseasePrompt": "Nom de la nouvelle catégorie",
+    "createDialog": { "title": "Créer un nouveau cas clinique" },
+    "content": {
+      "section": "Contenu du cas",
+      "helper": "Fournissez un fichier PDF, un contenu texte, ou les deux. Au moins un est requis.",
+      "pdf": "PDF du cas clinique",
+      "text": "Contenu texte",
+      "pdfDrop": "Cliquer pour téléverser un PDF (optionnel)",
+      "pdfSelected": "PDF téléversé",
+      "pdfHint": "Taille maximale : 10 Mo"
+    },
+    "pdfUploaded": "PDF téléversé",
+    "errors": {
+      "contentRequired": "Veuillez fournir un PDF ou un contenu texte",
+      "invalidPdf": "Fichier PDF invalide",
+      "pdfTooLarge": "PDF trop volumineux",
+      "uploadFailed": "Échec de l'upload"
+    },
+    "editCaseTitle": "Éditer : {name}",
+    "editPlaceholder": "Interface d'édition à venir"
+  }
 }

@@ -1,3 +1,24 @@
+## Feature: Bestof Larib Clinical Cases
+
+- Name: bestof-larib clinical cases
+- What it does: Adds a new sub-app at `/{locale}/bestof-larib` with a server-rendered table of clinical cases accessible to all users. Admins can create cases via a dialog with fields for name, exam type, disease tag, difficulty, and custom tags. Content accepts an optional PDF (uploaded to Cloudflare R2) and/or text content; at least one is required. View page displays a PDF preview and/or text. An Edit route is scaffolded for future updates.
+- How to use it:
+  - From the dashboard or navbar, click “Open” on bestof-larib to navigate to `/{locale}/bestof-larib`.
+  - Admins click “Create Case” to open the form. Use “+ Add New Exam Type” or “+ Add New Disease” to create taxonomy values inline.
+  - Upload a PDF (≤10MB) or paste text content, then choose “Save Progress” (Draft) or “Create Case” (Published).
+  - Click “View” on a row to access the case details page with a PDF preview if available.
+
+### Technical Details
+
+- Prisma: Adds `ExamType`, `DiseaseTag`, and `ClinicalCase` models; and `DifficultyLevel`, `CaseStatus` enums.
+- Services: `lib/services/bestof-larib.ts` for listing/creating cases and ensuring taxonomy.
+- Server Actions: `app/[locale]/bestof-larib/actions.ts` with `next-safe-action` and auth guards.
+- Uploads: `POST /api/uploads/clinical-pdf` streams PDFs to R2 using the existing S3 client.
+- UI: Server-first table in `app/[locale]/bestof-larib/page.tsx`, Create Case dialog in `app/[locale]/bestof-larib/ui/create-case-dialog.tsx`, view page at `app/[locale]/bestof-larib/[id]`.
+- i18n: New `bestof` namespace in `messages/{en,fr}.json`.
+
+---
+
 ## Feature: Admin User Management Sidebar and Panel
 
 - Name: Admin User Management

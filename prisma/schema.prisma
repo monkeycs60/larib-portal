@@ -10,37 +10,38 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 model User {
-  id            String    @id
-  email         String    @unique
-  emailVerified Boolean   @default(false)
-  name          String?
+  id              String        @id
+  email           String        @unique
+  emailVerified   Boolean       @default(false)
+  name            String?
   // Admin/user management fields
-  firstName     String?
-  lastName      String?
-  phoneNumber   String?
-  role          Role      @default(USER)
-  country       String?
-  birthDate     DateTime?
-  language      Language  @default(EN)
-  position      String?
-  arrivalDate   DateTime?
-  departureDate DateTime?
-  profilePhoto  String?
+  firstName       String?
+  lastName        String?
+  phoneNumber     String?
+  role            Role          @default(USER)
+  country         String?
+  birthDate       DateTime?
+  language        Language      @default(EN)
+  position        String?
+  arrivalDate     DateTime?
+  departureDate   DateTime?
+  profilePhoto    String?
   profilePhotoKey String?
-  applications  Application[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  image         String?
+  applications    Application[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  image           String?
 
-  sessions      Session[]
-  accounts      Account[]
-  
+  sessions     Session[]
+  accounts     Account[]
+  ClinicalCase ClinicalCase[]
+
   @@map("User")
 }
 
@@ -60,6 +61,68 @@ enum Application {
   CARDIOLARIB
 }
 
+// ---- Bestof Larib domain ----
+
+enum DifficultyLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum CaseStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model ExamType {
+  id        String   @id
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cases ClinicalCase[]
+
+  @@map("ExamType")
+}
+
+model DiseaseTag {
+  id        String   @id
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cases ClinicalCase[]
+
+  @@map("DiseaseTag")
+}
+
+model ClinicalCase {
+  id         String          @id
+  name       String
+  difficulty DifficultyLevel
+  status     CaseStatus      @default(DRAFT)
+  tags       String[]        @default([])
+
+  // Content: either pdf or text or both (validated at app level)
+  pdfUrl      String?
+  pdfKey      String?
+  textContent String?
+
+  // Relations
+  examTypeId   String?
+  examType     ExamType?   @relation(fields: [examTypeId], references: [id])
+  diseaseTagId String?
+  diseaseTag   DiseaseTag? @relation(fields: [diseaseTagId], references: [id])
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("ClinicalCase")
+}
+
 model Position {
   id        String   @id
   name      String   @unique
@@ -70,46 +133,46 @@ model Position {
 }
 
 model Session {
-  id            String   @id
-  expiresAt     DateTime
-  token         String   @unique
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  ipAddress     String?
-  userAgent     String?
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
 
-  userId        String
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@map("Session")
 }
 
 model Account {
-  id              String  @id
-  accountId       String
-  providerId      String
-  userId          String
-  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accessToken     String?
-  refreshToken    String?
-  idToken         String?
-  accessTokenExpiresAt    DateTime?
-  refreshTokenExpiresAt   DateTime?
-  scope           String?
-  password        String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
   @@map("Account")
 }
 
 model Verification {
-  id            String   @id
-  identifier    String
-  value         String
-  expiresAt     DateTime
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
   @@map("Verification")
 }
