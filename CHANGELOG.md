@@ -160,6 +160,15 @@
   - `components/ui/file-upload.tsx` now envoie un `FormData` vers l'API.
   - Supprime `actions/storage.ts` (obsolète).
 
+## Feature: Persist Avatar Immediately
+
+- Name: Save Profile Photo on Upload
+- What it does: After a successful upload, the app immediately stores `profilePhoto` and `profilePhotoKey` in the database so the image persists across refresh and appears in Prisma Studio.
+- How to use it: Upload the image; no additional Save click required for the photo field.
+- Technical details:
+  - `actions/avatar.ts#saveProfilePhotoAction` (authenticated) updates the user with `profilePhoto` and `profilePhotoKey`.
+  - `components/ui/file-upload.tsx` calls this action right after the API upload.
+
 ## Fix: R2 Presign CORS Compatibility Toggle
 
 - Name: Virtual-Hosted R2 Presign Toggle

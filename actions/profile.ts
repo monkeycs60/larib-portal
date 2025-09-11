@@ -27,7 +27,7 @@ export const updateSelfProfileAction = authenticatedAction
     const language = parsedInput.language ?? (parsedInput.locale === 'fr' ? 'FR' : 'EN')
 
     // Enforce field-level permissions per role
-    const basePayload = {
+  const basePayload = {
       id: ctx.userId,
       firstName: parsedInput.firstName ?? null,
       lastName: parsedInput.lastName ?? null,
@@ -42,6 +42,8 @@ export const updateSelfProfileAction = authenticatedAction
     if (isAdmin) {
       return await updateUser({
         ...basePayload,
+        // Do not wipe the stored key when editing unrelated fields.
+        // profilePhotoKey is only set by the avatar save action.
         role: parsedInput.role ?? ctx.user.role,
         applications: parsedInput.applications ?? ctx.user.applications ?? [],
       })
@@ -52,4 +54,3 @@ export const updateSelfProfileAction = authenticatedAction
       ...basePayload,
     })
   })
-

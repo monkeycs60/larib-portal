@@ -13,7 +13,7 @@ const remotePatterns: NonNullable<NextConfig['images']>['remotePatterns'] = []
 try {
   if (publicBase) {
     const u = new URL(publicBase)
-    remotePatterns.push({ protocol: u.protocol.replace(':','') as 'http' | 'https', hostname: u.hostname, pathname: '**' })
+    remotePatterns.push({ protocol: u.protocol.replace(':','') as 'http' | 'https', hostname: u.hostname, pathname: '/**' })
   }
 } catch {}
 

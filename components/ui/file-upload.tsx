@@ -65,6 +65,10 @@ export function FileUpload({
 			const res = await fetch('/api/uploads/avatar', { method: 'POST', body: fd });
 			if (!res.ok) throw new Error('upload_failed');
 			const data = (await res.json()) as { url: string; key: string };
+			// Persist immediately server-side so refresh keeps the avatar
+			const { saveProfilePhotoAction } = await import('@/actions/avatar');
+			const saveRes = await saveProfilePhotoAction({ url: data.url, key: data.key });
+			if ((saveRes as any)?.serverError) throw new Error('save_failed');
 			onUploaded({ url: data.url, key: data.key });
 			setFile(null);
 			if (preview) URL.revokeObjectURL(preview);
