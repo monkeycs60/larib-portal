@@ -251,3 +251,9 @@ Notes:
 - Editor: TipTap with `StarterKit`, `Underline`, `Link`, `Placeholder`, `TextStyle`, and a `FontSize` extension to parse/render `font-size` inline styles.
 - UI: Adds a Size dropdown (shadcn `Select`) to set or reset font size on the current selection; maintains strong typing and removes `any`/ignore patterns.
 - Files updated: `components/ui/rich-text-editor.tsx`.
+
+## Update: Case View Layout
+
+- Name: Bestof Case View (Details + Content)
+- What it does: The Case “View” page now shows all case details on the left (exam type, disease, difficulty, tags, created date) and the content on the right. If a PDF was uploaded, it shows a PDF viewer; otherwise it renders the formatted text content.
+- Files updated: `app/[locale]/bestof-larib/[id]/page.tsx`.
