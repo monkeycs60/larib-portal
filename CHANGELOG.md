@@ -169,6 +169,14 @@
   - `actions/avatar.ts#saveProfilePhotoAction` (authenticated) updates the user with `profilePhoto` and `profilePhotoKey`.
   - `components/ui/file-upload.tsx` calls this action right after the API upload.
 
+## Feature: Navbar Uses Profile Photo
+
+- Name: Avatar Photo in Navbar + Hover Border Gradient
+- What it does: Displays the user's `profilePhoto` (if present) in the navbar instead of initials. The avatar is round with the same border style, turns into a pointer on hover, and the border gains a subtle indigo→cyan gradient.
+- How to use it: Upload a photo on `/{locale}/profile`; the navbar immediately shows it and it persists on refresh.
+- Files:
+  - `app/[locale]/components/navbar-client.tsx`: Uses `user.profilePhoto ?? user.image`, adds gradient hover wrapper and pointer cursor.
+
 ## Fix: R2 Presign CORS Compatibility Toggle
 
 - Name: Virtual-Hosted R2 Presign Toggle
