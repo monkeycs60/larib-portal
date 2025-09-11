@@ -51,7 +51,7 @@ export default async function CaseViewPage({ params }: { params: { locale: strin
           {c.pdfUrl ? (
             <iframe src={c.pdfUrl} className="w-full h-[70vh] rounded border" />
           ) : (
-            <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: c.textContent || '' }} />
+            <div className="rte text-sm" dangerouslySetInnerHTML={{ __html: c.textContent || '' }} />
           )}
         </div>
       </div>
