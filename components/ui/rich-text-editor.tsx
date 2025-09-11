@@ -1,5 +1,5 @@
 "use client"
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
@@ -16,7 +16,6 @@ type Props = {
 }
 
 export function RichTextEditor({ value, onChange, placeholder, disabled, className }: Props) {
-  const [mode, setMode] = useState<'edit' | 'preview'>('edit')
   // Recreate editor when disabled changes to update editability (no useEffect)
   const deps = useMemo(() => [disabled] as const, [disabled])
   const editor = useEditor(
@@ -59,62 +58,76 @@ export function RichTextEditor({ value, onChange, placeholder, disabled, classNa
     return editor?.chain().focus()
   }
 
+  function keepSelection(e: React.MouseEvent) {
+    // Prevent toolbar click from blurring the editor (which loses selection)
+    e.preventDefault()
+  }
+
   return (
     <div className={className}>
       <div className="flex items-center justify-between mb-2">
         <div className="flex flex-wrap gap-1">
-          <Button type="button" size="sm" variant={editor?.isActive('bold') ? 'secondary' : 'outline'} disabled={!editor || disabled} onClick={() => chain()?.toggleBold().run()}><b>B</b></Button>
-          <Button type="button" size="sm" variant={editor?.isActive('italic') ? 'secondary' : 'outline'} disabled={!editor || disabled} onClick={() => chain()?.toggleItalic().run()}><i>I</i></Button>
-          <Button type="button" size="sm" variant={editor?.isActive('strike') ? 'secondary' : 'outline'} disabled={!editor || disabled} onClick={() => chain()?.toggleStrike().run()}>S</Button>
-          <Button type="button" size="sm" variant={editor?.isActive('underline') ? 'secondary' : 'outline'} disabled={!editor || disabled} onClick={() => chain()?.toggleUnderline?.().run?.()}>U</Button>
+          <Button type="button" size="sm" onMouseDown={keepSelection} variant={editor?.isActive('bold') ? 'secondary' : 'outline'} disabled={!editor || disabled} onClick={() => chain()?.toggleBold().run()}><b>B</b></Button>
+          <Button type="button" size="sm" onMouseDown={keepSelection} variant={editor?.isActive('italic') ? 'secondary' : 'outline'} disabled={!editor || disabled} onClick={() => chain()?.toggleItalic().run()}><i>I</i></Button>
+          <Button type="button" size="sm" onMouseDown={keepSelection} variant={editor?.isActive('strike') ? 'secondary' : 'outline'} disabled={!editor || disabled} onClick={() => chain()?.toggleStrike().run()}>S</Button>
+          <Button type="button" size="sm" onMouseDown={keepSelection} variant={editor?.isActive('underline') ? 'secondary' : 'outline'} disabled={!editor || disabled} onClick={() => chain()?.toggleUnderline?.().run?.()}>U</Button>
           <span className="mx-1 w-px h-6 bg-border" />
-          <Button type="button" size="sm" variant={editor?.isActive('paragraph') ? 'secondary' : 'outline'} disabled={!editor || disabled} onClick={() => chain()?.setParagraph().run()}>P</Button>
-          <Button type="button" size="sm" variant={editor?.isActive('heading', { level: 2 }) ? 'secondary' : 'outline'} disabled={!editor || disabled} onClick={() => chain()?.toggleHeading({ level: 2 }).run()}>H2</Button>
-          <Button type="button" size="sm" variant={editor?.isActive('heading', { level: 3 }) ? 'secondary' : 'outline'} disabled={!editor || disabled} onClick={() => chain()?.toggleHeading({ level: 3 }).run()}>H3</Button>
-          <Button type="button" size="sm" variant={editor?.isActive('bulletList') ? 'secondary' : 'outline'} disabled={!editor || disabled} onClick={() => chain()?.toggleBulletList().run()}>• List</Button>
-          <Button type="button" size="sm" variant={editor?.isActive('orderedList') ? 'secondary' : 'outline'} disabled={!editor || disabled} onClick={() => chain()?.toggleOrderedList().run()}>1. List</Button>
-          <Button type="button" size="sm" variant={editor?.isActive('blockquote') ? 'secondary' : 'outline'} disabled={!editor || disabled} onClick={() => chain()?.toggleBlockquote().run()}>❝</Button>
-          <Button type="button" size="sm" variant={editor?.isActive('codeBlock') ? 'secondary' : 'outline'} disabled={!editor || disabled} onClick={() => chain()?.toggleCodeBlock().run()}>Code</Button>
+          <Button type="button" size="sm" onMouseDown={keepSelection} variant={editor?.isActive('paragraph') ? 'secondary' : 'outline'} disabled={!editor || disabled} onClick={() => chain()?.setParagraph().run()}>P</Button>
+          <Button type="button" size="sm" onMouseDown={keepSelection} variant={editor?.isActive('heading', { level: 2 }) ? 'secondary' : 'outline'} disabled={!editor || disabled} onClick={() => {
+            if (!editor) return
+            const sel = editor.state.selection
+            const isEmptyLine = sel.empty && sel.$from.parent && sel.$from.parent.textContent.length === 0
+            if (sel.empty && !isEmptyLine) {
+              editor.chain().focus().splitBlock().setNode('heading', { level: 2 }).run()
+            } else {
+              chain()?.toggleHeading({ level: 2 }).run()
+            }
+          }}>H2</Button>
+          <Button type="button" size="sm" onMouseDown={keepSelection} variant={editor?.isActive('heading', { level: 3 }) ? 'secondary' : 'outline'} disabled={!editor || disabled} onClick={() => {
+            if (!editor) return
+            const sel = editor.state.selection
+            const isEmptyLine = sel.empty && sel.$from.parent && sel.$from.parent.textContent.length === 0
+            if (sel.empty && !isEmptyLine) {
+              editor.chain().focus().splitBlock().setNode('heading', { level: 3 }).run()
+            } else {
+              chain()?.toggleHeading({ level: 3 }).run()
+            }
+          }}>H3</Button>
+          <Button type="button" size="sm" onMouseDown={keepSelection} variant={editor?.isActive('bulletList') ? 'secondary' : 'outline'} disabled={!editor || disabled} onClick={() => chain()?.toggleBulletList().run()}>• List</Button>
+          <Button type="button" size="sm" onMouseDown={keepSelection} variant={editor?.isActive('orderedList') ? 'secondary' : 'outline'} disabled={!editor || disabled} onClick={() => chain()?.toggleOrderedList().run()}>1. List</Button>
+          <Button type="button" size="sm" onMouseDown={keepSelection} variant={editor?.isActive('blockquote') ? 'secondary' : 'outline'} disabled={!editor || disabled} onClick={() => chain()?.toggleBlockquote().run()}>❝</Button>
+          <Button type="button" size="sm" onMouseDown={keepSelection} variant={editor?.isActive('codeBlock') ? 'secondary' : 'outline'} disabled={!editor || disabled} onClick={() => chain()?.toggleCodeBlock().run()}>Code</Button>
           <span className="mx-1 w-px h-6 bg-border" />
-          <Button type="button" size="sm" variant="outline" disabled={!editor || disabled} onClick={() => chain()?.setHorizontalRule().run()}>HR</Button>
+          <Button type="button" size="sm" onMouseDown={keepSelection} variant="outline" disabled={!editor || disabled} onClick={() => chain()?.setHorizontalRule().run()}>HR</Button>
           <span className="mx-1 w-px h-6 bg-border" />
           <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          disabled={!editor || disabled}
-          onClick={() => {
-            const url = prompt('Enter URL') || ''
-            const safe = url.trim()
-            if (!safe) return
-            try {
-              const u = new URL(safe.startsWith('http') ? safe : `https://${safe}`)
-              chain()?.setLink({ href: u.toString() }).run()
-            } catch {
-              // ignore invalid
-            }
-          }}
-        >Link</Button>
-          <Button type="button" size="sm" variant="outline" disabled={!editor || disabled} onClick={() => chain()?.unsetLink().run()}>Unlink</Button>
+            type="button"
+            size="sm"
+            variant="outline"
+            onMouseDown={keepSelection}
+            disabled={!editor || disabled}
+            onClick={() => {
+              const url = prompt('Enter URL') || ''
+              const safe = url.trim()
+              if (!safe) return
+              try {
+                const u = new URL(safe.startsWith('http') ? safe : `https://${safe}`)
+                chain()?.setLink({ href: u.toString() }).run()
+              } catch {
+                // ignore invalid
+              }
+            }}
+          >Link</Button>
+          <Button type="button" size="sm" onMouseDown={keepSelection} variant="outline" disabled={!editor || disabled} onClick={() => chain()?.unsetLink().run()}>Unlink</Button>
           <span className="mx-1 w-px h-6 bg-border" />
-          <Button type="button" size="sm" variant="outline" disabled={!editor || disabled} onClick={() => editor?.commands.undo()}>Undo</Button>
-          <Button type="button" size="sm" variant="outline" disabled={!editor || disabled} onClick={() => editor?.commands.redo()}>Redo</Button>
-          <Button type="button" size="sm" variant="ghost" disabled={!editor || disabled} onClick={() => editor?.commands.clearContent()}>Clear</Button>
-        </div>
-        <div className="flex gap-1">
-          <Button type="button" size="sm" variant={mode === 'edit' ? 'secondary' : 'outline'} onClick={() => setMode('edit')} disabled={disabled}>Edit</Button>
-          <Button type="button" size="sm" variant={mode === 'preview' ? 'secondary' : 'outline'} onClick={() => setMode('preview')} disabled={disabled}>Preview</Button>
+          <Button type="button" size="sm" onMouseDown={keepSelection} variant="outline" disabled={!editor || disabled} onClick={() => editor?.commands.undo()}>Undo</Button>
+          <Button type="button" size="sm" onMouseDown={keepSelection} variant="outline" disabled={!editor || disabled} onClick={() => editor?.commands.redo()}>Redo</Button>
+          <Button type="button" size="sm" onMouseDown={keepSelection} variant="ghost" disabled={!editor || disabled} onClick={() => editor?.commands.clearContent()}>Clear</Button>
         </div>
       </div>
-      {mode === 'edit' ? (
-        <div className={`${disabled ? 'bg-muted cursor-not-allowed' : 'bg-background'}`}>
-          <EditorContent editor={editor} />
-        </div>
-      ) : (
-        <div className="rounded-md border px-3 py-2 bg-background">
-          <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: (editor?.getHTML() || value || '') }} />
-        </div>
-      )}
+      <div className={`${disabled ? 'bg-muted cursor-not-allowed' : 'bg-background'}`}>
+        <EditorContent editor={editor} />
+      </div>
     </div>
   )
 }

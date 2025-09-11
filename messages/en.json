@@ -187,6 +187,7 @@
     "create": "Create Case",
     "creating": "Creating...",
     "saving": "Saving...",
+    "cancel": "Cancel",
     "remove": "Remove",
     "selectPlaceholder": "Select...",
     "table": {
