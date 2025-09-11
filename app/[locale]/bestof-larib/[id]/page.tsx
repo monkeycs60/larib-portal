@@ -31,7 +31,7 @@ export default async function CaseViewPage({ params }: { params: { locale: strin
       {c.textContent ? (
         <div className="rounded border p-3">
           <div className="text-sm font-medium mb-2">{t('content.text')}</div>
-          <div className="prose prose-sm max-w-none whitespace-pre-wrap">{c.textContent}</div>
+          <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: c.textContent }} />
         </div>
       ) : null}
     </div>

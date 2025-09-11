@@ -8,7 +8,8 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
+import { RichTextEditor } from '@/components/ui/rich-text-editor'
+import { TagInput } from '@/components/ui/tag-input'
 import { useAction } from 'next-safe-action/hooks'
 import { createCaseAction, createDiseaseTagAction, createExamTypeAction } from '../actions'
 import { toast } from 'sonner'
@@ -18,7 +19,7 @@ const FormSchema = z.object({
   examType: z.string().optional(),
   diseaseTag: z.string().optional(),
   difficulty: z.enum(['BEGINNER','INTERMEDIATE','ADVANCED']).default('BEGINNER'),
-  tagsInput: z.string().optional(),
+  tags: z.array(z.string()).default([]),
   textContent: z.string().optional(),
   pdfUrl: z.string().url().optional(),
   pdfKey: z.string().optional(),
@@ -43,6 +44,7 @@ export default function CreateCaseDialog({ examTypes, diseaseTags }: { examTypes
 
   const pdfUrl = watch('pdfUrl')
   const textContent = watch('textContent')
+  const tags = watch('tags') || []
 
   const { execute, isExecuting } = useAction(createCaseAction, {
     onSuccess() {
@@ -104,13 +106,12 @@ export default function CreateCaseDialog({ examTypes, diseaseTags }: { examTypes
   }
 
   const onSubmit = handleSubmit(async (values) => {
-    const tags = (values.tagsInput || '')
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean)
-
     if (!values.pdfUrl && !values.textContent) {
       toast.error(t('errors.contentRequired'))
+      return
+    }
+    if (values.pdfUrl && values.textContent) {
+      toast.error(t('errors.exclusive'))
       return
     }
 
@@ -119,7 +120,7 @@ export default function CreateCaseDialog({ examTypes, diseaseTags }: { examTypes
       examTypeName: values.examType || null,
       diseaseTagName: values.diseaseTag || null,
       difficulty: values.difficulty,
-      tags,
+      tags: values.tags,
       pdfUrl: values.pdfUrl || null,
       pdfKey: values.pdfKey || null,
       textContent: values.textContent || null,
@@ -187,7 +188,13 @@ export default function CreateCaseDialog({ examTypes, diseaseTags }: { examTypes
           <section className="space-y-3">
             <div>
               <label className="block text-sm mb-1">{t('fields.customTags')}</label>
-              <Input placeholder={t('placeholders.customTags')} {...register('tagsInput')} />
+              <TagInput
+                value={tags}
+                onChange={(next) => setValue('tags', next)}
+                placeholder={t('placeholders.customTags')}
+                disabled={isExecuting}
+                max={10}
+              />
               <div className="text-xs text-muted-foreground mt-1">{t('hints.tags')}</div>
             </div>
           </section>
@@ -217,19 +224,34 @@ export default function CreateCaseDialog({ examTypes, diseaseTags }: { examTypes
                       const f = e.target.files?.[0]
                       if (f) void uploadPdf(f)
                     }}
-                    disabled={pdfUploading}
+                    disabled={pdfUploading || (!!textContent && textContent.length > 0)}
                   />
                 </label>
               )}
               <div className="text-xs text-muted-foreground mt-1">{t('content.pdfHint')}</div>
+              {textContent && textContent.length > 0 ? (
+                <div className="mt-2 text-yellow-700 bg-yellow-50 border border-yellow-200 text-sm rounded p-2">
+                  {t('errors.exclusivePdfDisabled')}
+                </div>
+              ) : null}
             </div>
 
             <div>
               <div className="text-sm font-medium mb-1">{t('content.text')}</div>
-              <Textarea rows={5} placeholder={t('placeholders.textContent')} {...register('textContent')} />
+              <RichTextEditor
+                value={textContent}
+                onChange={(html) => setValue('textContent', html)}
+                placeholder={t('placeholders.textContent')}
+                disabled={!!pdfUrl}
+              />
               {(!pdfUrl && !textContent) ? (
                 <div className="mt-2 text-yellow-700 bg-yellow-50 border border-yellow-200 text-sm rounded p-2">
                   {t('errors.contentRequired')}
+                </div>
+              ) : null}
+              {pdfUrl ? (
+                <div className="mt-2 text-yellow-700 bg-yellow-50 border border-yellow-200 text-sm rounded p-2">
+                  {t('errors.exclusiveTextDisabled')}
                 </div>
               ) : null}
             </div>
@@ -251,4 +273,3 @@ export default function CreateCaseDialog({ examTypes, diseaseTags }: { examTypes
     </Dialog>
   )
 }
-

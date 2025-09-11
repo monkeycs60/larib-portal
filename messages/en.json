@@ -226,7 +226,7 @@
     "createDialog": { "title": "Create New Clinical Case" },
     "content": {
       "section": "Case Content",
-      "helper": "Provide either a PDF file, text content, or both. At least one is required.",
+      "helper": "Provide either a PDF file or text content (not both). One is required.",
       "pdf": "Clinical Case PDF",
       "text": "Text Content",
       "pdfDrop": "Click to upload PDF file (optional)",
@@ -236,6 +236,9 @@
     "pdfUploaded": "PDF uploaded",
     "errors": {
       "contentRequired": "Please provide either a PDF file or text content",
+      "exclusive": "PDF and text cannot be used together",
+      "exclusivePdfDisabled": "Text content is present — PDF upload is disabled",
+      "exclusiveTextDisabled": "A PDF is present — text editor is disabled",
       "invalidPdf": "Invalid PDF file",
       "pdfTooLarge": "PDF is too large",
       "uploadFailed": "Upload failed"

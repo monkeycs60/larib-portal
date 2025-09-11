@@ -22,6 +22,9 @@ export const createCaseAction = authenticatedAction
     if (!parsedInput.pdfUrl && !parsedInput.textContent) {
       throw new Error('CONTENT_REQUIRED')
     }
+    if (parsedInput.pdfUrl && parsedInput.textContent) {
+      throw new Error('CONTENT_EXCLUSIVE')
+    }
     const created = await createClinicalCase({
       ...parsedInput,
       createdById: ctx.userId,
@@ -42,4 +45,3 @@ export const createDiseaseTagAction = adminOnlyAction
     const d = await ensureDiseaseTag(parsedInput.name)
     return d
   })
-

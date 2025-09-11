@@ -224,7 +224,7 @@
     "createDialog": { "title": "Créer un nouveau cas clinique" },
     "content": {
       "section": "Contenu du cas",
-      "helper": "Fournissez un fichier PDF, un contenu texte, ou les deux. Au moins un est requis.",
+      "helper": "Fournissez un fichier PDF ou un contenu texte (pas les deux). L'un est requis.",
       "pdf": "PDF du cas clinique",
       "text": "Contenu texte",
       "pdfDrop": "Cliquer pour téléverser un PDF (optionnel)",
@@ -234,6 +234,9 @@
     "pdfUploaded": "PDF téléversé",
     "errors": {
       "contentRequired": "Veuillez fournir un PDF ou un contenu texte",
+      "exclusive": "Le PDF et le texte ne peuvent pas être utilisés ensemble",
+      "exclusivePdfDisabled": "Un contenu texte est présent — l'upload PDF est désactivé",
+      "exclusiveTextDisabled": "Un PDF est présent — l'éditeur de texte est désactivé",
       "invalidPdf": "Fichier PDF invalide",
       "pdfTooLarge": "PDF trop volumineux",
       "uploadFailed": "Échec de l'upload"
