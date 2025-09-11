@@ -44,6 +44,10 @@ export default function CreateCaseDialog({ examTypes, diseaseTags }: { examTypes
 
   const pdfUrl = watch('pdfUrl')
   const textContent = watch('textContent')
+  const hasText = (() => {
+    const s = (textContent || '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()
+    return s.length > 0
+  })()
   const tags = watch('tags') || []
 
   const { execute, isExecuting } = useAction(createCaseAction, {
@@ -224,12 +228,12 @@ export default function CreateCaseDialog({ examTypes, diseaseTags }: { examTypes
                       const f = e.target.files?.[0]
                       if (f) void uploadPdf(f)
                     }}
-                    disabled={pdfUploading || (!!textContent && textContent.length > 0)}
+                    disabled={pdfUploading || hasText}
                   />
                 </label>
               )}
               <div className="text-xs text-muted-foreground mt-1">{t('content.pdfHint')}</div>
-              {textContent && textContent.length > 0 ? (
+              {hasText ? (
                 <div className="mt-2 text-yellow-700 bg-yellow-50 border border-yellow-200 text-sm rounded p-2">
                   {t('errors.exclusivePdfDisabled')}
                 </div>
