@@ -18,10 +18,13 @@ const CreateCaseSchema = z.object({
 export const createCaseAction = authenticatedAction
   .inputSchema(CreateCaseSchema)
   .action(async ({ parsedInput, ctx }) => {
-    // Validation: at least one content source
-    if (!parsedInput.pdfUrl && !parsedInput.textContent) {
-      throw new Error('CONTENT_REQUIRED')
+    // Validation: at least one content source for published, drafts can be empty
+    if (parsedInput.status === 'PUBLISHED') {
+      if (!parsedInput.pdfUrl && !parsedInput.textContent) {
+        throw new Error('CONTENT_REQUIRED')
+      }
     }
+    // Exclusivity always enforced
     if (parsedInput.pdfUrl && parsedInput.textContent) {
       throw new Error('CONTENT_EXCLUSIVE')
     }

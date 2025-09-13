@@ -2,8 +2,10 @@ import { getTranslations } from 'next-intl/server'
 import { listClinicalCases, listExamTypes, listDiseaseTags } from '@/lib/services/bestof-larib'
 import { getTypedSession } from '@/lib/auth-helpers'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Link } from '@/app/i18n/navigation'
+import { Eye, Pencil, Trash2, Plus } from 'lucide-react'
 import CreateCaseDialog from './components/create-case-dialog'
 
 export default async function BestofLaribPage({ params }: { params: { locale: string } }) {
@@ -32,39 +34,72 @@ export default async function BestofLaribPage({ params }: { params: { locale: st
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>{t('table.status')}</TableHead>
               <TableHead>{t('table.case')}</TableHead>
               <TableHead>{t('table.examType')}</TableHead>
               <TableHead>{t('table.disease')}</TableHead>
               <TableHead>{t('table.difficulty')}</TableHead>
-              <TableHead>{t('table.status')}</TableHead>
               <TableHead>{t('table.createdAt')}</TableHead>
+              <TableHead>{t('table.adminTags')}</TableHead>
               <TableHead className="text-right">{t('table.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {cases.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-sm text-muted-foreground">
+                <TableCell colSpan={8} className="text-center text-sm text-muted-foreground">
                   {t('empty')}
                 </TableCell>
               </TableRow>
             ) : (
               cases.map((c) => (
                 <TableRow key={c.id}>
+                  <TableCell>
+                    {c.status === 'PUBLISHED' ? (
+                      <Badge className="bg-green-500 text-white border-transparent">{t('status.published')}</Badge>
+                    ) : (
+                      <Badge className="bg-yellow-400 text-black border-transparent">{t('status.draft')}</Badge>
+                    )}
+                  </TableCell>
                   <TableCell className="font-medium">{c.name}</TableCell>
                   <TableCell>{c.examType?.name ?? '-'}</TableCell>
-                  <TableCell>{c.diseaseTag?.name ?? '-'}</TableCell>
-                  <TableCell>{t(`difficulty.${(c.difficulty === 'BEGINNER' ? 'beginner' : c.difficulty === 'INTERMEDIATE' ? 'intermediate' : 'advanced')}`)}</TableCell>
-                  <TableCell>{t(`status.${(c.status === 'DRAFT' ? 'draft' : 'published')}`)}</TableCell>
+                  <TableCell>
+                    {c.diseaseTag?.name ? (
+                      <Badge variant="secondary">{c.diseaseTag.name}</Badge>
+                    ) : (
+                      '-'
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className={
+                      c.difficulty === 'BEGINNER'
+                        ? 'border-green-500 text-green-700'
+                        : c.difficulty === 'INTERMEDIATE'
+                        ? 'border-amber-500 text-amber-700'
+                        : 'border-red-500 text-red-700'
+                    }>
+                      {t(`difficulty.${(c.difficulty === 'BEGINNER' ? 'beginner' : c.difficulty === 'INTERMEDIATE' ? 'intermediate' : 'advanced')}`)}
+                    </Badge>
+                  </TableCell>
                   <TableCell>{new Date(c.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell>
+                    <Button type="button" size="icon" variant="ghost" aria-label="add admin tag">
+                      <Plus />
+                    </Button>
+                  </TableCell>
                   <TableCell className="text-right space-x-2">
                     <Link href={`/bestof-larib/${c.id}`}>
-                      <Button size="sm" variant="secondary">{t('view')}</Button>
+                      <Button size="sm" variant="secondary"><Eye />{t('view')}</Button>
                     </Link>
                     {isAdmin ? (
-                      <Link href={`/bestof-larib/${c.id}/edit`}>
-                        <Button size="sm" variant="outline">{t('edit')}</Button>
-                      </Link>
+                      <>
+                        <Link href={`/bestof-larib/${c.id}/edit`}>
+                          <Button size="sm" variant="outline"><Pencil />{t('edit')}</Button>
+                        </Link>
+                        <Button type="button" size="sm" variant="destructive">
+                          <Trash2 />{t('delete')}
+                        </Button>
+                      </>
                     ) : null}
                   </TableCell>
                 </TableRow>

@@ -83,6 +83,7 @@ export function UserEditDialog({
 					...prev.filter((p) => p.id !== res.data?.id),
 					res.data!,
 				]);
+				setValue('position', res.data!.name);
 			},
 		}
 	);
@@ -107,11 +108,7 @@ export function UserEditDialog({
 	async function confirmAddPosition() {
 		const name = newPosName.trim();
 		if (!name) return;
-		const res = await execCreatePos({ name });
-		const created = res?.data;
-		if (created) {
-			setValue('position', created.name);
-		}
+		await execCreatePos({ name });
 		setAddPosOpen(false);
 		setNewPosName('');
 	}

@@ -189,6 +189,7 @@
     "saving": "Saving...",
     "cancel": "Cancel",
     "remove": "Remove",
+    "delete": "Delete",
     "selectPlaceholder": "Select...",
     "table": {
       "case": "Case",
@@ -197,6 +198,7 @@
       "difficulty": "Difficulty",
       "status": "Status",
       "createdAt": "Created",
+      "adminTags": "Admin Tags",
       "actions": "Actions"
     },
     "difficulty": {

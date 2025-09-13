@@ -187,6 +187,7 @@
     "saving": "Enregistrement...",
     "cancel": "Annuler",
     "remove": "Retirer",
+    "delete": "Supprimer",
     "selectPlaceholder": "Sélectionner...",
     "table": {
       "case": "Cas",
@@ -195,6 +196,7 @@
       "difficulty": "Difficulté",
       "status": "Statut",
       "createdAt": "Créé le",
+      "adminTags": "Tags admin",
       "actions": "Actions"
     },
     "difficulty": {

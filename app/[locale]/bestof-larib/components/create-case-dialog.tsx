@@ -173,15 +173,19 @@ export default function CreateCaseDialog({
 		setValue('pdfKey', undefined);
 	}
 
-	const onSubmit = handleSubmit(async (values) => {
-		if (!values.pdfUrl && !values.textContent) {
-			toast.error(t('errors.contentRequired'));
-			return;
-		}
-		if (values.pdfUrl && values.textContent) {
-			toast.error(t('errors.exclusive'));
-			return;
-		}
+  const onSubmit = handleSubmit(async (values) => {
+    // Allow saving draft without content; enforce for published only
+    if (statusToCreate === 'PUBLISHED') {
+      if (!values.pdfUrl && !values.textContent) {
+        toast.error(t('errors.contentRequired'));
+        return;
+      }
+    }
+    // Always enforce exclusivity
+    if (values.pdfUrl && values.textContent) {
+      toast.error(t('errors.exclusive'));
+      return;
+    }
 
 		await execute({
 			name: values.name,

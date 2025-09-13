@@ -38,6 +38,25 @@
 - UI: Server-first table in `app/[locale]/bestof-larib/page.tsx`, Create Case dialog in `app/[locale]/bestof-larib/ui/create-case-dialog.tsx`, view page at `app/[locale]/bestof-larib/[id]`.
 - i18n: New `bestof` namespace in `messages/{en,fr}.json`.
 
+### UI Update: Status & Tags Chips + Draft Save
+
+- Name: Bestof list UX improvements (chips + actions + draft save)
+- What it does:
+  - Moves Status to the first column and renders it as a chip (green “Published”, yellow “Draft”).
+  - Renders Disease as a chip and Difficulty as a distinct outline chip with level colors.
+  - Adds an “Admin Tags” column (left of Actions) with a Plus icon button by default when no admin tags exist yet.
+  - Adds icons to row action buttons and a new Delete button (not yet wired to deletion logic).
+  - Allows “Save Progress” (Draft) in the Create Case dialog even if PDF/Text are missing; exclusivity (not both) still enforced.
+- How to use it:
+  - Visit `/{locale}/bestof-larib`; status now appears on the far left as colored chips.
+  - Row actions include icons; a Delete button is present for admins (no action yet).
+  - In “Create Case”, use “Save Progress” to store an incomplete draft; use “Create Case” to publish (requires PDF or text).
+- Files updated:
+  - `app/[locale]/bestof-larib/page.tsx` (chips, columns, icons, delete button, admin tags column)
+  - `app/[locale]/bestof-larib/components/create-case-dialog.tsx` (draft save validation)
+  - `app/[locale]/bestof-larib/actions.ts` (server-side validation for draft vs. published)
+  - `messages/{en,fr}.json` (adds `bestof.table.adminTags` and `bestof.delete`)
+
 ---
 
 ## Feature: Admin User Management Sidebar and Panel
