@@ -35,7 +35,8 @@ const FormSchema = z.object({
 	pdfKey: z.string().optional(),
 });
 
-type FormValues = z.infer<typeof FormSchema>;
+// Important: use z.input here to align with zodResolver's input type (defaults may allow undefined in input)
+type FormValues = z.input<typeof FormSchema>;
 
 type Option = { id: string; name: string };
 
@@ -74,7 +75,7 @@ export default function CreateCaseDialog({
 
   const { register, handleSubmit, setValue, reset, watch } =
     useForm<FormValues>({
-      resolver: zodResolver<FormValues>(FormSchema),
+      resolver: zodResolver(FormSchema),
     defaultValues: clinicalCase
             ? {
                     name: clinicalCase.name,
@@ -228,7 +229,7 @@ export default function CreateCaseDialog({
         name: values.name,
         examTypeName: values.examType || null,
         diseaseTagName: values.diseaseTag || null,
-        difficulty: values.difficulty,
+        difficulty: values.difficulty || 'BEGINNER',
         tags: values.tags,
         pdfUrl: values.pdfUrl || null,
         pdfKey: values.pdfKey || null,
@@ -240,7 +241,7 @@ export default function CreateCaseDialog({
         name: values.name,
         examTypeName: values.examType || null,
         diseaseTagName: values.diseaseTag || null,
-        difficulty: values.difficulty,
+        difficulty: values.difficulty || 'BEGINNER',
         tags: values.tags,
         pdfUrl: values.pdfUrl || null,
         pdfKey: values.pdfKey || null,

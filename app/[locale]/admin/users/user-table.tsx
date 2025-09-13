@@ -7,6 +7,17 @@ import { AddUserDialog } from './user-add-dialog'
 import { deleteUserAction } from "./actions"
 import { useState } from "react"
 import { useAction } from 'next-safe-action/hooks'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { toast } from 'sonner'
 
 export type UserRow = UserFormValues & {
@@ -29,7 +40,6 @@ export function UserTable({ users, positions, locale }: { users: UserRow[]; posi
   })
 
   async function handleDelete(id: string) {
-    if (!confirm(t('confirmDelete'))) return
     setDeleting(id)
     await executeDelete({ id })
     setDeleting(null)
@@ -103,14 +113,29 @@ export function UserTable({ users, positions, locale }: { users: UserRow[]; posi
                     applications: (u.applications ?? []) as UserFormValues['applications'],
                   }}
                 />
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => handleDelete(u.id)}
-                  disabled={deleting === u.id}
-                >
-                  {deleting === u.id ? t('deleting') : t('delete')}
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      disabled={deleting === u.id}
+                    >
+                      {deleting === u.id ? t('deleting') : t('delete')}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>{t('confirmDelete')}</AlertDialogTitle>
+                      <AlertDialogDescription>{t('confirmDeleteDesc')}</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleDelete(u.id)}>
+                        {t('delete')}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </TableCell>
             </TableRow>
           ))}
