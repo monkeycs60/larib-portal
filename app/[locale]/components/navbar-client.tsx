@@ -187,10 +187,9 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
 												return (
 													<DropdownMenuItem key={app} asChild>
 														<Link
-															href={applicationLink(
-																locale,
+															href={
 																slug
-															)}>
+															}>
 															{tAdmin(`app_${app}`)}
 														</Link>
 													</DropdownMenuItem>
