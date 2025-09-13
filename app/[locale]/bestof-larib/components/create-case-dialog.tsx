@@ -55,13 +55,11 @@ type ClinicalCase = {
 export default function CreateCaseDialog({
   examTypes,
   diseaseTags,
-  locale,
   trigger,
   clinicalCase,
 }: {
   examTypes: Option[];
   diseaseTags: Option[];
-  locale: string;
   trigger?: ReactNode;
   clinicalCase?: ClinicalCase;
 }) {
@@ -74,9 +72,9 @@ export default function CreateCaseDialog({
 		clinicalCase?.status ?? 'PUBLISHED'
 	);
 
-	const { register, handleSubmit, setValue, reset, watch } =
-		useForm<FormValues>({
-			resolver: zodResolver(FormSchema),
+  const { register, handleSubmit, setValue, reset, watch } =
+    useForm<FormValues>({
+      resolver: zodResolver<FormValues>(FormSchema),
     defaultValues: clinicalCase
             ? {
                     name: clinicalCase.name,
@@ -102,19 +100,27 @@ export default function CreateCaseDialog({
 	})();
 	const tags = watch('tags') || [];
 
-	const { execute, isExecuting } = useAction(clinicalCase ? updateCaseAction : createCaseAction, {
-		onSuccess() {
-			toast.success(t('created'));
-			window.location.reload();
-		},
-		onError({ error }) {
-			const msg =
-				typeof error?.serverError === 'string'
-					? error.serverError
-					: t('actionError');
-			toast.error(msg);
-		},
-	});
+  const { execute: execCreate, isExecuting: creatingCase } = useAction(createCaseAction, {
+    onSuccess() {
+      toast.success(t('created'));
+      window.location.reload();
+    },
+    onError({ error }) {
+      const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError');
+      toast.error(msg);
+    },
+  });
+  const { execute: execUpdate, isExecuting: updatingCase } = useAction(updateCaseAction, {
+    onSuccess() {
+      toast.success(t('updated'));
+      window.location.reload();
+    },
+    onError({ error }) {
+      const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError');
+      toast.error(msg);
+    },
+  });
+  const isExecuting = creatingCase || updatingCase;
 
 	const { execute: execCreateExam, isExecuting: creatingExam } = useAction(
 		createExamTypeAction,
@@ -216,32 +222,32 @@ export default function CreateCaseDialog({
 			return;
 		}
 
-		await execute(
-			clinicalCase
-				? {
-					id: clinicalCase.id,
-					name: values.name,
-					examTypeName: values.examType || null,
-					diseaseTagName: values.diseaseTag || null,
-					difficulty: values.difficulty,
-					tags: values.tags,
-					pdfUrl: values.pdfUrl || null,
-					pdfKey: values.pdfKey || null,
-					textContent: values.textContent || null,
-					status: statusToCreate,
-				}
-				: {
-					name: values.name,
-					examTypeName: values.examType || null,
-					diseaseTagName: values.diseaseTag || null,
-					difficulty: values.difficulty,
-					tags: values.tags,
-					pdfUrl: values.pdfUrl || null,
-					pdfKey: values.pdfKey || null,
-					textContent: values.textContent || null,
-					status: statusToCreate,
-				}
-		);
+    if (clinicalCase) {
+      await execUpdate({
+        id: clinicalCase.id,
+        name: values.name,
+        examTypeName: values.examType || null,
+        diseaseTagName: values.diseaseTag || null,
+        difficulty: values.difficulty,
+        tags: values.tags,
+        pdfUrl: values.pdfUrl || null,
+        pdfKey: values.pdfKey || null,
+        textContent: values.textContent || null,
+        status: statusToCreate,
+      });
+    } else {
+      await execCreate({
+        name: values.name,
+        examTypeName: values.examType || null,
+        diseaseTagName: values.diseaseTag || null,
+        difficulty: values.difficulty,
+        tags: values.tags,
+        pdfUrl: values.pdfUrl || null,
+        pdfKey: values.pdfKey || null,
+        textContent: values.textContent || null,
+        status: statusToCreate,
+      });
+    }
 		setOpen(false);
 		reset();
 	});
@@ -457,27 +463,35 @@ export default function CreateCaseDialog({
 						</div>
 					</section>
 
-					<DialogFooter className='gap-2'>
-						<Button
-							type='button'
-							variant='outline'
-							onClick={() => setOpen(false)}>
-							{t('cancel')}
-						</Button>
-						<Button
-							type='submit'
-							variant='secondary'
-							disabled={isExecuting}
-							onClick={() => setStatusToCreate('DRAFT')}>
-							{isExecuting && statusToCreate === 'DRAFT' ? t('saving') : t('saveProgress')}
-						</Button>
-						<Button
-							type='submit'
-							disabled={isExecuting}
-							onClick={() => setStatusToCreate('PUBLISHED')}>
-							{isExecuting && statusToCreate === 'PUBLISHED' ? t('creating') : t('create')}
-						</Button>
-					</DialogFooter>
+            <DialogFooter className='gap-2'>
+              <Button
+                type='button'
+                variant='outline'
+                onClick={() => setOpen(false)}>
+                {t('cancel')}
+              </Button>
+              {clinicalCase ? null : (
+                <Button
+                  type='submit'
+                  variant='secondary'
+                  disabled={isExecuting}
+                  onClick={() => setStatusToCreate('DRAFT')}>
+                  {isExecuting && statusToCreate === 'DRAFT' ? t('saving') : t('saveProgress')}
+                </Button>
+              )}
+              <Button
+                type='submit'
+                disabled={isExecuting}
+                onClick={() => setStatusToCreate('PUBLISHED')}>
+                {clinicalCase
+                  ? isExecuting
+                    ? t('saving')
+                    : t('update')
+                  : isExecuting
+                    ? t('creating')
+                    : t('create')}
+              </Button>
+            </DialogFooter>
 				</form>
 				<InputDialog
 					open={examDialogOpen}

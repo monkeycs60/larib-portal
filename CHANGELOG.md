@@ -53,8 +53,8 @@
   - In “Create Case”, use “Save Progress” to store an incomplete draft; use “Create Case” to publish (requires PDF or text).
 - Files updated:
   - `app/[locale]/bestof-larib/page.tsx` (chips, columns, icons, delete button, admin tags column)
-  - `app/[locale]/bestof-larib/components/create-case-dialog.tsx` (draft save validation, edit mode support, prefill)
-  - `app/[locale]/bestof-larib/components/delete-case-button.tsx` (client delete with confirm + toast)
+  - `app/[locale]/bestof-larib/components/create-case-dialog.tsx` (draft save validation, edit mode support, prefill, conditional actions UI)
+  - `app/[locale]/bestof-larib/components/delete-case-button.tsx` (shadcn AlertDialog confirm + toast)
   - `app/[locale]/bestof-larib/actions.ts` (create validation, update & delete actions)
   - `lib/services/bestof-larib.ts` (list includes content fields; update/delete services)
   - `messages/{en,fr}.json` (adds `bestof.table.adminTags` and `bestof.delete`)

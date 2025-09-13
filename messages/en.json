@@ -181,6 +181,7 @@
     "back": "Back",
     "created": "Case created",
     "deleted": "Case deleted",
+    "deleting": "Deleting...",
     "actionError": "Action failed",
     "empty": "No cases yet",
     "notFound": "Case not found",
@@ -190,6 +191,7 @@
     "saving": "Saving...",
     "cancel": "Cancel",
     "remove": "Remove",
+    "update": "Edit Case",
     "delete": "Delete",
     "selectPlaceholder": "Select...",
     "table": {
@@ -238,6 +240,7 @@
       "pdfHint": "Maximum file size: 10MB"
     },
     "pdfUploaded": "PDF uploaded",
+    "updated": "Case updated",
     "errors": {
       "contentRequired": "Please provide either a PDF file or text content",
       "fieldsRequired": "Please fill all required fields",
@@ -250,6 +253,7 @@
     },
     "editCaseTitle": "Edit: {name}",
     "confirmDelete": "Delete this case?",
+    "confirmDeleteDesc": "This action cannot be undone.",
     "editPlaceholder": "Editing UI coming soon"
   }
 }

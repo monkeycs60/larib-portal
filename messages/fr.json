@@ -179,6 +179,7 @@
     "back": "Retour",
     "created": "Cas créé",
     "deleted": "Cas supprimé",
+    "deleting": "Suppression...",
     "actionError": "Échec de l'action",
     "empty": "Aucun cas pour le moment",
     "notFound": "Cas introuvable",
@@ -188,6 +189,7 @@
     "saving": "Enregistrement...",
     "cancel": "Annuler",
     "remove": "Retirer",
+    "update": "Modifier le cas",
     "delete": "Supprimer",
     "selectPlaceholder": "Sélectionner...",
     "table": {
@@ -236,6 +238,7 @@
       "pdfHint": "Taille maximale : 10 Mo"
     },
     "pdfUploaded": "PDF téléversé",
+    "updated": "Cas modifié",
     "errors": {
       "contentRequired": "Veuillez fournir un PDF ou un contenu texte",
       "fieldsRequired": "Veuillez renseigner tous les champs requis",
@@ -248,6 +251,7 @@
     },
     "editCaseTitle": "Éditer : {name}",
     "confirmDelete": "Supprimer ce cas ?",
+    "confirmDeleteDesc": "Cette action est irréversible.",
     "editPlaceholder": "Interface d'édition à venir"
   }
 }

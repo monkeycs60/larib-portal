@@ -5,6 +5,17 @@ import { useAction } from 'next-safe-action/hooks';
 import { deleteCaseAction } from '../actions';
 import { toast } from 'sonner';
 import { Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 export default function DeleteCaseButton({ id }: { id: string }) {
   const t = useTranslations('bestof');
@@ -20,19 +31,24 @@ export default function DeleteCaseButton({ id }: { id: string }) {
   });
 
   return (
-    <Button
-      type="button"
-      size="sm"
-      variant="destructive"
-      disabled={isExecuting}
-      onClick={() => {
-        const ok = window.confirm(t('confirmDelete'));
-        if (!ok) return;
-        void execute({ id });
-      }}
-    >
-      <Trash2 />{t('delete')}
-    </Button>
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button type="button" size="sm" variant="destructive" disabled={isExecuting}>
+          <Trash2 />{t('delete')}
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{t('confirmDelete')}</AlertDialogTitle>
+          <AlertDialogDescription>{t('confirmDeleteDesc')}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+          <AlertDialogAction onClick={() => execute({ id })}>
+            {isExecuting ? t('deleting') : t('delete')}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
-
