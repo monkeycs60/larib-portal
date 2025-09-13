@@ -95,11 +95,13 @@ export default function CreateCaseDialog({
 		createExamTypeAction,
 		{
 			onSuccess(res) {
-				if (res.data)
+				if (res.data) {
 					setExamList((prev) => [
 						...prev.filter((e) => e.id !== res.data!.id),
 						res.data!,
 					]);
+					setValue('examType', res.data!.name);
+				}
 			},
 		}
 	);
@@ -119,9 +121,7 @@ export default function CreateCaseDialog({
 	async function confirmAddExam() {
 		const name = newExamName.trim();
 		if (!name) return;
-		const res = await execCreateExam({ name });
-		const created = res?.data;
-		if (created) setValue('examType', created.name);
+		await execCreateExam({ name });
 		setExamDialogOpen(false);
 		setNewExamName('');
 	}
@@ -203,11 +203,13 @@ export default function CreateCaseDialog({
 			<DialogTrigger asChild>
 				<Button>{t('createCase')}</Button>
 			</DialogTrigger>
-			<DialogContent size='large' className='max-h-[90vh] overflow-y-auto max-w-[1400px] w-full'>
+			<DialogContent
+				size='large'
+				className='max-h-[90vh] overflow-y-auto max-w-[1400px] w-full'>
 				<DialogHeader>
 					<DialogTitle>{t('createDialog.title')}</DialogTitle>
-            </DialogHeader>
-            <form className='space-y-4' onSubmit={onSubmit}>
+				</DialogHeader>
+				<form className='space-y-4' onSubmit={onSubmit}>
 					<section className='space-y-3'>
 						<div className='grid md:grid-cols-2 gap-3'>
 							<div>
@@ -224,7 +226,10 @@ export default function CreateCaseDialog({
 									<button
 										type='button'
 										className='text-xs text-blue-600'
-										onClick={() => { setExamDialogOpen(true); setNewExamName(''); }}
+										onClick={() => {
+											setExamDialogOpen(true);
+											setNewExamName('');
+										}}
 										disabled={creatingExam}>
 										{t('addNewExam')}
 									</button>
@@ -262,7 +267,10 @@ export default function CreateCaseDialog({
 									<button
 										type='button'
 										className='text-xs text-blue-600'
-										onClick={() => { setDiseaseDialogOpen(true); setNewDiseaseName(''); }}
+										onClick={() => {
+											setDiseaseDialogOpen(true);
+											setNewDiseaseName('');
+										}}
 										disabled={creatingDisease}>
 										{t('addNewDisease')}
 									</button>
@@ -407,34 +415,34 @@ export default function CreateCaseDialog({
 						</Button>
 					</DialogFooter>
 				</form>
-            <InputDialog
-              open={examDialogOpen}
-              onOpenChange={setExamDialogOpen}
-              title={t('addNewExam')}
-              label={t('addNewExamPrompt')}
-              placeholder={t('addNewExamPrompt')}
-              confirmText={t('create')}
-              cancelText={t('cancel')}
-              value={newExamName}
-              onValueChange={setNewExamName}
-              onConfirm={confirmAddExam}
-              loading={creatingExam}
-              minLength={2}
-            />
-            <InputDialog
-              open={diseaseDialogOpen}
-              onOpenChange={setDiseaseDialogOpen}
-              title={t('addNewDisease')}
-              label={t('addNewDiseasePrompt')}
-              placeholder={t('addNewDiseasePrompt')}
-              confirmText={t('create')}
-              cancelText={t('cancel')}
-              value={newDiseaseName}
-              onValueChange={setNewDiseaseName}
-              onConfirm={confirmAddDisease}
-              loading={creatingDisease}
-              minLength={2}
-            />
+				<InputDialog
+					open={examDialogOpen}
+					onOpenChange={setExamDialogOpen}
+					title={t('addNewExam')}
+					label={t('addNewExamPrompt')}
+					placeholder={t('addNewExamPrompt')}
+					confirmText={t('create')}
+					cancelText={t('cancel')}
+					value={newExamName}
+					onValueChange={setNewExamName}
+					onConfirm={confirmAddExam}
+					loading={creatingExam}
+					minLength={2}
+				/>
+				<InputDialog
+					open={diseaseDialogOpen}
+					onOpenChange={setDiseaseDialogOpen}
+					title={t('addNewDisease')}
+					label={t('addNewDiseasePrompt')}
+					placeholder={t('addNewDiseasePrompt')}
+					confirmText={t('create')}
+					cancelText={t('cancel')}
+					value={newDiseaseName}
+					onValueChange={setNewDiseaseName}
+					onConfirm={confirmAddDisease}
+					loading={creatingDisease}
+					minLength={2}
+				/>
 			</DialogContent>
 		</Dialog>
 	);
