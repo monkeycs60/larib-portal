@@ -1,4 +1,25 @@
 ## Feature: Bestof Larib Clinical Cases
+## UI Enhancement: Replace prompt() with dialogs for inline creation
+
+- Name: Inline create dialogs (Exam, Disease, Position)
+- What it does: Replaces native `prompt()` with elegant shadcn input dialogs when creating new Exam Types, Disease Tags, or Positions from within forms. This improves UX and keeps styling consistent.
+- How to use it:
+  - Bestof: In the Create Case dialog, click “+ Add New Exam Type” or “+ Add New Disease” to open a dialog, enter a name, and confirm. The newly created value is auto-selected.
+  - Admin Users: In Add/Edit User, click “+ Add New Position” to open the dialog, enter a name, and confirm. The new position is auto-selected.
+  - Profile (Admin): In the Profile editor, click “+ Add New Position” to open the dialog and create a new position.
+
+### Technical Details
+
+- Added `components/ui/input-dialog.tsx` generic input dialog built on shadcn `Dialog` and `Input`.
+- Autofocus: the text field focuses on open via `autoFocus`.
+- Validation helper: confirm is disabled until trimmed value reaches a minimum length (default 2, configurable with `minLength`).
+- Size control: `DialogContent` now supports a `size` prop: `small` (narrow), default (medium), `large` (wide). The Bestof “Create Case” dialog uses `large`, and inline create dialogs use `small`.
+- Updated files:
+  - `app/[locale]/bestof-larib/components/create-case-dialog.tsx`: Replaces `prompt()` for Exam/Disease creation.
+  - `app/[locale]/admin/users/user-add-dialog.tsx`: Replaces `prompt()` for Position creation.
+  - `app/[locale]/admin/users/user-edit-dialog.tsx`: Replaces `prompt()` for Position creation.
+  - `app/[locale]/profile/profile-editor.tsx`: Replaces `prompt()` for Position creation.
+
 
 - Name: bestof-larib clinical cases
 - What it does: Adds a new sub-app at `/{locale}/bestof-larib` with a server-rendered table of clinical cases accessible to all users. Admins can create cases via a dialog with fields for name, exam type, disease tag, difficulty, and custom tags. Content accepts an optional PDF (uploaded to Cloudflare R2) and/or text content; at least one is required. View page displays a PDF preview and/or text. An Edit route is scaffolded for future updates.

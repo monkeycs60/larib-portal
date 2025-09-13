@@ -13,6 +13,7 @@ import { toast } from "sonner"
 import { COUNTRIES } from "@/lib/countries"
 import { createPositionAction } from "@/actions/positions"
 import { FileUpload } from "@/components/ui/file-upload"
+import { InputDialog } from "@/components/ui/input-dialog"
 
 const Schema = z.object({
   firstName: z.string().optional().nullable(),
@@ -126,10 +127,14 @@ export function ProfileEditor({ initial, positions = [] }: Props) {
     }
   })
 
-  async function onAddPosition() {
-    const name = prompt(tAdmin('addNewPositionPrompt'))
+  const [addPosOpen, setAddPosOpen] = useState(false)
+  const [newPosName, setNewPosName] = useState('')
+  async function confirmAddPosition() {
+    const name = newPosName.trim()
     if (!name) return
     await execCreatePos({ name })
+    setAddPosOpen(false)
+    setNewPosName('')
   }
 
   
@@ -177,7 +182,7 @@ export function ProfileEditor({ initial, positions = [] }: Props) {
           <div className="space-y-1">
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-500">{tAdmin('position')}</div>
-              <button type="button" className="text-xs text-blue-600" onClick={onAddPosition} disabled={creatingPos}>
+              <button type="button" className="text-xs text-blue-600" onClick={() => { setAddPosOpen(true); setNewPosName('') }} disabled={creatingPos}>
                 {tAdmin('addNewPosition')}
               </button>
             </div>
@@ -204,6 +209,19 @@ export function ProfileEditor({ initial, positions = [] }: Props) {
           <input type="hidden" {...form.register('profilePhoto')} />
         </div>
       </div>
+      <InputDialog
+        open={addPosOpen}
+        onOpenChange={setAddPosOpen}
+        title={tAdmin('addNewPosition')}
+        label={tAdmin('addNewPositionPrompt')}
+        placeholder={tAdmin('addNewPositionPrompt')}
+        confirmText={tAdmin('create')}
+        cancelText={tAdmin('cancel')}
+        value={newPosName}
+        onValueChange={setNewPosName}
+        onConfirm={confirmAddPosition}
+        loading={creatingPos}
+      />
 
       <div className="grid md:grid-cols-2 gap-4">
         {/* Role: hidden for non-admin users */}

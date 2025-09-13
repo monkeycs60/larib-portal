@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { TagInput } from '@/components/ui/tag-input';
+import { InputDialog } from '@/components/ui/input-dialog';
 import { useAction } from 'next-safe-action/hooks';
 import {
 	createCaseAction,
@@ -113,20 +114,28 @@ export default function CreateCaseDialog({
 			},
 		});
 
-	async function onAddExam() {
-		const name = prompt(t('addNewExamPrompt'));
+	const [examDialogOpen, setExamDialogOpen] = useState(false);
+	const [newExamName, setNewExamName] = useState('');
+	async function confirmAddExam() {
+		const name = newExamName.trim();
 		if (!name) return;
 		const res = await execCreateExam({ name });
 		const created = res?.data;
 		if (created) setValue('examType', created.name);
+		setExamDialogOpen(false);
+		setNewExamName('');
 	}
 
-	async function onAddDisease() {
-		const name = prompt(t('addNewDiseasePrompt'));
+	const [diseaseDialogOpen, setDiseaseDialogOpen] = useState(false);
+	const [newDiseaseName, setNewDiseaseName] = useState('');
+	async function confirmAddDisease() {
+		const name = newDiseaseName.trim();
 		if (!name) return;
 		const res = await execCreateDisease({ name });
 		const created = res?.data;
 		if (created) setValue('diseaseTag', created.name);
+		setDiseaseDialogOpen(false);
+		setNewDiseaseName('');
 	}
 
 	async function uploadPdf(file: File) {
@@ -151,7 +160,8 @@ export default function CreateCaseDialog({
 			setValue('pdfUrl', data.url);
 			setValue('pdfKey', data.key);
 			toast.success(t('pdfUploaded'));
-		} catch (e) {
+		} catch (e: unknown) {
+			console.error(e);
 			toast.error(t('errors.uploadFailed'));
 		} finally {
 			setPdfUploading(false);
@@ -193,11 +203,11 @@ export default function CreateCaseDialog({
 			<DialogTrigger asChild>
 				<Button>{t('createCase')}</Button>
 			</DialogTrigger>
-			<DialogContent className='max-h-[90vh] overflow-y-auto max-w-[1400px] w-full'>
+			<DialogContent size='large' className='max-h-[90vh] overflow-y-auto max-w-[1400px] w-full'>
 				<DialogHeader>
 					<DialogTitle>{t('createDialog.title')}</DialogTitle>
-				</DialogHeader>
-				<form className='space-y-4' onSubmit={onSubmit}>
+            </DialogHeader>
+            <form className='space-y-4' onSubmit={onSubmit}>
 					<section className='space-y-3'>
 						<div className='grid md:grid-cols-2 gap-3'>
 							<div>
@@ -214,7 +224,7 @@ export default function CreateCaseDialog({
 									<button
 										type='button'
 										className='text-xs text-blue-600'
-										onClick={onAddExam}
+										onClick={() => { setExamDialogOpen(true); setNewExamName(''); }}
 										disabled={creatingExam}>
 										{t('addNewExam')}
 									</button>
@@ -252,7 +262,7 @@ export default function CreateCaseDialog({
 									<button
 										type='button'
 										className='text-xs text-blue-600'
-										onClick={onAddDisease}
+										onClick={() => { setDiseaseDialogOpen(true); setNewDiseaseName(''); }}
 										disabled={creatingDisease}>
 										{t('addNewDisease')}
 									</button>
@@ -397,6 +407,34 @@ export default function CreateCaseDialog({
 						</Button>
 					</DialogFooter>
 				</form>
+            <InputDialog
+              open={examDialogOpen}
+              onOpenChange={setExamDialogOpen}
+              title={t('addNewExam')}
+              label={t('addNewExamPrompt')}
+              placeholder={t('addNewExamPrompt')}
+              confirmText={t('create')}
+              cancelText={t('cancel')}
+              value={newExamName}
+              onValueChange={setNewExamName}
+              onConfirm={confirmAddExam}
+              loading={creatingExam}
+              minLength={2}
+            />
+            <InputDialog
+              open={diseaseDialogOpen}
+              onOpenChange={setDiseaseDialogOpen}
+              title={t('addNewDisease')}
+              label={t('addNewDiseasePrompt')}
+              placeholder={t('addNewDiseasePrompt')}
+              confirmText={t('create')}
+              cancelText={t('cancel')}
+              value={newDiseaseName}
+              onValueChange={setNewDiseaseName}
+              onConfirm={confirmAddDisease}
+              loading={creatingDisease}
+              minLength={2}
+            />
 			</DialogContent>
 		</Dialog>
 	);

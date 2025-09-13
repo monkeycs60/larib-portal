@@ -11,6 +11,7 @@ import { useState } from 'react'
 import { useAction } from 'next-safe-action/hooks'
 import { createUserInviteAction, createPositionAction } from './actions'
 import { toast } from 'sonner'
+import { InputDialog } from '@/components/ui/input-dialog'
 
 const AddUserSchema = z.object({
   email: z.string().email(),
@@ -68,12 +69,16 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
     reset()
   })
 
-  async function onAddPosition() {
-    const name = prompt(t('addNewPositionPrompt'))
+  const [addPosOpen, setAddPosOpen] = useState(false)
+  const [newPosName, setNewPosName] = useState('')
+  async function confirmAddPosition() {
+    const name = newPosName.trim()
     if (!name) return
     const res = await execCreatePos({ name })
     const created = res?.data
     if (created) setValue('position', created.name)
+    setAddPosOpen(false)
+    setNewPosName('')
   }
 
   // Email preview values
@@ -114,7 +119,7 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
             <div>
               <div className="flex items-center justify-between">
                 <label className="block text-sm mb-1">{t('position')}</label>
-                <button type="button" className="text-xs text-blue-600" onClick={onAddPosition} disabled={creatingPos}>
+                <button type="button" className="text-xs text-blue-600" onClick={() => { setAddPosOpen(true); setNewPosName('') }} disabled={creatingPos}>
                   {t('addNewPosition')}
                 </button>
               </div>
@@ -173,6 +178,19 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
             </Button>
           </DialogFooter>
         </form>
+        <InputDialog
+          open={addPosOpen}
+          onOpenChange={setAddPosOpen}
+          title={t('addNewPosition')}
+          label={t('addNewPositionPrompt')}
+          placeholder={t('addNewPositionPrompt')}
+          confirmText={t('create')}
+          cancelText={t('cancel')}
+          value={newPosName}
+          onValueChange={setNewPosName}
+          onConfirm={confirmAddPosition}
+          loading={creatingPos}
+        />
       </DialogContent>
     </Dialog>
   )

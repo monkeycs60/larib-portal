@@ -4,7 +4,6 @@ import { getTypedSession } from '@/lib/auth-helpers'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Link } from '@/app/i18n/navigation'
-import { applicationLink } from '@/lib/application-link'
 import CreateCaseDialog from './components/create-case-dialog'
 
 export default async function BestofLaribPage({ params }: { params: { locale: string } }) {
