@@ -1,3 +1,21 @@
+## UI Enhancement: Bestof Case View – Analysis & Clinical Report
+
+- Name: User case interaction panel (My Analysis + My Clinical Report)
+- What it does: Enhances the case view at `/{locale}/bestof-larib/[id]` with:
+  - Left sidebar: Attempts, Personal Settings (tags, personal difficulty), and personal comments; Save and Validate actions.
+  - Center: "My Analysis" (LVEF, kinetic disorders, LGE presence, final diagnosis) and a rich text editor for "My Clinical Report".
+  - Right: Existing case content preview (PDF or text) preserved.
+  - Admins see the same UI but all inputs and actions are disabled.
+- How to use it:
+  - Open any case; fill analysis fields and report; click "Save Progress" to show a confirmation toast or "Validate Case" to confirm validation.
+- Updated files:
+  - `app/[locale]/bestof-larib/[id]/page.tsx` integrates the new panel and header badges.
+  - `app/[locale]/bestof-larib/[id]/user-panel.tsx` new client component for user/admin interaction.
+  - `messages/{en,fr}.json` adds `bestof.caseView.*` keys.
+  - `app/[locale]/bestof-larib/[id]/actions.ts` server actions for saving attempts, validating, and upserting personal settings.
+  - `lib/services/bestof-larib-attempts.ts` service layer for attempts and settings.
+  - `prisma/schema.prisma` added `CaseAttempt` and `UserCaseSettings` models.
+
 ## Feature: Bestof Larib Clinical Cases
 ## UI Enhancement: Replace prompt() with dialogs for inline creation
 

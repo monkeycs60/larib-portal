@@ -9,7 +9,7 @@ import { Eye, Pencil, Plus } from 'lucide-react'
 import DeleteCaseButton from './components/delete-case-button'
 import CreateCaseDialog from './components/create-case-dialog'
 
-export default async function BestofLaribPage({ params }: { params: { locale: string } }) {
+export default async function BestofLaribPage() {
   const t = await getTranslations('bestof')
   const [session, cases, examTypes, diseaseTags] = await Promise.all([
     getTypedSession(),
@@ -27,7 +27,7 @@ export default async function BestofLaribPage({ params }: { params: { locale: st
           <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
         </div>
         {isAdmin ? (
-          <CreateCaseDialog locale={params.locale} examTypes={examTypes} diseaseTags={diseaseTags} />
+          <CreateCaseDialog examTypes={examTypes} diseaseTags={diseaseTags} />
         ) : null}
       </div>
 
@@ -95,7 +95,6 @@ export default async function BestofLaribPage({ params }: { params: { locale: st
                     {isAdmin ? (
                       <>
                         <CreateCaseDialog
-                          locale={params.locale}
                           examTypes={examTypes}
                           diseaseTags={diseaseTags}
                           clinicalCase={{

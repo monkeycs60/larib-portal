@@ -255,6 +255,29 @@
     "editCaseTitle": "Edit: {name}",
     "confirmDelete": "Delete this case?",
     "confirmDeleteDesc": "This action cannot be undone.",
-    "editPlaceholder": "Editing UI coming soon"
+    "editPlaceholder": "Editing UI coming soon",
+    "caseView": {
+      "sidebar": { "title": "Case" },
+      "attempts": "Attempts",
+      "firstTry": "First try",
+      "personalSettings": "Personal Settings",
+      "myTags": "My Tags",
+      "myDifficulty": "My Difficulty",
+      "myComments": "My Comments",
+      "commentPlaceholder": "Add personal notes about this case...",
+      "validateCase": "Validate Case",
+      "myAnalysis": "My Analysis",
+      "myClinicalReport": "My Clinical Report",
+      "analysis": {
+        "lvef": "LVEF",
+        "kinetic": "Kinetic disorders",
+        "lge": "LGE presence",
+        "finalDx": "Final diagnosis"
+      },
+      "required": "Required",
+      "requiredBeforeValidation": "Required before validating the case.",
+      "savedDraft": "Progress saved",
+      "validated": "Case validated"
+    }
   }
 }

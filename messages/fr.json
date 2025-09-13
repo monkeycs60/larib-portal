@@ -253,6 +253,29 @@
     "editCaseTitle": "Éditer : {name}",
     "confirmDelete": "Supprimer ce cas ?",
     "confirmDeleteDesc": "Cette action est irréversible.",
-    "editPlaceholder": "Interface d'édition à venir"
+    "editPlaceholder": "Interface d'édition à venir",
+    "caseView": {
+      "sidebar": { "title": "Cas" },
+      "attempts": "Essais",
+      "firstTry": "Premier essai",
+      "personalSettings": "Paramètres personnels",
+      "myTags": "Mes tags",
+      "myDifficulty": "Mon niveau",
+      "myComments": "Mes notes",
+      "commentPlaceholder": "Ajoutez des notes personnelles sur ce cas...",
+      "validateCase": "Valider le cas",
+      "myAnalysis": "Mon analyse",
+      "myClinicalReport": "Mon compte rendu clinique",
+      "analysis": {
+        "lvef": "FEVG",
+        "kinetic": "Troubles cinétiques",
+        "lge": "Présence de LGE",
+        "finalDx": "Diagnostic final"
+      },
+      "required": "Requis",
+      "requiredBeforeValidation": "À compléter avant de valider le cas.",
+      "savedDraft": "Brouillon enregistré",
+      "validated": "Cas validé"
+    }
   }
 }
