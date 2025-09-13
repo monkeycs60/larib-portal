@@ -8,6 +8,9 @@ export type ClinicalCaseListItem = Prisma.ClinicalCaseGetPayload<{
     difficulty: true
     status: true
     tags: true
+    pdfUrl: true
+    pdfKey: true
+    textContent: true
     createdAt: true
     examType: { select: { id: true, name: true } }
     diseaseTag: { select: { id: true, name: true } }
@@ -23,6 +26,9 @@ export async function listClinicalCases(): Promise<ClinicalCaseListItem[]> {
       difficulty: true,
       status: true,
       tags: true,
+      pdfUrl: true,
+      pdfKey: true,
+      textContent: true,
       createdAt: true,
       examType: { select: { id: true, name: true } },
       diseaseTag: { select: { id: true, name: true } },
@@ -100,6 +106,45 @@ export async function createClinicalCase(data: CreateClinicalCaseInput) {
     },
   })
   return created
+}
+
+export type UpdateClinicalCaseInput = {
+  id: string
+  name: string
+  examTypeName?: string | null
+  diseaseTagName?: string | null
+  difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
+  tags?: string[]
+  pdfUrl?: string | null
+  pdfKey?: string | null
+  textContent?: string | null
+  status: 'DRAFT' | 'PUBLISHED'
+}
+
+export async function updateClinicalCase(data: UpdateClinicalCaseInput) {
+  const exam = data.examTypeName ? await ensureExamType(data.examTypeName) : null
+  const disease = data.diseaseTagName ? await ensureDiseaseTag(data.diseaseTagName) : null
+  const updated = await prisma.clinicalCase.update({
+    where: { id: data.id },
+    data: {
+      name: data.name,
+      difficulty: data.difficulty,
+      status: data.status,
+      tags: data.tags ?? [],
+      pdfUrl: data.pdfUrl ?? null,
+      pdfKey: data.pdfKey ?? null,
+      textContent: data.textContent ?? null,
+      examTypeId: exam?.id,
+      diseaseTagId: disease?.id,
+    },
+    select: { id: true },
+  })
+  return updated
+}
+
+export async function deleteClinicalCase(id: string) {
+  await prisma.clinicalCase.delete({ where: { id } })
+  return { id }
 }
 
 export async function getCaseById(id: string) {

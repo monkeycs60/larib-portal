@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -19,11 +19,7 @@ import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { TagInput } from '@/components/ui/tag-input';
 import { InputDialog } from '@/components/ui/input-dialog';
 import { useAction } from 'next-safe-action/hooks';
-import {
-	createCaseAction,
-	createDiseaseTagAction,
-	createExamTypeAction,
-} from '../actions';
+import { createCaseAction, createDiseaseTagAction, createExamTypeAction, updateCaseAction } from '../actions';
 import { toast } from 'sonner';
 
 const FormSchema = z.object({
@@ -43,13 +39,31 @@ type FormValues = z.infer<typeof FormSchema>;
 
 type Option = { id: string; name: string };
 
+type ClinicalCase = {
+  id: string;
+  name: string;
+  difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+  status: 'DRAFT' | 'PUBLISHED';
+  tags: string[];
+  pdfUrl: string | null;
+  pdfKey: string | null;
+  textContent: string | null;
+  examType?: Option | null;
+  diseaseTag?: Option | null;
+}
+
 export default function CreateCaseDialog({
-	examTypes,
-	diseaseTags,
+  examTypes,
+  diseaseTags,
+  locale,
+  trigger,
+  clinicalCase,
 }: {
-	examTypes: Option[];
-	diseaseTags: Option[];
-	locale: string;
+  examTypes: Option[];
+  diseaseTags: Option[];
+  locale: string;
+  trigger?: ReactNode;
+  clinicalCase?: ClinicalCase;
 }) {
 	const t = useTranslations('bestof');
 	const [open, setOpen] = useState(false);
@@ -57,13 +71,24 @@ export default function CreateCaseDialog({
 	const [diseaseList, setDiseaseList] = useState(diseaseTags);
 	const [pdfUploading, setPdfUploading] = useState(false);
 	const [statusToCreate, setStatusToCreate] = useState<'DRAFT' | 'PUBLISHED'>(
-		'PUBLISHED'
+		clinicalCase?.status ?? 'PUBLISHED'
 	);
 
 	const { register, handleSubmit, setValue, reset, watch } =
 		useForm<FormValues>({
 			resolver: zodResolver(FormSchema),
-			defaultValues: { difficulty: 'BEGINNER' },
+    defaultValues: clinicalCase
+            ? {
+                    name: clinicalCase.name,
+                    examType: clinicalCase.examType?.name,
+                    diseaseTag: clinicalCase.diseaseTag?.name,
+                    difficulty: clinicalCase.difficulty,
+                    tags: clinicalCase.tags ?? [],
+                    textContent: clinicalCase.textContent ?? undefined,
+                    pdfUrl: clinicalCase.pdfUrl ?? undefined,
+                    pdfKey: clinicalCase.pdfKey ?? undefined,
+            }
+            : { difficulty: 'BEGINNER' },
 		});
 
 	const pdfUrl = watch('pdfUrl');
@@ -77,7 +102,7 @@ export default function CreateCaseDialog({
 	})();
 	const tags = watch('tags') || [];
 
-	const { execute, isExecuting } = useAction(createCaseAction, {
+	const { execute, isExecuting } = useAction(clinicalCase ? updateCaseAction : createCaseAction, {
 		onSuccess() {
 			toast.success(t('created'));
 			window.location.reload();
@@ -113,6 +138,7 @@ export default function CreateCaseDialog({
 						...prev.filter((d) => d.id !== res.data!.id),
 						res.data!,
 					]);
+				setValue('diseaseTag', res.data!.name);
 			},
 		});
 
@@ -131,9 +157,7 @@ export default function CreateCaseDialog({
 	async function confirmAddDisease() {
 		const name = newDiseaseName.trim();
 		if (!name) return;
-		const res = await execCreateDisease({ name });
-		const created = res?.data;
-		if (created) setValue('diseaseTag', created.name);
+		await execCreateDisease({ name });
 		setDiseaseDialogOpen(false);
 		setNewDiseaseName('');
 	}
@@ -173,46 +197,86 @@ export default function CreateCaseDialog({
 		setValue('pdfKey', undefined);
 	}
 
-  const onSubmit = handleSubmit(async (values) => {
-    // Allow saving draft without content; enforce for published only
-    if (statusToCreate === 'PUBLISHED') {
-      if (!values.pdfUrl && !values.textContent) {
-        toast.error(t('errors.contentRequired'));
-        return;
-      }
-    }
-    // Always enforce exclusivity
-    if (values.pdfUrl && values.textContent) {
-      toast.error(t('errors.exclusive'));
-      return;
-    }
+	const onSubmit = handleSubmit(async (values) => {
+		// Allow saving draft without content; enforce for published only
+		if (statusToCreate === 'PUBLISHED') {
+			if (!values.pdfUrl && !values.textContent) {
+				toast.error(t('errors.contentRequired'));
+				return;
+			}
+			// Require exam & disease for publish
+			if (!values.examType || !values.diseaseTag) {
+				toast.error(t('errors.fieldsRequired'));
+				return;
+			}
+		}
+		// Always enforce exclusivity
+		if (values.pdfUrl && values.textContent) {
+			toast.error(t('errors.exclusive'));
+			return;
+		}
 
-		await execute({
-			name: values.name,
-			examTypeName: values.examType || null,
-			diseaseTagName: values.diseaseTag || null,
-			difficulty: values.difficulty,
-			tags: values.tags,
-			pdfUrl: values.pdfUrl || null,
-			pdfKey: values.pdfKey || null,
-			textContent: values.textContent || null,
-			status: statusToCreate,
-		});
+		await execute(
+			clinicalCase
+				? {
+					id: clinicalCase.id,
+					name: values.name,
+					examTypeName: values.examType || null,
+					diseaseTagName: values.diseaseTag || null,
+					difficulty: values.difficulty,
+					tags: values.tags,
+					pdfUrl: values.pdfUrl || null,
+					pdfKey: values.pdfKey || null,
+					textContent: values.textContent || null,
+					status: statusToCreate,
+				}
+				: {
+					name: values.name,
+					examTypeName: values.examType || null,
+					diseaseTagName: values.diseaseTag || null,
+					difficulty: values.difficulty,
+					tags: values.tags,
+					pdfUrl: values.pdfUrl || null,
+					pdfKey: values.pdfKey || null,
+					textContent: values.textContent || null,
+					status: statusToCreate,
+				}
+		);
 		setOpen(false);
 		reset();
 	});
 
 	return (
-		<Dialog open={open} onOpenChange={setOpen}>
+		<Dialog
+			open={open}
+			onOpenChange={(next) => {
+				setOpen(next);
+				if (next && clinicalCase) {
+					reset({
+						name: clinicalCase.name,
+						examType: clinicalCase.examType?.name,
+						diseaseTag: clinicalCase.diseaseTag?.name,
+						difficulty: clinicalCase.difficulty,
+						tags: clinicalCase.tags ?? [],
+						textContent: clinicalCase.textContent ?? undefined,
+						pdfUrl: clinicalCase.pdfUrl ?? undefined,
+						pdfKey: clinicalCase.pdfKey ?? undefined,
+					});
+					setStatusToCreate(clinicalCase.status);
+				}
+			}}
+		>
 			<DialogTrigger asChild>
-				<Button>{t('createCase')}</Button>
+				{trigger ? trigger : <Button>{t('createCase')}</Button>}
 			</DialogTrigger>
 			<DialogContent
 				size='large'
 				className='max-h-[90vh] overflow-y-auto max-w-[1400px] w-full'>
-				<DialogHeader>
-					<DialogTitle>{t('createDialog.title')}</DialogTitle>
-				</DialogHeader>
+            <DialogHeader>
+                <DialogTitle>
+                    {clinicalCase ? t('editCaseTitle', { name: clinicalCase.name }) : t('createDialog.title')}
+                </DialogTitle>
+            </DialogHeader>
 				<form className='space-y-4' onSubmit={onSubmit}>
 					<section className='space-y-3'>
 						<div className='grid md:grid-cols-2 gap-3'>
@@ -405,17 +469,13 @@ export default function CreateCaseDialog({
 							variant='secondary'
 							disabled={isExecuting}
 							onClick={() => setStatusToCreate('DRAFT')}>
-							{isExecuting && statusToCreate === 'DRAFT'
-								? t('saving')
-								: t('saveProgress')}
+							{isExecuting && statusToCreate === 'DRAFT' ? t('saving') : t('saveProgress')}
 						</Button>
 						<Button
 							type='submit'
 							disabled={isExecuting}
 							onClick={() => setStatusToCreate('PUBLISHED')}>
-							{isExecuting && statusToCreate === 'PUBLISHED'
-								? t('creating')
-								: t('create')}
+							{isExecuting && statusToCreate === 'PUBLISHED' ? t('creating') : t('create')}
 						</Button>
 					</DialogFooter>
 				</form>

@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Link } from '@/app/i18n/navigation'
-import { Eye, Pencil, Trash2, Plus } from 'lucide-react'
+import { Eye, Pencil, Plus } from 'lucide-react'
+import DeleteCaseButton from './components/delete-case-button'
 import CreateCaseDialog from './components/create-case-dialog'
 
 export default async function BestofLaribPage({ params }: { params: { locale: string } }) {
@@ -93,12 +94,25 @@ export default async function BestofLaribPage({ params }: { params: { locale: st
                     </Link>
                     {isAdmin ? (
                       <>
-                        <Link href={`/bestof-larib/${c.id}/edit`}>
-                          <Button size="sm" variant="outline"><Pencil />{t('edit')}</Button>
-                        </Link>
-                        <Button type="button" size="sm" variant="destructive">
-                          <Trash2 />{t('delete')}
-                        </Button>
+                        <CreateCaseDialog
+                          locale={params.locale}
+                          examTypes={examTypes}
+                          diseaseTags={diseaseTags}
+                          clinicalCase={{
+                            id: c.id,
+                            name: c.name,
+                            difficulty: c.difficulty,
+                            status: c.status,
+                            tags: c.tags ?? [],
+                            pdfUrl: c.pdfUrl ?? null,
+                            pdfKey: c.pdfKey ?? null,
+                            textContent: c.textContent ?? null,
+                            examType: c.examType ?? null,
+                            diseaseTag: c.diseaseTag ?? null,
+                          }}
+                          trigger={<Button size="sm" variant="outline"><Pencil />{t('edit')}</Button>}
+                        />
+                        <DeleteCaseButton id={c.id} />
                       </>
                     ) : null}
                   </TableCell>

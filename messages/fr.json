@@ -178,6 +178,7 @@
     "edit": "Éditer",
     "back": "Retour",
     "created": "Cas créé",
+    "deleted": "Cas supprimé",
     "actionError": "Échec de l'action",
     "empty": "Aucun cas pour le moment",
     "notFound": "Cas introuvable",
@@ -237,6 +238,7 @@
     "pdfUploaded": "PDF téléversé",
     "errors": {
       "contentRequired": "Veuillez fournir un PDF ou un contenu texte",
+      "fieldsRequired": "Veuillez renseigner tous les champs requis",
       "exclusive": "Le PDF et le texte ne peuvent pas être utilisés ensemble",
       "exclusivePdfDisabled": "Un contenu texte est présent — l'upload PDF est désactivé",
       "exclusiveTextDisabled": "Un PDF est présent — l'éditeur de texte est désactivé",
@@ -245,6 +247,7 @@
       "uploadFailed": "Échec de l'upload"
     },
     "editCaseTitle": "Éditer : {name}",
+    "confirmDelete": "Supprimer ce cas ?",
     "editPlaceholder": "Interface d'édition à venir"
   }
 }

@@ -180,6 +180,7 @@
     "edit": "Edit",
     "back": "Back",
     "created": "Case created",
+    "deleted": "Case deleted",
     "actionError": "Action failed",
     "empty": "No cases yet",
     "notFound": "Case not found",
@@ -239,6 +240,7 @@
     "pdfUploaded": "PDF uploaded",
     "errors": {
       "contentRequired": "Please provide either a PDF file or text content",
+      "fieldsRequired": "Please fill all required fields",
       "exclusive": "PDF and text cannot be used together",
       "exclusivePdfDisabled": "Text content is present — PDF upload is disabled",
       "exclusiveTextDisabled": "A PDF is present — text editor is disabled",
@@ -247,6 +249,7 @@
       "uploadFailed": "Upload failed"
     },
     "editCaseTitle": "Edit: {name}",
+    "confirmDelete": "Delete this case?",
     "editPlaceholder": "Editing UI coming soon"
   }
 }

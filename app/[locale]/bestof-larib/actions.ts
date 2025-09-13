@@ -1,7 +1,7 @@
 "use server"
 import { z } from 'zod'
 import { adminOnlyAction, authenticatedAction } from '@/actions/safe-action'
-import { createClinicalCase, ensureDiseaseTag, ensureExamType } from '@/lib/services/bestof-larib'
+import { createClinicalCase, ensureDiseaseTag, ensureExamType, updateClinicalCase, deleteClinicalCase } from '@/lib/services/bestof-larib'
 
 const CreateCaseSchema = z.object({
   name: z.string().min(1),
@@ -22,6 +22,9 @@ export const createCaseAction = authenticatedAction
     if (parsedInput.status === 'PUBLISHED') {
       if (!parsedInput.pdfUrl && !parsedInput.textContent) {
         throw new Error('CONTENT_REQUIRED')
+      }
+      if (!parsedInput.examTypeName || !parsedInput.diseaseTagName) {
+        throw new Error('FIELDS_REQUIRED')
       }
     }
     // Exclusivity always enforced
@@ -47,4 +50,31 @@ export const createDiseaseTagAction = adminOnlyAction
   .action(async ({ parsedInput }) => {
     const d = await ensureDiseaseTag(parsedInput.name)
     return d
+  })
+
+const UpdateCaseSchema = CreateCaseSchema.extend({ id: z.string().min(1) })
+
+export const updateCaseAction = adminOnlyAction
+  .inputSchema(UpdateCaseSchema)
+  .action(async ({ parsedInput }) => {
+    if (parsedInput.status === 'PUBLISHED') {
+      if (!parsedInput.pdfUrl && !parsedInput.textContent) {
+        throw new Error('CONTENT_REQUIRED')
+      }
+      if (!parsedInput.examTypeName || !parsedInput.diseaseTagName) {
+        throw new Error('FIELDS_REQUIRED')
+      }
+    }
+    if (parsedInput.pdfUrl && parsedInput.textContent) {
+      throw new Error('CONTENT_EXCLUSIVE')
+    }
+    const updated = await updateClinicalCase(parsedInput)
+    return updated
+  })
+
+export const deleteCaseAction = adminOnlyAction
+  .inputSchema(z.object({ id: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    const deleted = await deleteClinicalCase(parsedInput.id)
+    return deleted
   })
