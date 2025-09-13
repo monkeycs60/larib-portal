@@ -2,7 +2,6 @@ import { getTranslations } from 'next-intl/server'
 import { getCaseById } from '@/lib/services/bestof-larib'
 import { Link } from '@/app/i18n/navigation'
 import { Button } from '@/components/ui/button'
-import { applicationLink } from '@/lib/application-link'
 import { Badge } from '@/components/ui/badge'
 
 export default async function CaseViewPage({ params }: { params: { locale: string; id: string } }) {
