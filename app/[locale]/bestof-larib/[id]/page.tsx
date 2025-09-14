@@ -39,6 +39,7 @@ export default async function CaseViewPage({
             finalDx: s.lastAttempt?.finalDx ?? undefined,
         },
         report: s.lastAttempt?.report ?? null,
+        validatedAt: s.lastAttempt?.validatedAt ? new Date(s.lastAttempt.validatedAt).toISOString() : null,
     }))) : null
 
     return (

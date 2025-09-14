@@ -10,6 +10,8 @@
       email: serizay.clem@gmail.com
       password: ristifou
 
+- Use postgres mcp to debug database issues and test new features
+
 ### Prohibited Practices
 
 -  **No useEffect**: Use fetch in server components via services, or handle side effects via event handlers

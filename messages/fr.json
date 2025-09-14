@@ -276,6 +276,8 @@
       "requiredBeforeValidation": "À compléter avant de valider le cas.",
       "savedDraft": "Brouillon enregistré",
       "validated": "Cas validé"
+      ,
+      "startNewAttempt": "Nouvel essai"
     }
   }
 }

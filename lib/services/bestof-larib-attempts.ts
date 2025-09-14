@@ -11,6 +11,26 @@ export type SaveAttemptInput = {
 }
 
 export async function saveAttempt(input: SaveAttemptInput): Promise<string> {
+  // Reuse the latest draft (unvalidated) attempt for this user/case, or create one if missing.
+  const existingDraft = await prisma.caseAttempt.findFirst({
+    where: { userId: input.userId, caseId: input.caseId, validatedAt: null },
+    orderBy: { createdAt: 'desc' },
+    select: { id: true },
+  })
+  if (existingDraft) {
+    const updated = await prisma.caseAttempt.update({
+      where: { id: existingDraft.id },
+      data: {
+        lvef: input.lvef ?? null,
+        kinetic: input.kinetic ?? null,
+        lge: input.lge ?? null,
+        finalDx: input.finalDx ?? null,
+        report: input.report ?? null,
+      },
+      select: { id: true },
+    })
+    return updated.id
+  }
   const created = await prisma.caseAttempt.create({
     data: {
       id: crypto.randomUUID(),

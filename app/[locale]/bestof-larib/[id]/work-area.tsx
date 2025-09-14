@@ -17,6 +17,7 @@ export type PrefillState = {
   personalDifficulty: Difficulty | null
   analysis: { lvef?: string; kinetic?: string; lge?: string; finalDx?: string }
   report?: string | null
+  validatedAt?: string | null
 }
 
 export default function WorkArea({
@@ -44,7 +45,10 @@ export default function WorkArea({
   const [analysis, setAnalysis] = useState<{ lvef?: string; kinetic?: string; lge?: string; finalDx?: string}>(
     prefill?.analysis ?? { lvef: '', kinetic: '', lge: '', finalDx: '' },
   )
+  const [analysisKey, setAnalysisKey] = useState(0)
   const [report, setReport] = useState<string>(prefill?.report ?? '')
+
+  const [locked, setLocked] = useState<boolean>(!!prefill?.validatedAt)
 
   const { execute: saveAll, isExecuting: saving } = useAction(saveAllAction, {
     onError(err: unknown) { const m = (err as any)?.serverError ?? (err as any)?.message ?? t('actionError'); toast.error(m) },
@@ -52,11 +56,11 @@ export default function WorkArea({
   })
   const { execute: saveAndValidate, isExecuting: validating } = useAction(saveAllAndValidateAction, {
     onError(err: unknown) { const m = (err as any)?.serverError ?? (err as any)?.message ?? t('actionError'); toast.error(m) },
-    onSuccess() { toast.success(t('caseView.validated')) },
+    onSuccess() { toast.success(t('caseView.validated')); setLocked(true) },
   })
 
   function onSave() {
-    if (isAdmin) return
+    if (isAdmin || locked) return
     const pd: Difficulty | null = personalDifficulty ? personalDifficulty : null
     return saveAll({
       caseId,
@@ -69,7 +73,7 @@ export default function WorkArea({
   }
 
   function onValidate() {
-    if (isAdmin) return
+    if (isAdmin || locked) return
     if (!analysis.lvef || !analysis.kinetic || !analysis.lge || !analysis.finalDx) {
       toast.error(t('errors.fieldsRequired'))
       return
@@ -98,7 +102,7 @@ export default function WorkArea({
           </Button>
         </div>
         <CaseInteractionPanel
-          isAdmin={isAdmin}
+          isAdmin={isAdmin || locked}
           defaultTags={[]}
           createdAt={createdAt}
           caseId={caseId}
@@ -111,13 +115,21 @@ export default function WorkArea({
           onDifficultyChange={setPersonalDifficulty}
           hideActions
           collapsed={collapsed}
+          showStartNewAttempt={locked}
+          onStartNewAttempt={() => {
+            setLocked(false)
+            setAnalysis({ lvef: '', kinetic: '', lge: '', finalDx: '' })
+            setReport('')
+            setAnalysisKey((k) => k + 1)
+          }}
         />
       </div>
       <div className='space-y-4'>
         <section className='rounded border p-4'>
           <div className='font-medium mb-3'>{t('caseView.myAnalysis')}</div>
           <AnalysisForm
-            isAdmin={isAdmin}
+            key={analysisKey}
+            isAdmin={isAdmin || locked}
             caseId={caseId}
             values={analysis}
             onChange={setAnalysis}
@@ -127,15 +139,15 @@ export default function WorkArea({
         <section className='rounded border p-4'>
           <div className='font-medium mb-3'>{t('caseView.myClinicalReport')}</div>
           <ClinicalReport
-            isAdmin={isAdmin}
+            isAdmin={isAdmin || locked}
             caseId={caseId}
             value={report}
             onChange={setReport}
             hideInlineSave
           />
           <div className='flex justify-end gap-3 pt-4'>
-            <Button onClick={onSave} disabled={isAdmin || saving}>{t('saveProgress')}</Button>
-            <Button onClick={onValidate} variant='secondary' disabled={isAdmin || validating}>{t('caseView.validateCase')}</Button>
+            <Button onClick={onSave} disabled={isAdmin || locked || saving}>{t('saveProgress')}</Button>
+            <Button onClick={onValidate} variant='secondary' disabled={isAdmin || locked || validating}>{t('caseView.validateCase')}</Button>
           </div>
         </section>
       </div>

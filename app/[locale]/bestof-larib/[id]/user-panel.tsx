@@ -31,6 +31,8 @@ type Props = {
   onDifficultyChange?: (v: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | '') => void
   hideActions?: boolean
   collapsed?: boolean
+  showStartNewAttempt?: boolean
+  onStartNewAttempt?: () => void
 }
 
 const AnalysisSchema = z.object({
@@ -40,7 +42,7 @@ const AnalysisSchema = z.object({
   finalDx: z.string().min(1),
 })
 
-export default function CaseInteractionPanel({ isAdmin, defaultTags, createdAt, caseId, tags: cTags, onTagsChange, comments: cComments, onCommentsChange, difficulty: cDifficulty, onDifficultyChange, hideActions, collapsed }: Props) {
+export default function CaseInteractionPanel({ isAdmin, defaultTags, createdAt, caseId, tags: cTags, onTagsChange, comments: cComments, onCommentsChange, difficulty: cDifficulty, onDifficultyChange, hideActions, collapsed, showStartNewAttempt, onStartNewAttempt }: Props) {
   const t = useTranslations('bestof')
   const [tags, setTags] = useState<string[]>(cTags ?? defaultTags)
   const [comment, setComment] = useState(cComments ?? '')
@@ -113,6 +115,13 @@ export default function CaseInteractionPanel({ isAdmin, defaultTags, createdAt, 
               <Button onClick={() => { if (isAdmin) return; const id = lastAttemptId ?? (typeof window !== 'undefined' ? (window as any).__lastAttemptId : null); if (!id) { toast.error(t('errors.fieldsRequired')); return } execValidate({ attemptId: id }) }} disabled={isAdmin || validating} variant="secondary">{t('caseView.validateCase')}</Button>
             </div>
           )}
+          {showStartNewAttempt ? (
+            <div className="pt-2">
+              <Button type="button" onClick={onStartNewAttempt} variant="outline" className="w-full">
+                {t('caseView.startNewAttempt')}
+              </Button>
+            </div>
+          ) : null}
         </CardContent>
         )}
       </Card>
@@ -122,11 +131,15 @@ export default function CaseInteractionPanel({ isAdmin, defaultTags, createdAt, 
 
 export function AnalysisForm({ isAdmin, caseId, values, onChange, hideInlineSave }: { isAdmin: boolean; caseId: string; values?: { lvef?: string; kinetic?: string; lge?: string; finalDx?: string }; onChange?: (v: { lvef?: string; kinetic?: string; lge?: string; finalDx?: string }) => void; hideInlineSave?: boolean }) {
   const t = useTranslations('bestof')
-  const { register, handleSubmit, formState } = useForm<z.infer<typeof AnalysisSchema>>({
+  const { register, handleSubmit, formState, getValues } = useForm<z.infer<typeof AnalysisSchema>>({
     resolver: zodResolver(AnalysisSchema),
     defaultValues: { lvef: values?.lvef ?? '', kinetic: values?.kinetic ?? '', lge: values?.lge ?? '', finalDx: values?.finalDx ?? '' },
     mode: 'onChange',
   })
+  const lvefReg = register('lvef')
+  const kineticReg = register('kinetic')
+  const lgeReg = register('lge')
+  const finalDxReg = register('finalDx')
   const { execute: execSave, isExecuting } = useAction(saveAttemptAction, {
     onError() { toast.error(t('actionError')) },
     onSuccess(data) {
@@ -148,19 +161,43 @@ export function AnalysisForm({ isAdmin, caseId, values, onChange, hideInlineSave
     <form className="grid gap-3" onSubmit={handleSubmit(onSubmit)}>
       <div className="grid grid-cols-[180px_1fr] items-center gap-2">
         <Label>{t('caseView.analysis.lvef')}</Label>
-        <Input {...register('lvef')} aria-invalid={!!formState.errors.lvef} disabled={isAdmin} placeholder={t('caseView.required')} />
+        <Input
+          {...lvefReg}
+          onChange={(e) => { lvefReg.onChange(e); onChange?.({ ...getValues(), lvef: e.target.value }) }}
+          aria-invalid={!!formState.errors.lvef}
+          disabled={isAdmin}
+          placeholder={t('caseView.required')}
+        />
       </div>
       <div className="grid grid-cols-[180px_1fr] items-center gap-2">
         <Label>{t('caseView.analysis.kinetic')}</Label>
-        <Input {...register('kinetic')} aria-invalid={!!formState.errors.kinetic} disabled={isAdmin} placeholder={t('caseView.required')} />
+        <Input
+          {...kineticReg}
+          onChange={(e) => { kineticReg.onChange(e); onChange?.({ ...getValues(), kinetic: e.target.value }) }}
+          aria-invalid={!!formState.errors.kinetic}
+          disabled={isAdmin}
+          placeholder={t('caseView.required')}
+        />
       </div>
       <div className="grid grid-cols-[180px_1fr] items-center gap-2">
         <Label>{t('caseView.analysis.lge')}</Label>
-        <Input {...register('lge')} aria-invalid={!!formState.errors.lge} disabled={isAdmin} placeholder={t('caseView.required')} />
+        <Input
+          {...lgeReg}
+          onChange={(e) => { lgeReg.onChange(e); onChange?.({ ...getValues(), lge: e.target.value }) }}
+          aria-invalid={!!formState.errors.lge}
+          disabled={isAdmin}
+          placeholder={t('caseView.required')}
+        />
       </div>
       <div className="grid grid-cols-[180px_1fr] items-center gap-2">
         <Label>{t('caseView.analysis.finalDx')}</Label>
-        <Input {...register('finalDx')} aria-invalid={!!formState.errors.finalDx} disabled={isAdmin} placeholder={t('caseView.required')} />
+        <Input
+          {...finalDxReg}
+          onChange={(e) => { finalDxReg.onChange(e); onChange?.({ ...getValues(), finalDx: e.target.value }) }}
+          aria-invalid={!!formState.errors.finalDx}
+          disabled={isAdmin}
+          placeholder={t('caseView.required')}
+        />
       </div>
       <div className="text-xs text-muted-foreground">{t('caseView.requiredBeforeValidation')}</div>
       {hideInlineSave ? null : (

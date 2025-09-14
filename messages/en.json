@@ -278,6 +278,8 @@
       "requiredBeforeValidation": "Required before validating the case.",
       "savedDraft": "Progress saved",
       "validated": "Case validated"
+      ,
+      "startNewAttempt": "Start new attempt"
     }
   }
 }
