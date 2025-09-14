@@ -145,7 +145,7 @@ export async function listClinicalCasesWithDisplayTags(userId?: string | null, f
     }))
   }
 
-  // In-memory sort for enriched fields
+  // In-memory sort for enriched fields or case-insensitive name
   if (sort?.field === 'attempts') {
     const dir = sort.direction === 'asc' ? 1 : -1
     base.sort((a, b) => ((a.attemptsCount ?? 0) - (b.attemptsCount ?? 0)) * dir)
@@ -153,6 +153,9 @@ export async function listClinicalCasesWithDisplayTags(userId?: string | null, f
     const order = { BEGINNER: 0, INTERMEDIATE: 1, ADVANCED: 2 } as const
     const dir = sort.direction === 'asc' ? 1 : -1
     base.sort((a, b) => ((order[a.personalDifficulty ?? 'BEGINNER'] - order[b.personalDifficulty ?? 'BEGINNER']) * dir))
+  } else if (sort?.field === 'name') {
+    const dir = sort.direction === 'desc' ? -1 : 1
+    base.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }) * dir)
   }
 
   return base

@@ -313,7 +313,17 @@
       "reset": "Réinitialiser",
       "apply": "Appliquer",
       "dateFrom": "Du",
-      "dateTo": "Au"
+      "dateTo": "Au",
+      "dateRange": "Période",
+      "today": "Aujourd'hui",
+      "yesterday": "Hier",
+      "thisWeek": "Cette semaine",
+      "lastWeek": "La semaine dernière",
+      "thisMonth": "Ce mois-ci",
+      "lastMonth": "Le mois dernier",
+      "last7": "7 derniers jours",
+      "last30": "30 derniers jours",
+      "custom": "Personnalisée"
     }
   }
 }
