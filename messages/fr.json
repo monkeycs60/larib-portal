@@ -311,7 +311,9 @@
       "difficulty": "Difficulté",
       "any": "Tous",
       "reset": "Réinitialiser",
-      "apply": "Appliquer"
+      "apply": "Appliquer",
+      "dateFrom": "Du",
+      "dateTo": "Au"
     }
   }
 }

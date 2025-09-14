@@ -396,6 +396,8 @@ Notes:
 - Name: Filters + sortable headers + attempts/difficulty columns
 - What it does:
   - Adds a filters bar above the table (search by name, Status, Exam, Disease, Difficulty). Filters can be combined.
+  - Filters auto-apply on change; search has debounce.
+  - Adds date range filter (From/To) on created date.
   - Makes column headers sortable (Name, Status, Exam, Disease, Difficulty, Created, Attempts, My Difficulty).
   - Shows per-user Attempts count and My Difficulty in the list.
 - How to use:

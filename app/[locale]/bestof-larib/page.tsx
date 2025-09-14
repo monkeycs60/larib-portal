@@ -21,6 +21,8 @@ export default async function BestofLaribPage({ searchParams }: { searchParams?:
     examTypeId: typeof searchParams?.examTypeId === 'string' ? searchParams?.examTypeId : undefined,
     diseaseTagId: typeof searchParams?.diseaseTagId === 'string' ? searchParams?.diseaseTagId : undefined,
     difficulty: typeof searchParams?.difficulty === 'string' && ['BEGINNER','INTERMEDIATE','ADVANCED'].includes(searchParams.difficulty) ? (searchParams.difficulty as 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED') : undefined,
+    createdFrom: typeof searchParams?.dateFrom === 'string' && searchParams.dateFrom ? new Date(searchParams.dateFrom) : undefined,
+    createdTo: typeof searchParams?.dateTo === 'string' && searchParams.dateTo ? (() => { const d = new Date(searchParams.dateTo); d.setHours(23,59,59,999); return d })() : undefined,
   }
   const sortField = typeof searchParams?.sort === 'string' ? (searchParams.sort as CaseListSortField) : undefined
   const sortDirection = typeof searchParams?.dir === 'string' && (searchParams.dir === 'asc' || searchParams.dir === 'desc') ? (searchParams.dir) : undefined

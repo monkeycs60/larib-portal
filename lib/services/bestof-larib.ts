@@ -51,6 +51,8 @@ export type CaseListFilters = {
   examTypeId?: string
   diseaseTagId?: string
   difficulty?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
+  createdFrom?: Date
+  createdTo?: Date
 }
 
 export type CaseListSortField = 'name' | 'status' | 'difficulty' | 'createdAt' | 'examType' | 'diseaseTag' | 'attempts' | 'personalDifficulty'
@@ -63,6 +65,10 @@ export async function listClinicalCasesWithDisplayTags(userId?: string | null, f
     examTypeId: filters?.examTypeId ?? undefined,
     diseaseTagId: filters?.diseaseTagId ?? undefined,
     difficulty: filters?.difficulty ?? undefined,
+    createdAt: filters?.createdFrom || filters?.createdTo ? {
+      gte: filters?.createdFrom ?? undefined,
+      lte: filters?.createdTo ?? undefined,
+    } : undefined,
   }
 
   const orderBy: Parameters<typeof prisma.clinicalCase.findMany>[0]['orderBy'] = (() => {

@@ -313,7 +313,9 @@
       "difficulty": "Difficulty",
       "any": "Any",
       "reset": "Reset",
-      "apply": "Apply"
+      "apply": "Apply",
+      "dateFrom": "From",
+      "dateTo": "To"
     }
   }
 }
