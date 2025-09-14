@@ -291,6 +291,7 @@
     "manageTagsTab": "Manage",
     "casesByTagTab": "Cases",
     "casesTabInfo": "Select a tag to review which cases are flagged with it.",
+    "loading": "Loading...",
     "createNewTagLabel": "Create new tag",
     "tagNameLabel": "Name",
     "tagNamePlaceholder": "e.g. Must-know",
@@ -298,5 +299,7 @@
     "tagDescriptionLabel": "Description",
     "tagDescriptionPlaceholder": "Optional",
     "createTag": "Create Tag"
+    ,
+    "editTags": "Edit Tags"
   }
 }

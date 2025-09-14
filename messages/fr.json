@@ -289,6 +289,7 @@
     "manageTagsTab": "Gérer",
     "casesByTagTab": "Cas",
     "casesTabInfo": "Sélectionnez un tag pour voir sur quels cas il est utilisé.",
+    "loading": "Chargement...",
     "createNewTagLabel": "Créer un nouveau tag",
     "tagNameLabel": "Nom",
     "tagNamePlaceholder": "ex: Incontournable",
@@ -296,5 +297,7 @@
     "tagDescriptionLabel": "Description",
     "tagDescriptionPlaceholder": "Optionnel",
     "createTag": "Créer le tag"
+    ,
+    "editTags": "Modifier les tags"
   }
 }

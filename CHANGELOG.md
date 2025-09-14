@@ -351,4 +351,5 @@ Notes:
   - Implementation details:
     - New Prisma models: AdminTag, AdminTagOnCase, UserTag, UserTagOnCase.
     - New services in `lib/services/bestof-larib-tags.ts` and actions in `app/[locale]/bestof-larib/actions.ts`.
-    - UI: `TagManagerDialog` in `app/[locale]/bestof-larib/components/tag-manager-dialog.tsx` using shadcn/ui.
+  - UI: `TagManagerDialog` in `app/[locale]/bestof-larib/components/tag-manager-dialog.tsx` using shadcn/ui.
+  - Added generic `Loader` component in `components/ui/loader.tsx` and used in modal for smooth loading states.

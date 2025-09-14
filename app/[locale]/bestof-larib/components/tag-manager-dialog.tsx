@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Loader } from '@/components/ui/loader'
 import {
   ensureAdminTagAction,
   ensureUserTagAction,
@@ -145,7 +146,7 @@ export default function TagManagerDialog({
           </TabsList>
           <TabsContent value="assign" className="mt-4 flex-1 overflow-y-auto pr-1">
             {isLoading ? (
-              <div className="text-sm text-muted-foreground">Loading...</div>
+              <Loader full label={t('loading')} />
             ) : (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-2">
@@ -183,7 +184,7 @@ export default function TagManagerDialog({
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button variant="outline" onClick={() => setOpen(false)}>{t('cancel')}</Button>
-                  <Button onClick={onSaveAssignment} disabled={isSaving}>{isSaving ? t('saving') : t('update')}</Button>
+                  <Button onClick={onSaveAssignment} disabled={isSaving}>{isSaving ? t('saving') : t('editTags')}</Button>
                 </div>
               </div>
             )}
@@ -260,6 +261,9 @@ export default function TagManagerDialog({
               </div>
               {activeTagId ? (
                 <div className="rounded border">
+                  {listCasesByTag.isExecuting ? (
+                    <div className="h-40 flex items-center justify-center"><Loader label={t('loading')} /></div>
+                  ) : (
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -280,6 +284,7 @@ export default function TagManagerDialog({
                       )}
                     </TableBody>
                   </Table>
+                  )}
                 </div>
               ) : (
                 <div className="text-sm text-muted-foreground">{t('selectPlaceholder')}</div>
