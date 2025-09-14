@@ -122,3 +122,22 @@ export async function getUserCaseState(params: { userId: string; caseId: string 
     } : null,
   }
 }
+
+export type CaseAttemptSummary = {
+  id: string
+  createdAt: Date
+  validatedAt: Date | null
+  lvef: string | null
+  kinetic: string | null
+  lge: string | null
+  finalDx: string | null
+  report: string | null
+}
+
+export async function listUserCaseAttempts(params: { userId: string; caseId: string }): Promise<CaseAttemptSummary[]> {
+  return prisma.caseAttempt.findMany({
+    where: { userId: params.userId, caseId: params.caseId },
+    orderBy: [{ validatedAt: 'desc' }, { createdAt: 'desc' }],
+    select: { id: true, createdAt: true, validatedAt: true, lvef: true, kinetic: true, lge: true, finalDx: true, report: true },
+  })
+}

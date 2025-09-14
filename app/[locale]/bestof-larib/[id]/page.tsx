@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { getTypedSession } from '@/lib/auth-helpers';
 import WorkArea, { PrefillState } from './work-area';
-import { getUserCaseState } from '@/lib/services/bestof-larib-attempts'
+import { getUserCaseState, listUserCaseAttempts } from '@/lib/services/bestof-larib-attempts'
 
 export default async function CaseViewPage({
 	params,
@@ -28,19 +28,22 @@ export default async function CaseViewPage({
 	const isAdmin = (session?.user?.role ?? 'USER') === 'ADMIN';
 
     const userId = session?.user?.id
-    const prefill: PrefillState | null = userId ? (await getUserCaseState({ userId, caseId: c.id }).then(s => ({
-        tags: s.settings?.tags ?? [],
-        comments: s.settings?.comments ?? null,
-        personalDifficulty: s.settings?.personalDifficulty ?? null,
-        analysis: {
-            lvef: s.lastAttempt?.lvef ?? undefined,
-            kinetic: s.lastAttempt?.kinetic ?? undefined,
-            lge: s.lastAttempt?.lge ?? undefined,
-            finalDx: s.lastAttempt?.finalDx ?? undefined,
-        },
-        report: s.lastAttempt?.report ?? null,
-        validatedAt: s.lastAttempt?.validatedAt ? new Date(s.lastAttempt.validatedAt).toISOString() : null,
-    }))) : null
+    const [prefill, attempts] = userId ? await Promise.all([
+        getUserCaseState({ userId, caseId: c.id }).then(s => ({
+            tags: s.settings?.tags ?? [],
+            comments: s.settings?.comments ?? null,
+            personalDifficulty: s.settings?.personalDifficulty ?? null,
+            analysis: {
+                lvef: s.lastAttempt?.lvef ?? undefined,
+                kinetic: s.lastAttempt?.kinetic ?? undefined,
+                lge: s.lastAttempt?.lge ?? undefined,
+                finalDx: s.lastAttempt?.finalDx ?? undefined,
+            },
+            report: s.lastAttempt?.report ?? null,
+            validatedAt: s.lastAttempt?.validatedAt ? new Date(s.lastAttempt.validatedAt).toISOString() : null,
+        })),
+        listUserCaseAttempts({ userId, caseId: c.id }),
+    ]) : [null, []]
 
     return (
         <div className='space-y-4 py-6 px-12 mx-auto'>
@@ -73,6 +76,7 @@ export default async function CaseViewPage({
                 createdAt={c.createdAt}
                 defaultTags={c.tags ?? []}
                 prefill={prefill}
+                attempts={attempts as any}
                 right={
                     <>
                         <div className='text-sm font-medium mb-2'>

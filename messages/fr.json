@@ -278,6 +278,10 @@
       "validated": "Cas validé"
       ,
       "startNewAttempt": "Nouvel essai"
+      ,
+      "noAttempts": "Aucun essai",
+      "attemptDraft": "brouillon",
+      "attemptValidated": "validé"
     }
   }
 }

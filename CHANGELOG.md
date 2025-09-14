@@ -335,7 +335,7 @@ Notes:
   - When revisiting, your tags, difficulty, comments, analysis, and report are pre-filled.
 - Files updated:
   - `app/[locale]/bestof-larib/[id]/page.tsx`: server prefill and new layout usage.
-  - `app/[locale]/bestof-larib/[id]/work-area.tsx`: new client wrapper (collapsible left column, unified actions, controlled state).
-  - `app/[locale]/bestof-larib/[id]/user-panel.tsx`: controlled settings, optional hidden internal actions; controlled AnalysisForm/ClinicalReport.
+  - `app/[locale]/bestof-larib/[id]/work-area.tsx`: new client wrapper (collapsible + resizable columns, unified actions, controlled state, attempts selection).
+  - `app/[locale]/bestof-larib/[id]/user-panel.tsx`: removes redundant "Case" header; adds attempts list with click-to-load; controlled AnalysisForm/ClinicalReport.
   - `app/[locale]/bestof-larib/[id]/actions.ts`: adds `saveAllAction` and `saveAllAndValidateAction`.
-  - `lib/services/bestof-larib-attempts.ts`: adds `getUserCaseState` for prefill.
+  - `lib/services/bestof-larib-attempts.ts`: adds `getUserCaseState` for prefill and `listUserCaseAttempts`; `saveAttempt` now reuses the latest draft.

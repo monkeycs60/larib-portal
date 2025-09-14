@@ -280,6 +280,10 @@
       "validated": "Case validated"
       ,
       "startNewAttempt": "Start new attempt"
+      ,
+      "noAttempts": "No attempts yet",
+      "attemptDraft": "draft",
+      "attemptValidated": "validated"
     }
   }
 }

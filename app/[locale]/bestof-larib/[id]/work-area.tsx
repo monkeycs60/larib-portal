@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable'
 import { toast } from 'sonner'
 import { useAction } from 'next-safe-action/hooks'
 import { saveAllAction, saveAllAndValidateAction } from './actions'
@@ -27,6 +28,7 @@ export default function WorkArea({
   defaultTags,
   prefill,
   right,
+  attempts,
 }: {
   caseId: string
   isAdmin: boolean
@@ -34,6 +36,7 @@ export default function WorkArea({
   defaultTags: string[]
   prefill: PrefillState | null
   right: React.ReactNode
+  attempts: Array<{ id: string; createdAt: string | Date; validatedAt: string | Date | null; lvef: string | null; kinetic: string | null; lge: string | null; finalDx: string | null; report: string | null }>
 }) {
   const t = useTranslations('bestof')
   const [collapsed, setCollapsed] = useState(false)
@@ -90,70 +93,78 @@ export default function WorkArea({
   }
 
   return (
-    <div className="grid gap-4 xl:grid-cols-[var(--left,320px)_1fr_var(--right,720px)]" style={{
-      // shrink left column when collapsed
-      // @ts-expect-error CSS var string is fine
-      ['--left']: collapsed ? '56px' : '320px',
-    }}>
-      <div>
-        <div className='flex justify-between items-center mb-2'>
-          <Button variant='ghost' size='sm' onClick={() => setCollapsed(v => !v)}>
-            {collapsed ? t('caseView.sidebar.title') : t('caseView.sidebar.title')}
-          </Button>
-        </div>
-        <CaseInteractionPanel
-          isAdmin={isAdmin || locked}
-          defaultTags={[]}
-          createdAt={createdAt}
-          caseId={caseId}
-          // controlled values from parent
-          tags={tags}
-          onTagsChange={setTags}
-          comments={comments}
-          onCommentsChange={setComments}
-          difficulty={personalDifficulty}
-          onDifficultyChange={setPersonalDifficulty}
-          hideActions
-          collapsed={collapsed}
-          showStartNewAttempt={locked}
-          onStartNewAttempt={() => {
-            setLocked(false)
-            setAnalysis({ lvef: '', kinetic: '', lge: '', finalDx: '' })
-            setReport('')
-            setAnalysisKey((k) => k + 1)
-          }}
-        />
-      </div>
-      <div className='space-y-4'>
-        <section className='rounded border p-4'>
-          <div className='font-medium mb-3'>{t('caseView.myAnalysis')}</div>
-          <AnalysisForm
-            key={analysisKey}
-            isAdmin={isAdmin || locked}
-            caseId={caseId}
-            values={analysis}
-            onChange={setAnalysis}
-            hideInlineSave
-          />
-        </section>
-        <section className='rounded border p-4'>
-          <div className='font-medium mb-3'>{t('caseView.myClinicalReport')}</div>
-          <ClinicalReport
-            isAdmin={isAdmin || locked}
-            caseId={caseId}
-            value={report}
-            onChange={setReport}
-            hideInlineSave
-          />
-          <div className='flex justify-end gap-3 pt-4'>
-            <Button onClick={onSave} disabled={isAdmin || locked || saving}>{t('saveProgress')}</Button>
-            <Button onClick={onValidate} variant='secondary' disabled={isAdmin || locked || validating}>{t('caseView.validateCase')}</Button>
+    <ResizablePanelGroup direction='horizontal' className='gap-4'>
+      <ResizablePanel defaultSize={collapsed ? 10 : 20} minSize={8} maxSize={30}>
+        <div>
+          <div className='mb-2'>
+            <Button variant='ghost' size='sm' onClick={() => setCollapsed(v => !v)}>{collapsed ? '›' : '‹'}</Button>
           </div>
-        </section>
-      </div>
-      <div className='rounded border p-4 h-fit'>
-        {right}
-      </div>
-    </div>
+          <CaseInteractionPanel
+            isAdmin={isAdmin || locked}
+            defaultTags={[]}
+            createdAt={createdAt}
+            caseId={caseId}
+            tags={tags}
+            onTagsChange={setTags}
+            comments={comments}
+            onCommentsChange={setComments}
+            difficulty={personalDifficulty}
+            onDifficultyChange={setPersonalDifficulty}
+            hideActions
+            collapsed={collapsed}
+            attempts={attempts}
+            onSelectAttempt={(att) => {
+              setAnalysis({ lvef: att.lvef ?? '', kinetic: att.kinetic ?? '', lge: att.lge ?? '', finalDx: att.finalDx ?? '' })
+              setReport(att.report ?? '')
+              setLocked(!!att.validatedAt)
+              setAnalysisKey(k => k + 1)
+            }}
+            showStartNewAttempt
+            onStartNewAttempt={() => {
+              setLocked(false)
+              setAnalysis({ lvef: '', kinetic: '', lge: '', finalDx: '' })
+              setReport('')
+              setAnalysisKey((k) => k + 1)
+            }}
+          />
+        </div>
+      </ResizablePanel>
+      <ResizableHandle withHandle />
+      <ResizablePanel defaultSize={45} minSize={30}>
+        <div className='space-y-4'>
+          <section className='rounded border p-4'>
+            <div className='font-medium mb-3'>{t('caseView.myAnalysis')}</div>
+            <AnalysisForm
+              key={analysisKey}
+              isAdmin={isAdmin || locked}
+              caseId={caseId}
+              values={analysis}
+              onChange={setAnalysis}
+              hideInlineSave
+            />
+          </section>
+          <section className='rounded border p-4'>
+            <div className='font-medium mb-3'>{t('caseView.myClinicalReport')}</div>
+            <ClinicalReport
+              isAdmin={isAdmin || locked}
+              caseId={caseId}
+              value={report}
+              onChange={setReport}
+              hideInlineSave
+            />
+            <div className='flex justify-end gap-3 pt-4'>
+              <Button onClick={onSave} disabled={isAdmin || locked || saving}>{t('saveProgress')}</Button>
+              <Button onClick={onValidate} variant='secondary' disabled={isAdmin || locked || validating}>{t('caseView.validateCase')}</Button>
+            </div>
+          </section>
+        </div>
+      </ResizablePanel>
+      <ResizableHandle withHandle />
+      <ResizablePanel defaultSize={35} minSize={20}>
+        <div className='rounded border p-4 h-fit'>
+          {right}
+        </div>
+      </ResizablePanel>
+    </ResizablePanelGroup>
   )
 }

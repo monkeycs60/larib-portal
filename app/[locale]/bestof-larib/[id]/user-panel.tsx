@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -33,6 +33,8 @@ type Props = {
   collapsed?: boolean
   showStartNewAttempt?: boolean
   onStartNewAttempt?: () => void
+  attempts?: Array<{ id: string; createdAt: string | Date; validatedAt: string | Date | null; lvef: string | null; kinetic: string | null; lge: string | null; finalDx: string | null; report: string | null }>
+  onSelectAttempt?: (a: { id: string; createdAt: string | Date; validatedAt: string | Date | null; lvef: string | null; kinetic: string | null; lge: string | null; finalDx: string | null; report: string | null }) => void
 }
 
 const AnalysisSchema = z.object({
@@ -42,7 +44,7 @@ const AnalysisSchema = z.object({
   finalDx: z.string().min(1),
 })
 
-export default function CaseInteractionPanel({ isAdmin, defaultTags, createdAt, caseId, tags: cTags, onTagsChange, comments: cComments, onCommentsChange, difficulty: cDifficulty, onDifficultyChange, hideActions, collapsed, showStartNewAttempt, onStartNewAttempt }: Props) {
+export default function CaseInteractionPanel({ isAdmin, defaultTags, createdAt, caseId, tags: cTags, onTagsChange, comments: cComments, onCommentsChange, difficulty: cDifficulty, onDifficultyChange, hideActions, collapsed, showStartNewAttempt, onStartNewAttempt, attempts = [], onSelectAttempt }: Props) {
   const t = useTranslations('bestof')
   const [tags, setTags] = useState<string[]>(cTags ?? defaultTags)
   const [comment, setComment] = useState(cComments ?? '')
@@ -67,19 +69,32 @@ export default function CaseInteractionPanel({ isAdmin, defaultTags, createdAt, 
   return (
     <div className="space-y-4">
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center justify-between">
-            <span>{t('caseView.sidebar.title')}</span>
-            <span className="text-xs text-muted-foreground">{createdLabel}</span>
-          </CardTitle>
-        </CardHeader>
         {collapsed ? null : (
         <CardContent className="space-y-4">
           <div className="aspect-video w-full bg-black/90 rounded" />
 
           <div className="space-y-2">
             <div className="font-medium">{t('caseView.attempts')}</div>
-            <div className="text-sm text-muted-foreground">{t('caseView.firstTry')}</div>
+            <div className="text-xs text-muted-foreground">{createdLabel}</div>
+            <div className="flex flex-col gap-1 max-h-40 overflow-auto pr-1">
+              {attempts.length === 0 ? (
+                <div className="text-sm text-muted-foreground">{t('caseView.noAttempts')}</div>
+              ) : attempts.map((a, idx) => {
+                const n = attempts.length - idx
+                const date = new Date(a.createdAt).toLocaleDateString()
+                const label = a.validatedAt ? t('caseView.attemptValidated') : t('caseView.attemptDraft')
+                return (
+                  <button
+                    key={a.id}
+                    type="button"
+                    className="text-left text-sm rounded px-2 py-1 hover:bg-muted"
+                    onClick={() => onSelectAttempt?.(a)}
+                  >
+                    #{n} • {date} • {label}
+                  </button>
+                )
+              })}
+            </div>
           </div>
 
           <div className="space-y-3">
