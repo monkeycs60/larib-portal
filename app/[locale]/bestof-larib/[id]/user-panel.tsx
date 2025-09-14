@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
@@ -16,6 +16,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAction } from 'next-safe-action/hooks'
 import { saveAttemptAction, upsertSettingsAction, validateAttemptAction } from './actions'
+import { CheckCircle2, Eye } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 type Props = {
   isAdmin: boolean
@@ -30,7 +32,6 @@ type Props = {
   difficulty?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | ''
   onDifficultyChange?: (v: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | '') => void
   hideActions?: boolean
-  collapsed?: boolean
   showStartNewAttempt?: boolean
   onStartNewAttempt?: () => void
   attempts?: Array<{ id: string; createdAt: string | Date; validatedAt: string | Date | null; lvef: string | null; kinetic: string | null; lge: string | null; finalDx: string | null; report: string | null }>
@@ -44,7 +45,7 @@ const AnalysisSchema = z.object({
   finalDx: z.string().min(1),
 })
 
-export default function CaseInteractionPanel({ isAdmin, defaultTags, createdAt, caseId, tags: cTags, onTagsChange, comments: cComments, onCommentsChange, difficulty: cDifficulty, onDifficultyChange, hideActions, collapsed, showStartNewAttempt, onStartNewAttempt, attempts = [], onSelectAttempt }: Props) {
+export default function CaseInteractionPanel({ isAdmin, defaultTags, createdAt, caseId, tags: cTags, onTagsChange, comments: cComments, onCommentsChange, difficulty: cDifficulty, onDifficultyChange, hideActions, showStartNewAttempt, onStartNewAttempt, attempts = [], onSelectAttempt }: Props) {
   const t = useTranslations('bestof')
   const [tags, setTags] = useState<string[]>(cTags ?? defaultTags)
   const [comment, setComment] = useState(cComments ?? '')
@@ -59,41 +60,63 @@ export default function CaseInteractionPanel({ isAdmin, defaultTags, createdAt, 
     onSuccess() { toast.success(t('caseView.validated')) },
   })
 
-  // Local-only default persistence kept to not break external usage; values propagate up when handlers provided
-  function onLocalTagsChange(v: string[]) { setTags(v); onTagsChange?.(v) }
-  function onLocalCommentsChange(v: string) { setComment(v); onCommentsChange?.(v) }
-  function onLocalDifficultyChange(v: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | '') { setDifficulty(v); onDifficultyChange?.(v) }
+  // Debounced auto-save for personal settings (no useEffect)
+  const saveTimerRef = useRef<any>(null)
+  function scheduleSave(next?: { tags?: string[]; comments?: string; difficulty?: typeof difficulty }) {
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+    saveTimerRef.current = setTimeout(async () => {
+      const payload = {
+        caseId,
+        tags: next?.tags ?? tags,
+        comments: (next?.comments ?? comment) || null,
+        personalDifficulty: (next?.difficulty ?? difficulty) || undefined,
+      }
+      try { await execSettings(payload) } catch {}
+    }, 500)
+  }
+
+  // Local state update + notify parent + debounced save
+  function onLocalTagsChange(v: string[]) { setTags(v); onTagsChange?.(v); if (!isAdmin) scheduleSave({ tags: v }) }
+  function onLocalCommentsChange(v: string) { setComment(v); onCommentsChange?.(v); if (!isAdmin) scheduleSave({ comments: v }) }
+  function onLocalDifficultyChange(v: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | '') { setDifficulty(v); onDifficultyChange?.(v); if (!isAdmin) scheduleSave({ difficulty: v }) }
 
   const createdLabel = useMemo(() => new Date(createdAt).toLocaleString(), [createdAt])
 
   return (
     <div className="space-y-4">
       <Card>
-        {collapsed ? null : (
         <CardContent className="space-y-4">
-          <div className="aspect-video w-full bg-black/90 rounded" />
 
           <div className="space-y-2">
             <div className="font-medium">{t('caseView.attempts')}</div>
-            <div className="text-xs text-muted-foreground">{createdLabel}</div>
-            <div className="flex flex-col gap-1 max-h-40 overflow-auto pr-1">
-              {attempts.length === 0 ? (
+            <div className="flex flex-col gap-2 max-h-44 overflow-auto pr-1">
+              {attempts.filter(a => !!a.validatedAt).length === 0 ? (
                 <div className="text-sm text-muted-foreground">{t('caseView.noAttempts')}</div>
-              ) : attempts.map((a, idx) => {
-                const n = attempts.length - idx
-                const date = new Date(a.createdAt).toLocaleDateString()
-                const label = a.validatedAt ? t('caseView.attemptValidated') : t('caseView.attemptDraft')
-                return (
-                  <button
-                    key={a.id}
-                    type="button"
-                    className="text-left text-sm rounded px-2 py-1 hover:bg-muted"
-                    onClick={() => onSelectAttempt?.(a)}
-                  >
-                    #{n} • {date} • {label}
-                  </button>
-                )
-              })}
+              ) : attempts
+                  .filter(a => !!a.validatedAt)
+                  .sort((a,b) => new Date(a.createdAt as any).getTime() - new Date(b.createdAt as any).getTime())
+                  .map((a, idx, arr) => {
+                    const num = idx + 1
+                    const date = new Date(a.createdAt)
+                    const dt = `${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} ${date.toLocaleDateString()}`
+                    return (
+                      <button
+                        key={a.id}
+                        type="button"
+                        onClick={() => onSelectAttempt?.(a)}
+                        className={cn("w-full rounded border p-2 text-left hover:bg-accent/50 transition", "flex items-center justify-between")}
+                      >
+                        <div className="text-sm">
+                          <div className="font-medium">Attempt {num}</div>
+                          <div className="text-xs text-muted-foreground">{dt}</div>
+                        </div>
+                        <div className="flex items-center gap-2 text-green-600">
+                          <CheckCircle2 className="size-4" />
+                          <Eye className="size-4 text-muted-foreground" />
+                        </div>
+                      </button>
+                    )
+                  })}
             </div>
           </div>
 
@@ -138,7 +161,6 @@ export default function CaseInteractionPanel({ isAdmin, defaultTags, createdAt, 
             </div>
           ) : null}
         </CardContent>
-        )}
       </Card>
     </div>
   )
@@ -226,7 +248,6 @@ export function AnalysisForm({ isAdmin, caseId, values, onChange, hideInlineSave
 
 export function ClinicalReport({ isAdmin, caseId, value, onChange, hideInlineSave }: { isAdmin: boolean; caseId: string; value?: string; onChange?: (v: string) => void; hideInlineSave?: boolean }) {
   const t = useTranslations('bestof')
-  const [valueState, setValueState] = useState(value ?? '')
   const { execute: execSave, isExecuting } = useAction(saveAttemptAction, {
     onError() { toast.error(t('actionError')) },
     onSuccess(data) {
@@ -236,12 +257,12 @@ export function ClinicalReport({ isAdmin, caseId, value, onChange, hideInlineSav
 
   function save() {
     if (isAdmin) return
-    execSave({ caseId, report: valueState })
+    execSave({ caseId, report: value ?? '' })
   }
 
   return (
     <div className="space-y-3">
-      <RichTextEditor value={valueState} onChange={(v) => { setValueState(v); onChange?.(v) }} disabled={isAdmin} />
+      <RichTextEditor value={value ?? ''} onChange={(v) => { onChange?.(v) }} disabled={isAdmin} />
       {hideInlineSave ? null : (
         <div className="flex gap-2">
           <Button type="button" onClick={save} disabled={isAdmin || isExecuting}>{t('saveProgress')}</Button>

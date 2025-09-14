@@ -3,6 +3,7 @@ import { getCaseById } from '@/lib/services/bestof-larib';
 import { Link } from '@/app/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { ArrowLeft } from 'lucide-react';
 import { getTypedSession } from '@/lib/auth-helpers';
 import WorkArea, { PrefillState } from './work-area';
 import { getUserCaseState, listUserCaseAttempts } from '@/lib/services/bestof-larib-attempts'
@@ -47,28 +48,30 @@ export default async function CaseViewPage({
 
     return (
         <div className='space-y-4 py-6 px-12 mx-auto'>
-			<div className='flex items-center justify-between gap-4'>
-				<div className='flex items-center gap-3 flex-wrap'>
-					<h1 className='text-2xl font-semibold'>{c.name}</h1>
-					{c.examType?.name ? (
-						<Badge variant='secondary'>{c.examType.name}</Badge>
-					) : null}
-					<Badge
-						variant='outline'
-						className={
-							c.difficulty === 'BEGINNER'
-								? 'border-green-500 text-green-700'
-								: c.difficulty === 'INTERMEDIATE'
-								? 'border-amber-500 text-amber-700'
-								: 'border-red-500 text-red-700'
-						}>
-						{t(`difficulty.${difficultyLabel}`)}
-					</Badge>
-				</div>
-				<Link href={'/bestof-larib'}>
-					<Button variant='outline'>{t('back')}</Button>
-				</Link>
-			</div>
+            <div className='flex items-center justify-between gap-4'>
+                <div className='flex items-center gap-3 flex-wrap'>
+                    <Badge asChild variant='outline'>
+                        <Link href={'/bestof-larib'} className='cursor-pointer'>
+                            <ArrowLeft className='mr-1' /> {t('back')}
+                        </Link>
+                    </Badge>
+                    <h1 className='text-2xl font-semibold'>{c.name}</h1>
+                    {c.examType?.name ? (
+                        <Badge variant='secondary'>{c.examType.name}</Badge>
+                    ) : null}
+                    <Badge
+                        variant='outline'
+                        className={
+                            c.difficulty === 'BEGINNER'
+                                ? 'border-green-500 text-green-700'
+                                : c.difficulty === 'INTERMEDIATE'
+                                ? 'border-amber-500 text-amber-700'
+                                : 'border-red-500 text-red-700'
+                        }>
+                        {t(`difficulty.${difficultyLabel}`)}
+                    </Badge>
+                </div>
+            </div>
 
             <WorkArea
                 caseId={c.id}
