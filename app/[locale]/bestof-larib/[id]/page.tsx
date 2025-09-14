@@ -7,6 +7,7 @@ import { getTypedSession } from '@/lib/auth-helpers';
 import WorkArea, { PrefillState } from './work-area';
 import type { CaseAttemptSummary } from '@/lib/services/bestof-larib-attempts'
 import { getUserCaseState, listUserCaseAttempts } from '@/lib/services/bestof-larib-attempts'
+import { listUserTags, getCaseUserTagIds } from '@/lib/services/bestof-larib-tags'
 
 export default async function CaseViewPage({
 	params,
@@ -29,7 +30,7 @@ export default async function CaseViewPage({
 	const isAdmin = (session?.user?.role ?? 'USER') === 'ADMIN';
 
     const userId = session?.user?.id
-    const [prefill, attempts] = userId ? await Promise.all([
+    const [prefill, attempts, userTags, userTagIds] = userId ? await Promise.all([
         getUserCaseState({ userId, caseId: c.id }).then(s => ({
             tags: s.settings?.tags ?? [],
             comments: s.settings?.comments ?? null,
@@ -44,7 +45,9 @@ export default async function CaseViewPage({
             validatedAt: s.lastAttempt?.validatedAt ? new Date(s.lastAttempt.validatedAt).toISOString() : null,
         }) as PrefillState),
         listUserCaseAttempts({ userId, caseId: c.id }) as Promise<CaseAttemptSummary[]>,
-    ]) : [null, []]
+        listUserTags(userId).then(rows => rows.map(r => ({ id: r.id, name: r.name, color: r.color, description: r.description ?? null }))),
+        getCaseUserTagIds(userId, c.id),
+    ]) : [null, [], [], []]
 
     return (
         <div className='space-y-4 py-6 px-12 mx-auto'>
@@ -77,6 +80,7 @@ export default async function CaseViewPage({
                 meta={{ caseId: c.id, isAdmin, createdAt: c.createdAt }}
                 defaults={{ tags: c.tags ?? [], prefill }}
                 attempts={attempts}
+                userTagData={userId ? { tags: userTags, ids: userTagIds } : undefined}
                 rightPane={
                     <>
                         <div className='text-sm font-medium mb-2'>

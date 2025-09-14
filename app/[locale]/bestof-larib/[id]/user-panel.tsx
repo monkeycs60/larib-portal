@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import TagInput from '@/components/ui/tag-input'
+import UserTagsSection from './user-tags-section'
 import { Select } from '@/components/ui/select'
 import RichTextEditor from '@/components/ui/rich-text-editor'
 import { useTranslations } from 'next-intl'
@@ -21,6 +21,8 @@ import { cn } from '@/lib/utils'
 import { getActionErrorMessage } from '@/lib/ui/safe-action-error'
 import { useBestofAttemptStore } from '@/lib/stores/bestof-attempts'
 
+type UserTagRef = { id: string; name: string; color: string; description: string | null }
+
 type CaseInteractionPanelConfig = {
   isAdmin: boolean
   defaultTags: string[]
@@ -33,6 +35,9 @@ type CaseInteractionPanelConfig = {
   onCommentsChange?: (v: string) => void
   difficulty?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | ''
   onDifficultyChange?: (v: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | '') => void
+  // user tag picker data
+  userTags?: UserTagRef[]
+  userTagIds?: string[]
   hideActions?: boolean
   showStartNewAttempt?: boolean
   onStartNewAttempt?: () => void
@@ -143,7 +148,14 @@ export default function CaseInteractionPanel({ config }: { config: CaseInteracti
             <div className="font-medium">{t('caseView.personalSettings')}</div>
             <div className="space-y-1">
               <Label>{t('caseView.myTags')}</Label>
-              <TagInput value={tags} onChange={onLocalTagsChange} placeholder={t('placeholders.customTags')} disabled={isAdmin} />
+              {Array.isArray(config.userTags) && Array.isArray(config.userTagIds) ? (
+                <UserTagsSection
+                  isAdmin={isAdmin}
+                  caseId={caseId}
+                  initialTags={config.userTags}
+                  initialSelectedIds={config.userTagIds}
+                />
+              ) : (<div className="text-xs text-muted-foreground">-</div>)}
             </div>
             <div className="space-y-1">
               <Label>{t('caseView.myDifficulty')}</Label>

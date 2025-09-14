@@ -408,3 +408,17 @@ Notes:
   - `app/[locale]/bestof-larib/components/sort-header.tsx` client header sort control.
   - `lib/services/bestof-larib.ts` supports filters/sort; enriches with attempts count and personal difficulty.
   - `messages/{en,fr}.json` adds table labels and filters labels.
+## UX: Case view personal tags picker
+
+- Name: User tag toggles with create modal
+- What it does:
+  - In the case view personal settings, shows all of the user's tags as toggleable items for the current case.
+  - Adds a “Create Tag” modal to add new personal tags; saves selection with “Update Tags”. Admins cannot edit.
+  - UI: Replaces checkbox list with compact chips; active chips are filled with tag color, inactive chips are outlined with tag color.
+- How to use:
+  - Open a case, under Personal Settings > My Tags, toggle tags and click “Update Tags”, or create a new one via the modal.
+- Updated files:
+  - `app/[locale]/bestof-larib/[id]/user-tags-section.tsx` new client component.
+  - `app/[locale]/bestof-larib/[id]/user-panel.tsx` integrates the picker.
+  - `app/[locale]/bestof-larib/[id]/work-area.tsx` passes user tag data.
+  - `app/[locale]/bestof-larib/[id]/page.tsx` fetches user tags and selected case tag ids server-side.

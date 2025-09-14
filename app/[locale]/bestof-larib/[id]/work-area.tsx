@@ -24,7 +24,7 @@ export type PrefillState = {
   validatedAt?: string | null
 }
 
-export default function WorkArea({ meta, defaults, rightPane, attempts }: { meta: { caseId: string; isAdmin: boolean; createdAt: string | Date }; defaults: { tags: string[]; prefill: PrefillState | null }; rightPane: React.ReactNode; attempts: CaseAttemptSummary[] }) {
+export default function WorkArea({ meta, defaults, rightPane, attempts, userTagData }: { meta: { caseId: string; isAdmin: boolean; createdAt: string | Date }; defaults: { tags: string[]; prefill: PrefillState | null }; rightPane: React.ReactNode; attempts: CaseAttemptSummary[]; userTagData?: { tags: { id: string; name: string; color: string; description: string | null }[]; ids: string[] } }) {
   const t = useTranslations('bestof')
 
   const { caseId, isAdmin, createdAt } = meta
@@ -105,6 +105,8 @@ export default function WorkArea({ meta, defaults, rightPane, attempts }: { meta
             onCommentsChange: setComments,
             difficulty: personalDifficulty,
             onDifficultyChange: setPersonalDifficulty,
+            userTags: userTagData?.tags,
+            userTagIds: userTagData?.ids,
             hideActions: true,
             attempts: attemptItems,
             onSelectAttempt: (selectedAttempt) => {
