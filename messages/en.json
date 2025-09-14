@@ -197,11 +197,14 @@
     "selectPlaceholder": "Select...",
     "table": {
       "case": "Case",
+      "name": "Name",
       "examType": "Exam Type",
       "disease": "Disease Tag",
       "difficulty": "Difficulty",
       "status": "Status",
       "createdAt": "Created",
+      "attempts": "Attempts",
+      "myDifficulty": "My Difficulty",
       "adminTags": "Admin Tags",
       "userTags": "User Tags",
       "actions": "Actions"
@@ -300,6 +303,17 @@
     "tagDescriptionPlaceholder": "Optional",
     "createTag": "Create Tag"
     ,
-    "editTags": "Update Tags"
+    "editTags": "Update Tags",
+    "filters": {
+      "search": "Search",
+      "searchPlaceholder": "Search by name...",
+      "status": "Status",
+      "exam": "Exam",
+      "disease": "Disease",
+      "difficulty": "Difficulty",
+      "any": "Any",
+      "reset": "Reset",
+      "apply": "Apply"
+    }
   }
 }

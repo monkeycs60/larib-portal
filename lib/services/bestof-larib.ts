@@ -41,11 +41,54 @@ export type CaseDisplayTag = { id: string; name: string; color: string; descript
 export type ClinicalCaseWithDisplayTags = Omit<ClinicalCaseListItem, 'tags'> & {
   adminTags: CaseDisplayTag[]
   userTags: CaseDisplayTag[]
+  attemptsCount?: number
+  personalDifficulty?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | null
 }
 
-export async function listClinicalCasesWithDisplayTags(userId?: string | null): Promise<ClinicalCaseWithDisplayTags[]> {
+export type CaseListFilters = {
+  name?: string
+  status?: 'DRAFT' | 'PUBLISHED'
+  examTypeId?: string
+  diseaseTagId?: string
+  difficulty?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
+}
+
+export type CaseListSortField = 'name' | 'status' | 'difficulty' | 'createdAt' | 'examType' | 'diseaseTag' | 'attempts' | 'personalDifficulty'
+export type CaseListSort = { field?: CaseListSortField; direction?: 'asc' | 'desc' }
+
+export async function listClinicalCasesWithDisplayTags(userId?: string | null, filters?: CaseListFilters, sort?: CaseListSort): Promise<ClinicalCaseWithDisplayTags[]> {
+  const where: Parameters<typeof prisma.clinicalCase.findMany>[0]['where'] = {
+    name: filters?.name ? { contains: filters.name, mode: 'insensitive' } : undefined,
+    status: filters?.status ?? undefined,
+    examTypeId: filters?.examTypeId ?? undefined,
+    diseaseTagId: filters?.diseaseTagId ?? undefined,
+    difficulty: filters?.difficulty ?? undefined,
+  }
+
+  const orderBy: Parameters<typeof prisma.clinicalCase.findMany>[0]['orderBy'] = (() => {
+    const dir = sort?.direction ?? 'desc'
+    switch (sort?.field) {
+      case 'name':
+        return { name: dir }
+      case 'status':
+        return { status: dir }
+      case 'difficulty':
+        return { difficulty: dir }
+      case 'createdAt':
+        return { createdAt: dir }
+      case 'examType':
+        return { examType: { name: dir } }
+      case 'diseaseTag':
+        return { diseaseTag: { name: dir } }
+      // attempts and personalDifficulty are sorted in-memory below
+      default:
+        return { createdAt: 'desc' as const }
+    }
+  })()
+
   const rows = await prisma.clinicalCase.findMany({
-    orderBy: { createdAt: 'desc' },
+    where,
+    orderBy,
     select: {
       id: true,
       name: true,
@@ -65,7 +108,7 @@ export async function listClinicalCasesWithDisplayTags(userId?: string | null): 
       },
     },
   })
-  return rows.map((r) => ({
+  let base: ClinicalCaseWithDisplayTags[] = rows.map((r) => ({
     id: r.id,
     name: r.name,
     difficulty: r.difficulty,
@@ -79,6 +122,34 @@ export async function listClinicalCasesWithDisplayTags(userId?: string | null): 
     adminTags: r.adminTags.map((at) => ({ id: at.tag.id, name: at.tag.name, color: at.tag.color, description: at.tag.description ?? null })),
     userTags: r.userTags.map((ut) => ({ id: ut.tag.id, name: ut.tag.name, color: ut.tag.color, description: ut.tag.description ?? null })),
   }))
+
+  // Enrich with attempts count and personalDifficulty for the user
+  if (userId && base.length > 0) {
+    const caseIds = base.map((b) => b.id)
+    const [attempts, settings] = await Promise.all([
+      prisma.caseAttempt.groupBy({ by: ['caseId'], where: { userId, caseId: { in: caseIds } }, _count: { _all: true } }),
+      prisma.userCaseSettings.findMany({ where: { userId, caseId: { in: caseIds } }, select: { caseId: true, personalDifficulty: true } }),
+    ])
+    const attemptsMap = new Map<string, number>(attempts.map((a) => [a.caseId, a._count._all]))
+    const pdMap = new Map<string, 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | null>(settings.map((s) => [s.caseId, s.personalDifficulty]))
+    base = base.map((b) => ({
+      ...b,
+      attemptsCount: attemptsMap.get(b.id) ?? 0,
+      personalDifficulty: pdMap.get(b.id) ?? null,
+    }))
+  }
+
+  // In-memory sort for enriched fields
+  if (sort?.field === 'attempts') {
+    const dir = sort.direction === 'asc' ? 1 : -1
+    base.sort((a, b) => ((a.attemptsCount ?? 0) - (b.attemptsCount ?? 0)) * dir)
+  } else if (sort?.field === 'personalDifficulty') {
+    const order = { BEGINNER: 0, INTERMEDIATE: 1, ADVANCED: 2 } as const
+    const dir = sort.direction === 'asc' ? 1 : -1
+    base.sort((a, b) => ((order[a.personalDifficulty ?? 'BEGINNER'] - order[b.personalDifficulty ?? 'BEGINNER']) * dir))
+  }
+
+  return base
 }
 
 export type ExamType = { id: string; name: string }

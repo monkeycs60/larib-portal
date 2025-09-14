@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server'
-import { listClinicalCasesWithDisplayTags, listExamTypes, listDiseaseTags } from '@/lib/services/bestof-larib'
+import { listClinicalCasesWithDisplayTags, listExamTypes, listDiseaseTags, type CaseListFilters, type CaseListSortField } from '@/lib/services/bestof-larib'
 import { getTypedSession } from '@/lib/auth-helpers'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -9,12 +9,23 @@ import { Eye, Pencil, Plus } from 'lucide-react'
 import DeleteCaseButton from './components/delete-case-button'
 import CreateCaseDialog from './components/create-case-dialog'
 import TagManagerDialog from './components/tag-manager-dialog'
+import FiltersBar from './components/filters-bar'
+import SortHeader from './components/sort-header'
 
-export default async function BestofLaribPage() {
+export default async function BestofLaribPage({ searchParams }: { searchParams?: Record<string, string | string[] | undefined> }) {
   const t = await getTranslations('bestof')
   const session = await getTypedSession()
+  const filters: CaseListFilters = {
+    name: typeof searchParams?.q === 'string' ? searchParams?.q : undefined,
+    status: typeof searchParams?.status === 'string' && ['PUBLISHED','DRAFT'].includes(searchParams.status) ? (searchParams.status as 'PUBLISHED' | 'DRAFT') : undefined,
+    examTypeId: typeof searchParams?.examTypeId === 'string' ? searchParams?.examTypeId : undefined,
+    diseaseTagId: typeof searchParams?.diseaseTagId === 'string' ? searchParams?.diseaseTagId : undefined,
+    difficulty: typeof searchParams?.difficulty === 'string' && ['BEGINNER','INTERMEDIATE','ADVANCED'].includes(searchParams.difficulty) ? (searchParams.difficulty as 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED') : undefined,
+  }
+  const sortField = typeof searchParams?.sort === 'string' ? (searchParams.sort as CaseListSortField) : undefined
+  const sortDirection = typeof searchParams?.dir === 'string' && (searchParams.dir === 'asc' || searchParams.dir === 'desc') ? (searchParams.dir) : undefined
   const [cases, examTypes, diseaseTags] = await Promise.all([
-    listClinicalCasesWithDisplayTags(session?.user?.id),
+    listClinicalCasesWithDisplayTags(session?.user?.id, filters, { field: sortField, direction: sortDirection }),
     listExamTypes(),
     listDiseaseTags(),
   ])
@@ -32,16 +43,20 @@ export default async function BestofLaribPage() {
         ) : null}
       </div>
 
+      <FiltersBar examTypes={examTypes} diseaseTags={diseaseTags} />
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t('table.status')}</TableHead>
-              <TableHead>{t('table.case')}</TableHead>
-              <TableHead>{t('table.examType')}</TableHead>
-              <TableHead>{t('table.disease')}</TableHead>
-              <TableHead>{t('table.difficulty')}</TableHead>
-              <TableHead>{t('table.createdAt')}</TableHead>
+              <TableHead><SortHeader field="status" label={t('table.status')} /></TableHead>
+              <TableHead><SortHeader field="name" label={t('table.name')} /></TableHead>
+              <TableHead><SortHeader field="examType" label={t('table.examType')} /></TableHead>
+              <TableHead><SortHeader field="diseaseTag" label={t('table.disease')} /></TableHead>
+              <TableHead><SortHeader field="difficulty" label={t('table.difficulty')} /></TableHead>
+              <TableHead><SortHeader field="createdAt" label={t('table.createdAt')} /></TableHead>
+              {session?.user?.id ? (<TableHead><SortHeader field="attempts" label={t('table.attempts')} /></TableHead>) : null}
+              {session?.user?.id ? (<TableHead><SortHeader field="personalDifficulty" label={t('table.myDifficulty')} /></TableHead>) : null}
               <TableHead>{isAdmin ? t('table.adminTags') : t('table.userTags')}</TableHead>
               <TableHead className="text-right">{t('table.actions')}</TableHead>
             </TableRow>
@@ -49,7 +64,7 @@ export default async function BestofLaribPage() {
           <TableBody>
             {cases.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center text-sm text-muted-foreground">
+                <TableCell colSpan={6 + (session?.user?.id ? 2 : 0) + 2} className="text-center text-sm text-muted-foreground">
                   {t('empty')}
                 </TableCell>
               </TableRow>
@@ -84,6 +99,26 @@ export default async function BestofLaribPage() {
                     </Badge>
                   </TableCell>
                   <TableCell>{new Date(caseItem.createdAt).toLocaleDateString()}</TableCell>
+                  {session?.user?.id ? (
+                    <TableCell>{typeof caseItem.attemptsCount === 'number' ? caseItem.attemptsCount : 0}</TableCell>
+                  ) : null}
+                  {session?.user?.id ? (
+                    <TableCell>
+                      {caseItem.personalDifficulty ? (
+                        <Badge variant="outline" className={
+                          caseItem.personalDifficulty === 'BEGINNER'
+                            ? 'border-green-500 text-green-700'
+                            : caseItem.personalDifficulty === 'INTERMEDIATE'
+                            ? 'border-amber-500 text-amber-700'
+                            : 'border-red-500 text-red-700'
+                        }>
+                          {t(`difficulty.${(caseItem.personalDifficulty === 'BEGINNER' ? 'beginner' : caseItem.personalDifficulty === 'INTERMEDIATE' ? 'intermediate' : 'advanced')}`)}
+                        </Badge>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                  ) : null}
                   <TableCell>
                     <div className="flex items-center gap-2 justify-between">
                       <div className="flex flex-wrap gap-1">

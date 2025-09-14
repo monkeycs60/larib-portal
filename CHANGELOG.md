@@ -391,3 +391,18 @@ Notes:
 - Updated files:
   - `messages/{en,fr}.json` update `bestof.editTags` translations.
   - `app/[locale]/bestof-larib/components/tag-manager-dialog.tsx` calls `router.refresh()` on successful tag save.
+## Feature: Bestof list filters, sorting, and user stats
+
+- Name: Filters + sortable headers + attempts/difficulty columns
+- What it does:
+  - Adds a filters bar above the table (search by name, Status, Exam, Disease, Difficulty). Filters can be combined.
+  - Makes column headers sortable (Name, Status, Exam, Disease, Difficulty, Created, Attempts, My Difficulty).
+  - Shows per-user Attempts count and My Difficulty in the list.
+- How to use:
+  - Use the search and selects above the list, then click Apply. Click Reset to clear filters. Click any column header to sort; click again to toggle direction.
+- Updated files:
+  - `app/[locale]/bestof-larib/page.tsx` reads URL params and renders new columns.
+  - `app/[locale]/bestof-larib/components/filters-bar.tsx` client filters toolbar.
+  - `app/[locale]/bestof-larib/components/sort-header.tsx` client header sort control.
+  - `lib/services/bestof-larib.ts` supports filters/sort; enriches with attempts count and personal difficulty.
+  - `messages/{en,fr}.json` adds table labels and filters labels.

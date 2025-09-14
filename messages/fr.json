@@ -195,11 +195,14 @@
     "selectPlaceholder": "Sélectionner...",
     "table": {
       "case": "Cas",
+      "name": "Nom",
       "examType": "Type d'examen",
       "disease": "Catégorie / maladie",
       "difficulty": "Difficulté",
       "status": "Statut",
       "createdAt": "Créé le",
+      "attempts": "Essais",
+      "myDifficulty": "Mon niveau",
       "adminTags": "Tags admin",
       "userTags": "Tags utilisateur",
       "actions": "Actions"
@@ -298,6 +301,17 @@
     "tagDescriptionPlaceholder": "Optionnel",
     "createTag": "Créer le tag"
     ,
-    "editTags": "Mettre à jour les tags"
+    "editTags": "Mettre à jour les tags",
+    "filters": {
+      "search": "Recherche",
+      "searchPlaceholder": "Rechercher par nom...",
+      "status": "Statut",
+      "exam": "Examen",
+      "disease": "Pathologie",
+      "difficulty": "Difficulté",
+      "any": "Tous",
+      "reset": "Réinitialiser",
+      "apply": "Appliquer"
+    }
   }
 }
