@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server'
-import { listClinicalCases, listExamTypes, listDiseaseTags } from '@/lib/services/bestof-larib'
+import { listClinicalCasesWithDisplayTags, listExamTypes, listDiseaseTags } from '@/lib/services/bestof-larib'
 import { getTypedSession } from '@/lib/auth-helpers'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -12,9 +12,9 @@ import TagManagerDialog from './components/tag-manager-dialog'
 
 export default async function BestofLaribPage() {
   const t = await getTranslations('bestof')
-  const [session, cases, examTypes, diseaseTags] = await Promise.all([
-    getTypedSession(),
-    listClinicalCases(),
+  const session = await getTypedSession()
+  const [cases, examTypes, diseaseTags] = await Promise.all([
+    listClinicalCasesWithDisplayTags(session?.user?.id),
     listExamTypes(),
     listDiseaseTags(),
   ])
@@ -85,15 +85,24 @@ export default async function BestofLaribPage() {
                   </TableCell>
                   <TableCell>{new Date(c.createdAt).toLocaleDateString()}</TableCell>
                   <TableCell>
-                    <TagManagerDialog
-                      mode={isAdmin ? 'admin' : 'user'}
-                      caseId={c.id}
-                      trigger={
-                        <Button type="button" size="icon" variant="ghost" aria-label={isAdmin ? 'add admin tag' : 'add user tag'}>
-                          <Plus />
-                        </Button>
-                      }
-                    />
+                    <div className="flex items-center gap-2 justify-between">
+                      <div className="flex flex-wrap gap-1">
+                        {(isAdmin ? c.adminTags : c.userTags).map((tag) => (
+                          <Badge key={tag.id} className="border-transparent text-white" style={{ backgroundColor: tag.color }}>
+                            {tag.name}
+                          </Badge>
+                        ))}
+                      </div>
+                      <TagManagerDialog
+                        mode={isAdmin ? 'admin' : 'user'}
+                        caseId={c.id}
+                        trigger={
+                          <Button type="button" size="icon" variant="ghost" aria-label={isAdmin ? 'add admin tag' : 'add user tag'}>
+                            <Plus />
+                          </Button>
+                        }
+                      />
+                    </div>
                   </TableCell>
                   <TableCell className="text-right space-x-2">
                     <Link href={`/bestof-larib/${c.id}`}>

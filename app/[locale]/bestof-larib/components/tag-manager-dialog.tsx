@@ -50,7 +50,8 @@ export default function TagManagerDialog({
 
   const listTags = useAction(mode === 'admin' ? listAdminTagsAction : listUserTagsAction, {
     onSuccess(res) {
-      setTags((res.data as any) ?? [])
+      const data = Array.isArray(res.data) ? (res.data as Tag[]) : []
+      setTags(data)
     },
     onError({ error }) {
       const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError')
@@ -60,7 +61,8 @@ export default function TagManagerDialog({
 
   const getCaseTagIds = useAction(mode === 'admin' ? getCaseAdminTagIdsAction : getCaseUserTagIdsAction, {
     onSuccess(res) {
-      setSelectedIds((res.data as string[]) ?? [])
+      const data = Array.isArray(res.data) ? (res.data as string[]) : []
+      setSelectedIds(data)
     },
   })
 
@@ -90,7 +92,7 @@ export default function TagManagerDialog({
 
   const listCasesByTag = useAction(mode === 'admin' ? listCasesByAdminTagAction : listCasesByUserTagAction, {
     onSuccess(res) {
-      const rows = (res.data as any[]) ?? []
+      const rows = Array.isArray(res.data) ? (res.data as { id: string; name: string; createdAt: string }[]) : []
       setActiveTagCases(rows.map((r) => ({ id: r.id, name: r.name, createdAt: r.createdAt })))
     },
   })
@@ -128,26 +130,27 @@ export default function TagManagerDialog({
       <DialogTrigger asChild>
         {trigger ?? <Button size="icon" variant="ghost">+</Button>}
       </DialogTrigger>
-      <DialogContent className="max-w-[900px] w-full">
+      <DialogContent className="w-[900px] max-w-[900px] h-[600px] overflow-hidden">
         <DialogHeader>
           <DialogTitle>
             {mode === 'admin' ? t('table.adminTags') : t('caseView.myTags')}
           </DialogTitle>
         </DialogHeader>
-        <Tabs defaultValue="assign">
+        <div className="flex h-[calc(600px-70px)] flex-col">
+        <Tabs defaultValue="assign" className="flex-1 flex flex-col overflow-hidden">
           <TabsList>
             <TabsTrigger value="assign">{t('assignTagsTab') || 'Assign'}</TabsTrigger>
             <TabsTrigger value="manage">{t('manageTagsTab') || 'Manage'}</TabsTrigger>
             <TabsTrigger value="cases">{t('casesByTagTab') || 'Cases'}</TabsTrigger>
           </TabsList>
-          <TabsContent value="assign" className="mt-4">
+          <TabsContent value="assign" className="mt-4 flex-1 overflow-y-auto pr-1">
             {isLoading ? (
               <div className="text-sm text-muted-foreground">Loading...</div>
             ) : (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-2">
                   {tags.map((tag) => (
-                    <label key={tag.id} className="flex items-center gap-2 p-2 rounded border hover:bg-accent/50">
+                    <label key={tag.id} className="flex items-start gap-2 p-2 rounded border hover:bg-accent/50">
                       <input
                         type="checkbox"
                         checked={selectedIds.includes(tag.id)}
@@ -156,9 +159,14 @@ export default function TagManagerDialog({
                           setSelectedIds((prev) => (checked ? [...prev, tag.id] : prev.filter((id) => id !== tag.id)))
                         }}
                       />
-                      <span className="inline-flex items-center gap-2">
-                        <span className="size-3 rounded" style={{ backgroundColor: tag.color }} />
-                        <span className="text-sm font-medium">{tag.name}</span>
+                      <span className="inline-flex flex-col gap-1">
+                        <span className="inline-flex items-center gap-2">
+                          <span className="size-3 rounded" style={{ backgroundColor: tag.color }} />
+                          <span className="text-sm font-medium">{tag.name}</span>
+                        </span>
+                        {tag.description ? (
+                          <span className="text-[11px] leading-4 text-muted-foreground">{tag.description}</span>
+                        ) : null}
                       </span>
                     </label>
                   ))}
@@ -180,7 +188,7 @@ export default function TagManagerDialog({
               </div>
             )}
           </TabsContent>
-          <TabsContent value="manage" className="mt-4">
+          <TabsContent value="manage" className="mt-4 flex-1 overflow-y-auto pr-1">
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-2 max-h-72 overflow-y-auto pr-2">
                 {tags.map((tag) => (
@@ -222,14 +230,17 @@ export default function TagManagerDialog({
                 </div>
                 <div className="flex justify-end">
                   <Button onClick={onCreateTag} disabled={ensureTag.isExecuting || !newName.trim()}>
-                    {ensureTag.isExecuting ? t('saving') : t('create')}
+                    {ensureTag.isExecuting ? t('saving') : t('createTag')}
                   </Button>
                 </div>
               </div>
             </div>
           </TabsContent>
-          <TabsContent value="cases" className="mt-4">
+          <TabsContent value="cases" className="mt-4 flex-1 overflow-y-auto pr-1">
             <div className="space-y-3">
+              <div className="text-[12px] text-muted-foreground">
+                {t('casesTabInfo') || 'Select a tag to see which cases use it.'}
+              </div>
               <div className="flex items-center gap-2">
                 <select
                   className="border rounded px-2 py-1 text-sm bg-transparent"
@@ -276,8 +287,8 @@ export default function TagManagerDialog({
             </div>
           </TabsContent>
         </Tabs>
+        </div>
       </DialogContent>
     </Dialog>
   )
 }
-

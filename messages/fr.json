@@ -288,11 +288,13 @@
     "assignTagsTab": "Assigner",
     "manageTagsTab": "Gérer",
     "casesByTagTab": "Cas",
+    "casesTabInfo": "Sélectionnez un tag pour voir sur quels cas il est utilisé.",
     "createNewTagLabel": "Créer un nouveau tag",
     "tagNameLabel": "Nom",
     "tagNamePlaceholder": "ex: Incontournable",
     "tagColorLabel": "Couleur",
     "tagDescriptionLabel": "Description",
-    "tagDescriptionPlaceholder": "Optionnel"
+    "tagDescriptionPlaceholder": "Optionnel",
+    "createTag": "Créer le tag"
   }
 }

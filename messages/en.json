@@ -290,11 +290,13 @@
     "assignTagsTab": "Assign",
     "manageTagsTab": "Manage",
     "casesByTagTab": "Cases",
+    "casesTabInfo": "Select a tag to review which cases are flagged with it.",
     "createNewTagLabel": "Create new tag",
     "tagNameLabel": "Name",
     "tagNamePlaceholder": "e.g. Must-know",
     "tagColorLabel": "Color",
     "tagDescriptionLabel": "Description",
-    "tagDescriptionPlaceholder": "Optional"
+    "tagDescriptionPlaceholder": "Optional",
+    "createTag": "Create Tag"
   }
 }
