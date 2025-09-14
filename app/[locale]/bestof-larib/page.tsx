@@ -51,14 +51,14 @@ export default async function BestofLaribPage({ searchParams }: { searchParams?:
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead><SortHeader field="status" label={t('table.status')} /></TableHead>
-              <TableHead><SortHeader field="name" label={t('table.name')} /></TableHead>
-              <TableHead><SortHeader field="examType" label={t('table.examType')} /></TableHead>
-              <TableHead><SortHeader field="diseaseTag" label={t('table.disease')} /></TableHead>
-              <TableHead><SortHeader field="difficulty" label={t('table.difficulty')} /></TableHead>
-              <TableHead><SortHeader field="createdAt" label={t('table.createdAt')} /></TableHead>
-              {session?.user?.id ? (<TableHead><SortHeader field="attempts" label={t('table.attempts')} /></TableHead>) : null}
-              {session?.user?.id ? (<TableHead><SortHeader field="personalDifficulty" label={t('table.myDifficulty')} /></TableHead>) : null}
+              <TableHead><SortHeader field="status" label={t('table.status')} activeField={sortField} direction={sortDirection} /></TableHead>
+              <TableHead><SortHeader field="name" label={t('table.name')} activeField={sortField} direction={sortDirection} /></TableHead>
+              <TableHead><SortHeader field="examType" label={t('table.examType')} activeField={sortField} direction={sortDirection} /></TableHead>
+              <TableHead><SortHeader field="diseaseTag" label={t('table.disease')} activeField={sortField} direction={sortDirection} /></TableHead>
+              <TableHead><SortHeader field="difficulty" label={t('table.difficulty')} activeField={sortField} direction={sortDirection} /></TableHead>
+              <TableHead><SortHeader field="createdAt" label={t('table.createdAt')} activeField={sortField} direction={sortDirection} /></TableHead>
+              {session?.user?.id ? (<TableHead><SortHeader field="attempts" label={t('table.attempts')} activeField={sortField} direction={sortDirection} /></TableHead>) : null}
+              {session?.user?.id ? (<TableHead><SortHeader field="personalDifficulty" label={t('table.myDifficulty')} activeField={sortField} direction={sortDirection} /></TableHead>) : null}
               <TableHead>{isAdmin ? t('table.adminTags') : t('table.userTags')}</TableHead>
               <TableHead className="text-right">{t('table.actions')}</TableHead>
             </TableRow>
