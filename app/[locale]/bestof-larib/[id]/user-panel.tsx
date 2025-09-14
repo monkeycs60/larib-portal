@@ -18,6 +18,7 @@ import { useAction } from 'next-safe-action/hooks'
 import { saveAttemptAction, upsertSettingsAction, validateAttemptAction } from './actions'
 import { CheckCircle2, Eye } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { getActionErrorMessage } from '@/lib/ui/safe-action-error'
 
 type Props = {
   isAdmin: boolean
@@ -53,15 +54,15 @@ export default function CaseInteractionPanel({ isAdmin, defaultTags, createdAt, 
   const [lastAttemptId, setLastAttemptId] = useState<string | null>(null)
 
   const { execute: execSettings } = useAction(upsertSettingsAction, {
-    onError(err: unknown) { const m = (err as any)?.serverError ?? (err as any)?.message ?? t('actionError'); toast.error(m) },
+    onError({ error }) { toast.error(getActionErrorMessage(error, t('actionError'))) },
   })
   const { execute: execValidate, isExecuting: validating } = useAction(validateAttemptAction, {
-    onError(err: unknown) { const m = (err as any)?.serverError ?? (err as any)?.message ?? t('actionError'); toast.error(m) },
+    onError({ error }) { toast.error(getActionErrorMessage(error, t('actionError'))) },
     onSuccess() { toast.success(t('caseView.validated')) },
   })
 
   // Debounced auto-save for personal settings (no useEffect)
-  const saveTimerRef = useRef<any>(null)
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   function scheduleSave(next?: { tags?: string[]; comments?: string; difficulty?: typeof difficulty }) {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
     saveTimerRef.current = setTimeout(async () => {
@@ -90,20 +91,20 @@ export default function CaseInteractionPanel({ isAdmin, defaultTags, createdAt, 
           <div className="space-y-2">
             <div className="font-medium">{t('caseView.attempts')}</div>
             <div className="flex flex-col gap-2 max-h-44 overflow-auto pr-1">
-              {attempts.filter(a => !!a.validatedAt).length === 0 ? (
+              {attempts.filter((attempt) => !!attempt.validatedAt).length === 0 ? (
                 <div className="text-sm text-muted-foreground">{t('caseView.noAttempts')}</div>
               ) : attempts
-                  .filter(a => !!a.validatedAt)
-                  .sort((a,b) => new Date(a.createdAt as any).getTime() - new Date(b.createdAt as any).getTime())
-                  .map((a, idx, arr) => {
-                    const num = idx + 1
-                    const date = new Date(a.createdAt)
+                  .filter((attempt) => !!attempt.validatedAt)
+                  .sort((leftAttempt, rightAttempt) => new Date(leftAttempt.createdAt).getTime() - new Date(rightAttempt.createdAt).getTime())
+                  .map((attempt, index, allAttempts) => {
+                    const num = index + 1
+                    const date = new Date(attempt.createdAt)
                     const dt = `${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} ${date.toLocaleDateString()}`
                     return (
                       <button
-                        key={a.id}
+                        key={attempt.id}
                         type="button"
-                        onClick={() => onSelectAttempt?.(a)}
+                        onClick={() => onSelectAttempt?.(attempt)}
                         className={cn("w-full rounded border p-2 text-left hover:bg-accent/50 transition", "flex items-center justify-between")}
                       >
                         <div className="text-sm">
@@ -150,7 +151,7 @@ export default function CaseInteractionPanel({ isAdmin, defaultTags, createdAt, 
           {hideActions ? null : (
             <div className="flex flex-col gap-2 pt-1">
               <Button onClick={async () => { if (isAdmin) return; await execSettings({ caseId, tags, comments: comment, personalDifficulty: difficulty || undefined }); toast.success(t('caseView.savedDraft')) }} disabled={isAdmin}>{t('saveProgress')}</Button>
-              <Button onClick={() => { if (isAdmin) return; const id = lastAttemptId ?? (typeof window !== 'undefined' ? (window as any).__lastAttemptId : null); if (!id) { toast.error(t('errors.fieldsRequired')); return } execValidate({ attemptId: id }) }} disabled={isAdmin || validating} variant="secondary">{t('caseView.validateCase')}</Button>
+              <Button onClick={() => { if (isAdmin) return; const id = lastAttemptId ?? (typeof window !== 'undefined' ? window.__lastAttemptId : null); if (!id) { toast.error(t('errors.fieldsRequired')); return } execValidate({ attemptId: id }) }} disabled={isAdmin || validating} variant="secondary">{t('caseView.validateCase')}</Button>
             </div>
           )}
           {showStartNewAttempt ? (
@@ -188,8 +189,8 @@ export function AnalysisForm({ isAdmin, caseId, values, onChange, hideInlineSave
     if (isAdmin) return
     const res = await execSave({ caseId, ...values })
     if (res?.data?.attemptId) {
-      // Ensure outer panel sees last attempt id if mounted together
-      try { (window as any).__lastAttemptId = res.data.attemptId } catch {}
+      // Ensure outer panel sees last attempt id if mounted together (no any casting)
+      try { window.__lastAttemptId = res.data.attemptId } catch {}
     }
     onChange?.(values)
   }

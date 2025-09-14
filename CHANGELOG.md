@@ -353,3 +353,18 @@ Notes:
     - New services in `lib/services/bestof-larib-tags.ts` and actions in `app/[locale]/bestof-larib/actions.ts`.
   - UI: `TagManagerDialog` in `app/[locale]/bestof-larib/components/tag-manager-dialog.tsx` using shadcn/ui.
   - Added generic `Loader` component in `components/ui/loader.tsx` and used in modal for smooth loading states.
+## Code Quality: Bestof Larib – Typing & Naming Cleanup (PR1)
+
+- Name: Bestof Larib code quality pass – typing and naming
+- What it does: Removes unsafe `any`/`as any` in the Bestof feature, improves variable naming in array helpers, and adds a small helper for typed action error messages.
+- How to use it: No user-facing changes. Build and run as usual. Behavior and UI remain identical.
+- Updated files:
+  - `app/[locale]/bestof-larib/[id]/page.tsx`: Strongly types `attempts` using `CaseAttemptSummary`.
+  - `app/[locale]/bestof-larib/[id]/work-area.tsx`: Typed attempts, safer error handling, clearer variable names.
+  - `app/[locale]/bestof-larib/[id]/user-panel.tsx`: Typed debounce timer, safer error handling, removed window `as any`, clearer variable names.
+  - `app/[locale]/bestof-larib/page.tsx`: Replaces `c` with `caseItem` in maps.
+  - `app/[locale]/bestof-larib/components/create-case-dialog.tsx`: Descriptive map variables for exam/disease options.
+  - `app/[locale]/bestof-larib/components/tag-manager-dialog.tsx`: Descriptive map/filter variables throughout.
+  - `lib/ui/safe-action-error.ts`: New tiny utility to extract a message from `next-safe-action` errors safely.
+  - `types/global.d.ts`: Adds `window.__lastAttemptId?: string` to remove `as any` casts.
+  - `cleanbestof.md`: Plan for PR1–PR3 to continue cleanup (Zustand + props refactor next).

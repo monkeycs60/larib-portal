@@ -54,40 +54,40 @@ export default async function BestofLaribPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              cases.map((c) => (
-                <TableRow key={c.id}>
+              cases.map((caseItem) => (
+                <TableRow key={caseItem.id}>
                   <TableCell>
-                    {c.status === 'PUBLISHED' ? (
+                    {caseItem.status === 'PUBLISHED' ? (
                       <Badge className="bg-green-500 text-white border-transparent">{t('status.published')}</Badge>
                     ) : (
                       <Badge className="bg-yellow-400 text-black border-transparent">{t('status.draft')}</Badge>
                     )}
                   </TableCell>
-                  <TableCell className="font-medium">{c.name}</TableCell>
-                  <TableCell>{c.examType?.name ?? '-'}</TableCell>
+                  <TableCell className="font-medium">{caseItem.name}</TableCell>
+                  <TableCell>{caseItem.examType?.name ?? '-'}</TableCell>
                   <TableCell>
-                    {c.diseaseTag?.name ? (
-                      <Badge variant="secondary">{c.diseaseTag.name}</Badge>
+                    {caseItem.diseaseTag?.name ? (
+                      <Badge variant="secondary">{caseItem.diseaseTag.name}</Badge>
                     ) : (
                       '-'
                     )}
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className={
-                      c.difficulty === 'BEGINNER'
+                      caseItem.difficulty === 'BEGINNER'
                         ? 'border-green-500 text-green-700'
-                        : c.difficulty === 'INTERMEDIATE'
+                        : caseItem.difficulty === 'INTERMEDIATE'
                         ? 'border-amber-500 text-amber-700'
                         : 'border-red-500 text-red-700'
                     }>
-                      {t(`difficulty.${(c.difficulty === 'BEGINNER' ? 'beginner' : c.difficulty === 'INTERMEDIATE' ? 'intermediate' : 'advanced')}`)}
+                      {t(`difficulty.${(caseItem.difficulty === 'BEGINNER' ? 'beginner' : caseItem.difficulty === 'INTERMEDIATE' ? 'intermediate' : 'advanced')}`)}
                     </Badge>
                   </TableCell>
-                  <TableCell>{new Date(c.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell>{new Date(caseItem.createdAt).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2 justify-between">
                       <div className="flex flex-wrap gap-1">
-                        {(isAdmin ? c.adminTags : c.userTags).map((tag) => (
+                        {(isAdmin ? caseItem.adminTags : caseItem.userTags).map((tag) => (
                           <Badge key={tag.id} className="border-transparent text-white" style={{ backgroundColor: tag.color }}>
                             {tag.name}
                           </Badge>
@@ -95,7 +95,7 @@ export default async function BestofLaribPage() {
                       </div>
                       <TagManagerDialog
                         mode={isAdmin ? 'admin' : 'user'}
-                        caseId={c.id}
+                        caseId={caseItem.id}
                         trigger={
                           <Button type="button" size="icon" variant="ghost" aria-label={isAdmin ? 'add admin tag' : 'add user tag'}>
                             <Plus />
@@ -105,7 +105,7 @@ export default async function BestofLaribPage() {
                     </div>
                   </TableCell>
                   <TableCell className="text-right space-x-2">
-                    <Link href={`/bestof-larib/${c.id}`}>
+                    <Link href={`/bestof-larib/${caseItem.id}`}>
                       <Button size="sm" variant="secondary"><Eye />{t('view')}</Button>
                     </Link>
                     {isAdmin ? (
@@ -114,20 +114,20 @@ export default async function BestofLaribPage() {
                           examTypes={examTypes}
                           diseaseTags={diseaseTags}
                           clinicalCase={{
-                            id: c.id,
-                            name: c.name,
-                            difficulty: c.difficulty,
-                            status: c.status,
-                            tags: c.tags ?? [],
-                            pdfUrl: c.pdfUrl ?? null,
-                            pdfKey: c.pdfKey ?? null,
-                            textContent: c.textContent ?? null,
-                            examType: c.examType ?? null,
-                            diseaseTag: c.diseaseTag ?? null,
+                            id: caseItem.id,
+                            name: caseItem.name,
+                            difficulty: caseItem.difficulty,
+                            status: caseItem.status,
+                            tags: caseItem.tags ?? [],
+                            pdfUrl: caseItem.pdfUrl ?? null,
+                            pdfKey: caseItem.pdfKey ?? null,
+                            textContent: caseItem.textContent ?? null,
+                            examType: caseItem.examType ?? null,
+                            diseaseTag: caseItem.diseaseTag ?? null,
                           }}
                           trigger={<Button size="sm" variant="outline"><Pencil />{t('edit')}</Button>}
                         />
-                        <DeleteCaseButton id={c.id} />
+                        <DeleteCaseButton id={caseItem.id} />
                       </>
                     ) : null}
                   </TableCell>

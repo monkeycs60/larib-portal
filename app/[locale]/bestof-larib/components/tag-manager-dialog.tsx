@@ -84,7 +84,7 @@ export default function TagManagerDialog({
       if (!res.data) return
       const created = res.data as Tag
       setTags((prev) => {
-        const next = [...prev.filter((t) => t.id !== created.id), { ...created, caseCount: prev.find((p) => p.id === created.id)?.caseCount ?? 0 }]
+        const next = [...prev.filter((tagItem) => tagItem.id !== created.id), { ...created, caseCount: prev.find((existingTag) => existingTag.id === created.id)?.caseCount ?? 0 }]
         return next.sort((a, b) => a.name.localeCompare(b.name))
       })
       toast.success(t('updated'))
@@ -94,7 +94,7 @@ export default function TagManagerDialog({
   const listCasesByTag = useAction(mode === 'admin' ? listCasesByAdminTagAction : listCasesByUserTagAction, {
     onSuccess(res) {
       const rows = Array.isArray(res.data) ? (res.data as { id: string; name: string; createdAt: string }[]) : []
-      setActiveTagCases(rows.map((r) => ({ id: r.id, name: r.name, createdAt: r.createdAt })))
+      setActiveTagCases(rows.map((row) => ({ id: row.id, name: row.name, createdAt: row.createdAt })))
     },
   })
 
@@ -176,11 +176,14 @@ export default function TagManagerDialog({
                   ) : null}
                 </div>
                 <div className="flex gap-2">
-                  {selectedIds.map((id) => tags.find((t) => t.id === id)).filter(Boolean).map((tag) => (
-                    <Badge key={tag!.id} style={{ backgroundColor: (tag as Tag).color }} className="text-white border-transparent">
-                      {(tag as Tag).name}
-                    </Badge>
-                  ))}
+                  {selectedIds
+                    .map((id) => tags.find((tag) => tag.id === id))
+                    .filter(Boolean)
+                    .map((tagItem) => (
+                      <Badge key={tagItem!.id} style={{ backgroundColor: (tagItem as Tag).color }} className="text-white border-transparent">
+                        {(tagItem as Tag).name}
+                      </Badge>
+                    ))}
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button variant="outline" onClick={() => setOpen(false)}>{t('cancel')}</Button>
@@ -192,19 +195,19 @@ export default function TagManagerDialog({
           <TabsContent value="manage" className="mt-4 flex-1 overflow-y-auto pr-1">
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-2 max-h-72 overflow-y-auto pr-2">
-                {tags.map((tag) => (
-                  <div key={tag.id} className="flex items-start justify-between gap-2 p-2 rounded border">
+                {tags.map((tagItem) => (
+                  <div key={tagItem.id} className="flex items-start justify-between gap-2 p-2 rounded border">
                     <div className="flex items-start gap-2">
-                      <span className="mt-1 size-3 rounded" style={{ backgroundColor: tag.color }} />
+                      <span className="mt-1 size-3 rounded" style={{ backgroundColor: tagItem.color }} />
                       <div>
-                        <div className="text-sm font-medium">{tag.name}</div>
-                        {tag.description ? (
-                          <div className="text-xs text-muted-foreground">{tag.description}</div>
+                        <div className="text-sm font-medium">{tagItem.name}</div>
+                        {tagItem.description ? (
+                          <div className="text-xs text-muted-foreground">{tagItem.description}</div>
                         ) : null}
                       </div>
                     </div>
-                    {typeof tag.caseCount === 'number' ? (
-                      <div className="text-xs text-muted-foreground">{tag.caseCount} cases</div>
+                    {typeof tagItem.caseCount === 'number' ? (
+                      <div className="text-xs text-muted-foreground">{tagItem.caseCount} cases</div>
                     ) : null}
                   </div>
                 ))}
@@ -249,13 +252,13 @@ export default function TagManagerDialog({
                   onChange={(e) => void onSelectTagForCases(e.target.value)}
                 >
                   <option value="">{t('selectPlaceholder')}</option>
-                  {tags.map((tag) => (
-                    <option key={tag.id} value={tag.id}>{tag.name}</option>
+                  {tags.map((tagOption) => (
+                    <option key={tagOption.id} value={tagOption.id}>{tagOption.name}</option>
                   ))}
                 </select>
                 {activeTagId ? (
-                  <Badge style={{ backgroundColor: tags.find((t) => t.id === activeTagId)?.color }} className="text-white border-transparent">
-                    {tags.find((t) => t.id === activeTagId)?.name}
+                  <Badge style={{ backgroundColor: tags.find((tag) => tag.id === activeTagId)?.color }} className="text-white border-transparent">
+                    {tags.find((tag) => tag.id === activeTagId)?.name}
                   </Badge>
                 ) : null}
               </div>
@@ -275,10 +278,10 @@ export default function TagManagerDialog({
                       {activeTagCases.length === 0 ? (
                         <TableRow><TableCell colSpan={2} className="text-sm text-muted-foreground">{t('empty')}</TableCell></TableRow>
                       ) : (
-                        activeTagCases.map((c) => (
-                          <TableRow key={c.id}>
-                            <TableCell>{c.name}</TableCell>
-                            <TableCell>{new Date(c.createdAt).toLocaleDateString()}</TableCell>
+                        activeTagCases.map((caseItem) => (
+                          <TableRow key={caseItem.id}>
+                            <TableCell>{caseItem.name}</TableCell>
+                            <TableCell>{new Date(caseItem.createdAt).toLocaleDateString()}</TableCell>
                           </TableRow>
                         ))
                       )}

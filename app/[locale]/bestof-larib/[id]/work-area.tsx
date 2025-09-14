@@ -10,6 +10,8 @@ import { useAction } from 'next-safe-action/hooks'
 import { saveAllAction, saveAllAndValidateAction } from './actions'
 import CaseInteractionPanel from './user-panel'
 import { AnalysisForm, ClinicalReport } from './user-panel'
+import type { CaseAttemptSummary } from '@/lib/services/bestof-larib-attempts'
+import { getActionErrorMessage } from '@/lib/ui/safe-action-error'
 
 type Difficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
 
@@ -37,7 +39,7 @@ export default function WorkArea({
   defaultTags: string[]
   prefill: PrefillState | null
   right: React.ReactNode
-  attempts: Array<{ id: string; createdAt: string | Date; validatedAt: string | Date | null; lvef: string | null; kinetic: string | null; lge: string | null; finalDx: string | null; report: string | null }>
+  attempts: CaseAttemptSummary[]
 }) {
   const t = useTranslations('bestof')
 
@@ -53,20 +55,20 @@ export default function WorkArea({
   const [reportKey, setReportKey] = useState(0)
 
   const [locked, setLocked] = useState<boolean>(!!prefill?.validatedAt)
-  const [attemptItems, setAttemptItems] = useState(attempts)
+  const [attemptItems, setAttemptItems] = useState<CaseAttemptSummary[]>(attempts)
 
   const { execute: saveAll, isExecuting: saving } = useAction(saveAllAction, {
-    onError(err: unknown) { const m = (err as any)?.serverError ?? (err as any)?.message ?? t('actionError'); toast.error(m) },
+    onError({ error }) { toast.error(getActionErrorMessage(error, t('actionError'))) },
     onSuccess() { toast.success(t('caseView.savedDraft')) },
   })
   const { execute: saveAndValidate, isExecuting: validating } = useAction(saveAllAndValidateAction, {
-    onError(err: unknown) { const m = (err as any)?.serverError ?? (err as any)?.message ?? t('actionError'); toast.error(m) },
+    onError({ error }) { toast.error(getActionErrorMessage(error, t('actionError'))) },
     onSuccess(data) {
       toast.success(t('caseView.validated'))
       setLocked(true)
       const now = new Date()
       const newItem = { id: data?.attemptId ?? crypto.randomUUID(), createdAt: now, validatedAt: now, lvef: analysis.lvef ?? null, kinetic: analysis.kinetic ?? null, lge: analysis.lge ?? null, finalDx: analysis.finalDx ?? null, report: report ?? null }
-      setAttemptItems(prev => [...prev.filter(a => a.id !== newItem.id), newItem])
+      setAttemptItems(previousAttempts => [...previousAttempts.filter(attemptItem => attemptItem.id !== newItem.id), newItem])
     },
   })
 
@@ -116,12 +118,12 @@ export default function WorkArea({
           onDifficultyChange={setPersonalDifficulty}
           hideActions
           attempts={attemptItems}
-          onSelectAttempt={(att) => {
-            setAnalysis({ lvef: att.lvef ?? '', kinetic: att.kinetic ?? '', lge: att.lge ?? '', finalDx: att.finalDx ?? '' })
-            setReport(att.report ?? '')
-            setLocked(!!att.validatedAt)
-            setAnalysisKey(k => k + 1)
-            setReportKey(k => k + 1)
+          onSelectAttempt={(selectedAttempt) => {
+            setAnalysis({ lvef: selectedAttempt.lvef ?? '', kinetic: selectedAttempt.kinetic ?? '', lge: selectedAttempt.lge ?? '', finalDx: selectedAttempt.finalDx ?? '' })
+            setReport(selectedAttempt.report ?? '')
+            setLocked(!!selectedAttempt.validatedAt)
+            setAnalysisKey(key => key + 1)
+            setReportKey(key => key + 1)
           }}
           showStartNewAttempt
           onStartNewAttempt={() => {

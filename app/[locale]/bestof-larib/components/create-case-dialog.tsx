@@ -128,10 +128,10 @@ export default function CreateCaseDialog({
 		{
 			onSuccess(res) {
 				if (res.data) {
-					setExamList((prev) => [
-						...prev.filter((e) => e.id !== res.data!.id),
-						res.data!,
-					]);
+      setExamList((previous) => [
+        ...previous.filter((examType) => examType.id !== res.data!.id),
+        res.data!,
+      ]);
 					setValue('examType', res.data!.name);
 				}
 			},
@@ -141,10 +141,10 @@ export default function CreateCaseDialog({
 		useAction(createDiseaseTagAction, {
 			onSuccess(res) {
 				if (res.data)
-					setDiseaseList((prev) => [
-						...prev.filter((d) => d.id !== res.data!.id),
-						res.data!,
-					]);
+      setDiseaseList((previous) => [
+        ...previous.filter((disease) => disease.id !== res.data!.id),
+        res.data!,
+      ]);
 				setValue('diseaseTag', res.data!.name);
 			},
 		});
@@ -311,11 +311,11 @@ export default function CreateCaseDialog({
 								</div>
 								<Select {...register('examType')}>
 									<option value=''>{t('selectPlaceholder')}</option>
-									{examList.map((e) => (
-										<option key={e.id} value={e.name}>
-											{e.name}
-										</option>
-									))}
+                    {examList.map((examTypeOption) => (
+                        <option key={examTypeOption.id} value={examTypeOption.name}>
+                            {examTypeOption.name}
+                        </option>
+                    ))}
 								</Select>
 							</div>
 							<div>
@@ -352,11 +352,11 @@ export default function CreateCaseDialog({
 								</div>
 								<Select {...register('diseaseTag')}>
 									<option value=''>{t('selectPlaceholder')}</option>
-									{diseaseList.map((d) => (
-										<option key={d.id} value={d.name}>
-											{d.name}
-										</option>
-									))}
+                    {diseaseList.map((diseaseTagOption) => (
+                        <option key={diseaseTagOption.id} value={diseaseTagOption.name}>
+                            {diseaseTagOption.name}
+                        </option>
+                    ))}
 								</Select>
 							</div>
 						</div>

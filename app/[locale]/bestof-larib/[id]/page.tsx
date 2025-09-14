@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft } from 'lucide-react';
 import { getTypedSession } from '@/lib/auth-helpers';
 import WorkArea, { PrefillState } from './work-area';
+import type { CaseAttemptSummary } from '@/lib/services/bestof-larib-attempts'
 import { getUserCaseState, listUserCaseAttempts } from '@/lib/services/bestof-larib-attempts'
 
 export default async function CaseViewPage({
@@ -29,7 +30,10 @@ export default async function CaseViewPage({
 	const isAdmin = (session?.user?.role ?? 'USER') === 'ADMIN';
 
     const userId = session?.user?.id
-    const [prefill, attempts] = userId ? await Promise.all([
+    const [prefill, attempts] = userId ? await Promise.all<[
+        PrefillState,
+        CaseAttemptSummary[]
+    ]>([
         getUserCaseState({ userId, caseId: c.id }).then(s => ({
             tags: s.settings?.tags ?? [],
             comments: s.settings?.comments ?? null,
@@ -42,8 +46,8 @@ export default async function CaseViewPage({
             },
             report: s.lastAttempt?.report ?? null,
             validatedAt: s.lastAttempt?.validatedAt ? new Date(s.lastAttempt.validatedAt).toISOString() : null,
-        })),
-        listUserCaseAttempts({ userId, caseId: c.id }),
+        }) as PrefillState),
+        listUserCaseAttempts({ userId, caseId: c.id }) as Promise<CaseAttemptSummary[]>,
     ]) : [null, []]
 
     return (
@@ -79,7 +83,7 @@ export default async function CaseViewPage({
                 createdAt={c.createdAt}
                 defaultTags={c.tags ?? []}
                 prefill={prefill}
-                attempts={attempts as any}
+                attempts={attempts}
                 right={
                     <>
                         <div className='text-sm font-medium mb-2'>
