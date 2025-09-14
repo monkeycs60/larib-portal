@@ -54,3 +54,51 @@ export async function upsertUserSettings(input: { userId: string; caseId: string
   })
   return settings
 }
+
+export type UserCaseState = {
+  settings: {
+    tags: string[]
+    personalDifficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | null
+    comments: string | null
+  } | null
+  lastAttempt: {
+    id: string
+    lvef: string | null
+    kinetic: string | null
+    lge: string | null
+    finalDx: string | null
+    report: string | null
+    validatedAt: Date | null
+  } | null
+}
+
+export async function getUserCaseState(params: { userId: string; caseId: string }): Promise<UserCaseState> {
+  const [settings, lastAttempt] = await Promise.all([
+    prisma.userCaseSettings.findUnique({
+      where: { userId_caseId: { userId: params.userId, caseId: params.caseId } },
+      select: { tags: true, personalDifficulty: true, comments: true },
+    }),
+    prisma.caseAttempt.findFirst({
+      where: { userId: params.userId, caseId: params.caseId },
+      orderBy: [{ validatedAt: 'desc' }, { createdAt: 'desc' }],
+      select: { id: true, lvef: true, kinetic: true, lge: true, finalDx: true, report: true, validatedAt: true },
+    }),
+  ])
+
+  return {
+    settings: settings ? {
+      tags: settings.tags,
+      personalDifficulty: settings.personalDifficulty,
+      comments: settings.comments,
+    } : null,
+    lastAttempt: lastAttempt ? {
+      id: lastAttempt.id,
+      lvef: lastAttempt.lvef,
+      kinetic: lastAttempt.kinetic,
+      lge: lastAttempt.lge,
+      finalDx: lastAttempt.finalDx,
+      report: lastAttempt.report,
+      validatedAt: lastAttempt.validatedAt,
+    } : null,
+  }
+}

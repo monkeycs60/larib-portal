@@ -55,3 +55,57 @@ export const upsertSettingsAction = authenticatedAction
     })
     return settings
   })
+
+const SaveAllSchema = z.object({
+  caseId: z.string().min(1),
+  tags: z.array(z.string()).max(50),
+  personalDifficulty: z.enum(['BEGINNER','INTERMEDIATE','ADVANCED']).nullable(),
+  comments: z.string().nullable(),
+  analysis: z.object({ lvef: z.string().optional(), kinetic: z.string().optional(), lge: z.string().optional(), finalDx: z.string().optional() }),
+  report: z.string().optional(),
+})
+
+export const saveAllAction = authenticatedAction
+  .inputSchema(SaveAllSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    await upsertUserSettings({
+      userId: ctx.userId,
+      caseId: parsedInput.caseId,
+      tags: parsedInput.tags,
+      personalDifficulty: parsedInput.personalDifficulty ?? undefined,
+      comments: parsedInput.comments,
+    })
+    const attemptId = await saveAttempt({
+      userId: ctx.userId,
+      caseId: parsedInput.caseId,
+      lvef: parsedInput.analysis.lvef,
+      kinetic: parsedInput.analysis.kinetic,
+      lge: parsedInput.analysis.lge,
+      finalDx: parsedInput.analysis.finalDx,
+      report: parsedInput.report,
+    })
+    return { attemptId }
+  })
+
+export const saveAllAndValidateAction = authenticatedAction
+  .inputSchema(SaveAllSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    await upsertUserSettings({
+      userId: ctx.userId,
+      caseId: parsedInput.caseId,
+      tags: parsedInput.tags,
+      personalDifficulty: parsedInput.personalDifficulty ?? undefined,
+      comments: parsedInput.comments,
+    })
+    const attemptId = await saveAttempt({
+      userId: ctx.userId,
+      caseId: parsedInput.caseId,
+      lvef: parsedInput.analysis.lvef,
+      kinetic: parsedInput.analysis.kinetic,
+      lge: parsedInput.analysis.lge,
+      finalDx: parsedInput.analysis.finalDx,
+      report: parsedInput.report,
+    })
+    const ok = await validateAttempt({ userId: ctx.userId, attemptId })
+    return { attemptId, ok }
+  })

@@ -323,3 +323,19 @@ Notes:
 - Name: Bestof Links & UI Polish
 - What it does: Avoids duplicated locale in links by using i18n `Link` with locale-less paths for View/Edit, preventing `/en/en/...`. Adjusts the font-size dropdown styling so the value is not clipped.
 - Files updated: `app/[locale]/bestof-larib/page.tsx`, `app/[locale]/bestof-larib/[id]/page.tsx`, `components/ui/rich-text-editor.tsx`.
+## UI Enhancement: Bestof Case View – Collapsible sidebar, wider Case Content, unified actions
+
+- Name: Collapsible Case sidebar + unified Save/Validate
+- What it does: Makes the left “Case” panel collapsible, enlarges the right Case Content area, and consolidates actions into two buttons — “Save Progress” and “Validate Case” — shown under “My Clinical Report” (bottom-right). Saving/validation now persists personal settings (tags, difficulty, comments), analysis, and clinical report together; validation also marks the latest attempt as validated.
+- How to use it:
+  - Open any case at `/{locale}/bestof-larib/[id]`.
+  - Toggle the “Case” panel to collapse/expand and gain more space for the content.
+  - Enter analysis fields and write your report; set personal tags/difficulty/comments.
+  - Click “Save Progress” to store everything, or “Validate Case” to save + validate.
+  - When revisiting, your tags, difficulty, comments, analysis, and report are pre-filled.
+- Files updated:
+  - `app/[locale]/bestof-larib/[id]/page.tsx`: server prefill and new layout usage.
+  - `app/[locale]/bestof-larib/[id]/work-area.tsx`: new client wrapper (collapsible left column, unified actions, controlled state).
+  - `app/[locale]/bestof-larib/[id]/user-panel.tsx`: controlled settings, optional hidden internal actions; controlled AnalysisForm/ClinicalReport.
+  - `app/[locale]/bestof-larib/[id]/actions.ts`: adds `saveAllAction` and `saveAllAndValidateAction`.
+  - `lib/services/bestof-larib-attempts.ts`: adds `getUserCaseState` for prefill.

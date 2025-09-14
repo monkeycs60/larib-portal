@@ -7,8 +7,9 @@
 -  **No useEffect**: Use fetch in server components via services, or handle side effects via event handlers
 -  **No TypeScript any**: Always use strong typing (not any or as any) ; if you need custom types, reuse them via @/types/ ; never use ts ignore comments.
 -  **No OOP patterns**: Avoid classes or object-oriented approaches
--  **No Bad naming**: Use descriptive names for variables, functions, and components, it has to be explicit
+-  **No Bad naming**: Use descriptive names for variables, functions, and components, it has to be explicit. When dealing with map, filter, reduce, etc., use don't use abbreviations for mapped variables (no 'c' for 'case', no 'i' for 'item', etc.)
 -  **No Bad comments**: Never use comments to explain the code, it has to be explicit
+-  **No more than 5 props**: When a component has more than 5 props, it is a sign that it is too complex and should be refactored (or pass props as a single object).
 
 ### Required Practices
 
