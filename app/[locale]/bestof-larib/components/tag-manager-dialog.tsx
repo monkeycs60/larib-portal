@@ -1,5 +1,6 @@
 'use client'
 import { useState, type ReactNode } from 'react'
+import { useRouter } from '@/app/i18n/navigation'
 import { useTranslations } from 'next-intl'
 import { useAction } from 'next-safe-action/hooks'
 import { Button } from '@/components/ui/button'
@@ -38,6 +39,7 @@ export default function TagManagerDialog({
   trigger?: ReactNode
 }) {
   const t = useTranslations('bestof')
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [tags, setTags] = useState<Tag[]>([])
   const [selectedIds, setSelectedIds] = useState<string[]>([])
@@ -88,6 +90,10 @@ export default function TagManagerDialog({
       toast.success(t('updated'))
       // refresh counts
       void (mode === 'admin' ? listTagsAdmin.execute() : listTagsUser.execute())
+      // ensure server components re-render with fresh tags
+      router.refresh()
+      // close dialog on success
+      setOpen(false)
     },
     onError({ error }) {
       const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError')
@@ -98,6 +104,8 @@ export default function TagManagerDialog({
     onSuccess() {
       toast.success(t('updated'))
       void (mode === 'admin' ? listTagsAdmin.execute() : listTagsUser.execute())
+      router.refresh()
+      setOpen(false)
     },
     onError({ error }) {
       const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError')

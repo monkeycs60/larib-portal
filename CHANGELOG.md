@@ -379,3 +379,15 @@ Notes:
   - `app/[locale]/bestof-larib/[id]/work-area.tsx`: Groups props into `{ meta, defaults, rightPane, attempts }`.
   - `app/[locale]/bestof-larib/[id]/page.tsx`: Updated to new `WorkArea` API.
   - `app/[locale]/bestof-larib/components/tag-manager-dialog.tsx`: Fixed union typing by splitting hooks per mode; clarified types for cases list.
+## UX: Update tags label + auto-refresh (Bestof)
+
+- Name: Tag edit label and refresh on save
+- What it does:
+  - Changes the dialog action label from "Edit Tags" to "Update Tags".
+  - Refreshes the bestof-larib list after saving tags so new tags appear immediately without hard reload.
+  - Closes the Tag Manager dialog automatically on successful save.
+- How to use:
+  - Click the plus icon in the Admin/User Tags column, select tags, then click "Update Tags". The table updates right away.
+- Updated files:
+  - `messages/{en,fr}.json` update `bestof.editTags` translations.
+  - `app/[locale]/bestof-larib/components/tag-manager-dialog.tsx` calls `router.refresh()` on successful tag save.
