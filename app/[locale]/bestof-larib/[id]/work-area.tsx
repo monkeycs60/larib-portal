@@ -24,24 +24,12 @@ export type PrefillState = {
   validatedAt?: string | null
 }
 
-export default function WorkArea({
-  caseId,
-  isAdmin,
-  createdAt,
-  defaultTags,
-  prefill,
-  right,
-  attempts,
-}: {
-  caseId: string
-  isAdmin: boolean
-  createdAt: string | Date
-  defaultTags: string[]
-  prefill: PrefillState | null
-  right: React.ReactNode
-  attempts: CaseAttemptSummary[]
-}) {
+export default function WorkArea({ meta, defaults, rightPane, attempts }: { meta: { caseId: string; isAdmin: boolean; createdAt: string | Date }; defaults: { tags: string[]; prefill: PrefillState | null }; rightPane: React.ReactNode; attempts: CaseAttemptSummary[] }) {
   const t = useTranslations('bestof')
+
+  const { caseId, isAdmin, createdAt } = meta
+  const prefill = defaults.prefill
+  const defaultTags = defaults.tags
 
   const [tags, setTags] = useState<string[]>(prefill?.tags ?? defaultTags)
   const [comments, setComments] = useState<string>(prefill?.comments ?? '')
@@ -63,11 +51,11 @@ export default function WorkArea({
   })
   const { execute: saveAndValidate, isExecuting: validating } = useAction(saveAllAndValidateAction, {
     onError({ error }) { toast.error(getActionErrorMessage(error, t('actionError'))) },
-    onSuccess(data) {
+    onSuccess(res) {
       toast.success(t('caseView.validated'))
       setLocked(true)
       const now = new Date()
-      const newItem = { id: data?.attemptId ?? crypto.randomUUID(), createdAt: now, validatedAt: now, lvef: analysis.lvef ?? null, kinetic: analysis.kinetic ?? null, lge: analysis.lge ?? null, finalDx: analysis.finalDx ?? null, report: report ?? null }
+      const newItem = { id: res.data?.attemptId ?? crypto.randomUUID(), createdAt: now, validatedAt: now, lvef: analysis.lvef ?? null, kinetic: analysis.kinetic ?? null, lge: analysis.lge ?? null, finalDx: analysis.finalDx ?? null, report: report ?? null }
       setAttemptItems(previousAttempts => [...previousAttempts.filter(attemptItem => attemptItem.id !== newItem.id), newItem])
     },
   })
@@ -106,32 +94,34 @@ export default function WorkArea({
     <div className='flex gap-4'>
       <div className='w-[320px] shrink-0'>
         <CaseInteractionPanel
-          isAdmin={isAdmin}
-          defaultTags={[]}
-          createdAt={createdAt}
-          caseId={caseId}
-          tags={tags}
-          onTagsChange={setTags}
-          comments={comments}
-          onCommentsChange={setComments}
-          difficulty={personalDifficulty}
-          onDifficultyChange={setPersonalDifficulty}
-          hideActions
-          attempts={attemptItems}
-          onSelectAttempt={(selectedAttempt) => {
-            setAnalysis({ lvef: selectedAttempt.lvef ?? '', kinetic: selectedAttempt.kinetic ?? '', lge: selectedAttempt.lge ?? '', finalDx: selectedAttempt.finalDx ?? '' })
-            setReport(selectedAttempt.report ?? '')
-            setLocked(!!selectedAttempt.validatedAt)
-            setAnalysisKey(key => key + 1)
-            setReportKey(key => key + 1)
-          }}
-          showStartNewAttempt
-          onStartNewAttempt={() => {
-            setLocked(false)
-            setAnalysis({ lvef: '', kinetic: '', lge: '', finalDx: '' })
-            setReport('')
-            setAnalysisKey((k) => k + 1)
-            setReportKey((k) => k + 1)
+          config={{
+            isAdmin,
+            defaultTags: [],
+            createdAt,
+            caseId,
+            tags,
+            onTagsChange: setTags,
+            comments,
+            onCommentsChange: setComments,
+            difficulty: personalDifficulty,
+            onDifficultyChange: setPersonalDifficulty,
+            hideActions: true,
+            attempts: attemptItems,
+            onSelectAttempt: (selectedAttempt) => {
+              setAnalysis({ lvef: selectedAttempt.lvef ?? '', kinetic: selectedAttempt.kinetic ?? '', lge: selectedAttempt.lge ?? '', finalDx: selectedAttempt.finalDx ?? '' })
+              setReport(selectedAttempt.report ?? '')
+              setLocked(!!selectedAttempt.validatedAt)
+              setAnalysisKey((key) => key + 1)
+              setReportKey((key) => key + 1)
+            },
+            showStartNewAttempt: true,
+            onStartNewAttempt: () => {
+              setLocked(false)
+              setAnalysis({ lvef: '', kinetic: '', lge: '', finalDx: '' })
+              setReport('')
+              setAnalysisKey((key) => key + 1)
+              setReportKey((key) => key + 1)
+            },
           }}
         />
       </div>
@@ -175,7 +165,7 @@ export default function WorkArea({
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={45} minSize={20}>
           <div className='rounded border p-4 h-fit'>
-            {right}
+            {rightPane}
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>

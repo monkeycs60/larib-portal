@@ -368,3 +368,14 @@ Notes:
   - `lib/ui/safe-action-error.ts`: New tiny utility to extract a message from `next-safe-action` errors safely.
   - `types/global.d.ts`: Adds `window.__lastAttemptId?: string` to remove `as any` casts.
   - `cleanbestof.md`: Plan for PR1–PR3 to continue cleanup (Zustand + props refactor next).
+## Code Quality: Bestof Larib – Props Refactor + Small Store (PR2/PR3)
+
+- Name: Props reduction and shared state for attempts
+- What it does: Reduces prop counts by grouping inputs and replaces window globals with a tiny Zustand store.
+- How to use it: No UI change. Components are invoked with grouped config objects.
+- Updated files:
+  - `lib/stores/bestof-attempts.ts`: New Zustand store for `lastAttemptIdByCase`.
+  - `app/[locale]/bestof-larib/[id]/user-panel.tsx`: Accepts a single `config` prop; shares last attempt id via store; typed debounced save payload.
+  - `app/[locale]/bestof-larib/[id]/work-area.tsx`: Groups props into `{ meta, defaults, rightPane, attempts }`.
+  - `app/[locale]/bestof-larib/[id]/page.tsx`: Updated to new `WorkArea` API.
+  - `app/[locale]/bestof-larib/components/tag-manager-dialog.tsx`: Fixed union typing by splitting hooks per mode; clarified types for cases list.

@@ -21,7 +21,7 @@ import { cn } from '@/lib/utils'
 import { getActionErrorMessage } from '@/lib/ui/safe-action-error'
 import { useBestofAttemptStore } from '@/lib/stores/bestof-attempts'
 
-type Props = {
+type CaseInteractionPanelConfig = {
   isAdmin: boolean
   defaultTags: string[]
   createdAt: string | Date
@@ -47,8 +47,25 @@ const AnalysisSchema = z.object({
   finalDx: z.string().min(1),
 })
 
-export default function CaseInteractionPanel({ isAdmin, defaultTags, caseId, tags: cTags, onTagsChange, comments: cComments, onCommentsChange, difficulty: cDifficulty, onDifficultyChange, hideActions, showStartNewAttempt, onStartNewAttempt, attempts = [], onSelectAttempt }: Props) {
+export default function CaseInteractionPanel({ config }: { config: CaseInteractionPanelConfig }) {
   const t = useTranslations('bestof')
+  const {
+    isAdmin,
+    defaultTags,
+    caseId,
+    tags: cTags,
+    onTagsChange,
+    comments: cComments,
+    onCommentsChange,
+    difficulty: cDifficulty,
+    onDifficultyChange,
+    hideActions,
+    showStartNewAttempt,
+    onStartNewAttempt,
+    attempts = [],
+    onSelectAttempt,
+  } = config
+
   const [tags, setTags] = useState<string[]>(cTags ?? defaultTags)
   const [comment, setComment] = useState(cComments ?? '')
   const [difficulty, setDifficulty] = useState<'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | ''>(cDifficulty ?? '')
@@ -70,7 +87,7 @@ export default function CaseInteractionPanel({ isAdmin, defaultTags, caseId, tag
       const payload = {
         caseId,
         tags: next?.tags ?? tags,
-        comments: (next?.comments ?? comment) || null,
+        comments: (next?.comments ?? comment) || undefined,
         personalDifficulty: (next?.difficulty ?? difficulty) || undefined,
       }
       try { await execSettings(payload) } catch {}
@@ -181,18 +198,17 @@ export function AnalysisForm({ isAdmin, caseId, values, onChange, hideInlineSave
   const finalDxReg = register('finalDx')
   const { execute: execSave, isExecuting } = useAction(saveAttemptAction, {
     onError() { toast.error(t('actionError')) },
-    onSuccess(data) {
-      if (data?.attemptId) toast.success(t('caseView.savedDraft'))
+    onSuccess(res) {
+      if (res.data?.attemptId) {
+        toast.success(t('caseView.savedDraft'))
+        try { useBestofAttemptStore.getState().setLastAttemptId(caseId, res.data.attemptId) } catch {}
+      }
     },
   })
 
   async function onSubmit(values: z.infer<typeof AnalysisSchema>) {
     if (isAdmin) return
-    const res = await execSave({ caseId, ...values })
-    if (res?.data?.attemptId) {
-      // Share last attempt id through a small global store
-      try { useBestofAttemptStore.getState().setLastAttemptId(caseId, res.data.attemptId) } catch {}
-    }
+    await execSave({ caseId, ...values })
     onChange?.(values)
   }
 
@@ -252,8 +268,8 @@ export function ClinicalReport({ isAdmin, caseId, value, onChange, hideInlineSav
   const t = useTranslations('bestof')
   const { execute: execSave, isExecuting } = useAction(saveAttemptAction, {
     onError() { toast.error(t('actionError')) },
-    onSuccess(data) {
-      if (data?.attemptId) toast.success(t('caseView.savedDraft'))
+    onSuccess(res) {
+      if (res.data?.attemptId) toast.success(t('caseView.savedDraft'))
     },
   })
 

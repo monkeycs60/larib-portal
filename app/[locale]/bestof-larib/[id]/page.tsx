@@ -74,13 +74,10 @@ export default async function CaseViewPage({
             </div>
 
             <WorkArea
-                caseId={c.id}
-                isAdmin={isAdmin}
-                createdAt={c.createdAt}
-                defaultTags={c.tags ?? []}
-                prefill={prefill}
+                meta={{ caseId: c.id, isAdmin, createdAt: c.createdAt }}
+                defaults={{ tags: c.tags ?? [], prefill }}
                 attempts={attempts}
-                right={
+                rightPane={
                     <>
                         <div className='text-sm font-medium mb-2'>
                             {t('content.section')}

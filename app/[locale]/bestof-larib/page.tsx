@@ -118,7 +118,7 @@ export default async function BestofLaribPage() {
                             name: caseItem.name,
                             difficulty: caseItem.difficulty,
                             status: caseItem.status,
-                            tags: caseItem.tags ?? [],
+                            tags: [],
                             pdfUrl: caseItem.pdfUrl ?? null,
                             pdfKey: caseItem.pdfKey ?? null,
                             textContent: caseItem.textContent ?? null,

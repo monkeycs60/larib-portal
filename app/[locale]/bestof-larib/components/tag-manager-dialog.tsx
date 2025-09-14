@@ -42,14 +42,24 @@ export default function TagManagerDialog({
   const [tags, setTags] = useState<Tag[]>([])
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [activeTagId, setActiveTagId] = useState<string>('')
-  const [activeTagCases, setActiveTagCases] = useState<{ id: string; name: string; createdAt: string }[]>([])
+  const [activeTagCases, setActiveTagCases] = useState<{ id: string; name: string; createdAt: string | Date }[]>([])
 
   // New tag form
   const [newName, setNewName] = useState('')
   const [newColor, setNewColor] = useState('#3b82f6')
   const [newDesc, setNewDesc] = useState('')
 
-  const listTags = useAction(mode === 'admin' ? listAdminTagsAction : listUserTagsAction, {
+  const listTagsAdmin = useAction(listAdminTagsAction, {
+    onSuccess(res) {
+      const data = Array.isArray(res.data) ? (res.data as Tag[]) : []
+      setTags(data)
+    },
+    onError({ error }) {
+      const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError')
+      toast.error(msg)
+    },
+  })
+  const listTagsUser = useAction(listUserTagsAction, {
     onSuccess(res) {
       const data = Array.isArray(res.data) ? (res.data as Tag[]) : []
       setTags(data)
@@ -60,18 +70,34 @@ export default function TagManagerDialog({
     },
   })
 
-  const getCaseTagIds = useAction(mode === 'admin' ? getCaseAdminTagIdsAction : getCaseUserTagIdsAction, {
+  const getCaseTagIdsAdmin = useAction(getCaseAdminTagIdsAction, {
+    onSuccess(res) {
+      const data = Array.isArray(res.data) ? (res.data as string[]) : []
+      setSelectedIds(data)
+    },
+  })
+  const getCaseTagIdsUser = useAction(getCaseUserTagIdsAction, {
     onSuccess(res) {
       const data = Array.isArray(res.data) ? (res.data as string[]) : []
       setSelectedIds(data)
     },
   })
 
-  const saveCaseTags = useAction(mode === 'admin' ? setCaseAdminTagsAction : setCaseUserTagsAction, {
+  const saveCaseTagsAdmin = useAction(setCaseAdminTagsAction, {
     onSuccess() {
       toast.success(t('updated'))
       // refresh counts
-      void listTags.execute()
+      void (mode === 'admin' ? listTagsAdmin.execute() : listTagsUser.execute())
+    },
+    onError({ error }) {
+      const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError')
+      toast.error(msg)
+    },
+  })
+  const saveCaseTagsUser = useAction(setCaseUserTagsAction, {
+    onSuccess() {
+      toast.success(t('updated'))
+      void (mode === 'admin' ? listTagsAdmin.execute() : listTagsUser.execute())
     },
     onError({ error }) {
       const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError')
@@ -79,7 +105,18 @@ export default function TagManagerDialog({
     },
   })
 
-  const ensureTag = useAction(mode === 'admin' ? ensureAdminTagAction : ensureUserTagAction, {
+  const ensureTagAdmin = useAction(ensureAdminTagAction, {
+    onSuccess(res) {
+      if (!res.data) return
+      const created = res.data as Tag
+      setTags((prev) => {
+        const next = [...prev.filter((tagItem) => tagItem.id !== created.id), { ...created, caseCount: prev.find((existingTag) => existingTag.id === created.id)?.caseCount ?? 0 }]
+        return next.sort((a, b) => a.name.localeCompare(b.name))
+      })
+      toast.success(t('updated'))
+    },
+  })
+  const ensureTagUser = useAction(ensureUserTagAction, {
     onSuccess(res) {
       if (!res.data) return
       const created = res.data as Tag
@@ -91,9 +128,15 @@ export default function TagManagerDialog({
     },
   })
 
-  const listCasesByTag = useAction(mode === 'admin' ? listCasesByAdminTagAction : listCasesByUserTagAction, {
+  const listCasesByTagAdmin = useAction(listCasesByAdminTagAction, {
     onSuccess(res) {
-      const rows = Array.isArray(res.data) ? (res.data as { id: string; name: string; createdAt: string }[]) : []
+      const rows = Array.isArray(res.data) ? (res.data as { id: string; name: string; createdAt: Date }[]) : []
+      setActiveTagCases(rows.map((row) => ({ id: row.id, name: row.name, createdAt: row.createdAt })))
+    },
+  })
+  const listCasesByTagUser = useAction(listCasesByUserTagAction, {
+    onSuccess(res) {
+      const rows = Array.isArray(res.data) ? (res.data as { id: string; name: string; createdAt: Date }[]) : []
       setActiveTagCases(rows.map((row) => ({ id: row.id, name: row.name, createdAt: row.createdAt })))
     },
   })
@@ -101,30 +144,37 @@ export default function TagManagerDialog({
   async function onOpen(next: boolean) {
     setOpen(next)
     if (next) {
-      await listTags.execute()
-      await getCaseTagIds.execute({ caseId })
+      const selectedList = mode === 'admin' ? listTagsAdmin : listTagsUser
+      const selectedCaseIds = mode === 'admin' ? getCaseTagIdsAdmin : getCaseTagIdsUser
+      await selectedList.execute()
+      await selectedCaseIds.execute({ caseId })
     }
   }
 
   async function onSaveAssignment() {
-    await saveCaseTags.execute({ caseId, tagIds: selectedIds })
+    const selected = mode === 'admin' ? saveCaseTagsAdmin : saveCaseTagsUser
+    await selected.execute({ caseId, tagIds: selectedIds })
   }
 
   async function onCreateTag() {
     const name = newName.trim()
     if (!name) return
-    await ensureTag.execute({ name, color: newColor, description: newDesc.trim() || null })
+    const ensure = mode === 'admin' ? ensureTagAdmin : ensureTagUser
+    await ensure.execute({ name, color: newColor, description: newDesc.trim() || null })
     setNewName('')
     setNewDesc('')
   }
 
   async function onSelectTagForCases(tagId: string) {
     setActiveTagId(tagId)
-    if (tagId) await listCasesByTag.execute({ tagId })
+    if (tagId) {
+      const listBy = mode === 'admin' ? listCasesByTagAdmin : listCasesByTagUser
+      await listBy.execute({ tagId })
+    }
   }
 
-  const isSaving = saveCaseTags.isExecuting
-  const isLoading = listTags.isExecuting || getCaseTagIds.isExecuting
+  const isSaving = (mode === 'admin' ? saveCaseTagsAdmin.isExecuting : saveCaseTagsUser.isExecuting)
+  const isLoading = (mode === 'admin' ? listTagsAdmin.isExecuting : listTagsUser.isExecuting) || (mode === 'admin' ? getCaseTagIdsAdmin.isExecuting : getCaseTagIdsUser.isExecuting)
 
   return (
     <Dialog open={open} onOpenChange={onOpen}>
@@ -233,8 +283,8 @@ export default function TagManagerDialog({
                   <Textarea value={newDesc} onChange={(e) => setNewDesc(e.target.value)} placeholder={t('tagDescriptionPlaceholder') || 'Optional'} />
                 </div>
                 <div className="flex justify-end">
-                  <Button onClick={onCreateTag} disabled={ensureTag.isExecuting || !newName.trim()}>
-                    {ensureTag.isExecuting ? t('saving') : t('createTag')}
+                  <Button onClick={onCreateTag} disabled={(mode === 'admin' ? ensureTagAdmin.isExecuting : ensureTagUser.isExecuting) || !newName.trim()}>
+                    {(mode === 'admin' ? ensureTagAdmin.isExecuting : ensureTagUser.isExecuting) ? t('saving') : t('createTag')}
                   </Button>
                 </div>
               </div>
@@ -264,7 +314,7 @@ export default function TagManagerDialog({
               </div>
               {activeTagId ? (
                 <div className="rounded border">
-                  {listCasesByTag.isExecuting ? (
+                  {(mode === 'admin' ? listCasesByTagAdmin.isExecuting : listCasesByTagUser.isExecuting) ? (
                     <div className="h-40 flex items-center justify-center"><Loader label={t('loading')} /></div>
                   ) : (
                   <Table>
