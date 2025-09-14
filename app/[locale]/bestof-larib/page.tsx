@@ -8,6 +8,7 @@ import { Link } from '@/app/i18n/navigation'
 import { Eye, Pencil, Plus } from 'lucide-react'
 import DeleteCaseButton from './components/delete-case-button'
 import CreateCaseDialog from './components/create-case-dialog'
+import TagManagerDialog from './components/tag-manager-dialog'
 
 export default async function BestofLaribPage() {
   const t = await getTranslations('bestof')
@@ -41,7 +42,7 @@ export default async function BestofLaribPage() {
               <TableHead>{t('table.disease')}</TableHead>
               <TableHead>{t('table.difficulty')}</TableHead>
               <TableHead>{t('table.createdAt')}</TableHead>
-              <TableHead>{t('table.adminTags')}</TableHead>
+              <TableHead>{isAdmin ? t('table.adminTags') : t('table.userTags')}</TableHead>
               <TableHead className="text-right">{t('table.actions')}</TableHead>
             </TableRow>
           </TableHeader>
@@ -84,9 +85,15 @@ export default async function BestofLaribPage() {
                   </TableCell>
                   <TableCell>{new Date(c.createdAt).toLocaleDateString()}</TableCell>
                   <TableCell>
-                    <Button type="button" size="icon" variant="ghost" aria-label="add admin tag">
-                      <Plus />
-                    </Button>
+                    <TagManagerDialog
+                      mode={isAdmin ? 'admin' : 'user'}
+                      caseId={c.id}
+                      trigger={
+                        <Button type="button" size="icon" variant="ghost" aria-label={isAdmin ? 'add admin tag' : 'add user tag'}>
+                          <Plus />
+                        </Button>
+                      }
+                    />
                   </TableCell>
                   <TableCell className="text-right space-x-2">
                     <Link href={`/bestof-larib/${c.id}`}>

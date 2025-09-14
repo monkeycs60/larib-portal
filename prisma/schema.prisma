@@ -38,13 +38,14 @@ model User {
   updatedAt       DateTime      @updatedAt
   image           String?
 
-  sessions         Session[]
-  accounts         Account[]
+  sessions Session[]
+  accounts Account[]
 
   //related to bestof larib
   ClinicalCase     ClinicalCase[]
   UserCaseSettings UserCaseSettings[]
   CaseAttempt      CaseAttempt[]
+  UserTag          UserTag[]
 
   @@map("User")
 }
@@ -125,6 +126,8 @@ model ClinicalCase {
   updatedAt        DateTime           @updatedAt
   UserCaseSettings UserCaseSettings[]
   CaseAttempt      CaseAttempt[]
+  adminTags        AdminTagOnCase[]
+  userTags         UserTagOnCase[]
 
   @@map("ClinicalCase")
 }
@@ -220,4 +223,59 @@ model Verification {
   updatedAt  DateTime @updatedAt
 
   @@map("Verification")
+}
+
+// ---- Tagging System for Bestof Larib ----
+
+model AdminTag {
+  id          String   @id
+  name        String   @unique
+  color       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  cases AdminTagOnCase[]
+
+  @@map("AdminTag")
+}
+
+model AdminTagOnCase {
+  caseId String
+  tagId  String
+
+  c         ClinicalCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  tag       AdminTag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  createdAt DateTime     @default(now())
+
+  @@id([caseId, tagId])
+  @@map("AdminTagOnCase")
+}
+
+model UserTag {
+  id          String   @id
+  userId      String
+  name        String
+  color       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cases UserTagOnCase[]
+
+  @@unique([userId, name])
+  @@map("UserTag")
+}
+
+model UserTagOnCase {
+  caseId    String
+  userTagId String
+
+  c         ClinicalCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  tag       UserTag      @relation(fields: [userTagId], references: [id], onDelete: Cascade)
+  createdAt DateTime     @default(now())
+
+  @@id([caseId, userTagId])
+  @@map("UserTagOnCase")
 }

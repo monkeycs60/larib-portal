@@ -2,6 +2,18 @@
 import { z } from 'zod'
 import { adminOnlyAction, authenticatedAction } from '@/actions/safe-action'
 import { createClinicalCase, ensureDiseaseTag, ensureExamType, updateClinicalCase, deleteClinicalCase } from '@/lib/services/bestof-larib'
+import {
+  ensureAdminTag,
+  ensureUserTag,
+  getCaseAdminTagIds,
+  getCaseUserTagIds,
+  listAdminTags,
+  listCasesByAdminTag,
+  listCasesByUserTag,
+  listUserTags,
+  setCaseAdminTags,
+  setCaseUserTags,
+} from '@/lib/services/bestof-larib-tags'
 
 const CreateCaseSchema = z.object({
   name: z.string().min(1),
@@ -77,4 +89,66 @@ export const deleteCaseAction = adminOnlyAction
   .action(async ({ parsedInput }) => {
     const deleted = await deleteClinicalCase(parsedInput.id)
     return deleted
+  })
+
+// --- Tagging actions ---
+
+// Shared admin tags
+export const listAdminTagsAction = adminOnlyAction
+  .action(async () => {
+    return await listAdminTags()
+  })
+
+export const getCaseAdminTagIdsAction = adminOnlyAction
+  .inputSchema(z.object({ caseId: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    return await getCaseAdminTagIds(parsedInput.caseId)
+  })
+
+export const ensureAdminTagAction = adminOnlyAction
+  .inputSchema(z.object({ name: z.string().min(1), color: z.string().min(1), description: z.string().trim().optional().nullable() }))
+  .action(async ({ parsedInput }) => {
+    return await ensureAdminTag({ name: parsedInput.name, color: parsedInput.color, description: parsedInput.description })
+  })
+
+export const setCaseAdminTagsAction = adminOnlyAction
+  .inputSchema(z.object({ caseId: z.string().min(1), tagIds: z.array(z.string().min(1)).default([]) }))
+  .action(async ({ parsedInput }) => {
+    return await setCaseAdminTags(parsedInput.caseId, parsedInput.tagIds)
+  })
+
+export const listCasesByAdminTagAction = adminOnlyAction
+  .inputSchema(z.object({ tagId: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    return await listCasesByAdminTag(parsedInput.tagId)
+  })
+
+// Private user tags
+export const listUserTagsAction = authenticatedAction
+  .action(async ({ ctx }) => {
+    return await listUserTags(ctx.userId)
+  })
+
+export const getCaseUserTagIdsAction = authenticatedAction
+  .inputSchema(z.object({ caseId: z.string().min(1) }))
+  .action(async ({ parsedInput, ctx }) => {
+    return await getCaseUserTagIds(ctx.userId, parsedInput.caseId)
+  })
+
+export const ensureUserTagAction = authenticatedAction
+  .inputSchema(z.object({ name: z.string().min(1), color: z.string().min(1), description: z.string().trim().optional().nullable() }))
+  .action(async ({ parsedInput, ctx }) => {
+    return await ensureUserTag(ctx.userId, { name: parsedInput.name, color: parsedInput.color, description: parsedInput.description })
+  })
+
+export const setCaseUserTagsAction = authenticatedAction
+  .inputSchema(z.object({ caseId: z.string().min(1), tagIds: z.array(z.string().min(1)).default([]) }))
+  .action(async ({ parsedInput, ctx }) => {
+    return await setCaseUserTags(ctx.userId, parsedInput.caseId, parsedInput.tagIds)
+  })
+
+export const listCasesByUserTagAction = authenticatedAction
+  .inputSchema(z.object({ tagId: z.string().min(1) }))
+  .action(async ({ parsedInput, ctx }) => {
+    return await listCasesByUserTag(ctx.userId, parsedInput.tagId)
   })

@@ -339,3 +339,16 @@ Notes:
   - `app/[locale]/bestof-larib/[id]/user-panel.tsx`: removes redundant "Case" header; adds attempts list with click-to-load; controlled AnalysisForm/ClinicalReport.
   - `app/[locale]/bestof-larib/[id]/actions.ts`: adds `saveAllAction` and `saveAllAndValidateAction`.
   - `lib/services/bestof-larib-attempts.ts`: adds `getUserCaseState` for prefill and `listUserCaseAttempts`; `saveAttempt` now reuses the latest draft.
+- Feature: Admin/User Tags for Bestof Larib cases
+  - Add shared Admin Tags and private User Tags with color and description.
+  - Manage tags via a modal on the cases table (+ button), with tabs to assign, manage, and view cases by tag.
+  - Admin tags are global for all admins; user tags are visible only to the user who created them.
+  - How to use:
+    - In the Bestof Larib cases list, click + in the Tags column.
+    - Assign: select tags for the case and save.
+    - Manage: create new tags (name, color, description).
+    - Cases: pick a tag to view all cases flagged with it.
+  - Implementation details:
+    - New Prisma models: AdminTag, AdminTagOnCase, UserTag, UserTagOnCase.
+    - New services in `lib/services/bestof-larib-tags.ts` and actions in `app/[locale]/bestof-larib/actions.ts`.
+    - UI: `TagManagerDialog` in `app/[locale]/bestof-larib/components/tag-manager-dialog.tsx` using shadcn/ui.

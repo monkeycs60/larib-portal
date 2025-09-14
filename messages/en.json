@@ -203,6 +203,7 @@
       "status": "Status",
       "createdAt": "Created",
       "adminTags": "Admin Tags",
+      "userTags": "User Tags",
       "actions": "Actions"
     },
     "difficulty": {
@@ -285,5 +286,15 @@
       "attemptDraft": "draft",
       "attemptValidated": "validated"
     }
+    ,
+    "assignTagsTab": "Assign",
+    "manageTagsTab": "Manage",
+    "casesByTagTab": "Cases",
+    "createNewTagLabel": "Create new tag",
+    "tagNameLabel": "Name",
+    "tagNamePlaceholder": "e.g. Must-know",
+    "tagColorLabel": "Color",
+    "tagDescriptionLabel": "Description",
+    "tagDescriptionPlaceholder": "Optional"
   }
 }

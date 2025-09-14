@@ -201,6 +201,7 @@
       "status": "Statut",
       "createdAt": "Créé le",
       "adminTags": "Tags admin",
+      "userTags": "Tags utilisateur",
       "actions": "Actions"
     },
     "difficulty": {
@@ -283,5 +284,15 @@
       "attemptDraft": "brouillon",
       "attemptValidated": "validé"
     }
+    ,
+    "assignTagsTab": "Assigner",
+    "manageTagsTab": "Gérer",
+    "casesByTagTab": "Cas",
+    "createNewTagLabel": "Créer un nouveau tag",
+    "tagNameLabel": "Nom",
+    "tagNamePlaceholder": "ex: Incontournable",
+    "tagColorLabel": "Couleur",
+    "tagDescriptionLabel": "Description",
+    "tagDescriptionPlaceholder": "Optionnel"
   }
 }
