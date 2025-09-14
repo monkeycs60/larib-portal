@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable'
 import { toast } from 'sonner'
 import { useAction } from 'next-safe-action/hooks'
@@ -49,6 +50,7 @@ export default function WorkArea({
   )
   const [analysisKey, setAnalysisKey] = useState(0)
   const [report, setReport] = useState<string>(prefill?.report ?? '')
+  const [reportKey, setReportKey] = useState(0)
 
   const [locked, setLocked] = useState<boolean>(!!prefill?.validatedAt)
   const [attemptItems, setAttemptItems] = useState(attempts)
@@ -119,6 +121,7 @@ export default function WorkArea({
             setReport(att.report ?? '')
             setLocked(!!att.validatedAt)
             setAnalysisKey(k => k + 1)
+            setReportKey(k => k + 1)
           }}
           showStartNewAttempt
           onStartNewAttempt={() => {
@@ -126,6 +129,7 @@ export default function WorkArea({
             setAnalysis({ lvef: '', kinetic: '', lge: '', finalDx: '' })
             setReport('')
             setAnalysisKey((k) => k + 1)
+            setReportKey((k) => k + 1)
           }}
         />
       </div>
@@ -133,7 +137,10 @@ export default function WorkArea({
         <ResizablePanel defaultSize={55} minSize={35}>
           <div className='space-y-4'>
             <section className='rounded border p-4'>
-              <div className='font-medium mb-3'>{t('caseView.myAnalysis')}</div>
+              <div className='font-medium mb-3 flex items-center gap-2'>
+                <span>{t('caseView.myAnalysis')}</span>
+                <Badge variant='secondary'>{locked ? t('caseView.attemptValidated') : t('caseView.attemptDraft')}</Badge>
+              </div>
               <AnalysisForm
                 key={analysisKey}
                 isAdmin={isAdmin || locked}
@@ -144,8 +151,12 @@ export default function WorkArea({
               />
             </section>
             <section className='rounded border p-4'>
-              <div className='font-medium mb-3'>{t('caseView.myClinicalReport')}</div>
+              <div className='font-medium mb-3 flex items-center gap-2'>
+                <span>{t('caseView.myClinicalReport')}</span>
+                <Badge variant='secondary'>{locked ? t('caseView.attemptValidated') : t('caseView.attemptDraft')}</Badge>
+              </div>
               <ClinicalReport
+                key={reportKey}
                 isAdmin={isAdmin || locked}
                 caseId={caseId}
                 value={report}
