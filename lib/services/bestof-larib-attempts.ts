@@ -34,9 +34,9 @@ export async function validateAttempt({ userId, attemptId }: { userId: string; a
   return true
 }
 
-export async function upsertUserSettings(input: { userId: string; tags: string[]; personalDifficulty?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'; comments?: string | null }) {
+export async function upsertUserSettings(input: { userId: string; caseId: string; tags: string[]; personalDifficulty?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'; comments?: string | null }) {
   const settings = await prisma.userCaseSettings.upsert({
-    where: { userId_caseId: { userId: input.userId, caseId: '__global__' } },
+    where: { userId_caseId: { userId: input.userId, caseId: input.caseId } },
     update: {
       tags: input.tags,
       personalDifficulty: input.personalDifficulty ?? null,
@@ -45,7 +45,7 @@ export async function upsertUserSettings(input: { userId: string; tags: string[]
     create: {
       id: crypto.randomUUID(),
       userId: input.userId,
-      caseId: '__global__',
+      caseId: input.caseId,
       tags: input.tags,
       personalDifficulty: input.personalDifficulty ?? null,
       comments: input.comments ?? null,
@@ -54,4 +54,3 @@ export async function upsertUserSettings(input: { userId: string; tags: string[]
   })
   return settings
 }
-

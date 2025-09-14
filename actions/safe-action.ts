@@ -5,7 +5,8 @@ import { getTypedSession } from "../lib/auth-helpers";
 export const actionClient = createSafeActionClient({
   handleServerError(e) {
     console.error("Action error:", e.message);
-    return DEFAULT_SERVER_ERROR_MESSAGE;
+    // Surface full error message to client as requested
+    return e.message || DEFAULT_SERVER_ERROR_MESSAGE;
   },
 });
 

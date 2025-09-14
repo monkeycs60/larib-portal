@@ -37,6 +37,7 @@ export const validateAttemptAction = authenticatedAction
   })
 
 const UpsertSettingsSchema = z.object({
+  caseId: z.string().min(1),
   tags: z.array(z.string()).max(50).optional(),
   personalDifficulty: z.enum(['BEGINNER','INTERMEDIATE','ADVANCED']).optional(),
   comments: z.string().optional(),
@@ -47,10 +48,10 @@ export const upsertSettingsAction = authenticatedAction
   .action(async ({ parsedInput, ctx }) => {
     const settings = await upsertUserSettings({
       userId: ctx.userId,
+      caseId: parsedInput.caseId,
       tags: parsedInput.tags ?? [],
       personalDifficulty: parsedInput.personalDifficulty,
       comments: parsedInput.comments ?? null,
     })
     return settings
   })
-

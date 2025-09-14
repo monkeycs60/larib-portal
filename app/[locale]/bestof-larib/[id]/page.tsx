@@ -41,6 +41,7 @@ export default async function CaseViewPage({ params }: { params: { locale: strin
           isAdmin={isAdmin}
           defaultTags={c.tags ?? []}
           createdAt={c.createdAt}
+          caseId={c.id}
         />
 
         <div className="space-y-4">

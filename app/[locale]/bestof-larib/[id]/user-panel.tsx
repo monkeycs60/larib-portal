@@ -21,6 +21,7 @@ type Props = {
   isAdmin: boolean
   defaultTags: string[]
   createdAt: string | Date
+  caseId: string
 }
 
 const AnalysisSchema = z.object({
@@ -30,7 +31,7 @@ const AnalysisSchema = z.object({
   finalDx: z.string().min(1),
 })
 
-export default function CaseInteractionPanel({ isAdmin, defaultTags, createdAt }: Props) {
+export default function CaseInteractionPanel({ isAdmin, defaultTags, createdAt, caseId }: Props) {
   const t = useTranslations('bestof')
   const [tags, setTags] = useState<string[]>(defaultTags)
   const [comment, setComment] = useState('')
@@ -38,16 +39,16 @@ export default function CaseInteractionPanel({ isAdmin, defaultTags, createdAt }
   const [lastAttemptId, setLastAttemptId] = useState<string | null>(null)
 
   const { execute: execSettings } = useAction(upsertSettingsAction, {
-    onError() { toast.error(t('actionError')) },
+    onError(err: unknown) { const m = (err as any)?.serverError ?? (err as any)?.message ?? t('actionError'); toast.error(m) },
   })
   const { execute: execValidate, isExecuting: validating } = useAction(validateAttemptAction, {
-    onError() { toast.error(t('actionError')) },
+    onError(err: unknown) { const m = (err as any)?.serverError ?? (err as any)?.message ?? t('actionError'); toast.error(m) },
     onSuccess() { toast.success(t('caseView.validated')) },
   })
 
   async function saveDraft() {
     if (isAdmin) return
-    await execSettings({ tags, comments: comment, personalDifficulty: difficulty || undefined })
+    await execSettings({ caseId, tags, comments: comment, personalDifficulty: difficulty || undefined })
     toast.success(t('caseView.savedDraft'))
   }
 
