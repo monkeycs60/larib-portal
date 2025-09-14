@@ -2,10 +2,18 @@
 
 - Always document new feature in CHANGELOG.md: document name + what it does + how to use it. The objective is to have a clear and concise documentation of all app features.
 
+- Use playwright mcp to debug ui issues and test new features :
+   credentials for admin:
+      email: toupin.solenn@gmail.com
+      password: ristifouf
+   credentials for user:
+      email: serizay.clem@gmail.com
+      password: ristifou
+
 ### Prohibited Practices
 
 -  **No useEffect**: Use fetch in server components via services, or handle side effects via event handlers
--  **No TypeScript any**: Always use strong typing (not any or as any) ; if you need custom types, reuse them via @/types/ ; never use ts ignore comments.
+-  **No TypeScript any or as any**: Always use strong typing (not any or as any) ; if you need custom types, reuse them via @/types/ ; never use ts ignore comments.
 -  **No OOP patterns**: Avoid classes or object-oriented approaches
 -  **No Bad naming**: Use descriptive names for variables, functions, and components, it has to be explicit. When dealing with map, filter, reduce, etc., use don't use abbreviations for mapped variables (no 'c' for 'case', no 'i' for 'item', etc.)
 -  **No Bad comments**: Never use comments to explain the code, it has to be explicit
