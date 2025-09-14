@@ -26,6 +26,13 @@ export default function UserTagsSection({ isAdmin, caseId, initialTags, initialS
       if (!res.data) return
       const created = res.data as Tag
       setTags((prev) => [...prev.filter((t) => t.id !== created.id), created].sort((a, b) => a.name.localeCompare(b.name)))
+      const nextSelected = Array.from(new Set([...
+        selectedIds,
+        created.id,
+      ]))
+      setSelectedIds(nextSelected)
+      // auto-save new selection
+      void save.execute({ caseId, tagIds: nextSelected })
       toast.success(t('updated'))
       setOpen(false)
       setNewName('')
@@ -41,7 +48,12 @@ export default function UserTagsSection({ isAdmin, caseId, initialTags, initialS
 
   function onToggle(id: string) {
     if (isAdmin) return
-    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
+    setSelectedIds((prev) => {
+      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      // auto-save
+      void save.execute({ caseId, tagIds: next })
+      return next
+    })
   }
 
   return (
@@ -56,7 +68,7 @@ export default function UserTagsSection({ isAdmin, caseId, initialTags, initialS
               onClick={() => onToggle(tag.id)}
               aria-pressed={active}
               disabled={isAdmin}
-              className={`px-2 py-1 rounded-full text-xs border transition ${
+              className={`px-2 py-1 rounded-full text-xs border transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 ${
                 active
                   ? 'text-white border-transparent'
                   : 'bg-transparent'
@@ -100,9 +112,7 @@ export default function UserTagsSection({ isAdmin, caseId, initialTags, initialS
             </div>
           </DialogContent>
         </Dialog>
-        <div className="ml-auto">
-          <Button onClick={() => save.execute({ caseId, tagIds: selectedIds })} disabled={isAdmin || save.isExecuting}>{save.isExecuting ? t('saving') : t('editTags')}</Button>
-        </div>
+        {/* Auto-save on toggle and create; no explicit Update button */}
       </div>
     </div>
   )

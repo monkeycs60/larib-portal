@@ -413,8 +413,9 @@ Notes:
 - Name: User tag toggles with create modal
 - What it does:
   - In the case view personal settings, shows all of the user's tags as toggleable items for the current case.
-  - Adds a “Create Tag” modal to add new personal tags; saves selection with “Update Tags”. Admins cannot edit.
-  - UI: Replaces checkbox list with compact chips; active chips are filled with tag color, inactive chips are outlined with tag color.
+  - Adds a “Create Tag” modal; on success, the tag is auto-selected and saved.
+  - UI: Compact chips with hover/focus; active = filled color, inactive = outlined. Admins cannot edit.
+  - Auto-save: toggling chips or creating a tag saves immediately (removed the “Update Tags” button in this panel).
 - How to use:
   - Open a case, under Personal Settings > My Tags, toggle tags and click “Update Tags”, or create a new one via the modal.
 - Updated files:
