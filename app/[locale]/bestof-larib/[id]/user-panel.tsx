@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
@@ -19,6 +19,7 @@ import { saveAttemptAction, upsertSettingsAction, validateAttemptAction } from '
 import { CheckCircle2, Eye } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getActionErrorMessage } from '@/lib/ui/safe-action-error'
+import { useBestofAttemptStore } from '@/lib/stores/bestof-attempts'
 
 type Props = {
   isAdmin: boolean
@@ -46,7 +47,7 @@ const AnalysisSchema = z.object({
   finalDx: z.string().min(1),
 })
 
-export default function CaseInteractionPanel({ isAdmin, defaultTags, createdAt, caseId, tags: cTags, onTagsChange, comments: cComments, onCommentsChange, difficulty: cDifficulty, onDifficultyChange, hideActions, showStartNewAttempt, onStartNewAttempt, attempts = [], onSelectAttempt }: Props) {
+export default function CaseInteractionPanel({ isAdmin, defaultTags, caseId, tags: cTags, onTagsChange, comments: cComments, onCommentsChange, difficulty: cDifficulty, onDifficultyChange, hideActions, showStartNewAttempt, onStartNewAttempt, attempts = [], onSelectAttempt }: Props) {
   const t = useTranslations('bestof')
   const [tags, setTags] = useState<string[]>(cTags ?? defaultTags)
   const [comment, setComment] = useState(cComments ?? '')
@@ -81,7 +82,7 @@ export default function CaseInteractionPanel({ isAdmin, defaultTags, createdAt, 
   function onLocalCommentsChange(v: string) { setComment(v); onCommentsChange?.(v); if (!isAdmin) scheduleSave({ comments: v }) }
   function onLocalDifficultyChange(v: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | '') { setDifficulty(v); onDifficultyChange?.(v); if (!isAdmin) scheduleSave({ difficulty: v }) }
 
-  const createdLabel = useMemo(() => new Date(createdAt).toLocaleString(), [createdAt])
+  // createdAt is available in props if later needed in UI
 
   return (
     <div className="space-y-4">
@@ -96,7 +97,7 @@ export default function CaseInteractionPanel({ isAdmin, defaultTags, createdAt, 
               ) : attempts
                   .filter((attempt) => !!attempt.validatedAt)
                   .sort((leftAttempt, rightAttempt) => new Date(leftAttempt.createdAt).getTime() - new Date(rightAttempt.createdAt).getTime())
-                  .map((attempt, index, allAttempts) => {
+                  .map((attempt, index) => {
                     const num = index + 1
                     const date = new Date(attempt.createdAt)
                     const dt = `${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} ${date.toLocaleDateString()}`
@@ -104,7 +105,7 @@ export default function CaseInteractionPanel({ isAdmin, defaultTags, createdAt, 
                       <button
                         key={attempt.id}
                         type="button"
-                        onClick={() => onSelectAttempt?.(attempt)}
+                        onClick={() => { setLastAttemptId(attempt.id); useBestofAttemptStore.getState().setLastAttemptId(caseId, attempt.id); onSelectAttempt?.(attempt) }}
                         className={cn("w-full rounded border p-2 text-left hover:bg-accent/50 transition", "flex items-center justify-between")}
                       >
                         <div className="text-sm">
@@ -151,7 +152,7 @@ export default function CaseInteractionPanel({ isAdmin, defaultTags, createdAt, 
           {hideActions ? null : (
             <div className="flex flex-col gap-2 pt-1">
               <Button onClick={async () => { if (isAdmin) return; await execSettings({ caseId, tags, comments: comment, personalDifficulty: difficulty || undefined }); toast.success(t('caseView.savedDraft')) }} disabled={isAdmin}>{t('saveProgress')}</Button>
-              <Button onClick={() => { if (isAdmin) return; const id = lastAttemptId ?? (typeof window !== 'undefined' ? window.__lastAttemptId : null); if (!id) { toast.error(t('errors.fieldsRequired')); return } execValidate({ attemptId: id }) }} disabled={isAdmin || validating} variant="secondary">{t('caseView.validateCase')}</Button>
+              <Button onClick={() => { if (isAdmin) return; const id = lastAttemptId ?? useBestofAttemptStore.getState().getLastAttemptId(caseId) ?? null; if (!id) { toast.error(t('errors.fieldsRequired')); return } execValidate({ attemptId: id }) }} disabled={isAdmin || validating} variant="secondary">{t('caseView.validateCase')}</Button>
             </div>
           )}
           {showStartNewAttempt ? (
@@ -189,8 +190,8 @@ export function AnalysisForm({ isAdmin, caseId, values, onChange, hideInlineSave
     if (isAdmin) return
     const res = await execSave({ caseId, ...values })
     if (res?.data?.attemptId) {
-      // Ensure outer panel sees last attempt id if mounted together (no any casting)
-      try { window.__lastAttemptId = res.data.attemptId } catch {}
+      // Share last attempt id through a small global store
+      try { useBestofAttemptStore.getState().setLastAttemptId(caseId, res.data.attemptId) } catch {}
     }
     onChange?.(values)
   }

@@ -1,7 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { getCaseById } from '@/lib/services/bestof-larib';
 import { Link } from '@/app/i18n/navigation';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft } from 'lucide-react';
 import { getTypedSession } from '@/lib/auth-helpers';
@@ -30,10 +29,7 @@ export default async function CaseViewPage({
 	const isAdmin = (session?.user?.role ?? 'USER') === 'ADMIN';
 
     const userId = session?.user?.id
-    const [prefill, attempts] = userId ? await Promise.all<[
-        PrefillState,
-        CaseAttemptSummary[]
-    ]>([
+    const [prefill, attempts] = userId ? await Promise.all([
         getUserCaseState({ userId, caseId: c.id }).then(s => ({
             tags: s.settings?.tags ?? [],
             comments: s.settings?.comments ?? null,
