@@ -253,7 +253,7 @@
       "exclusivePdfDisabled": "Text content is present — PDF upload is disabled",
       "exclusiveTextDisabled": "A PDF is present — text editor is disabled",
       "invalidPdf": "Invalid PDF file",
-      "pdfTooLarge": "PDF is too large",
+      "pdfTooLarge": "PDF is too large: max size is 20MB",
       "uploadFailed": "Upload failed"
     },
     "editCaseTitle": "Edit: {name}",

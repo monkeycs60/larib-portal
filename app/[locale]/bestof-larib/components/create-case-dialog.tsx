@@ -174,7 +174,7 @@ export default function CreateCaseDialog({
 			toast.error(t('errors.invalidPdf'));
 			return;
 		}
-		if (file.size > 10 * 1024 * 1024) {
+		if (file.size > 20 * 1024 * 1024) {
 			toast.error(t('errors.pdfTooLarge'));
 			return;
 		}
@@ -193,7 +193,7 @@ export default function CreateCaseDialog({
 			toast.success(t('pdfUploaded'));
 		} catch (e: unknown) {
 			console.error(e);
-			toast.error(t('errors.uploadFailed'));
+			toast.error(t('errors.uploadFailed') + ' ' + e);
 		} finally {
 			setPdfUploading(false);
 		}
