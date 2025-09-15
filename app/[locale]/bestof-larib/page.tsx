@@ -12,6 +12,7 @@ import CreateCaseDialog from './components/create-case-dialog'
 import TagManagerDialog from './components/tag-manager-dialog'
 import FiltersBar from './components/filters-bar'
 import SortHeader from './components/sort-header'
+import TableOverlay from './components/table-overlay'
 
 export default async function BestofLaribPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const t = await getTranslations('bestof')
@@ -75,7 +76,8 @@ export default async function BestofLaribPage({ searchParams }: { searchParams: 
         }}
       />
 
-      <div className="rounded-md border">
+      <div className="relative rounded-md border">
+        <TableOverlay />
         <Table>
           <TableHeader>
             <TableRow>

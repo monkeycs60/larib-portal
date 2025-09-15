@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
 import { MultiSelect } from '@/components/ui/multiselect';
+import { useBestofLoadingStore } from '@/lib/stores/bestof-loading';
 
 type ExamType = { id: string; name: string };
 type DiseaseTag = { id: string; name: string };
@@ -50,7 +51,9 @@ export default function FiltersBar({
 	const [dateFrom, setDateFrom] = useState(qp.get('dateFrom') ?? '');
 	const [dateTo, setDateTo] = useState(qp.get('dateTo') ?? '');
 	const [datePreset, setDatePreset] = useState(qp.get('datePreset') ?? '');
-	const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const overlayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const setOverlayLoading = useBestofLoadingStore((s) => s.setLoading);
 
 	function resetFilters() {
 		setQ('');
@@ -80,6 +83,10 @@ export default function FiltersBar({
         const current = new URLSearchParams(
             typeof window !== 'undefined' ? window.location.search : ''
         );
+        // show overlay while navigating
+        setOverlayLoading(true);
+        if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current);
+        overlayTimerRef.current = setTimeout(() => setOverlayLoading(false), 1500);
         // remove existing filters
         [
             'q',

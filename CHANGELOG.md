@@ -435,4 +435,5 @@ Notes:
   - Added "My Difficulty" filter (filters by personal difficulty saved per case)
   - Slightly reduced the width of the name search input for better layout
   - Added route-level loading skeleton (loading.tsx) to smooth UI during filter changes/navigation
+  - Added in-page table overlay loader for smoother filter transitions
   - How to use: Open Bestof Larib list page, use the new filter selects in the top filter bar. Admins will see an "Admin Tag" filter; authenticated users will see a "User Tag" and a "My Difficulty" filter. All filters update the URL query and results dynamically.
