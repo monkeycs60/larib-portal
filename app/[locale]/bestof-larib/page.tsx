@@ -35,7 +35,7 @@ export default async function BestofLaribPage({ searchParams }: { searchParams?:
     difficulties: asDifficultyArray(searchParams?.difficulty),
     createdFrom: typeof searchParams?.dateFrom === 'string' && searchParams.dateFrom ? new Date(searchParams.dateFrom) : undefined,
     createdTo: typeof searchParams?.dateTo === 'string' && searchParams.dateTo ? (() => { const d = new Date(searchParams.dateTo); d.setHours(23,59,59,999); return d })() : undefined,
-    adminTagId: typeof searchParams?.adminTagId === 'string' ? searchParams?.adminTagId : undefined,
+    adminTagIds: asArray(searchParams?.adminTagId),
     userTagIds: asArray(searchParams?.userTagId),
     myDifficulty: typeof searchParams?.myDifficulty === 'string' && ['BEGINNER','INTERMEDIATE','ADVANCED'].includes(searchParams.myDifficulty) ? (searchParams.myDifficulty as 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED') : undefined,
   }

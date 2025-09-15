@@ -53,7 +53,7 @@ export type CaseListFilters = {
   difficulties?: Array<'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'>
   createdFrom?: Date
   createdTo?: Date
-  adminTagId?: string
+  adminTagIds?: string[]
   userTagIds?: string[]
   myDifficulty?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
 }
@@ -72,8 +72,8 @@ export async function listClinicalCasesWithDisplayTags(userId?: string | null, f
       gte: filters?.createdFrom ?? undefined,
       lte: filters?.createdTo ?? undefined,
     } : undefined,
-    // Admin tag filter
-    adminTags: filters?.adminTagId ? { some: { tagId: filters.adminTagId } } : undefined,
+    // Admin tag filter (any-of)
+    adminTags: filters?.adminTagIds?.length ? { some: { tagId: { in: filters.adminTagIds } } } : undefined,
     // User tag filter (scoped to current user)
     userTags: filters?.userTagIds?.length && userId ? { some: { tag: { id: { in: filters.userTagIds }, userId } } } : undefined,
     // Personal difficulty filter (from UserCaseSettings) scoped to current user

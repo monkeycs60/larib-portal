@@ -44,7 +44,7 @@ export default function FiltersBar({
     const [examTypeIds, setExamTypeIds] = useState<string[]>(qpArray('examTypeId'));
     const [diseaseTagIds, setDiseaseTagIds] = useState<string[]>(qpArray('diseaseTagId'));
     const [difficulties, setDifficulties] = useState<string[]>(qpArray('difficulty'));
-    const [adminTagId, setAdminTagId] = useState(qp.get('adminTagId') ?? '');
+    const [adminTagIds, setAdminTagIds] = useState<string[]>(qpArray('adminTagId'));
     const [userTagIds, setUserTagIds] = useState<string[]>(qpArray('userTagId'));
 	const [myDifficulty, setMyDifficulty] = useState(qp.get('myDifficulty') ?? '');
 	const [dateFrom, setDateFrom] = useState(qp.get('dateFrom') ?? '');
@@ -58,7 +58,7 @@ export default function FiltersBar({
         setExamTypeIds([]);
         setDiseaseTagIds([]);
         setDifficulties([]);
-        setAdminTagId('');
+        setAdminTagIds([]);
         setUserTagIds([]);
         setMyDifficulty('');
 		setDateFrom('');
@@ -101,7 +101,7 @@ export default function FiltersBar({
             examTypeId: examTypeIds,
             diseaseTagId: diseaseTagIds,
             difficulty: difficulties,
-            adminTagId,
+            adminTagId: adminTagIds,
             userTagId: userTagIds,
             myDifficulty,
             dateFrom,
@@ -123,7 +123,10 @@ export default function FiltersBar({
             const v = merged.difficulty;
             (Array.isArray(v) ? v : [v]).forEach((val) => current.append('difficulty', val));
         }
-        if (merged.adminTagId) current.set('adminTagId', merged.adminTagId);
+        if (merged.adminTagId) {
+            const v = merged.adminTagId;
+            (Array.isArray(v) ? v : [v]).forEach((val) => current.append('adminTagId', val));
+        }
         if (merged.userTagId) {
             const v = merged.userTagId;
             (Array.isArray(v) ? v : [v]).forEach((val) => current.append('userTagId', val));
@@ -251,19 +254,16 @@ export default function FiltersBar({
 				/>
 			</div>
             {isAdmin ? (
-                <div>
+                <div className='min-w-52'>
                     <label className='block text-xs mb-1'>{t('filters.adminTag')}</label>
-                    <Select
-                        value={adminTagId}
-                        onChange={(e) => {
-                            setAdminTagId(e.target.value);
-                            pushWith({ adminTagId: e.target.value, userTagId: [] });
-                        }}>
-                        <option value=''>{t('filters.any')}</option>
-                        {adminTags.map((tag) => (
-                            <option key={tag.id} value={tag.id}>{tag.name}</option>
-                        ))}
-                    </Select>
+                    <MultiSelect
+                        options={adminTags.map(tag => ({ label: tag.name, value: tag.id }))}
+                        defaultValue={adminTagIds}
+                        onValueChange={(vals) => { setAdminTagIds(vals); pushWith({ adminTagId: vals, userTagId: [] }); }}
+                        placeholder={t('filters.any')}
+                        maxCount={2}
+                        responsive
+                    />
                 </div>
             ) : (
                 userTags.length > 0 ? (
@@ -272,7 +272,7 @@ export default function FiltersBar({
                         <MultiSelect
                             options={userTags.map(tag => ({ label: tag.name, value: tag.id }))}
                             defaultValue={userTagIds}
-                            onValueChange={(vals) => { setUserTagIds(vals); pushWith({ userTagId: vals, adminTagId: '' }); }}
+                            onValueChange={(vals) => { setUserTagIds(vals); pushWith({ userTagId: vals, adminTagId: [] }); }}
                             placeholder={t('filters.any')}
                             maxCount={2}
                             responsive

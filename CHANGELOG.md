@@ -429,8 +429,10 @@ Notes:
 
 - Bestof Larib: Added role-specific filters in the cases list
   - Admins can filter by admin tag (global admin tags)
-  - Users can filter by their own user tags (now multi-select)
+  - Admin Tag filter is now multi-select (uses MultiSelect)
+  - Users can filter by their own user tags (multi-select)
   - Exam, Disease, and Difficulty filters are now multi-select using the app's MultiSelect component for a better UX
   - Added "My Difficulty" filter (filters by personal difficulty saved per case)
   - Slightly reduced the width of the name search input for better layout
+  - Added route-level loading skeleton (loading.tsx) to smooth UI during filter changes/navigation
   - How to use: Open Bestof Larib list page, use the new filter selects in the top filter bar. Admins will see an "Admin Tag" filter; authenticated users will see a "User Tag" and a "My Difficulty" filter. All filters update the URL query and results dynamically.
