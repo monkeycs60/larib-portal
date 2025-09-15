@@ -5,17 +5,25 @@ import { useRouter, usePathname } from '@/app/i18n/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
+import { MultiSelect } from '@/components/ui/multiselect';
 
 type ExamType = { id: string; name: string };
 type DiseaseTag = { id: string; name: string };
+type SimpleTag = { id: string; name: string };
 
 export default function FiltersBar({
-	examTypes,
-	diseaseTags,
+  data,
 }: {
-	examTypes: ExamType[];
-	diseaseTags: DiseaseTag[];
+  data: {
+    examTypes: ExamType[];
+    diseaseTags: DiseaseTag[];
+    isAdmin?: boolean;
+    adminTags?: SimpleTag[];
+    userTags?: SimpleTag[];
+    canUsePersonalDifficulty?: boolean;
+  };
 }) {
+    const { examTypes, diseaseTags, isAdmin = false, adminTags = [], userTags = [], canUsePersonalDifficulty = false } = data;
 	const t = useTranslations('bestof');
 	const router = useRouter();
 	const pathname = usePathname();
@@ -27,11 +35,18 @@ export default function FiltersBar({
 
 	const [q, setQ] = useState(qp.get('q') ?? '');
 	const [status, setStatus] = useState(qp.get('status') ?? '');
-	const [examTypeId, setExamTypeId] = useState(qp.get('examTypeId') ?? '');
-	const [diseaseTagId, setDiseaseTagId] = useState(
-		qp.get('diseaseTagId') ?? ''
-	);
-	const [difficulty, setDifficulty] = useState(qp.get('difficulty') ?? '');
+    const qpArray = (key: string) => {
+        const all = url.searchParams.getAll(key);
+        const single = url.searchParams.get(key);
+        if (all && all.length > 1) return all;
+        return single ? [single] : [];
+    };
+    const [examTypeIds, setExamTypeIds] = useState<string[]>(qpArray('examTypeId'));
+    const [diseaseTagIds, setDiseaseTagIds] = useState<string[]>(qpArray('diseaseTagId'));
+    const [difficulties, setDifficulties] = useState<string[]>(qpArray('difficulty'));
+    const [adminTagId, setAdminTagId] = useState(qp.get('adminTagId') ?? '');
+    const [userTagIds, setUserTagIds] = useState<string[]>(qpArray('userTagId'));
+	const [myDifficulty, setMyDifficulty] = useState(qp.get('myDifficulty') ?? '');
 	const [dateFrom, setDateFrom] = useState(qp.get('dateFrom') ?? '');
 	const [dateTo, setDateTo] = useState(qp.get('dateTo') ?? '');
 	const [datePreset, setDatePreset] = useState(qp.get('datePreset') ?? '');
@@ -40,9 +55,12 @@ export default function FiltersBar({
 	function resetFilters() {
 		setQ('');
 		setStatus('');
-		setExamTypeId('');
-		setDiseaseTagId('');
-		setDifficulty('');
+        setExamTypeIds([]);
+        setDiseaseTagIds([]);
+        setDifficulties([]);
+        setAdminTagId('');
+        setUserTagIds([]);
+        setMyDifficulty('');
 		setDateFrom('');
 		setDateTo('');
 		setDatePreset('');
@@ -58,43 +76,64 @@ export default function FiltersBar({
 		router.push(qs ? `${pathname}?${qs}` : pathname);
 	}
 
-	function pushWith(partial: Partial<Record<string, string>>) {
-		const current = new URLSearchParams(
-			typeof window !== 'undefined' ? window.location.search : ''
-		);
-		// remove existing filters
-		[
-			'q',
-			'status',
-			'examTypeId',
-			'diseaseTagId',
-			'difficulty',
-			'dateFrom',
-			'dateTo',
-			'datePreset',
-		].forEach((k) => current.delete(k));
-		// re-add from state merged with partial
-		const merged = {
-			q: q.trim(),
-			status,
-			examTypeId,
-			diseaseTagId,
-			difficulty,
-			dateFrom,
-			dateTo,
-			datePreset,
-			...partial,
-		};
-		if (merged.q) current.set('q', merged.q);
-		if (merged.status) current.set('status', merged.status);
-		if (merged.examTypeId) current.set('examTypeId', merged.examTypeId);
-		if (merged.diseaseTagId) current.set('diseaseTagId', merged.diseaseTagId);
-		if (merged.difficulty) current.set('difficulty', merged.difficulty);
-		if (merged.dateFrom) current.set('dateFrom', merged.dateFrom);
-		if (merged.dateTo) current.set('dateTo', merged.dateTo);
-		if (merged.datePreset) current.set('datePreset', merged.datePreset);
-		router.push(`${pathname}?${current.toString()}`);
-	}
+    function pushWith(partial: Partial<Record<string, string | string[]>>) {
+        const current = new URLSearchParams(
+            typeof window !== 'undefined' ? window.location.search : ''
+        );
+        // remove existing filters
+        [
+            'q',
+            'status',
+            'examTypeId',
+            'diseaseTagId',
+            'difficulty',
+            'adminTagId',
+            'userTagId',
+            'myDifficulty',
+            'dateFrom',
+            'dateTo',
+            'datePreset',
+        ].forEach((k) => current.delete(k));
+        // re-add from state merged with partial
+        const merged = {
+            q: q.trim(),
+            status,
+            examTypeId: examTypeIds,
+            diseaseTagId: diseaseTagIds,
+            difficulty: difficulties,
+            adminTagId,
+            userTagId: userTagIds,
+            myDifficulty,
+            dateFrom,
+            dateTo,
+            datePreset,
+            ...partial,
+        };
+        if (merged.q) current.set('q', merged.q);
+        if (merged.status) current.set('status', merged.status);
+        if (merged.examTypeId) {
+            const v = merged.examTypeId;
+            (Array.isArray(v) ? v : [v]).forEach((val) => current.append('examTypeId', val));
+        }
+        if (merged.diseaseTagId) {
+            const v = merged.diseaseTagId;
+            (Array.isArray(v) ? v : [v]).forEach((val) => current.append('diseaseTagId', val));
+        }
+        if (merged.difficulty) {
+            const v = merged.difficulty;
+            (Array.isArray(v) ? v : [v]).forEach((val) => current.append('difficulty', val));
+        }
+        if (merged.adminTagId) current.set('adminTagId', merged.adminTagId);
+        if (merged.userTagId) {
+            const v = merged.userTagId;
+            (Array.isArray(v) ? v : [v]).forEach((val) => current.append('userTagId', val));
+        }
+        if (merged.myDifficulty) current.set('myDifficulty', merged.myDifficulty);
+        if (merged.dateFrom) current.set('dateFrom', merged.dateFrom);
+        if (merged.dateTo) current.set('dateTo', merged.dateTo);
+        if (merged.datePreset) current.set('datePreset', merged.datePreset);
+        router.push(`${pathname}?${current.toString()}`);
+    }
 
 	function formatYYYYMMDD(d: Date) {
 		const y = d.getFullYear();
@@ -196,7 +235,7 @@ export default function FiltersBar({
 
 	return (
 		<div className='flex flex-wrap items-end gap-3'>
-			<div className='flex-1 min-w-56'>
+            <div className='flex-1 min-w-40'>
 				<label className='block text-xs mb-1'>{t('filters.search')}</label>
 				<Input
 					value={q}
@@ -211,10 +250,40 @@ export default function FiltersBar({
 					placeholder={t('filters.searchPlaceholder')}
 				/>
 			</div>
-			<div>
-				<label className='block text-xs mb-1'>{t('filters.status')}</label>
-				<Select
-					value={status}
+            {isAdmin ? (
+                <div>
+                    <label className='block text-xs mb-1'>{t('filters.adminTag')}</label>
+                    <Select
+                        value={adminTagId}
+                        onChange={(e) => {
+                            setAdminTagId(e.target.value);
+                            pushWith({ adminTagId: e.target.value, userTagId: [] });
+                        }}>
+                        <option value=''>{t('filters.any')}</option>
+                        {adminTags.map((tag) => (
+                            <option key={tag.id} value={tag.id}>{tag.name}</option>
+                        ))}
+                    </Select>
+                </div>
+            ) : (
+                userTags.length > 0 ? (
+                    <div className='min-w-52'>
+                        <label className='block text-xs mb-1'>{t('filters.userTag')}</label>
+                        <MultiSelect
+                            options={userTags.map(tag => ({ label: tag.name, value: tag.id }))}
+                            defaultValue={userTagIds}
+                            onValueChange={(vals) => { setUserTagIds(vals); pushWith({ userTagId: vals, adminTagId: '' }); }}
+                            placeholder={t('filters.any')}
+                            maxCount={2}
+                            responsive
+                        />
+                    </div>
+                ) : null
+            )}
+            <div>
+                <label className='block text-xs mb-1'>{t('filters.status')}</label>
+                <Select
+                    value={status}
 					onChange={(e) => {
 						setStatus(e.target.value);
 						pushWith({ status: e.target.value });
@@ -224,56 +293,61 @@ export default function FiltersBar({
 					<option value='DRAFT'>{t('status.draft')}</option>
 				</Select>
 			</div>
-			<div>
-				<label className='block text-xs mb-1'>{t('filters.exam')}</label>
-				<Select
-					value={examTypeId}
-					onChange={(e) => {
-						setExamTypeId(e.target.value);
-						pushWith({ examTypeId: e.target.value });
-					}}>
-					<option value=''>{t('filters.any')}</option>
-					{examTypes.map((ex) => (
-						<option key={ex.id} value={ex.id}>
-							{ex.name}
-						</option>
-					))}
-				</Select>
-			</div>
-			<div>
-				<label className='block text-xs mb-1'>{t('filters.disease')}</label>
-				<Select
-					value={diseaseTagId}
-					onChange={(e) => {
-						setDiseaseTagId(e.target.value);
-						pushWith({ diseaseTagId: e.target.value });
-					}}>
-					<option value=''>{t('filters.any')}</option>
-					{diseaseTags.map((d) => (
-						<option key={d.id} value={d.id}>
-							{d.name}
-						</option>
-					))}
-				</Select>
-			</div>
-			<div>
-				<label className='block text-xs mb-1'>
-					{t('filters.difficulty')}
-				</label>
-				<Select
-					value={difficulty}
-					onChange={(e) => {
-						setDifficulty(e.target.value);
-						pushWith({ difficulty: e.target.value });
-					}}>
-					<option value=''>{t('filters.any')}</option>
-					<option value='BEGINNER'>{t('difficulty.beginner')}</option>
-					<option value='INTERMEDIATE'>
-						{t('difficulty.intermediate')}
-					</option>
-					<option value='ADVANCED'>{t('difficulty.advanced')}</option>
-				</Select>
-			</div>
+            <div className='min-w-52'>
+                <label className='block text-xs mb-1'>{t('filters.exam')}</label>
+                <MultiSelect
+                    options={examTypes.map(ex => ({ label: ex.name, value: ex.id }))}
+                    defaultValue={examTypeIds}
+                    onValueChange={(vals) => { setExamTypeIds(vals); pushWith({ examTypeId: vals }); }}
+                    placeholder={t('filters.any')}
+                    maxCount={2}
+                    responsive
+                />
+            </div>
+            <div className='min-w-52'>
+                <label className='block text-xs mb-1'>{t('filters.disease')}</label>
+                <MultiSelect
+                    options={diseaseTags.map(d => ({ label: d.name, value: d.id }))}
+                    defaultValue={diseaseTagIds}
+                    onValueChange={(vals) => { setDiseaseTagIds(vals); pushWith({ diseaseTagId: vals }); }}
+                    placeholder={t('filters.any')}
+                    maxCount={2}
+                    responsive
+                />
+            </div>
+            <div className='min-w-52'>
+                <label className='block text-xs mb-1'>
+                    {t('filters.difficulty')}
+                </label>
+                <MultiSelect
+                    options={[
+                        { label: t('difficulty.beginner'), value: 'BEGINNER' },
+                        { label: t('difficulty.intermediate'), value: 'INTERMEDIATE' },
+                        { label: t('difficulty.advanced'), value: 'ADVANCED' },
+                    ]}
+                    defaultValue={difficulties}
+                    onValueChange={(vals) => { setDifficulties(vals); pushWith({ difficulty: vals }); }}
+                    placeholder={t('filters.any')}
+                    maxCount={3}
+                    responsive
+                />
+            </div>
+			{canUsePersonalDifficulty ? (
+				<div>
+					<label className='block text-xs mb-1'>{t('filters.myDifficulty')}</label>
+					<Select
+						value={myDifficulty}
+						onChange={(e) => {
+							setMyDifficulty(e.target.value);
+							pushWith({ myDifficulty: e.target.value });
+						}}>
+						<option value=''>{t('filters.any')}</option>
+						<option value='BEGINNER'>{t('difficulty.beginner')}</option>
+						<option value='INTERMEDIATE'>{t('difficulty.intermediate')}</option>
+						<option value='ADVANCED'>{t('difficulty.advanced')}</option>
+					</Select>
+				</div>
+			) : null}
 			<div>
 				<label className='block text-xs mb-1'>
 					{t('filters.dateRange')}

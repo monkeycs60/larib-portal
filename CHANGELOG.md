@@ -423,3 +423,14 @@ Notes:
   - `app/[locale]/bestof-larib/[id]/user-panel.tsx` integrates the picker.
   - `app/[locale]/bestof-larib/[id]/work-area.tsx` passes user tag data.
   - `app/[locale]/bestof-larib/[id]/page.tsx` fetches user tags and selected case tag ids server-side.
+# Changelog
+
+## [Unreleased]
+
+- Bestof Larib: Added role-specific filters in the cases list
+  - Admins can filter by admin tag (global admin tags)
+  - Users can filter by their own user tags (now multi-select)
+  - Exam, Disease, and Difficulty filters are now multi-select using the app's MultiSelect component for a better UX
+  - Added "My Difficulty" filter (filters by personal difficulty saved per case)
+  - Slightly reduced the width of the name search input for better layout
+  - How to use: Open Bestof Larib list page, use the new filter selects in the top filter bar. Admins will see an "Admin Tag" filter; authenticated users will see a "User Tag" and a "My Difficulty" filter. All filters update the URL query and results dynamically.

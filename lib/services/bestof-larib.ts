@@ -48,30 +48,39 @@ export type ClinicalCaseWithDisplayTags = Omit<ClinicalCaseListItem, 'tags'> & {
 export type CaseListFilters = {
   name?: string
   status?: 'DRAFT' | 'PUBLISHED'
-  examTypeId?: string
-  diseaseTagId?: string
-  difficulty?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
+  examTypeIds?: string[]
+  diseaseTagIds?: string[]
+  difficulties?: Array<'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'>
   createdFrom?: Date
   createdTo?: Date
+  adminTagId?: string
+  userTagIds?: string[]
+  myDifficulty?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
 }
 
 export type CaseListSortField = 'name' | 'status' | 'difficulty' | 'createdAt' | 'examType' | 'diseaseTag' | 'attempts' | 'personalDifficulty'
 export type CaseListSort = { field?: CaseListSortField; direction?: 'asc' | 'desc' }
 
 export async function listClinicalCasesWithDisplayTags(userId?: string | null, filters?: CaseListFilters, sort?: CaseListSort): Promise<ClinicalCaseWithDisplayTags[]> {
-  const where: Parameters<typeof prisma.clinicalCase.findMany>[0]['where'] = {
+  const where = {
     name: filters?.name ? { contains: filters.name, mode: 'insensitive' } : undefined,
     status: filters?.status ?? undefined,
-    examTypeId: filters?.examTypeId ?? undefined,
-    diseaseTagId: filters?.diseaseTagId ?? undefined,
-    difficulty: filters?.difficulty ?? undefined,
+    examTypeId: filters?.examTypeIds?.length ? { in: filters.examTypeIds } : undefined,
+    diseaseTagId: filters?.diseaseTagIds?.length ? { in: filters.diseaseTagIds } : undefined,
+    difficulty: filters?.difficulties?.length ? { in: filters.difficulties } : undefined,
     createdAt: filters?.createdFrom || filters?.createdTo ? {
       gte: filters?.createdFrom ?? undefined,
       lte: filters?.createdTo ?? undefined,
     } : undefined,
+    // Admin tag filter
+    adminTags: filters?.adminTagId ? { some: { tagId: filters.adminTagId } } : undefined,
+    // User tag filter (scoped to current user)
+    userTags: filters?.userTagIds?.length && userId ? { some: { tag: { id: { in: filters.userTagIds }, userId } } } : undefined,
+    // Personal difficulty filter (from UserCaseSettings) scoped to current user
+    UserCaseSettings: filters?.myDifficulty && userId ? { some: { userId, personalDifficulty: filters.myDifficulty } } : undefined,
   }
 
-  const orderBy: Parameters<typeof prisma.clinicalCase.findMany>[0]['orderBy'] = (() => {
+  const orderBy = (() => {
     const dir = sort?.direction ?? 'desc'
     switch (sort?.field) {
       case 'name':

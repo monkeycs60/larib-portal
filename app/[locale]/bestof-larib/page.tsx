@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server'
 import { listClinicalCasesWithDisplayTags, listExamTypes, listDiseaseTags, type CaseListFilters, type CaseListSortField } from '@/lib/services/bestof-larib'
+import { listAdminTags, listUserTags } from '@/lib/services/bestof-larib-tags'
 import { getTypedSession } from '@/lib/auth-helpers'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -15,23 +16,40 @@ import SortHeader from './components/sort-header'
 export default async function BestofLaribPage({ searchParams }: { searchParams?: Record<string, string | string[] | undefined> }) {
   const t = await getTranslations('bestof')
   const session = await getTypedSession()
+  const asArray = (value: string | string[] | undefined): string[] | undefined => {
+    if (!value) return undefined
+    return Array.isArray(value) ? value.filter(Boolean) : value ? [value] : undefined
+  }
+  const validDifficulties = ['BEGINNER','INTERMEDIATE','ADVANCED'] as const
+  const asDifficultyArray = (value: string | string[] | undefined): (typeof validDifficulties)[number][] | undefined => {
+    const arr = asArray(value)
+    if (!arr?.length) return undefined
+    const filtered = arr.filter((v) => (validDifficulties as readonly string[]).includes(v))
+    return filtered as (typeof validDifficulties)[number][]
+  }
   const filters: CaseListFilters = {
     name: typeof searchParams?.q === 'string' ? searchParams?.q : undefined,
     status: typeof searchParams?.status === 'string' && ['PUBLISHED','DRAFT'].includes(searchParams.status) ? (searchParams.status as 'PUBLISHED' | 'DRAFT') : undefined,
-    examTypeId: typeof searchParams?.examTypeId === 'string' ? searchParams?.examTypeId : undefined,
-    diseaseTagId: typeof searchParams?.diseaseTagId === 'string' ? searchParams?.diseaseTagId : undefined,
-    difficulty: typeof searchParams?.difficulty === 'string' && ['BEGINNER','INTERMEDIATE','ADVANCED'].includes(searchParams.difficulty) ? (searchParams.difficulty as 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED') : undefined,
+    examTypeIds: asArray(searchParams?.examTypeId),
+    diseaseTagIds: asArray(searchParams?.diseaseTagId),
+    difficulties: asDifficultyArray(searchParams?.difficulty),
     createdFrom: typeof searchParams?.dateFrom === 'string' && searchParams.dateFrom ? new Date(searchParams.dateFrom) : undefined,
     createdTo: typeof searchParams?.dateTo === 'string' && searchParams.dateTo ? (() => { const d = new Date(searchParams.dateTo); d.setHours(23,59,59,999); return d })() : undefined,
+    adminTagId: typeof searchParams?.adminTagId === 'string' ? searchParams?.adminTagId : undefined,
+    userTagIds: asArray(searchParams?.userTagId),
+    myDifficulty: typeof searchParams?.myDifficulty === 'string' && ['BEGINNER','INTERMEDIATE','ADVANCED'].includes(searchParams.myDifficulty) ? (searchParams.myDifficulty as 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED') : undefined,
   }
   const sortField = typeof searchParams?.sort === 'string' ? (searchParams.sort as CaseListSortField) : undefined
   const sortDirection = typeof searchParams?.dir === 'string' && (searchParams.dir === 'asc' || searchParams.dir === 'desc') ? (searchParams.dir) : undefined
-  const [cases, examTypes, diseaseTags] = await Promise.all([
+  const isAdmin = session?.user?.role === 'ADMIN'
+  const [cases, examTypes, diseaseTags, adminTags, userTagsList] = await Promise.all([
     listClinicalCasesWithDisplayTags(session?.user?.id, filters, { field: sortField, direction: sortDirection }),
     listExamTypes(),
     listDiseaseTags(),
+    isAdmin ? listAdminTags().then(rows => rows.map(r => ({ id: r.id, name: r.name }))) : Promise.resolve([]),
+    session?.user?.id ? listUserTags(session.user.id).then(rows => rows.map(r => ({ id: r.id, name: r.name }))) : Promise.resolve([]),
   ])
-  const isAdmin = session?.user?.role === 'ADMIN'
+  
 
   return (
     <div className="space-y-4 p-6 max-w-7xl mx-auto">
@@ -45,7 +63,16 @@ export default async function BestofLaribPage({ searchParams }: { searchParams?:
         ) : null}
       </div>
 
-      <FiltersBar examTypes={examTypes} diseaseTags={diseaseTags} />
+      <FiltersBar
+        data={{
+          examTypes,
+          diseaseTags,
+          isAdmin,
+          adminTags,
+          userTags: userTagsList,
+          canUsePersonalDifficulty: Boolean(session?.user?.id),
+        }}
+      />
 
       <div className="rounded-md border">
         <Table>
