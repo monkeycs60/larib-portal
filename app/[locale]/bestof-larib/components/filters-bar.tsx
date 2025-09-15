@@ -261,7 +261,7 @@ export default function FiltersBar({
                         defaultValue={adminTagIds}
                         onValueChange={(vals) => { setAdminTagIds(vals); pushWith({ adminTagId: vals, userTagId: [] }); }}
                         placeholder={t('filters.any')}
-                        maxCount={2}
+                        maxCount={3}
                         responsive
                     />
                 </div>
@@ -274,7 +274,7 @@ export default function FiltersBar({
                             defaultValue={userTagIds}
                             onValueChange={(vals) => { setUserTagIds(vals); pushWith({ userTagId: vals, adminTagId: [] }); }}
                             placeholder={t('filters.any')}
-                            maxCount={2}
+                            maxCount={3}
                             responsive
                         />
                     </div>
