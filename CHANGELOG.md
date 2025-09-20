@@ -6,6 +6,16 @@
 - Updated files:
   - `app/[locale]/bestof-larib/[id]/work-area.tsx` refreshes the route after validation and keeps a temporary attempt in memory until the server data updates.
 
+## Fix: Bestof User Tag Picker Feedback
+
+- Name: Clear feedback for personal tag selections
+- What it does: Improves the "My Tags" picker by showing toggle chips with color dots, checkmarks, and auto-save status, preventing the router warning caused by immediate server action calls without a transition.
+- How to use it: In the left panel of `/{locale}/bestof-larib/[id]`, selecting or deselecting a tag now highlights the chip, displays consistent messaging, and saves automatically without console errors.
+- Updated files:
+  - `app/[locale]/bestof-larib/[id]/user-tags-section.tsx` refactors selection persistence using transitions and introduces the new toggle-style UI.
+  - `messages/en.json` documents the new helper strings explaining the tag state.
+  - `messages/fr.json` mirrors the helper strings for French users.
+
 ## UI Enhancement: Bestof Case View – Analysis & Clinical Report
 
 - Name: User case interaction panel (My Analysis + My Clinical Report)

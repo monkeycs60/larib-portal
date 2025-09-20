@@ -285,7 +285,10 @@
       ,
       "noAttempts": "Aucun essai",
       "attemptDraft": "brouillon",
-      "attemptValidated": "validé"
+      "attemptValidated": "validé",
+      "noUserTags": "Vous n'avez pas encore créé de tags personnels.",
+      "noTagsSelected": "Sélectionnez les tags qui décrivent ce cas pour vous.",
+      "tagsAutoSaved": "Les sélections sont enregistrées automatiquement."
     }
     ,
     "assignTagsTab": "Assigner",

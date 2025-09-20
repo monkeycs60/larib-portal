@@ -1,14 +1,17 @@
 "use client"
-import { useState } from 'react'
+
+import { useEffect, useMemo, useState, useTransition } from 'react'
 import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useAction } from 'next-safe-action/hooks'
 import { ensureUserTagAction, setCaseUserTagsAction } from '../actions'
 import { toast } from 'sonner'
+import { Toggle } from '@/components/ui/toggle'
+import { cn } from '@/lib/utils'
+import { Check, Loader2, Plus } from 'lucide-react'
 
 type Tag = { id: string; name: string; color: string; description: string | null }
 
@@ -20,19 +23,26 @@ export default function UserTagsSection({ isAdmin, caseId, initialTags, initialS
   const [newName, setNewName] = useState('')
   const [newColor, setNewColor] = useState('#3b82f6')
   const [newDesc, setNewDesc] = useState('')
+  const [isSavingSelection, startSavingSelection] = useTransition()
+
+  const save = useAction(setCaseUserTagsAction, {
+    onSuccess() { toast.success(t('updated')) },
+    onError() { toast.error(t('actionError')) },
+  })
+
+  function updateSelection(ids: string[]) {
+    setSelectedIds(ids)
+    if (isAdmin) return
+    startSavingSelection(() => { void save.execute({ caseId, tagIds: ids }) })
+  }
 
   const createTag = useAction(ensureUserTagAction, {
     onSuccess(res) {
       if (!res.data) return
       const created = res.data as Tag
-      setTags((prev) => [...prev.filter((t) => t.id !== created.id), created].sort((a, b) => a.name.localeCompare(b.name)))
-      const nextSelected = Array.from(new Set([...
-        selectedIds,
-        created.id,
-      ]))
-      setSelectedIds(nextSelected)
-      // auto-save new selection
-      void save.execute({ caseId, tagIds: nextSelected })
+      setTags((previous) => [...previous.filter((tag) => tag.id !== created.id), created])
+      const nextSelected = Array.from(new Set([...selectedIds, created.id]))
+      updateSelection(nextSelected)
       toast.success(t('updated'))
       setOpen(false)
       setNewName('')
@@ -41,50 +51,73 @@ export default function UserTagsSection({ isAdmin, caseId, initialTags, initialS
     onError() { toast.error(t('actionError')) },
   })
 
-  const save = useAction(setCaseUserTagsAction, {
-    onSuccess() { toast.success(t('updated')) },
-    onError() { toast.error(t('actionError')) },
-  })
+  useEffect(() => { setTags(initialTags) }, [initialTags])
+  useEffect(() => { setSelectedIds(initialSelectedIds) }, [initialSelectedIds])
 
-  function onToggle(id: string) {
+  const sortedTags = useMemo(() => tags.slice().sort((left, right) => left.name.localeCompare(right.name)), [tags])
+  const isSaving = save.isExecuting || isSavingSelection
+
+  function handleToggle(tagId: string, pressed: boolean) {
     if (isAdmin) return
-    setSelectedIds((prev) => {
-      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-      // auto-save
-      void save.execute({ caseId, tagIds: next })
-      return next
-    })
+    const nextIds = pressed ? Array.from(new Set([...selectedIds, tagId])) : selectedIds.filter((id) => id !== tagId)
+    updateSelection(nextIds)
+  }
+
+  function handleCreateTag() {
+    const payload = { name: newName.trim(), color: newColor, description: newDesc.trim() || null }
+    if (!payload.name) return
+    startSavingSelection(() => { void createTag.execute(payload) })
   }
 
   return (
-    <div className="space-y-2">
-      <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto pr-1">
-        {tags.map((tag) => {
-          const active = selectedIds.includes(tag.id)
-          return (
-            <button
-              key={tag.id}
-              type="button"
-              onClick={() => onToggle(tag.id)}
-              aria-pressed={active}
-              disabled={isAdmin}
-              className={`px-2 py-1 rounded-full text-xs border transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 ${
-                active
-                  ? 'text-white border-transparent'
-                  : 'bg-transparent'
-              }`}
-              style={active ? { backgroundColor: tag.color } : { borderColor: tag.color, color: tag.color }}
-            >
-              {tag.name}
-            </button>
-          )
-        })}
-        {tags.length === 0 ? (<div className="text-sm text-muted-foreground">{t('empty')}</div>) : null}
+    <div className="space-y-3">
+      <div className="space-y-2">
+        <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto pr-1">
+          {sortedTags.length === 0 ? (
+            <div className="text-sm text-muted-foreground">{t('caseView.noUserTags')}</div>
+          ) : sortedTags.map((tag) => {
+            const active = selectedIds.includes(tag.id)
+            const backgroundTint = `${tag.color}33`
+            return (
+              <Toggle
+                key={tag.id}
+                pressed={active}
+                onPressedChange={(pressed) => handleToggle(tag.id, pressed)}
+                disabled={isAdmin || isSaving}
+                aria-label={tag.name}
+                className={cn(
+                  'justify-start rounded-full border px-3 py-1.5 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 disabled:opacity-60',
+                  active ? 'shadow-sm ring-1 ring-offset-1 ring-offset-background' : 'bg-background'
+                )}
+                style={{ borderColor: tag.color, backgroundColor: active ? backgroundTint : undefined }}
+              >
+                <span className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: tag.color }} />
+                  <span className="max-w-[140px] truncate text-sm font-medium">{tag.name}</span>
+                  {active ? <Check className="size-3" /> : null}
+                </span>
+              </Toggle>
+            )
+          })}
+        </div>
+        {isSaving ? (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Loader2 className="size-3 animate-spin" />
+            {t('saving')}
+          </div>
+        ) : (
+          <div className="text-xs text-muted-foreground">
+            {selectedIds.length === 0 ? t('caseView.noTagsSelected') : t('caseView.tagsAutoSaved')}
+          </div>
+        )}
       </div>
       <div className="flex justify-between gap-2 pt-1">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button type="button" variant="outline" disabled={isAdmin}>{t('createTag')}</Button>
+            <Button type="button" variant="outline" disabled={isAdmin || isSaving}>
+              <Plus className="mr-2 size-4" />
+              {t('createTag')}
+            </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
@@ -93,21 +126,24 @@ export default function UserTagsSection({ isAdmin, caseId, initialTags, initialS
             <div className="space-y-3">
               <div className="space-y-1">
                 <label className="text-xs">{t('tagNameLabel') || 'Name'}</label>
-                <Input value={newName} onChange={(e) => setNewName(e.target.value)} />
+                <Input value={newName} onChange={(event) => setNewName(event.target.value)} />
               </div>
               <div className="space-y-1">
                 <label className="text-xs">{t('tagColorLabel') || 'Color'}</label>
                 <div className="flex items-center gap-2">
-                  <input type="color" value={newColor} onChange={(e) => setNewColor(e.target.value)} className="h-9 w-12 rounded border" />
-                  <Input value={newColor} onChange={(e) => setNewColor(e.target.value)} className="font-mono" />
+                  <input type="color" value={newColor} onChange={(event) => setNewColor(event.target.value)} className="h-9 w-12 rounded border" />
+                  <Input value={newColor} onChange={(event) => setNewColor(event.target.value)} className="font-mono" />
                 </div>
               </div>
               <div className="space-y-1">
                 <label className="text-xs">{t('tagDescriptionLabel') || 'Description'}</label>
-                <Textarea value={newDesc} onChange={(e) => setNewDesc(e.target.value)} placeholder={t('tagDescriptionPlaceholder') || 'Optional'} />
+                <Textarea value={newDesc} onChange={(event) => setNewDesc(event.target.value)} placeholder={t('tagDescriptionPlaceholder') || 'Optional'} />
               </div>
               <div className="flex justify-end">
-                <Button onClick={() => createTag.execute({ name: newName.trim(), color: newColor, description: newDesc.trim() || null })} disabled={!newName.trim() || createTag.isExecuting}>{createTag.isExecuting ? t('saving') : t('createTag')}</Button>
+                <Button onClick={handleCreateTag} disabled={!newName.trim() || createTag.isExecuting}>
+                  {createTag.isExecuting ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
+                  {t('createTag')}
+                </Button>
               </div>
             </div>
           </DialogContent>

@@ -287,7 +287,10 @@
       ,
       "noAttempts": "No attempts yet",
       "attemptDraft": "draft",
-      "attemptValidated": "validated"
+      "attemptValidated": "validated",
+      "noUserTags": "You have not created any personal tags yet.",
+      "noTagsSelected": "Select the tags that describe this case for you.",
+      "tagsAutoSaved": "Selections are saved automatically."
     }
     ,
     "assignTagsTab": "Assign",
