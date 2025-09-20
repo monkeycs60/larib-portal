@@ -91,86 +91,111 @@ export default function WorkArea({ meta, defaults, rightPane, attempts, userTagD
   }
 
   return (
-    <div className='flex gap-4'>
-      <div className='w-[320px] shrink-0'>
-        <CaseInteractionPanel
-          config={{
-            isAdmin,
-            defaultTags: [],
-            createdAt,
-            caseId,
-            tags,
-            onTagsChange: setTags,
-            comments,
-            onCommentsChange: setComments,
-            difficulty: personalDifficulty,
-            onDifficultyChange: setPersonalDifficulty,
-            userTags: userTagData?.tags,
-            userTagIds: userTagData?.ids,
-            hideActions: true,
-            attempts: attemptItems,
-            onSelectAttempt: (selectedAttempt) => {
-              setAnalysis({ lvef: selectedAttempt.lvef ?? '', kinetic: selectedAttempt.kinetic ?? '', lge: selectedAttempt.lge ?? '', finalDx: selectedAttempt.finalDx ?? '' })
-              setReport(selectedAttempt.report ?? '')
-              setLocked(!!selectedAttempt.validatedAt)
-              setAnalysisKey((key) => key + 1)
-              setReportKey((key) => key + 1)
-            },
-            showStartNewAttempt: true,
-            onStartNewAttempt: () => {
-              setLocked(false)
-              setAnalysis({ lvef: '', kinetic: '', lge: '', finalDx: '' })
-              setReport('')
-              setAnalysisKey((key) => key + 1)
-              setReportKey((key) => key + 1)
-            },
-          }}
-        />
-      </div>
-      <ResizablePanelGroup direction='horizontal' className='flex-1 gap-4'>
-        <ResizablePanel defaultSize={55} minSize={35}>
-          <div className='space-y-4'>
-            <section className='rounded border p-4'>
-              <div className='font-medium mb-3 flex items-center gap-2'>
-                <span>{t('caseView.myAnalysis')}</span>
-                <Badge variant='secondary'>{locked ? t('caseView.attemptValidated') : t('caseView.attemptDraft')}</Badge>
-              </div>
-              <AnalysisForm
-                key={analysisKey}
-                isAdmin={isAdmin || locked}
-                caseId={caseId}
-                values={analysis}
-                onChange={setAnalysis}
-                hideInlineSave
-              />
-            </section>
-            <section className='rounded border p-4'>
-              <div className='font-medium mb-3 flex items-center gap-2'>
-                <span>{t('caseView.myClinicalReport')}</span>
-                <Badge variant='secondary'>{locked ? t('caseView.attemptValidated') : t('caseView.attemptDraft')}</Badge>
-              </div>
-              <ClinicalReport
-                key={reportKey}
-                isAdmin={isAdmin || locked}
-                caseId={caseId}
-                value={report}
-                onChange={setReport}
-                hideInlineSave
-              />
-              <div className='flex justify-end gap-3 pt-4'>
-                <Button onClick={onSave} disabled={isAdmin || locked || saving}>{t('saveProgress')}</Button>
-                <Button onClick={onValidate} variant='secondary' disabled={isAdmin || locked || validating}>{t('caseView.validateCase')}</Button>
-              </div>
-            </section>
-          </div>
-        </ResizablePanel>
-        <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={45} minSize={20}>
-          <div className='rounded border p-4 h-fit'>
-            {rightPane}
-          </div>
-        </ResizablePanel>
-      </ResizablePanelGroup>
-    </div>
-  )
+		<div className='flex gap-4'>
+			<div className='w-[320px] shrink-0'>
+				<CaseInteractionPanel
+					config={{
+						isAdmin,
+						defaultTags: [],
+						createdAt,
+						caseId,
+						tags,
+						onTagsChange: setTags,
+						comments,
+						onCommentsChange: setComments,
+						difficulty: personalDifficulty,
+						onDifficultyChange: setPersonalDifficulty,
+						userTags: userTagData?.tags,
+						userTagIds: userTagData?.ids,
+						hideActions: true,
+						attempts: attemptItems,
+						onSelectAttempt: (selectedAttempt) => {
+							setAnalysis({
+								lvef: selectedAttempt.lvef ?? '',
+								kinetic: selectedAttempt.kinetic ?? '',
+								lge: selectedAttempt.lge ?? '',
+								finalDx: selectedAttempt.finalDx ?? '',
+							});
+							setReport(selectedAttempt.report ?? '');
+							setLocked(!!selectedAttempt.validatedAt);
+							setAnalysisKey((key) => key + 1);
+							setReportKey((key) => key + 1);
+						},
+						showStartNewAttempt: true,
+						onStartNewAttempt: () => {
+							setLocked(false);
+							setAnalysis({
+								lvef: '',
+								kinetic: '',
+								lge: '',
+								finalDx: '',
+							});
+							setReport('');
+							setAnalysisKey((key) => key + 1);
+							setReportKey((key) => key + 1);
+						},
+					}}
+				/>
+			</div>
+			<ResizablePanelGroup direction='horizontal' className='flex-1 gap-4'>
+				<ResizablePanel defaultSize={55} minSize={35}>
+					<div className='space-y-4'>
+						<section className='rounded border p-4'>
+							<div className='font-medium mb-3 flex items-center gap-2'>
+								<span>{t('caseView.myAnalysis')}</span>
+								<Badge variant='secondary'>
+									{locked
+										? t('caseView.attemptValidated')
+										: t('caseView.attemptDraft')}
+								</Badge>
+							</div>
+							<AnalysisForm
+								key={analysisKey}
+								isAdmin={isAdmin || locked}
+								caseId={caseId}
+								values={analysis}
+								onChange={setAnalysis}
+								hideInlineSave
+							/>
+						</section>
+						<section className='rounded border p-4'>
+							<div className='font-medium mb-3 flex items-center gap-2'>
+								<span>{t('caseView.myClinicalReport')}</span>
+								<Badge variant='secondary'>
+									{locked
+										? t('caseView.attemptValidated')
+										: t('caseView.attemptDraft')}
+								</Badge>
+							</div>
+							<ClinicalReport
+								key={reportKey}
+								isAdmin={isAdmin || locked}
+								caseId={caseId}
+								value={report}
+								onChange={setReport}
+								hideInlineSave
+							/>
+							<div className='flex justify-end gap-3 pt-4'>
+								<Button
+									onClick={onSave}
+									variant='secondary'
+									disabled={isAdmin || locked || saving}>
+									{t('saveProgress')}
+								</Button>
+								<Button
+									onClick={onValidate}
+									disabled={isAdmin || locked || validating}>
+									{t('caseView.validateCase')}
+								</Button>
+							</div>
+						</section>
+					</div>
+				</ResizablePanel>
+				<ResizableHandle withHandle />
+				<ResizablePanel defaultSize={45} minSize={20}>
+					<div className='rounded border p-4 h-fit'>{rightPane}</div>
+				</ResizablePanel>
+			</ResizablePanelGroup>
+		</div>
+  );
 }
