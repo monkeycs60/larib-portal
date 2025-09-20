@@ -128,7 +128,12 @@ export default function UserTagsSection({
 		[tags]
 	);
 	const isSaving = save.isExecuting || isSavingSelection;
-	const hasManyTags = sortedTags.length > 10;
+	const hasManyTags = sortedTags.length > 5;
+
+	const visibleTags = useMemo(() => {
+		if (!hasManyTags || expanded) return sortedTags;
+		return sortedTags.slice(0, 5);
+	}, [expanded, hasManyTags, sortedTags]);
 
 	function handleToggle(tagId: string, pressed: boolean) {
 		if (isAdmin) return;
@@ -153,21 +158,22 @@ export default function UserTagsSection({
 	return (
 		<div className='space-y-3'>
 			<div className='space-y-2'>
-				<div
-					className={cn(
-						'flex flex-wrap gap-2 overflow-y-auto pr-1 transition-all duration-200',
-						expanded ? 'max-h-60' : 'max-h-32'
-					)}>
+		<div
+			className={cn(
+				'flex flex-wrap gap-2 overflow-y-auto pr-1 transition-all duration-200',
+				expanded || !hasManyTags ? 'max-h-60' : 'max-h-32'
+			)}>
 					{sortedTags.length === 0 ? (
 						<div className='text-sm text-muted-foreground'>
 							{t('caseView.noUserTags')}
 						</div>
-					) : (
-						sortedTags.map((tag) => {
+			) : (
+				visibleTags.map((tag) => {
 							const active = selectedIds.includes(tag.id);
 							const activeBackground = mixWithWhite(tag.color, 0.82);
 							const activeBorder = mixWithWhite(tag.color, 0.32);
-							const inactiveBorder = mixWithWhite(tag.color, 0.88);
+						const inactiveBorder = mixWithWhite(tag.color, 0.92);
+						const inactiveBackground = mixWithWhite(tag.color, 0.98);
 							const labelColor = active
 								? getReadableTextColor(activeBackground)
 								: '#475569';
@@ -180,19 +186,19 @@ export default function UserTagsSection({
 									}
 									disabled={isAdmin || isSaving}
 									aria-label={tag.name}
-									className={cn(
-										'justify-start rounded-full border px-3 py-1.5 text-[13px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 disabled:opacity-60',
-										active
-											? 'shadow-sm'
-											: 'bg-background hover:bg-muted/60'
-									)}
+							className={cn(
+								'group justify-start rounded-full border px-3 py-1.5 text-[13px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 disabled:opacity-60',
+								active
+									? 'shadow-sm'
+									: 'bg-background hover:bg-muted/60'
+							)}
 									style={{
 										borderColor: active
 											? activeBorder
 											: inactiveBorder,
-										backgroundColor: active
-											? activeBackground
-											: undefined,
+									backgroundColor: active
+										? activeBackground
+										: inactiveBackground,
 										color: labelColor,
 									}}>
 									<span className='flex items-center gap-2'>
@@ -203,7 +209,12 @@ export default function UserTagsSection({
 										<span className='max-w-[132px] truncate font-medium'>
 											{tag.name}
 										</span>
-										{active ? <Check className='size-3' /> : null}
+									<Check
+										className={cn(
+											'size-3 transition-opacity',
+											active ? 'opacity-100' : 'opacity-0'
+										)}
+									/>
 									</span>
 								</Toggle>
 							);
