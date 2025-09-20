@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useMemo, useState, useTransition } from 'react'
 import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -12,6 +12,7 @@ import CaseInteractionPanel from './user-panel'
 import { AnalysisForm, ClinicalReport } from './user-panel'
 import type { CaseAttemptSummary } from '@/lib/services/bestof-larib-attempts'
 import { getActionErrorMessage } from '@/lib/ui/safe-action-error'
+import { useRouter } from '@/app/i18n/navigation'
 
 type Difficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
 
@@ -26,6 +27,8 @@ export type PrefillState = {
 
 export default function WorkArea({ meta, defaults, rightPane, attempts, userTagData }: { meta: { caseId: string; isAdmin: boolean; createdAt: string | Date }; defaults: { tags: string[]; prefill: PrefillState | null }; rightPane: React.ReactNode; attempts: CaseAttemptSummary[]; userTagData?: { tags: { id: string; name: string; color: string; description: string | null }[]; ids: string[] } }) {
   const t = useTranslations('bestof')
+  const router = useRouter()
+  const [, startRefresh] = useTransition()
 
   const { caseId, isAdmin, createdAt } = meta
   const prefill = defaults.prefill
@@ -43,7 +46,14 @@ export default function WorkArea({ meta, defaults, rightPane, attempts, userTagD
   const [reportKey, setReportKey] = useState(0)
 
   const [locked, setLocked] = useState<boolean>(!!prefill?.validatedAt)
-  const [attemptItems, setAttemptItems] = useState<CaseAttemptSummary[]>(attempts)
+  const [pendingAttempt, setPendingAttempt] = useState<CaseAttemptSummary | null>(null)
+
+  const attemptItems = useMemo<CaseAttemptSummary[]>(() => {
+    if (!pendingAttempt) return attempts
+    const alreadyIncluded = attempts.some(attemptItem => attemptItem.id === pendingAttempt.id)
+    if (alreadyIncluded) return attempts
+    return [...attempts, pendingAttempt]
+  }, [attempts, pendingAttempt])
 
   const { execute: saveAll, isExecuting: saving } = useAction(saveAllAction, {
     onError({ error }) { toast.error(getActionErrorMessage(error, t('actionError'))) },
@@ -56,7 +66,8 @@ export default function WorkArea({ meta, defaults, rightPane, attempts, userTagD
       setLocked(true)
       const now = new Date()
       const newItem = { id: res.data?.attemptId ?? crypto.randomUUID(), createdAt: now, validatedAt: now, lvef: analysis.lvef ?? null, kinetic: analysis.kinetic ?? null, lge: analysis.lge ?? null, finalDx: analysis.finalDx ?? null, report: report ?? null }
-      setAttemptItems(previousAttempts => [...previousAttempts.filter(attemptItem => attemptItem.id !== newItem.id), newItem])
+      setPendingAttempt(newItem)
+      startRefresh(() => router.refresh())
     },
   })
 

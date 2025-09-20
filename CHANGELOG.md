@@ -1,3 +1,11 @@
+## Fix: Bestof Attempt Refresh After Validation
+
+- Name: Instant attempt refresh on validation
+- What it does: When validating a case from `/{locale}/bestof-larib/[id]`, the latest attempt now keeps its fresh analysis/report values and forces the page to re-fetch server data so the sidebar immediately displays the correct attempt content without a hard reload.
+- How to use it: As a user, fill in your analysis/report, click "Validate Case", and the new attempt in the left column will match what you just submitted without needing to refresh manually.
+- Updated files:
+  - `app/[locale]/bestof-larib/[id]/work-area.tsx` refreshes the route after validation and keeps a temporary attempt in memory until the server data updates.
+
 ## UI Enhancement: Bestof Case View – Analysis & Clinical Report
 
 - Name: User case interaction panel (My Analysis + My Clinical Report)
