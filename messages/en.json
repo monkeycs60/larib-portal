@@ -290,7 +290,9 @@
       "attemptValidated": "validated",
       "noUserTags": "You have not created any personal tags yet.",
       "noTagsSelected": "Select the tags that describe this case for you.",
-      "tagsAutoSaved": "Selections are saved automatically."
+      "tagsAutoSaved": "Selections are saved automatically.",
+      "showAllTags": "Show all tags",
+      "hideTags": "Show fewer"
     }
     ,
     "assignTagsTab": "Assign",
