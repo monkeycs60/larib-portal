@@ -121,6 +121,10 @@ export default function CaseTagQuickPicker({ mode, caseId, assignedTags, onChang
 			.map((tag) => ({ id: tag.id, name: tag.name, color: tag.color, description: tag.description ?? null }))
 		onChange?.(nextAssigned)
 		const save = mode === 'admin' ? saveCaseTagsAdmin : saveCaseTagsUser
+		if (save.isExecuting) {
+			void save.execute({ caseId, tagIds: next })
+			return
+		}
 		startApplying(() => {
 			void save.execute({ caseId, tagIds: next })
 		})
@@ -162,14 +166,7 @@ export default function CaseTagQuickPicker({ mode, caseId, assignedTags, onChang
 				<Command>
 					<CommandInput placeholder={t('tagSearchPlaceholder') || 'Search tags...'} autoFocus />
 					<CommandList>
-						{isLoading ? (
-							<CommandEmpty>
-								<div className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
-									<Loader2 className="size-4 animate-spin" />
-									{t('loading')}
-								</div>
-							</CommandEmpty>
-						) : orderedTags.length === 0 ? (
+						{orderedTags.length === 0 && !isLoading ? (
 							<CommandEmpty>{t('noTagsFound') || 'No tags found.'}</CommandEmpty>
 						) : (
 							<CommandGroup>
