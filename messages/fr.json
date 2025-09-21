@@ -252,7 +252,8 @@
       "exclusiveTextDisabled": "Un PDF est présent — l'éditeur de texte est désactivé",
       "invalidPdf": "Fichier PDF invalide",
       "pdfTooLarge": "PDF trop volumineux : taille maximale 20Mo",
-      "uploadFailed": "Échec de l'upload"
+      "uploadFailed": "Échec de l'upload",
+      "reportTooShort": "Le compte rendu clinique doit contenir au moins 10 caractères"
     },
     "editCaseTitle": "Éditer : {name}",
     "confirmDelete": "Supprimer ce cas ?",
@@ -265,6 +266,7 @@
       "personalSettings": "Paramètres personnels",
       "myTags": "Mes tags",
       "myDifficulty": "Mon niveau",
+      "difficultyNotSet": "Non défini",
       "myComments": "Mes notes",
       "commentPlaceholder": "Ajoutez des notes personnelles sur ce cas...",
       "validateCase": "Valider le cas",
@@ -279,6 +281,7 @@
       "required": "Requis",
       "requiredBeforeValidation": "À compléter avant de valider le cas.",
       "savedDraft": "Brouillon enregistré",
+      "personalDifficultySaved": "Niveau personnel mis à jour",
       "validated": "Cas validé"
       ,
       "startNewAttempt": "Nouvel essai"

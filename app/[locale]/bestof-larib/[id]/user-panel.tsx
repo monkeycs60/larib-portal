@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import UserTagsSection from './user-tags-section'
-import { Select } from '@/components/ui/select'
 import RichTextEditor from '@/components/ui/rich-text-editor'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
@@ -20,6 +19,8 @@ import { CheckCircle2, Eye } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getActionErrorMessage } from '@/lib/ui/safe-action-error'
 import { useBestofAttemptStore } from '@/lib/stores/bestof-attempts'
+import PersonalDifficultyPicker from '../components/personal-difficulty-picker'
+import { htmlToPlainText } from '@/lib/html'
 
 type UserTagRef = { id: string; name: string; color: string; description: string | null }
 
@@ -76,11 +77,17 @@ export default function CaseInteractionPanel({ config }: { config: CaseInteracti
   const [difficulty, setDifficulty] = useState<'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | ''>(cDifficulty ?? '')
   const [lastAttemptId, setLastAttemptId] = useState<string | null>(null)
 
+  function resolveError(error: unknown) {
+    const message = getActionErrorMessage(error, t('actionError'))
+    if (message === 'REPORT_TOO_SHORT') return t('errors.reportTooShort')
+    return message
+  }
+
   const { execute: execSettings } = useAction(upsertSettingsAction, {
-    onError({ error }) { toast.error(getActionErrorMessage(error, t('actionError'))) },
+    onError({ error }) { toast.error(resolveError(error)) },
   })
   const { execute: execValidate, isExecuting: validating } = useAction(validateAttemptAction, {
-    onError({ error }) { toast.error(getActionErrorMessage(error, t('actionError'))) },
+    onError({ error }) { toast.error(resolveError(error)) },
     onSuccess() { toast.success(t('caseView.validated')) },
   })
 
@@ -164,16 +171,7 @@ export default function CaseInteractionPanel({ config }: { config: CaseInteracti
             </div>
             <div className="space-y-1">
               <Label>{t('caseView.myDifficulty')}</Label>
-              <Select
-                value={difficulty}
-                onChange={(e) => onLocalDifficultyChange(e.target.value as typeof difficulty)}
-                disabled={isAdmin}
-              >
-                <option value="" disabled>{t('selectPlaceholder')}</option>
-                <option value="BEGINNER">{t('difficulty.beginner')}</option>
-                <option value="INTERMEDIATE">{t('difficulty.intermediate')}</option>
-                <option value="ADVANCED">{t('difficulty.advanced')}</option>
-              </Select>
+              <PersonalDifficultyPicker value={difficulty} onChange={onLocalDifficultyChange} disabled={isAdmin} />
             </div>
             <div className="space-y-1">
               <Label className="flex items-center gap-2">
@@ -283,8 +281,14 @@ export function AnalysisForm({ isAdmin, caseId, values, onChange, hideInlineSave
 
 export function ClinicalReport({ isAdmin, caseId, value, onChange, hideInlineSave }: { isAdmin: boolean; caseId: string; value?: string; onChange?: (v: string) => void; hideInlineSave?: boolean }) {
   const t = useTranslations('bestof')
+  function resolveError(error: unknown) {
+    const message = getActionErrorMessage(error, t('actionError'))
+    if (message === 'REPORT_TOO_SHORT') return t('errors.reportTooShort')
+    return message
+  }
+
   const { execute: execSave, isExecuting } = useAction(saveAttemptAction, {
-    onError() { toast.error(t('actionError')) },
+    onError({ error }) { toast.error(resolveError(error)) },
     onSuccess(res) {
       if (res.data?.attemptId) toast.success(t('caseView.savedDraft'))
     },
@@ -292,7 +296,13 @@ export function ClinicalReport({ isAdmin, caseId, value, onChange, hideInlineSav
 
   function save() {
     if (isAdmin) return
-    execSave({ caseId, report: value ?? '' })
+    const raw = value ?? ''
+    const plainText = htmlToPlainText(raw)
+    if (plainText.length < 10) {
+      toast.error(t('errors.reportTooShort'))
+      return
+    }
+    execSave({ caseId, report: raw })
   }
 
   return (

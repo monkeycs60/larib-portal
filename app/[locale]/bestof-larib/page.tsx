@@ -10,6 +10,7 @@ import { Eye, Pencil } from 'lucide-react'
 import DeleteCaseButton from './components/delete-case-button'
 import CreateCaseDialog from './components/create-case-dialog'
 import CaseTagCell from './components/case-tag-cell'
+import CaseDifficultyCell from './components/case-difficulty-cell'
 import FiltersBar from './components/filters-bar'
 import SortHeader from './components/sort-header'
 import TableOverlay from './components/table-overlay'
@@ -136,19 +137,11 @@ export default async function BestofLaribPage({ searchParams }: { searchParams: 
                   ) : null}
                   {session?.user?.id && !isAdmin ? (
                     <TableCell>
-                      {caseItem.personalDifficulty ? (
-                        <Badge variant="outline" className={
-                          caseItem.personalDifficulty === 'BEGINNER'
-                            ? 'border-green-500 text-green-700'
-                            : caseItem.personalDifficulty === 'INTERMEDIATE'
-                            ? 'border-amber-500 text-amber-700'
-                            : 'border-red-500 text-red-700'
-                        }>
-                          {t(`difficulty.${(caseItem.personalDifficulty === 'BEGINNER' ? 'beginner' : caseItem.personalDifficulty === 'INTERMEDIATE' ? 'intermediate' : 'advanced')}`)}
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
+                      <CaseDifficultyCell
+                        key={`${caseItem.id}-${caseItem.personalDifficulty ?? 'unset'}`}
+                        caseId={caseItem.id}
+                        initialDifficulty={caseItem.personalDifficulty ?? null}
+                      />
                     </TableCell>
                   ) : null}
                   <TableCell>

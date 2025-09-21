@@ -3,7 +3,6 @@
 import { useMemo, useState, useTransition } from 'react'
 import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable'
 import { toast } from 'sonner'
 import { useAction } from 'next-safe-action/hooks'
@@ -13,6 +12,7 @@ import { AnalysisForm, ClinicalReport } from './user-panel'
 import type { CaseAttemptSummary } from '@/lib/services/bestof-larib-attempts'
 import { getActionErrorMessage } from '@/lib/ui/safe-action-error'
 import { useRouter } from '@/app/i18n/navigation'
+import { htmlToPlainText } from '@/lib/html'
 
 type Difficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
 
@@ -55,12 +55,18 @@ export default function WorkArea({ meta, defaults, rightPane, attempts, userTagD
     return [...attempts, pendingAttempt]
   }, [attempts, pendingAttempt])
 
+  function resolveError(error: unknown) {
+    const message = getActionErrorMessage(error, t('actionError'))
+    if (message === 'REPORT_TOO_SHORT') return t('errors.reportTooShort')
+    return message
+  }
+
   const { execute: saveAll, isExecuting: saving } = useAction(saveAllAction, {
-    onError({ error }) { toast.error(getActionErrorMessage(error, t('actionError'))) },
+    onError({ error }) { toast.error(resolveError(error)) },
     onSuccess() { toast.success(t('caseView.savedDraft')) },
   })
   const { execute: saveAndValidate, isExecuting: validating } = useAction(saveAllAndValidateAction, {
-    onError({ error }) { toast.error(getActionErrorMessage(error, t('actionError'))) },
+    onError({ error }) { toast.error(resolveError(error)) },
     onSuccess(res) {
       toast.success(t('caseView.validated'))
       setLocked(true)
@@ -74,6 +80,11 @@ export default function WorkArea({ meta, defaults, rightPane, attempts, userTagD
   function onSave() {
     if (isAdmin || locked) return
     const pd: Difficulty | null = personalDifficulty ? personalDifficulty : null
+    const plainText = htmlToPlainText(report)
+    if (plainText.length < 10) {
+      toast.error(t('errors.reportTooShort'))
+      return
+    }
     return saveAll({
       caseId,
       tags,
@@ -91,6 +102,11 @@ export default function WorkArea({ meta, defaults, rightPane, attempts, userTagD
       return
     }
     const pd: Difficulty | null = personalDifficulty ? personalDifficulty : null
+    const plainText = htmlToPlainText(report)
+    if (plainText.length < 10) {
+      toast.error(t('errors.reportTooShort'))
+      return
+    }
     return saveAndValidate({
       caseId,
       tags,
@@ -152,14 +168,7 @@ export default function WorkArea({ meta, defaults, rightPane, attempts, userTagD
 				<ResizablePanel defaultSize={55} minSize={35}>
 					<div className='space-y-4'>
 						<section className='rounded border p-4'>
-							<div className='font-medium mb-3 flex items-center gap-2'>
-								<span>{t('caseView.myAnalysis')}</span>
-								<Badge variant='secondary'>
-									{locked
-										? t('caseView.attemptValidated')
-										: t('caseView.attemptDraft')}
-								</Badge>
-							</div>
+							<div className='font-medium mb-3'>{t('caseView.myAnalysis')}</div>
 							<AnalysisForm
 								key={analysisKey}
 								isAdmin={isAdmin || locked}
@@ -170,14 +179,7 @@ export default function WorkArea({ meta, defaults, rightPane, attempts, userTagD
 							/>
 						</section>
 						<section className='rounded border p-4'>
-							<div className='font-medium mb-3 flex items-center gap-2'>
-								<span>{t('caseView.myClinicalReport')}</span>
-								<Badge variant='secondary'>
-									{locked
-										? t('caseView.attemptValidated')
-										: t('caseView.attemptDraft')}
-								</Badge>
-							</div>
+							<div className='font-medium mb-3'>{t('caseView.myClinicalReport')}</div>
 							<ClinicalReport
 								key={reportKey}
 								isAdmin={isAdmin || locked}

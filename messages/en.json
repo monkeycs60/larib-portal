@@ -254,7 +254,8 @@
       "exclusiveTextDisabled": "A PDF is present — text editor is disabled",
       "invalidPdf": "Invalid PDF file",
       "pdfTooLarge": "PDF is too large: max size is 20MB",
-      "uploadFailed": "Upload failed"
+      "uploadFailed": "Upload failed",
+      "reportTooShort": "Clinical report must be at least 10 characters"
     },
     "editCaseTitle": "Edit: {name}",
     "confirmDelete": "Delete this case?",
@@ -267,6 +268,7 @@
       "personalSettings": "Personal Settings",
       "myTags": "My Tags",
       "myDifficulty": "My Difficulty",
+      "difficultyNotSet": "Not set",
       "myComments": "My Comments",
       "commentPlaceholder": "Add personal notes about this case...",
       "validateCase": "Validate Case",
@@ -281,6 +283,7 @@
       "required": "Required",
       "requiredBeforeValidation": "Required before validating the case.",
       "savedDraft": "Progress saved",
+      "personalDifficultySaved": "Personal difficulty updated",
       "validated": "Case validated"
       ,
       "startNewAttempt": "Start new attempt"

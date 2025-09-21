@@ -1,3 +1,19 @@
+## Enhancement: Bestof Clinical Report & Difficulty UX
+
+- Name: Colored difficulty chips + report minimum
+- What it does: Removes the draft/validated badges in the case workspace, requires at least 10 plain-text characters before saving or validating a clinical report, and replaces personal difficulty selects with color-coded chips (including inline updates from the clinical cases table).
+- How to use it: On any case (`/{locale}/bestof-larib/[id]`), enter at least 10 characters in "My Clinical Report" to enable save/validate, and use the new green/amber/red chips in the sidebar or directly in the cases table to set your personal difficulty.
+- Updated files:
+  - `app/[locale]/bestof-larib/components/personal-difficulty-picker.tsx`
+  - `app/[locale]/bestof-larib/components/case-difficulty-cell.tsx`
+  - `app/[locale]/bestof-larib/page.tsx`
+  - `app/[locale]/bestof-larib/[id]/user-panel.tsx`
+  - `app/[locale]/bestof-larib/[id]/work-area.tsx`
+  - `app/[locale]/bestof-larib/[id]/actions.ts`
+  - `lib/html.ts`
+  - `messages/en.json`
+  - `messages/fr.json`
+
 ## Fix: Bestof Attempt Refresh After Validation
 
 - Name: Instant attempt refresh on validation

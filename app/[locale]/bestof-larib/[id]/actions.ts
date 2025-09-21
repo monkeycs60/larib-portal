@@ -3,6 +3,9 @@
 import { z } from 'zod'
 import { authenticatedAction } from '@/actions/safe-action'
 import { saveAttempt, validateAttempt, upsertUserSettings } from '@/lib/services/bestof-larib-attempts'
+import { htmlToPlainText } from '@/lib/html'
+
+const ReportSchema = z.string().refine((value) => htmlToPlainText(value).length >= 10, { message: 'REPORT_TOO_SHORT' })
 
 const SaveAttemptSchema = z.object({
   caseId: z.string().min(1),
@@ -10,7 +13,7 @@ const SaveAttemptSchema = z.object({
   kinetic: z.string().min(1).optional(),
   lge: z.string().min(1).optional(),
   finalDx: z.string().min(1).optional(),
-  report: z.string().min(1).optional(),
+  report: ReportSchema.optional(),
 })
 
 export const saveAttemptAction = authenticatedAction
@@ -62,7 +65,7 @@ const SaveAllSchema = z.object({
   personalDifficulty: z.enum(['BEGINNER','INTERMEDIATE','ADVANCED']).nullable(),
   comments: z.string().nullable(),
   analysis: z.object({ lvef: z.string().optional(), kinetic: z.string().optional(), lge: z.string().optional(), finalDx: z.string().optional() }),
-  report: z.string().optional(),
+  report: ReportSchema.optional(),
 })
 
 export const saveAllAction = authenticatedAction
