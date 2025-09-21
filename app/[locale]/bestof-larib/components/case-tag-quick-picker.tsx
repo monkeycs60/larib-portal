@@ -14,7 +14,7 @@ import {
 	setCaseUserTagsAction,
 } from '../actions'
 import { toast } from 'sonner'
-import { Check, Loader2, Plus } from 'lucide-react'
+import { Check, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useRouter } from '@/app/i18n/navigation'
 import { useTranslations } from 'next-intl'
