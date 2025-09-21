@@ -1,3 +1,11 @@
+## Fix: Bestof Admin Attempt Button
+
+- Name: Admin start new attempt disabled
+- What it does: Prevents admins from launching a new attempt from a case by disabling the "Start new attempt" action when viewing the workspace.
+- How to use it: As an admin on `/{locale}/bestof-larib/[id]`, the "Start new attempt" button now appears disabled and cannot be triggered; regular users keep the existing behavior.
+- Updated files:
+  - `app/[locale]/bestof-larib/[id]/user-panel.tsx`
+
 ## Fix: Login Suspense Boundary
 
 - Name: Suspense-wrapped login form

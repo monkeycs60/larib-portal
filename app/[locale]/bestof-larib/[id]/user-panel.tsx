@@ -189,7 +189,13 @@ export default function CaseInteractionPanel({ config }: { config: CaseInteracti
           )}
           {showStartNewAttempt ? (
             <div className="pt-2">
-              <Button type="button" onClick={onStartNewAttempt} variant="outline" className="w-full">
+              <Button
+                type="button"
+                onClick={() => { if (isAdmin) return; onStartNewAttempt?.() }}
+                variant="outline"
+                className="w-full"
+                disabled={isAdmin}
+              >
                 {t('caseView.startNewAttempt')}
               </Button>
             </div>
