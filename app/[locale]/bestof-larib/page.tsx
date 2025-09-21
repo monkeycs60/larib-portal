@@ -208,51 +208,55 @@ export default async function BestofLaribPage({ searchParams }: { searchParams: 
 										}
 									/>
 								</TableCell>
-								<TableCell className='flex flex-col gap-2'>
-									<Link href={`/bestof-larib/${caseItem.id}`}>
-										<Button size='sm' variant='secondary'>
-											<Eye />
-											{t('view')}
-										</Button>
-									</Link>
-									{session?.user?.id && !isAdmin ? (
-										<Link
-											href={`/bestof-larib/${caseItem.id}?newAttempt=1`}>
-											<Button size='sm'>
-												<PlusCircle />
-												{t('caseView.startNewAttempt')}
-											</Button>
-										</Link>
-									) : null}
-									{isAdmin ? (
-										<>
-											<CreateCaseDialog
-												examTypes={examTypes}
-												diseaseTags={diseaseTags}
-												clinicalCase={{
-													id: caseItem.id,
-													name: caseItem.name,
-													difficulty: caseItem.difficulty,
-													status: caseItem.status,
-													tags: [],
-													pdfUrl: caseItem.pdfUrl ?? null,
-													pdfKey: caseItem.pdfKey ?? null,
-													textContent:
-														caseItem.textContent ?? null,
-													examType: caseItem.examType ?? null,
-													diseaseTag: caseItem.diseaseTag ?? null,
-												}}
-												trigger={
-													<Button size='sm' variant='outline'>
-														<Pencil />
-														{t('edit')}
-													</Button>
-												}
-											/>
-											<DeleteCaseButton id={caseItem.id} />
-										</>
-									) : null}
-								</TableCell>
+                  <TableCell>
+                    <div className='flex flex-wrap justify-end gap-2'>
+                      <Link href={`/bestof-larib/${caseItem.id}`} className='inline-flex'>
+                        <Button size='sm' variant='secondary' className='gap-1'>
+                          <Eye />
+                          {t('view')}
+                        </Button>
+                      </Link>
+                      {session?.user?.id && !isAdmin ? (
+                        <Link href={`/bestof-larib/${caseItem.id}?newAttempt=1`} className='inline-flex'>
+                          <Button size='sm' variant='outline' className='gap-1'>
+                            <PlusCircle />
+                            {t('caseView.startNewAttempt')}
+                          </Button>
+                        </Link>
+                      ) : null}
+                      {isAdmin ? (
+                        <>
+                          <span className='inline-flex'>
+                            <CreateCaseDialog
+                              examTypes={examTypes}
+                              diseaseTags={diseaseTags}
+                              clinicalCase={{
+                                id: caseItem.id,
+                                name: caseItem.name,
+                                difficulty: caseItem.difficulty,
+                                status: caseItem.status,
+                                tags: [],
+                                pdfUrl: caseItem.pdfUrl ?? null,
+                                pdfKey: caseItem.pdfKey ?? null,
+                                textContent: caseItem.textContent ?? null,
+                                examType: caseItem.examType ?? null,
+                                diseaseTag: caseItem.diseaseTag ?? null,
+                              }}
+                              trigger={
+                                <Button size='sm' variant='outline' className='gap-1'>
+                                  <Pencil />
+                                  {t('edit')}
+                                </Button>
+                              }
+                            />
+                          </span>
+                          <span className='inline-flex'>
+                            <DeleteCaseButton id={caseItem.id} />
+                          </span>
+                        </>
+                      ) : null}
+                    </div>
+                  </TableCell>
 							</TableRow>
 						);})
             )}

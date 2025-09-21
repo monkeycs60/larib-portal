@@ -289,8 +289,8 @@ export default function FiltersBar({
                     </div>
                 ) : null
             )}
-            <div>
-                <label className='block text-xs mb-1'>{isAdmin ? t('filters.status') : t('filters.progress')}</label>
+            <div className='min-w-44'>
+                <label className='block text-xs mb-1'>{t('filters.status')}</label>
                 <Select
                     value={status}
 					onChange={(e) => {
