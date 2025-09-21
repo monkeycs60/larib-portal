@@ -100,7 +100,11 @@ export default function CaseInteractionPanel({ config }: { config: CaseInteracti
   }
 
   // Local state update + notify parent + debounced save
-  function onLocalTagsChange(v: string[]) { setTags(v); onTagsChange?.(v); if (!isAdmin) scheduleSave({ tags: v }) }
+  function onLocalTagsChange(v: string[]) {
+    setTags(v)
+    onTagsChange?.(v)
+    if (!isAdmin) scheduleSave({ tags: v })
+  }
   function onLocalCommentsChange(v: string) { setComment(v); onCommentsChange?.(v); if (!isAdmin) scheduleSave({ comments: v }) }
   function onLocalDifficultyChange(v: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | '') { setDifficulty(v); onDifficultyChange?.(v); if (!isAdmin) scheduleSave({ difficulty: v }) }
 
@@ -154,6 +158,7 @@ export default function CaseInteractionPanel({ config }: { config: CaseInteracti
                   caseId={caseId}
                   initialTags={config.userTags}
                   initialSelectedIds={config.userTagIds}
+                  onSelectionChange={onLocalTagsChange}
                 />
               ) : (<div className="text-xs text-muted-foreground">-</div>)}
             </div>

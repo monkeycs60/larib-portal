@@ -1,5 +1,7 @@
-'use client'
-import { useState, type ReactNode } from 'react'
+"use client"
+
+import { useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
 import { useRouter } from '@/app/i18n/navigation'
 import { useTranslations } from 'next-intl'
 import { useAction } from 'next-safe-action/hooks'
@@ -7,354 +9,460 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Loader } from '@/components/ui/loader'
+import { Toggle } from '@/components/ui/toggle'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
+import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 import {
   ensureAdminTagAction,
   ensureUserTagAction,
   getCaseAdminTagIdsAction,
   getCaseUserTagIdsAction,
   listAdminTagsAction,
-  listCasesByAdminTagAction,
-  listCasesByUserTagAction,
   listUserTagsAction,
   setCaseAdminTagsAction,
   setCaseUserTagsAction,
+  updateAdminTagAction,
+  updateUserTagAction,
+  deleteAdminTagAction,
+  deleteUserTagAction,
 } from '../actions'
-import { toast } from 'sonner'
+import { Check, Loader2, Pencil, Plus, RefreshCcw, Trash2 } from 'lucide-react'
 
 type Mode = 'admin' | 'user'
 
-type Tag = { id: string; name: string; color: string; description: string | null; caseCount?: number }
+type Tag = {
+	id: string
+	name: string
+	color: string
+	description: string | null
+	caseCount?: number
+}
 
-export default function TagManagerDialog({
-  mode,
-  caseId,
-  trigger,
-}: {
-  mode: Mode
-  caseId: string
-  trigger?: ReactNode
-}) {
-  const t = useTranslations('bestof')
-  const router = useRouter()
-  const [open, setOpen] = useState(false)
-  const [tags, setTags] = useState<Tag[]>([])
-  const [selectedIds, setSelectedIds] = useState<string[]>([])
-  const [activeTagId, setActiveTagId] = useState<string>('')
-  const [activeTagCases, setActiveTagCases] = useState<{ id: string; name: string; createdAt: string | Date }[]>([])
+type TagFormState = {
+	id: string | null
+	name: string
+	color: string
+	description: string
+}
 
-  // New tag form
-  const [newName, setNewName] = useState('')
-  const [newColor, setNewColor] = useState('#3b82f6')
-  const [newDesc, setNewDesc] = useState('')
+const defaultForm: TagFormState = {
+	id: null,
+	name: '',
+	color: '#3b82f6',
+	description: '',
+}
 
-  const listTagsAdmin = useAction(listAdminTagsAction, {
-    onSuccess(res) {
-      const data = Array.isArray(res.data) ? (res.data as Tag[]) : []
-      setTags(data)
-    },
-    onError({ error }) {
-      const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError')
-      toast.error(msg)
-    },
-  })
-  const listTagsUser = useAction(listUserTagsAction, {
-    onSuccess(res) {
-      const data = Array.isArray(res.data) ? (res.data as Tag[]) : []
-      setTags(data)
-    },
-    onError({ error }) {
-      const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError')
-      toast.error(msg)
-    },
-  })
+export default function TagManagerDialog({ mode, caseId, trigger }: { mode: Mode; caseId: string; trigger?: ReactNode }) {
+	const t = useTranslations('bestof')
+	const router = useRouter()
+	const [open, setOpen] = useState(false)
+	const [tags, setTags] = useState<Tag[]>([])
+	const [selectedIds, setSelectedIds] = useState<string[]>([])
+	const [form, setForm] = useState<TagFormState>(defaultForm)
+	const [initialSelectedIds, setInitialSelectedIds] = useState<string[]>([])
+	const [deleteCandidate, setDeleteCandidate] = useState<Tag | null>(null)
 
-  const getCaseTagIdsAdmin = useAction(getCaseAdminTagIdsAction, {
-    onSuccess(res) {
-      const data = Array.isArray(res.data) ? (res.data as string[]) : []
-      setSelectedIds(data)
-    },
-  })
-  const getCaseTagIdsUser = useAction(getCaseUserTagIdsAction, {
-    onSuccess(res) {
-      const data = Array.isArray(res.data) ? (res.data as string[]) : []
-      setSelectedIds(data)
-    },
-  })
+	const listTagsAdmin = useAction(listAdminTagsAction, {
+		onSuccess(res) {
+			const rows = Array.isArray(res.data) ? (res.data as Tag[]) : []
+			setTags(rows)
+		},
+		onError({ error }) {
+			const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError')
+			toast.error(msg)
+		},
+	})
+	const listTagsUser = useAction(listUserTagsAction, {
+		onSuccess(res) {
+			const rows = Array.isArray(res.data) ? (res.data as Tag[]) : []
+			setTags(rows)
+		},
+		onError({ error }) {
+			const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError')
+			toast.error(msg)
+		},
+	})
 
-  const saveCaseTagsAdmin = useAction(setCaseAdminTagsAction, {
-    onSuccess() {
-      toast.success(t('updated'))
-      // refresh counts
-      void (mode === 'admin' ? listTagsAdmin.execute() : listTagsUser.execute())
-      // ensure server components re-render with fresh tags
-      router.refresh()
-      // close dialog on success
-      setOpen(false)
-    },
-    onError({ error }) {
-      const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError')
-      toast.error(msg)
-    },
-  })
-  const saveCaseTagsUser = useAction(setCaseUserTagsAction, {
-    onSuccess() {
-      toast.success(t('updated'))
-      void (mode === 'admin' ? listTagsAdmin.execute() : listTagsUser.execute())
-      router.refresh()
-      setOpen(false)
-    },
-    onError({ error }) {
-      const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError')
-      toast.error(msg)
-    },
-  })
+	const getCaseTagIdsAdmin = useAction(getCaseAdminTagIdsAction, {
+		onSuccess(res) {
+			const ids = Array.isArray(res.data) ? (res.data as string[]) : []
+			setSelectedIds(ids)
+			setInitialSelectedIds(ids)
+		},
+	})
+	const getCaseTagIdsUser = useAction(getCaseUserTagIdsAction, {
+		onSuccess(res) {
+			const ids = Array.isArray(res.data) ? (res.data as string[]) : []
+			setSelectedIds(ids)
+			setInitialSelectedIds(ids)
+		},
+	})
 
-  const ensureTagAdmin = useAction(ensureAdminTagAction, {
-    onSuccess(res) {
-      if (!res.data) return
-      const created = res.data as Tag
-      setTags((prev) => {
-        const next = [...prev.filter((tagItem) => tagItem.id !== created.id), { ...created, caseCount: prev.find((existingTag) => existingTag.id === created.id)?.caseCount ?? 0 }]
-        return next.sort((a, b) => a.name.localeCompare(b.name))
-      })
-      toast.success(t('updated'))
-    },
-  })
-  const ensureTagUser = useAction(ensureUserTagAction, {
-    onSuccess(res) {
-      if (!res.data) return
-      const created = res.data as Tag
-      setTags((prev) => {
-        const next = [...prev.filter((tagItem) => tagItem.id !== created.id), { ...created, caseCount: prev.find((existingTag) => existingTag.id === created.id)?.caseCount ?? 0 }]
-        return next.sort((a, b) => a.name.localeCompare(b.name))
-      })
-      toast.success(t('updated'))
-    },
-  })
+	const saveCaseTagsAdmin = useAction(setCaseAdminTagsAction, {
+		onSuccess() {
+			toast.success(t('updated'))
+			setInitialSelectedIds(selectedIds)
+			void listTagsAdmin.execute()
+			router.refresh()
+		},
+		onError({ error }) {
+			const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError')
+			toast.error(msg)
+		},
+	})
+	const saveCaseTagsUser = useAction(setCaseUserTagsAction, {
+		onSuccess() {
+			toast.success(t('updated'))
+			setInitialSelectedIds(selectedIds)
+			void listTagsUser.execute()
+			router.refresh()
+		},
+		onError({ error }) {
+			const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError')
+			toast.error(msg)
+		},
+	})
 
-  const listCasesByTagAdmin = useAction(listCasesByAdminTagAction, {
-    onSuccess(res) {
-      const rows = Array.isArray(res.data) ? (res.data as { id: string; name: string; createdAt: Date }[]) : []
-      setActiveTagCases(rows.map((row) => ({ id: row.id, name: row.name, createdAt: row.createdAt })))
-    },
-  })
-  const listCasesByTagUser = useAction(listCasesByUserTagAction, {
-    onSuccess(res) {
-      const rows = Array.isArray(res.data) ? (res.data as { id: string; name: string; createdAt: Date }[]) : []
-      setActiveTagCases(rows.map((row) => ({ id: row.id, name: row.name, createdAt: row.createdAt })))
-    },
-  })
+	const ensureTagAdmin = useAction(ensureAdminTagAction, {
+		onSuccess(res) {
+			const created = (res.data as Tag | undefined)
+			if (!created) return
+			setTags((previous) => sortTags([...previous.filter((tag) => tag.id !== created.id), { ...created, caseCount: previous.find((tag) => tag.id === created.id)?.caseCount ?? 0 }]))
+			setSelectedIds((prev) => Array.from(new Set([...prev, created.id])))
+			toast.success(t('updated'))
+			setForm({ ...defaultForm })
+			router.refresh()
+		},
+		onError({ error }) {
+			const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError')
+			toast.error(msg)
+		},
+	})
+	const ensureTagUser = useAction(ensureUserTagAction, {
+		onSuccess(res) {
+			const created = (res.data as Tag | undefined)
+			if (!created) return
+			setTags((previous) => sortTags([...previous.filter((tag) => tag.id !== created.id), { ...created, caseCount: previous.find((tag) => tag.id === created.id)?.caseCount ?? 0 }]))
+			setSelectedIds((prev) => Array.from(new Set([...prev, created.id])))
+			toast.success(t('updated'))
+			setForm({ ...defaultForm })
+			router.refresh()
+		},
+		onError({ error }) {
+			const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError')
+			toast.error(msg)
+		},
+	})
 
-  async function onOpen(next: boolean) {
-    setOpen(next)
-    if (next) {
-      const selectedList = mode === 'admin' ? listTagsAdmin : listTagsUser
-      const selectedCaseIds = mode === 'admin' ? getCaseTagIdsAdmin : getCaseTagIdsUser
-      await selectedList.execute()
-      await selectedCaseIds.execute({ caseId })
-    }
-  }
+	const updateTagAdmin = useAction(updateAdminTagAction, {
+		onSuccess(res) {
+			const updated = res.data as Tag | undefined
+			if (!updated) return
+			setTags((previous) => sortTags(previous.map((tag) => (tag.id === updated.id ? { ...tag, ...updated } : tag))))
+			toast.success(t('updated'))
+			setForm({ ...defaultForm })
+			router.refresh()
+		},
+		onError({ error }) {
+			const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError')
+			toast.error(msg)
+		},
+	})
+	const updateTagUser = useAction(updateUserTagAction, {
+		onSuccess(res) {
+			const updated = res.data as Tag | undefined
+			if (!updated) return
+			setTags((previous) => sortTags(previous.map((tag) => (tag.id === updated.id ? { ...tag, ...updated } : tag))))
+			toast.success(t('updated'))
+			setForm({ ...defaultForm })
+			router.refresh()
+		},
+		onError({ error }) {
+			const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError')
+			toast.error(msg)
+		},
+	})
 
-  async function onSaveAssignment() {
-    const selected = mode === 'admin' ? saveCaseTagsAdmin : saveCaseTagsUser
-    await selected.execute({ caseId, tagIds: selectedIds })
-  }
+	const deleteTagAdmin = useAction(deleteAdminTagAction, {
+		onSuccess(res) {
+			const removed = res.data as { id: string } | undefined
+			if (!removed) return
+			setTags((previous) => previous.filter((tag) => tag.id !== removed.id))
+			setSelectedIds((prev) => prev.filter((id) => id !== removed.id))
+			setDeleteCandidate(null)
+			toast.success(t('tagDeleted') || 'Tag deleted')
+			router.refresh()
+		},
+		onError({ error }) {
+			const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError')
+			toast.error(msg)
+		},
+	})
+	const deleteTagUser = useAction(deleteUserTagAction, {
+		onSuccess(res) {
+			const removed = res.data as { id: string } | undefined
+			if (!removed) return
+			setTags((previous) => previous.filter((tag) => tag.id !== removed.id))
+			setSelectedIds((prev) => prev.filter((id) => id !== removed.id))
+			setDeleteCandidate(null)
+			toast.success(t('tagDeleted') || 'Tag deleted')
+			router.refresh()
+		},
+		onError({ error }) {
+			const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError')
+			toast.error(msg)
+		},
+	})
 
-  async function onCreateTag() {
-    const name = newName.trim()
-    if (!name) return
-    const ensure = mode === 'admin' ? ensureTagAdmin : ensureTagUser
-    await ensure.execute({ name, color: newColor, description: newDesc.trim() || null })
-    setNewName('')
-    setNewDesc('')
-  }
+	const isLoading = (mode === 'admin' ? listTagsAdmin.isExecuting : listTagsUser.isExecuting) || (mode === 'admin' ? getCaseTagIdsAdmin.isExecuting : getCaseTagIdsUser.isExecuting)
+	const isSavingAssignments = mode === 'admin' ? saveCaseTagsAdmin.isExecuting : saveCaseTagsUser.isExecuting
+	const isSavingTag = form.id
+		? (mode === 'admin' ? updateTagAdmin.isExecuting : updateTagUser.isExecuting)
+		: (mode === 'admin' ? ensureTagAdmin.isExecuting : ensureTagUser.isExecuting)
 
-  async function onSelectTagForCases(tagId: string) {
-    setActiveTagId(tagId)
-    if (tagId) {
-      const listBy = mode === 'admin' ? listCasesByTagAdmin : listCasesByTagUser
-      await listBy.execute({ tagId })
-    }
-  }
+const hasChanges = useMemo(() => {
+		if (initialSelectedIds.length !== selectedIds.length) return true
+		const current = new Set(initialSelectedIds)
+		return selectedIds.some((id) => !current.has(id))
+	}, [initialSelectedIds, selectedIds])
 
-  const isSaving = (mode === 'admin' ? saveCaseTagsAdmin.isExecuting : saveCaseTagsUser.isExecuting)
-  const isLoading = (mode === 'admin' ? listTagsAdmin.isExecuting : listTagsUser.isExecuting) || (mode === 'admin' ? getCaseTagIdsAdmin.isExecuting : getCaseTagIdsUser.isExecuting)
+	const assignedTags = useMemo(() => selectedIds
+		.map((id) => tags.find((tag) => tag.id === id))
+		.filter(Boolean) as Tag[], [selectedIds, tags])
 
-  return (
-    <Dialog open={open} onOpenChange={onOpen}>
-      <DialogTrigger asChild>
-        {trigger ?? <Button size="icon" variant="ghost">+</Button>}
-      </DialogTrigger>
-      <DialogContent className="w-[900px] max-w-[900px] h-[600px] overflow-hidden">
-        <DialogHeader>
-          <DialogTitle>
-            {mode === 'admin' ? t('table.adminTags') : t('caseView.myTags')}
-          </DialogTitle>
-        </DialogHeader>
-        <div className="flex h-[calc(600px-70px)] flex-col">
-        <Tabs defaultValue="assign" className="flex-1 flex flex-col overflow-hidden">
-          <TabsList>
-            <TabsTrigger value="assign">{t('assignTagsTab') || 'Assign'}</TabsTrigger>
-            <TabsTrigger value="manage">{t('manageTagsTab') || 'Manage'}</TabsTrigger>
-            <TabsTrigger value="cases">{t('casesByTagTab') || 'Cases'}</TabsTrigger>
-          </TabsList>
-          <TabsContent value="assign" className="mt-4 flex-1 overflow-y-auto pr-1">
-            {isLoading ? (
-              <Loader full label={t('loading')} />
-            ) : (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-2">
-                  {tags.map((tag) => (
-                    <label key={tag.id} className="flex items-start gap-2 p-2 rounded border hover:bg-accent/50">
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.includes(tag.id)}
-                        onChange={(e) => {
-                          const checked = e.target.checked
-                          setSelectedIds((prev) => (checked ? [...prev, tag.id] : prev.filter((id) => id !== tag.id)))
-                        }}
-                      />
-                      <span className="inline-flex flex-col gap-1">
-                        <span className="inline-flex items-center gap-2">
-                          <span className="size-3 rounded" style={{ backgroundColor: tag.color }} />
-                          <span className="text-sm font-medium">{tag.name}</span>
-                        </span>
-                        {tag.description ? (
-                          <span className="text-[11px] leading-4 text-muted-foreground">{tag.description}</span>
-                        ) : null}
-                      </span>
-                    </label>
-                  ))}
-                  {tags.length === 0 ? (
-                    <div className="col-span-2 text-sm text-muted-foreground">No tags yet</div>
-                  ) : null}
-                </div>
-                <div className="flex gap-2">
-                  {selectedIds
-                    .map((id) => tags.find((tag) => tag.id === id))
-                    .filter(Boolean)
-                    .map((tagItem) => (
-                      <Badge key={tagItem!.id} style={{ backgroundColor: (tagItem as Tag).color }} className="text-white border-transparent">
-                        {(tagItem as Tag).name}
-                      </Badge>
-                    ))}
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => setOpen(false)}>{t('cancel')}</Button>
-                  <Button onClick={onSaveAssignment} disabled={isSaving}>{isSaving ? t('saving') : t('editTags')}</Button>
-                </div>
-              </div>
-            )}
-          </TabsContent>
-          <TabsContent value="manage" className="mt-4 flex-1 overflow-y-auto pr-1">
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-2 max-h-72 overflow-y-auto pr-2">
-                {tags.map((tagItem) => (
-                  <div key={tagItem.id} className="flex items-start justify-between gap-2 p-2 rounded border">
-                    <div className="flex items-start gap-2">
-                      <span className="mt-1 size-3 rounded" style={{ backgroundColor: tagItem.color }} />
-                      <div>
-                        <div className="text-sm font-medium">{tagItem.name}</div>
-                        {tagItem.description ? (
-                          <div className="text-xs text-muted-foreground">{tagItem.description}</div>
-                        ) : null}
-                      </div>
-                    </div>
-                    {typeof tagItem.caseCount === 'number' ? (
-                      <div className="text-xs text-muted-foreground">{tagItem.caseCount} cases</div>
-                    ) : null}
-                  </div>
-                ))}
-                {tags.length === 0 ? (
-                  <div className="text-sm text-muted-foreground">No tags yet</div>
-                ) : null}
-              </div>
-              <div className="space-y-3">
-                <div className="text-sm font-medium">{t('createNewTagLabel') || 'Create new tag'}</div>
-                <div className="space-y-2">
-                  <label className="text-xs">{t('tagNameLabel') || 'Name'}</label>
-                  <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder={t('tagNamePlaceholder') || 'e.g. Must-know'} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs">{t('tagColorLabel') || 'Color'}</label>
-                  <div className="flex items-center gap-2">
-                    <input type="color" value={newColor} onChange={(e) => setNewColor(e.target.value)} className="h-9 w-12 rounded border" />
-                    <Input value={newColor} onChange={(e) => setNewColor(e.target.value)} className="font-mono" />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs">{t('tagDescriptionLabel') || 'Description'}</label>
-                  <Textarea value={newDesc} onChange={(e) => setNewDesc(e.target.value)} placeholder={t('tagDescriptionPlaceholder') || 'Optional'} />
-                </div>
-                <div className="flex justify-end">
-                  <Button onClick={onCreateTag} disabled={(mode === 'admin' ? ensureTagAdmin.isExecuting : ensureTagUser.isExecuting) || !newName.trim()}>
-                    {(mode === 'admin' ? ensureTagAdmin.isExecuting : ensureTagUser.isExecuting) ? t('saving') : t('createTag')}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-          <TabsContent value="cases" className="mt-4 flex-1 overflow-y-auto pr-1">
-            <div className="space-y-3">
-              <div className="text-[12px] text-muted-foreground">
-                {t('casesTabInfo') || 'Select a tag to see which cases use it.'}
-              </div>
-              <div className="flex items-center gap-2">
-                <select
-                  className="border rounded px-2 py-1 text-sm bg-transparent"
-                  value={activeTagId}
-                  onChange={(e) => void onSelectTagForCases(e.target.value)}
-                >
-                  <option value="">{t('selectPlaceholder')}</option>
-                  {tags.map((tagOption) => (
-                    <option key={tagOption.id} value={tagOption.id}>{tagOption.name}</option>
-                  ))}
-                </select>
-                {activeTagId ? (
-                  <Badge style={{ backgroundColor: tags.find((tag) => tag.id === activeTagId)?.color }} className="text-white border-transparent">
-                    {tags.find((tag) => tag.id === activeTagId)?.name}
-                  </Badge>
-                ) : null}
-              </div>
-              {activeTagId ? (
-                <div className="rounded border">
-                  {(mode === 'admin' ? listCasesByTagAdmin.isExecuting : listCasesByTagUser.isExecuting) ? (
-                    <div className="h-40 flex items-center justify-center"><Loader label={t('loading')} /></div>
-                  ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>{t('table.case')}</TableHead>
-                        <TableHead>{t('table.createdAt')}</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {activeTagCases.length === 0 ? (
-                        <TableRow><TableCell colSpan={2} className="text-sm text-muted-foreground">{t('empty')}</TableCell></TableRow>
-                      ) : (
-                        activeTagCases.map((caseItem) => (
-                          <TableRow key={caseItem.id}>
-                            <TableCell>{caseItem.name}</TableCell>
-                            <TableCell>{new Date(caseItem.createdAt).toLocaleDateString()}</TableCell>
-                          </TableRow>
-                        ))
-                      )}
-                    </TableBody>
-                  </Table>
-                  )}
-                </div>
-              ) : (
-                <div className="text-sm text-muted-foreground">{t('selectPlaceholder')}</div>
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
-        </div>
-      </DialogContent>
-    </Dialog>
-  )
+	async function handleOpen(next: boolean) {
+		setOpen(next)
+		if (next) {
+			setForm({ ...defaultForm })
+			setDeleteCandidate(null)
+			const loadList = mode === 'admin' ? listTagsAdmin.execute : listTagsUser.execute
+			const loadSelections = mode === 'admin' ? getCaseTagIdsAdmin.execute : getCaseTagIdsUser.execute
+			await Promise.all([loadList(), loadSelections({ caseId })])
+		}
+	}
+
+	async function refreshData() {
+		const loadList = mode === 'admin' ? listTagsAdmin.execute : listTagsUser.execute
+		const loadSelections = mode === 'admin' ? getCaseTagIdsAdmin.execute : getCaseTagIdsUser.execute
+		await Promise.all([loadList(), loadSelections({ caseId })])
+	}
+
+	function toggleTag(tagId: string) {
+		setSelectedIds((prev) => (prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]))
+	}
+
+	async function onSaveAssignments() {
+		const save = mode === 'admin' ? saveCaseTagsAdmin : saveCaseTagsUser
+		await save.execute({ caseId, tagIds: selectedIds })
+	}
+
+	function onSubmitTagForm(event: React.FormEvent<HTMLFormElement>) {
+		event.preventDefault()
+		const payload = { id: form.id ?? undefined, name: form.name.trim(), color: form.color, description: form.description.trim() || null }
+		if (!payload.name) {
+			toast.error(t('errors.fieldsRequired'))
+			return
+		}
+		if (form.id) {
+			const update = mode === 'admin' ? updateTagAdmin : updateTagUser
+			void update.execute({ id: form.id, name: payload.name, color: payload.color, description: payload.description })
+		} else {
+			const create = mode === 'admin' ? ensureTagAdmin : ensureTagUser
+			void create.execute({ name: payload.name, color: payload.color, description: payload.description })
+		}
+	}
+
+	function startEdit(tag: Tag) {
+		setForm({ id: tag.id, name: tag.name, color: tag.color, description: tag.description ?? '' })
+	}
+
+	function resetForm() {
+		setForm({ ...defaultForm })
+	}
+
+	function confirmDelete(tag: Tag) {
+		setDeleteCandidate(tag)
+	}
+
+	async function handleDeleteTag() {
+		if (!deleteCandidate) return
+		const action = mode === 'admin' ? deleteTagAdmin : deleteTagUser
+		await action.execute({ id: deleteCandidate.id })
+	}
+
+	const displayTags = useMemo(() => sortTags(tags), [tags])
+
+	return (
+		<Dialog open={open} onOpenChange={(next) => void handleOpen(next)}>
+			<DialogTrigger asChild>{trigger ?? <Button size="icon" variant="ghost"><Plus /></Button>}</DialogTrigger>
+			<DialogContent className="w-[880px] max-w-[95vw]">
+				<DialogHeader>
+					<DialogTitle>{mode === 'admin' ? t('table.adminTags') : t('caseView.myTags')}</DialogTitle>
+				</DialogHeader>
+				<div className="grid gap-6 md:grid-cols-[1.4fr_1fr]">
+					<section className="space-y-4">
+						<header className="flex items-center justify-between">
+							<div className="text-sm font-medium">{t('tagAssignmentHeading') || 'Assign tags to this case'}</div>
+						<Button type="button" variant="ghost" size="icon" aria-label={t('refresh') || 'Refresh'} onClick={() => void refreshData()}>
+								{isLoading ? <Loader2 className="size-4 animate-spin" /> : <RefreshCcw className="size-4" />}
+							</Button>
+						</header>
+						<div className="max-h-72 overflow-y-auto pr-1 space-y-2">
+							{isLoading ? (
+								<div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
+									<Loader2 className="mr-2 size-4 animate-spin" />
+									{t('loading')}
+								</div>
+							) : displayTags.length === 0 ? (
+								<div className="text-sm text-muted-foreground">{t('noTagsYet') || 'No tags yet.'}</div>
+							) : (
+								displayTags.map((tag) => {
+									const active = selectedIds.includes(tag.id)
+									const labelColor = active ? getReadableTextColor(tag.color) : '#475569'
+									return (
+										<div key={tag.id} className="flex items-center justify-between gap-3 rounded-md border p-2">
+											<Toggle
+												pressed={active}
+												onPressedChange={() => toggleTag(tag.id)}
+												disabled={isSavingAssignments}
+												className={cn(
+													'group justify-start rounded-full border px-3 py-1.5 text-left text-[13px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 disabled:opacity-60',
+													active ? 'shadow-sm' : 'bg-background hover:bg-muted/60',
+												)}
+												style={{
+													borderColor: active ? mixWithWhite(tag.color, 0.32) : mixWithWhite(tag.color, 0.9),
+													backgroundColor: active ? mixWithWhite(tag.color, 0.82) : mixWithWhite(tag.color, 0.97),
+													color: labelColor,
+												}}
+											>
+												<span className="flex items-center gap-2">
+													<span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: tag.color }} />
+													<span className="max-w-[160px] truncate font-medium">{tag.name}</span>
+													<Check className={cn('size-3 transition-opacity', active ? 'opacity-100' : 'opacity-0')} />
+												</span>
+											</Toggle>
+											<div className="flex items-center gap-1 pl-2">
+												{typeof tag.caseCount === 'number' ? (
+													<span className="rounded bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">{tag.caseCount}</span>
+												) : null}
+												<Button type="button" size="icon" variant="ghost" aria-label={t('edit')} onClick={() => startEdit(tag)}>
+													<Pencil className="size-4" />
+												</Button>
+												<Button type="button" size="icon" variant="ghost" aria-label={t('delete')} onClick={() => confirmDelete(tag)}>
+													<Trash2 className="size-4" />
+												</Button>
+											</div>
+										</div>
+									)
+								})
+							)}
+						</div>
+						<div className="space-y-2">
+							<div className="flex flex-wrap gap-2">
+								{assignedTags.map((tag) => (
+									<span key={tag.id} className="inline-flex items-center gap-1 rounded-full border px-2 py-1 text-xs" style={{ borderColor: mixWithWhite(tag.color, 0.6), backgroundColor: mixWithWhite(tag.color, 0.92) }}>
+										<span className="h-2 w-2 rounded-full" style={{ backgroundColor: tag.color }} />
+										<span>{tag.name}</span>
+									</span>
+								))}
+								{assignedTags.length === 0 ? (
+									<span className="text-xs text-muted-foreground">{t('caseView.noTagsSelected')}</span>
+								) : null}
+							</div>
+							<div className="flex justify-end gap-2 pt-2">
+								<Button type="button" variant="outline" onClick={() => setOpen(false)}>{t('close') || 'Close'}</Button>
+								<Button type="button" onClick={onSaveAssignments} disabled={isSavingAssignments || !hasChanges}>
+									{isSavingAssignments ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
+									{t('editTags')}
+								</Button>
+							</div>
+						</div>
+					</section>
+					<section className="space-y-4">
+						<header className="flex items-center justify-between">
+							<div className="text-sm font-medium">
+								{form.id ? t('editTagHeading') || 'Edit tag' : t('createNewTagLabel') || 'Create new tag'}
+							</div>
+							{form.id ? (
+								<Button type="button" variant="ghost" size="sm" onClick={resetForm}>{t('reset') || 'Reset'}</Button>
+							) : null}
+						</header>
+						<form className="space-y-3" onSubmit={onSubmitTagForm}>
+							<div className="space-y-1">
+								<label className="text-xs font-medium" htmlFor="tag-name">{t('tagNameLabel') || 'Name'}</label>
+								<Input id="tag-name" value={form.name} onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))} placeholder={t('tagNamePlaceholder') || 'e.g. Must-know'} />
+							</div>
+							<div className="space-y-1">
+								<label className="text-xs font-medium" htmlFor="tag-color">{t('tagColorLabel') || 'Color'}</label>
+								<div className="flex items-center gap-2">
+									<input id="tag-color" type="color" value={form.color} onChange={(event) => setForm((prev) => ({ ...prev, color: event.target.value }))} className="h-9 w-12 rounded border" />
+									<Input value={form.color} onChange={(event) => setForm((prev) => ({ ...prev, color: event.target.value }))} className="font-mono" />
+								</div>
+							</div>
+							<div className="space-y-1">
+								<label className="text-xs font-medium" htmlFor="tag-description">{t('tagDescriptionLabel') || 'Description'}</label>
+								<Textarea id="tag-description" value={form.description} onChange={(event) => setForm((prev) => ({ ...prev, description: event.target.value }))} placeholder={t('tagDescriptionPlaceholder') || 'Optional'} rows={4} />
+							</div>
+							<div className="flex justify-end gap-2">
+								<Button type="submit" disabled={isSavingTag}>
+									{isSavingTag ? <Loader2 className="mr-2 size-4 animate-spin" /> : form.id ? <Pencil className="mr-2 size-4" /> : <Plus className="mr-2 size-4" />}
+									{form.id ? t('saveChanges') || 'Save changes' : t('createTag')}
+								</Button>
+							</div>
+						</form>
+					</section>
+				</div>
+			</DialogContent>
+			<AlertDialog open={Boolean(deleteCandidate)} onOpenChange={(next) => { if (!next) setDeleteCandidate(null) }}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>{t('confirmDeleteTag') || 'Delete tag?'}</AlertDialogTitle>
+					</AlertDialogHeader>
+					<p className="text-sm text-muted-foreground">
+						{t('confirmDeleteTagDescription') || 'This will remove the tag from all cases. This action cannot be undone.'}
+					</p>
+					<AlertDialogFooter>
+						<AlertDialogCancel onClick={() => setDeleteCandidate(null)}>{t('cancel')}</AlertDialogCancel>
+						<AlertDialogAction onClick={() => void handleDeleteTag()} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+							{(mode === 'admin' ? deleteTagAdmin.isExecuting : deleteTagUser.isExecuting) ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
+							{t('delete')}
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
+		</Dialog>
+	)
+}
+
+function sortTags(tags: Tag[]) {
+	return [...tags].sort((a, b) => a.name.localeCompare(b.name))
+}
+
+function mixWithWhite(hex: string, ratio: number) {
+	const parsed = parseHexColor(hex)
+	if (!parsed) return hex
+	const mix = (channel: number) => Math.round(channel + (255 - channel) * ratio)
+	const toHex = (channel: number) => channel.toString(16).padStart(2, '0')
+	const r = mix(parsed.r)
+	const g = mix(parsed.g)
+	const b = mix(parsed.b)
+	return `#${toHex(r)}${toHex(g)}${toHex(b)}`
+}
+
+function getReadableTextColor(hex: string) {
+	const parsed = parseHexColor(hex)
+	if (!parsed) return '#1f2937'
+	const luminance = (0.299 * parsed.r + 0.587 * parsed.g + 0.114 * parsed.b) / 255
+	return luminance > 0.6 ? '#1f2937' : '#ffffff'
+}
+
+function parseHexColor(color: string) {
+	const value = color.replace('#', '')
+	if (value.length !== 6) return null
+	const r = Number.parseInt(value.slice(0, 2), 16)
+	const g = Number.parseInt(value.slice(2, 4), 16)
+	const b = Number.parseInt(value.slice(4, 6), 16)
+	if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) return null
+	return { r, g, b }
 }

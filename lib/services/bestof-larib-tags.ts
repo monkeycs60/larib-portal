@@ -26,6 +26,29 @@ export async function ensureAdminTag(input: { name: string; color: string; descr
   return created
 }
 
+export async function updateAdminTag(input: { id: string; name: string; color: string; description?: string | null }) {
+  const tag = await prisma.adminTag.findUnique({ where: { id: input.id }, select: { id: true, name: true } })
+  if (!tag) throw new Error('ADMIN_TAG_NOT_FOUND')
+  const trimmed = input.name.trim()
+  if (trimmed !== tag.name) {
+    const duplicate = await prisma.adminTag.findUnique({ where: { name: trimmed } })
+    if (duplicate) throw new Error('ADMIN_TAG_NAME_TAKEN')
+  }
+  const updated = await prisma.adminTag.update({
+    where: { id: input.id },
+    data: { name: trimmed, color: input.color, description: input.description ?? null },
+    select: { id: true, name: true, color: true, description: true },
+  })
+  return updated
+}
+
+export async function deleteAdminTag(id: string) {
+  const tag = await prisma.adminTag.findUnique({ where: { id }, select: { id: true } })
+  if (!tag) throw new Error('ADMIN_TAG_NOT_FOUND')
+  await prisma.adminTag.delete({ where: { id } })
+  return { id }
+}
+
 export async function setCaseAdminTags(caseId: string, tagIds: string[]) {
   await prisma.adminTagOnCase.deleteMany({ where: { caseId } })
   if (tagIds.length) {
@@ -69,6 +92,29 @@ export async function ensureUserTag(userId: string, input: { name: string; color
   return created
 }
 
+export async function updateUserTag(userId: string, input: { id: string; name: string; color: string; description?: string | null }) {
+  const tag = await prisma.userTag.findFirst({ where: { id: input.id, userId }, select: { id: true, name: true } })
+  if (!tag) throw new Error('USER_TAG_NOT_FOUND')
+  const trimmed = input.name.trim()
+  if (trimmed !== tag.name) {
+    const duplicate = await prisma.userTag.findFirst({ where: { userId, name: trimmed }, select: { id: true } })
+    if (duplicate) throw new Error('USER_TAG_NAME_TAKEN')
+  }
+  const updated = await prisma.userTag.update({
+    where: { id: input.id },
+    data: { name: trimmed, color: input.color, description: input.description ?? null },
+    select: { id: true, name: true, color: true, description: true },
+  })
+  return updated
+}
+
+export async function deleteUserTag(userId: string, id: string) {
+  const tag = await prisma.userTag.findFirst({ where: { id, userId }, select: { id: true } })
+  if (!tag) throw new Error('USER_TAG_NOT_FOUND')
+  await prisma.userTag.delete({ where: { id } })
+  return { id }
+}
+
 export async function setCaseUserTags(userId: string, caseId: string, userTagIds: string[]) {
   // Only allow linking tags that belong to this user
   const owned = await prisma.userTag.findMany({ where: { userId, id: { in: userTagIds } }, select: { id: true } })
@@ -95,4 +141,3 @@ export async function listCasesByUserTag(userId: string, userTagId: string) {
   })
   return links.map((l) => l.c)
 }
-

@@ -13,6 +13,10 @@ import {
   listUserTags,
   setCaseAdminTags,
   setCaseUserTags,
+  updateAdminTag,
+  deleteAdminTag,
+  updateUserTag,
+  deleteUserTag,
 } from '@/lib/services/bestof-larib-tags'
 
 const CreateCaseSchema = z.object({
@@ -139,6 +143,37 @@ export const ensureUserTagAction = authenticatedAction
   .inputSchema(z.object({ name: z.string().min(1), color: z.string().min(1), description: z.string().trim().optional().nullable() }))
   .action(async ({ parsedInput, ctx }) => {
     return await ensureUserTag(ctx.userId, { name: parsedInput.name, color: parsedInput.color, description: parsedInput.description })
+  })
+
+const UpdateTagSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  color: z.string().min(1),
+  description: z.string().trim().optional().nullable(),
+})
+
+export const updateAdminTagAction = adminOnlyAction
+  .inputSchema(UpdateTagSchema)
+  .action(async ({ parsedInput }) => {
+    return await updateAdminTag(parsedInput)
+  })
+
+export const updateUserTagAction = authenticatedAction
+  .inputSchema(UpdateTagSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    return await updateUserTag(ctx.userId, parsedInput)
+  })
+
+export const deleteAdminTagAction = adminOnlyAction
+  .inputSchema(z.object({ id: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    return await deleteAdminTag(parsedInput.id)
+  })
+
+export const deleteUserTagAction = authenticatedAction
+  .inputSchema(z.object({ id: z.string().min(1) }))
+  .action(async ({ parsedInput, ctx }) => {
+    return await deleteUserTag(ctx.userId, parsedInput.id)
   })
 
 export const setCaseUserTagsAction = authenticatedAction

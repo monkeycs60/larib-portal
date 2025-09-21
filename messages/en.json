@@ -306,7 +306,21 @@
     "tagColorLabel": "Color",
     "tagDescriptionLabel": "Description",
     "tagDescriptionPlaceholder": "Optional",
-    "createTag": "Create Tag"
+    "createTag": "Create Tag",
+    "tagAssignmentHeading": "Assign tags to this case",
+    "noTagsYet": "You haven't created any tags yet.",
+    "editTagHeading": "Edit tag",
+    "saveChanges": "Save changes",
+    "reset": "Reset",
+    "refresh": "Refresh",
+    "manageTags": "Manage tags",
+    "quickAssignTags": "Quick assign tags",
+    "tagSearchPlaceholder": "Search tags...",
+    "noTagsFound": "No tags found.",
+    "confirmDeleteTag": "Delete tag?",
+    "confirmDeleteTagDescription": "This will remove the tag from all cases. This action cannot be undone.",
+    "tagDeleted": "Tag deleted",
+    "close": "Close"
     ,
     "editTags": "Update Tags",
     "filters": {

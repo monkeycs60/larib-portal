@@ -304,7 +304,21 @@
     "tagColorLabel": "Couleur",
     "tagDescriptionLabel": "Description",
     "tagDescriptionPlaceholder": "Optionnel",
-    "createTag": "Créer le tag"
+    "createTag": "Créer le tag",
+    "tagAssignmentHeading": "Assigner des tags à ce cas",
+    "noTagsYet": "Vous n'avez pas encore créé de tags.",
+    "editTagHeading": "Modifier le tag",
+    "saveChanges": "Enregistrer",
+    "reset": "Réinitialiser",
+    "refresh": "Rafraîchir",
+    "manageTags": "Gérer les tags",
+    "quickAssignTags": "Assignation rapide",
+    "tagSearchPlaceholder": "Rechercher un tag...",
+    "noTagsFound": "Aucun tag trouvé.",
+    "confirmDeleteTag": "Supprimer le tag ?",
+    "confirmDeleteTagDescription": "Le tag sera retiré de tous les cas. Cette action est irréversible.",
+    "tagDeleted": "Tag supprimé",
+    "close": "Fermer"
     ,
     "editTags": "Mettre à jour les tags",
     "filters": {

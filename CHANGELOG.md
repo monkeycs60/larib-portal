@@ -6,6 +6,21 @@
 - Updated files:
   - `app/[locale]/bestof-larib/[id]/work-area.tsx` refreshes the route after validation and keeps a temporary attempt in memory until the server data updates.
 
+## Enhancement: Bestof Tag Management Overhaul
+
+- Name: Unified tag manager and inline assignment
+- What it does: Streamlines tag management by merging assignment and editing into a single dialog, adds inline actions (edit/delete) with confirmation, and introduces a quick tag picker directly in the clinical cases table for faster assignment without leaving the row.
+- How to use it: In `/{locale}/bestof-larib/[id]`, use "Create Tag" or the new toggle chips to manage personal tags; in the cases table, click the plus icon to toggle tags instantly or the settings icon to open the full manager.
+- Updated files:
+  - `app/[locale]/bestof-larib/components/tag-manager-dialog.tsx` rebuilds the dialog with combined assignment, editing, deletion, and refreshed visuals.
+  - `app/[locale]/bestof-larib/components/case-tag-quick-picker.tsx` adds the quick popover selector for case rows.
+  - `app/[locale]/bestof-larib/components/case-tag-cell.tsx` renders row badges with live updates and entry points to quick assign/manage.
+  - `app/[locale]/bestof-larib/page.tsx` swaps the table tag column to the new client cell.
+  - `app/[locale]/bestof-larib/[id]/user-tags-section.tsx` and `user-panel.tsx` reuse the same quick assign + manage controls inside the work area panel.
+  - `app/[locale]/bestof-larib/actions.ts` exposes update/delete actions for admin and user tags.
+  - `lib/services/bestof-larib-tags.ts` adds update/delete helpers for admin and user tags with validation.
+  - `messages/{en,fr}.json` localizes the new UI strings.
+
 ## Fix: Bestof User Tag Picker Feedback
 
 - Name: Clear feedback for personal tag selections

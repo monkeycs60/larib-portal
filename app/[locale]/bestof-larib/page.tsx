@@ -6,10 +6,10 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Link } from '@/app/i18n/navigation'
-import { Eye, Pencil, Plus } from 'lucide-react'
+import { Eye, Pencil } from 'lucide-react'
 import DeleteCaseButton from './components/delete-case-button'
 import CreateCaseDialog from './components/create-case-dialog'
-import TagManagerDialog from './components/tag-manager-dialog'
+import CaseTagCell from './components/case-tag-cell'
 import FiltersBar from './components/filters-bar'
 import SortHeader from './components/sort-header'
 import TableOverlay from './components/table-overlay'
@@ -152,24 +152,11 @@ export default async function BestofLaribPage({ searchParams }: { searchParams: 
                     </TableCell>
                   ) : null}
                   <TableCell>
-                    <div className="flex items-center gap-2 justify-between">
-                      <div className="flex flex-wrap gap-1">
-                        {(isAdmin ? caseItem.adminTags : caseItem.userTags).map((tag) => (
-                          <Badge key={tag.id} className="border-transparent text-white" style={{ backgroundColor: tag.color }}>
-                            {tag.name}
-                          </Badge>
-                        ))}
-                      </div>
-                      <TagManagerDialog
-                        mode={isAdmin ? 'admin' : 'user'}
-                        caseId={caseItem.id}
-                        trigger={
-                          <Button type="button" size="icon" variant="ghost" aria-label={isAdmin ? 'add admin tag' : 'add user tag'}>
-                            <Plus />
-                          </Button>
-                        }
-                      />
-                    </div>
+                    <CaseTagCell
+                      mode={isAdmin ? 'admin' : 'user'}
+                      caseId={caseItem.id}
+                      initialTags={isAdmin ? caseItem.adminTags : caseItem.userTags}
+                    />
                   </TableCell>
                   <TableCell className="text-right space-x-2">
                     <Link href={`/bestof-larib/${caseItem.id}`}>
