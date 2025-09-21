@@ -289,7 +289,7 @@
       "attemptDraft": "draft",
       "attemptValidated": "validated",
       "noUserTags": "You have not created any personal tags yet.",
-      "noTagsSelected": "Select the tags that describe this case for you.",
+      "noTagsSelected": "No tags selected",
       "tagsAutoSaved": "Selections are saved automatically.",
       "showAllTags": "Show all tags",
       "hideTags": "Show fewer"

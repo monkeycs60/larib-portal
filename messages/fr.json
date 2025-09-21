@@ -287,7 +287,7 @@
       "attemptDraft": "brouillon",
       "attemptValidated": "validé",
       "noUserTags": "Vous n'avez pas encore créé de tags personnels.",
-      "noTagsSelected": "Sélectionnez les tags qui décrivent ce cas pour vous.",
+      "noTagsSelected": "Aucun tag sélectionné",
       "tagsAutoSaved": "Les sélections sont enregistrées automatiquement.",
       "showAllTags": "Afficher tous les tags",
       "hideTags": "Réduire la liste"

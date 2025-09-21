@@ -147,8 +147,15 @@ export default function CaseTagQuickPicker({ mode, caseId, assignedTags, onChang
 	return (
 		<Popover open={open} onOpenChange={(next) => void handleOpenChange(next)}>
 			<PopoverTrigger asChild>
-				<Button type="button" size="icon" variant="ghost" aria-label={t('quickAssignTags') || 'Quick assign tags'}>
-					{isApplying ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
+				<Button
+					type="button"
+					size="icon"
+					variant="ghost"
+					aria-label={t('quickAssignTags') || 'Quick assign tags'}
+					disabled={isApplying}
+					className={cn(isApplying && 'opacity-60 cursor-wait')}
+				>
+					<Plus className="size-4" />
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent className="w-72 p-0">
@@ -169,7 +176,14 @@ export default function CaseTagQuickPicker({ mode, caseId, assignedTags, onChang
 								{orderedTags.map((tag) => {
 									const checked = selectedIds.includes(tag.id)
 									return (
-										<CommandItem key={tag.id} onSelect={() => toggle(tag.id)} className="flex items-center justify-between">
+										<CommandItem
+											key={tag.id}
+											onSelect={() => (isApplying ? undefined : toggle(tag.id))}
+											className={cn(
+												'flex items-center justify-between',
+												isApplying && 'pointer-events-none opacity-50'
+											)}
+										>
 											<span className="flex items-center gap-2">
 												<span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: tag.color }} />
 												<span>{tag.name}</span>

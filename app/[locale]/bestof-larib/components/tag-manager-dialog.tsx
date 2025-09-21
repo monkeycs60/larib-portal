@@ -318,8 +318,8 @@ const hasChanges = useMemo(() => {
 								<div className="text-sm text-muted-foreground">{t('noTagsYet') || 'No tags yet.'}</div>
 							) : (
 								displayTags.map((tag) => {
-									const active = selectedIds.includes(tag.id)
-									const labelColor = active ? getReadableTextColor(tag.color) : '#475569'
+							const active = selectedIds.includes(tag.id)
+							const labelColor = active ? '#1f2937' : '#475569'
 									return (
 										<div key={tag.id} className="flex items-center justify-between gap-3 rounded-md border p-2">
 											<Toggle
@@ -448,13 +448,6 @@ function mixWithWhite(hex: string, ratio: number) {
 	const g = mix(parsed.g)
 	const b = mix(parsed.b)
 	return `#${toHex(r)}${toHex(g)}${toHex(b)}`
-}
-
-function getReadableTextColor(hex: string) {
-	const parsed = parseHexColor(hex)
-	if (!parsed) return '#1f2937'
-	const luminance = (0.299 * parsed.r + 0.587 * parsed.g + 0.114 * parsed.b) / 255
-	return luminance > 0.6 ? '#1f2937' : '#ffffff'
 }
 
 function parseHexColor(color: string) {
