@@ -64,6 +64,7 @@ export default function UserTagsSection({
 			)}
 		</div>
 	)
+}
 
 function mapSelection(tags: CaseDisplayTag[], ids: string[]): CaseDisplayTag[] {
 	const set = new Set(ids)
