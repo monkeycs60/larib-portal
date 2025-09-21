@@ -1,3 +1,13 @@
+## Enhancement: Bestof Admin Creation Dialog Improvements
+
+- Name: Admin case dialog streamlined exam/disease creation
+- What it does: Renames the inline modals to “Create new exam type”/“Create new disease” and automatically selects the freshly created value in the form so admins do not need to re-open the dropdowns.
+- How to use it: While editing or creating a case in `/{locale}/bestof-larib`, use the “Create new exam type” or “Create new disease” buttons; the new entry is instantly selected in the corresponding field.
+- Updated files:
+  - `app/[locale]/bestof-larib/components/create-case-dialog.tsx`
+  - `messages/en.json`
+  - `messages/fr.json`
+
 ## Fix: Bestof Admin Attempt Button
 
 - Name: Admin start new attempt disabled
