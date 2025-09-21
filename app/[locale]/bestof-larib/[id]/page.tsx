@@ -5,21 +5,30 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft } from 'lucide-react';
 import { getTypedSession } from '@/lib/auth-helpers';
 import WorkArea, { PrefillState } from './work-area';
-import type { CaseAttemptSummary } from '@/lib/services/bestof-larib-attempts'
-import { getUserCaseState, listUserCaseAttempts } from '@/lib/services/bestof-larib-attempts'
-import { listUserTags, getCaseUserTagIds } from '@/lib/services/bestof-larib-tags'
+import type { CaseAttemptSummary } from '@/lib/services/bestof-larib-attempts';
+import { getUserCaseState, listUserCaseAttempts } from '@/lib/services/bestof-larib-attempts';
+import { listUserTags, getCaseUserTagIds } from '@/lib/services/bestof-larib-tags';
 
 export default async function CaseViewPage({
 	params,
+	searchParams,
 }: {
 	params: { locale: string; id: string };
+	searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
 	const t = await getTranslations('bestof');
-    const [c, session] = await Promise.all([
-        getCaseById(params.id),
-        getTypedSession(),
-    ]);
-    if (!c) return <div className='p-6'>{t('notFound')}</div>;
+	const sp = await searchParams;
+	const shouldStartNewAttempt = (() => {
+		const raw = sp?.newAttempt;
+		if (!raw) return false;
+		if (Array.isArray(raw)) return raw.some((value) => value === '1' || value === 'true');
+		return raw === '1' || raw === 'true';
+	})();
+	const [c, session] = await Promise.all([
+		getCaseById(params.id),
+		getTypedSession(),
+	]);
+	if (!c) return <div className='p-6'>{t('notFound')}</div>;
 
 	const difficultyLabel =
 		c.difficulty === 'BEGINNER'
@@ -29,25 +38,38 @@ export default async function CaseViewPage({
 			: 'advanced';
 	const isAdmin = (session?.user?.role ?? 'USER') === 'ADMIN';
 
-    const userId = session?.user?.id
-    const [prefill, attempts, userTags, userTagIds] = userId ? await Promise.all([
-        getUserCaseState({ userId, caseId: c.id }).then(s => ({
-            tags: s.settings?.tags ?? [],
-            comments: s.settings?.comments ?? null,
-            personalDifficulty: s.settings?.personalDifficulty ?? null,
-            analysis: {
-                lvef: s.lastAttempt?.lvef ?? undefined,
-                kinetic: s.lastAttempt?.kinetic ?? undefined,
-                lge: s.lastAttempt?.lge ?? undefined,
-                finalDx: s.lastAttempt?.finalDx ?? undefined,
-            },
-            report: s.lastAttempt?.report ?? null,
-            validatedAt: s.lastAttempt?.validatedAt ? new Date(s.lastAttempt.validatedAt).toISOString() : null,
-        }) as PrefillState),
-        listUserCaseAttempts({ userId, caseId: c.id }) as Promise<CaseAttemptSummary[]>,
-        listUserTags(userId).then(rows => rows.map(r => ({ id: r.id, name: r.name, color: r.color, description: r.description ?? null }))),
-        getCaseUserTagIds(userId, c.id),
-    ]) : [null, [], [], []]
+	const userId = session?.user?.id;
+	const [prefillState, attempts, userTags, userTagIds] = userId
+		? await Promise.all([
+			getUserCaseState({ userId, caseId: c.id }).then(s => ({
+				tags: s.settings?.tags ?? [],
+				comments: s.settings?.comments ?? null,
+				personalDifficulty: s.settings?.personalDifficulty ?? null,
+				analysis: {
+					lvef: s.lastAttempt?.lvef ?? undefined,
+					kinetic: s.lastAttempt?.kinetic ?? undefined,
+					lge: s.lastAttempt?.lge ?? undefined,
+					finalDx: s.lastAttempt?.finalDx ?? undefined,
+				},
+				report: s.lastAttempt?.report ?? null,
+				validatedAt: s.lastAttempt?.validatedAt ? new Date(s.lastAttempt.validatedAt).toISOString() : null,
+			}) as PrefillState),
+			listUserCaseAttempts({ userId, caseId: c.id }) as Promise<CaseAttemptSummary[]>,
+			listUserTags(userId).then(rows => rows.map(r => ({ id: r.id, name: r.name, color: r.color, description: r.description ?? null }))),
+			getCaseUserTagIds(userId, c.id),
+		])
+		: [null, [], [], []];
+
+	const prefill = (() => {
+		if (!prefillState) return null;
+		if (!shouldStartNewAttempt) return prefillState;
+		return {
+			...prefillState,
+			analysis: { lvef: '', kinetic: '', lge: '', finalDx: '' },
+			report: '',
+			validatedAt: null,
+		} satisfies PrefillState;
+	})();
 
     return (
         <div className='space-y-4 py-6 px-12 mx-auto'>

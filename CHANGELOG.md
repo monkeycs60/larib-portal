@@ -1,3 +1,12 @@
+## Enhancement: Bestof Quick New Attempt Entry
+
+- Name: New attempt shortcut from cases list
+- What it does: Adds a user-only "New attempt" button beside "View" in the clinical cases table, sending the user to the case workspace with a fresh attempt while preserving personal settings.
+- How to use it: On `/{locale}/bestof-larib`, click "New attempt" on any row to open the case with cleared analysis/report fields, ready for a brand-new submission.
+- Updated files:
+  - `app/[locale]/bestof-larib/page.tsx`
+  - `app/[locale]/bestof-larib/[id]/page.tsx`
+
 ## Enhancement: Bestof Clinical Report & Difficulty UX
 
 - Name: Colored difficulty chips + report minimum

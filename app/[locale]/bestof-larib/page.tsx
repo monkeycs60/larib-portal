@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Link } from '@/app/i18n/navigation'
-import { Eye, Pencil } from 'lucide-react'
+import { Eye, Pencil, PlusCircle } from 'lucide-react'
 import DeleteCaseButton from './components/delete-case-button'
 import CreateCaseDialog from './components/create-case-dialog'
 import CaseTagCell from './components/case-tag-cell'
@@ -155,6 +155,11 @@ export default async function BestofLaribPage({ searchParams }: { searchParams: 
                     <Link href={`/bestof-larib/${caseItem.id}`}>
                       <Button size="sm" variant="secondary"><Eye />{t('view')}</Button>
                     </Link>
+                    {session?.user?.id && !isAdmin ? (
+                      <Link href={`/bestof-larib/${caseItem.id}?newAttempt=1`}>
+                        <Button size="sm"><PlusCircle />{t('caseView.startNewAttempt')}</Button>
+                      </Link>
+                    ) : null}
                     {isAdmin ? (
                       <>
                         <CreateCaseDialog
