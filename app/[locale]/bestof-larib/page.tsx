@@ -30,9 +30,22 @@ export default async function BestofLaribPage({ searchParams }: { searchParams: 
     const filtered = arr.filter((v) => (validDifficulties as readonly string[]).includes(v))
     return filtered as (typeof validDifficulties)[number][]
   }
+  const isAdmin = session?.user?.role === 'ADMIN'
+  const rawStatus = typeof sp?.status === 'string' ? sp.status : undefined
+  const statusFilter: 'PUBLISHED' | 'DRAFT' | undefined = isAdmin && rawStatus && ['PUBLISHED','DRAFT'].includes(rawStatus) ? (rawStatus as 'PUBLISHED' | 'DRAFT') : undefined
+  const userProgressFilter: CaseListFilters['userProgress'] = !isAdmin && rawStatus
+    ? rawStatus === 'completed'
+      ? 'COMPLETED'
+      : rawStatus === 'in-progress'
+        ? 'IN_PROGRESS'
+        : rawStatus === 'not-started'
+          ? 'NOT_STARTED'
+          : undefined
+    : undefined
+
   const filters: CaseListFilters = {
     name: typeof sp?.q === 'string' ? sp.q : undefined,
-    status: typeof sp?.status === 'string' && ['PUBLISHED','DRAFT'].includes(sp.status) ? (sp.status as 'PUBLISHED' | 'DRAFT') : undefined,
+    status: statusFilter,
     examTypeIds: asArray(sp?.examTypeId),
     diseaseTagIds: asArray(sp?.diseaseTagId),
     difficulties: asDifficultyArray(sp?.difficulty),
@@ -41,10 +54,10 @@ export default async function BestofLaribPage({ searchParams }: { searchParams: 
     adminTagIds: asArray(sp?.adminTagId),
     userTagIds: asArray(sp?.userTagId),
     myDifficulty: typeof sp?.myDifficulty === 'string' && ['BEGINNER','INTERMEDIATE','ADVANCED'].includes(sp.myDifficulty) ? (sp.myDifficulty as 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED') : undefined,
+    userProgress: userProgressFilter,
   }
   const sortField = typeof sp?.sort === 'string' ? (sp.sort as CaseListSortField) : undefined
   const sortDirection = typeof sp?.dir === 'string' && (sp.dir === 'asc' || sp.dir === 'desc') ? (sp.dir) : undefined
-  const isAdmin = session?.user?.role === 'ADMIN'
   const [cases, examTypes, diseaseTags, adminTags, userTagsList] = await Promise.all([
     listClinicalCasesWithDisplayTags(session?.user?.id, filters, { field: sortField, direction: sortDirection }),
     listExamTypes(),

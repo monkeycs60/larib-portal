@@ -62,6 +62,7 @@ export type CaseListFilters = {
   adminTagIds?: string[]
   userTagIds?: string[]
   myDifficulty?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
+  userProgress?: 'COMPLETED' | 'IN_PROGRESS' | 'NOT_STARTED'
 }
 
 export type CaseListSortField = 'name' | 'status' | 'difficulty' | 'createdAt' | 'examType' | 'diseaseTag' | 'attempts' | 'personalDifficulty'
@@ -148,7 +149,7 @@ export async function listClinicalCasesWithDisplayTags(userId?: string | null, f
   if (userId && base.length > 0) {
     const caseIds = base.map((b) => b.id)
     const [attempts, settings, attemptStates] = await Promise.all([
-      prisma.caseAttempt.groupBy({ by: ['caseId'], where: { userId, caseId: { in: caseIds } }, _count: { _all: true } }),
+      prisma.caseAttempt.groupBy({ by: ['caseId'], where: { userId, caseId: { in: caseIds }, validatedAt: { not: null } }, _count: { _all: true } }),
       prisma.userCaseSettings.findMany({ where: { userId, caseId: { in: caseIds } }, select: { caseId: true, personalDifficulty: true } }),
       prisma.caseAttempt.findMany({ where: { userId, caseId: { in: caseIds } }, select: { caseId: true, validatedAt: true } }),
     ])
@@ -169,6 +170,15 @@ export async function listClinicalCasesWithDisplayTags(userId?: string | null, f
       personalDifficulty: pdMap.get(b.id) ?? null,
       userAttemptState: stateMap.get(b.id) ?? { hasValidatedAttempt: false, hasDraftAttempt: false },
     }))
+  }
+
+  if (userId && filters?.userProgress) {
+    base = base.filter((entry) => {
+      const state = entry.userAttemptState ?? { hasValidatedAttempt: false, hasDraftAttempt: false }
+      if (filters.userProgress === 'COMPLETED') return state.hasValidatedAttempt
+      if (filters.userProgress === 'IN_PROGRESS') return state.hasDraftAttempt && !state.hasValidatedAttempt
+      return !state.hasDraftAttempt && !state.hasValidatedAttempt
+    })
   }
 
   // In-memory sort for enriched fields or case-insensitive name

@@ -80,11 +80,6 @@ export default function WorkArea({ meta, defaults, rightPane, attempts, userTagD
   function onSave() {
     if (isAdmin || locked) return
     const pd: Difficulty | null = personalDifficulty ? personalDifficulty : null
-    const plainText = htmlToPlainText(report)
-    if (plainText.length < 10) {
-      toast.error(t('errors.reportTooShort'))
-      return
-    }
     return saveAll({
       caseId,
       tags,

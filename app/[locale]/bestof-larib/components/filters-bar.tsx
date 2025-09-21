@@ -35,7 +35,9 @@ export default function FiltersBar({
 	const qp = url.searchParams;
 
 	const [q, setQ] = useState(qp.get('q') ?? '');
-	const [status, setStatus] = useState(qp.get('status') ?? '');
+	const rawStatus = qp.get('status') ?? '';
+	const allowedStatusValues = isAdmin ? ['PUBLISHED','DRAFT'] : ['completed','in-progress','not-started'];
+	const [status, setStatus] = useState(allowedStatusValues.includes(rawStatus) ? rawStatus : '');
     const qpArray = (key: string) => {
         const all = url.searchParams.getAll(key);
         const single = url.searchParams.get(key);
@@ -79,7 +81,7 @@ export default function FiltersBar({
 		router.push(qs ? `${pathname}?${qs}` : pathname);
 	}
 
-    function pushWith(partial: Partial<Record<string, string | string[]>>) {
+	function pushWith(partial: Partial<Record<string, string | string[]>>) {
         const current = new URLSearchParams(
             typeof window !== 'undefined' ? window.location.search : ''
         );
@@ -288,7 +290,7 @@ export default function FiltersBar({
                 ) : null
             )}
             <div>
-                <label className='block text-xs mb-1'>{t('filters.status')}</label>
+                <label className='block text-xs mb-1'>{isAdmin ? t('filters.status') : t('filters.progress')}</label>
                 <Select
                     value={status}
 					onChange={(e) => {
@@ -296,8 +298,16 @@ export default function FiltersBar({
 						pushWith({ status: e.target.value });
 					}}>
 					<option value=''>{t('filters.any')}</option>
-					<option value='PUBLISHED'>{t('status.published')}</option>
-					<option value='DRAFT'>{t('status.draft')}</option>
+					{(isAdmin ? [
+					  { value: 'PUBLISHED', label: t('status.published') },
+					  { value: 'DRAFT', label: t('status.draft') },
+					] : [
+					  { value: 'completed', label: t('status.completed') },
+					  { value: 'in-progress', label: t('status.inProgress') },
+					  { value: 'not-started', label: t('status.notStarted') },
+					]).map((opt) => (
+					  <option key={opt.value} value={opt.value}>{opt.label}</option>
+					))}
 				</Select>
 			</div>
             <div className='min-w-52'>

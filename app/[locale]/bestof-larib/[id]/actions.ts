@@ -5,15 +5,15 @@ import { authenticatedAction } from '@/actions/safe-action'
 import { saveAttempt, validateAttempt, upsertUserSettings } from '@/lib/services/bestof-larib-attempts'
 import { htmlToPlainText } from '@/lib/html'
 
-const ReportSchema = z.string().refine((value) => htmlToPlainText(value).length >= 10, { message: 'REPORT_TOO_SHORT' })
+const ReportSchemaStrict = z.string().refine((value) => htmlToPlainText(value).length >= 10, { message: 'REPORT_TOO_SHORT' })
 
 const SaveAttemptSchema = z.object({
   caseId: z.string().min(1),
-  lvef: z.string().min(1).optional(),
-  kinetic: z.string().min(1).optional(),
-  lge: z.string().min(1).optional(),
-  finalDx: z.string().min(1).optional(),
-  report: ReportSchema.optional(),
+  lvef: z.string().optional(),
+  kinetic: z.string().optional(),
+  lge: z.string().optional(),
+  finalDx: z.string().optional(),
+  report: z.string().optional(),
 })
 
 export const saveAttemptAction = authenticatedAction
@@ -65,7 +65,11 @@ const SaveAllSchema = z.object({
   personalDifficulty: z.enum(['BEGINNER','INTERMEDIATE','ADVANCED']).nullable(),
   comments: z.string().nullable(),
   analysis: z.object({ lvef: z.string().optional(), kinetic: z.string().optional(), lge: z.string().optional(), finalDx: z.string().optional() }),
-  report: ReportSchema.optional(),
+  report: z.string().optional(),
+})
+
+const SaveAllAndValidateSchema = SaveAllSchema.extend({
+  report: ReportSchemaStrict,
 })
 
 export const saveAllAction = authenticatedAction
@@ -91,7 +95,7 @@ export const saveAllAction = authenticatedAction
   })
 
 export const saveAllAndValidateAction = authenticatedAction
-  .inputSchema(SaveAllSchema)
+  .inputSchema(SaveAllAndValidateSchema)
   .action(async ({ parsedInput, ctx }) => {
     await upsertUserSettings({
       userId: ctx.userId,

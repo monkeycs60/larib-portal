@@ -10,6 +10,11 @@ export type SaveAttemptInput = {
   report?: string
 }
 
+const toNullable = (value?: string | null): string | null => {
+  if (typeof value !== 'string') return null
+  return value.trim().length > 0 ? value : null
+}
+
 export async function saveAttempt(input: SaveAttemptInput): Promise<string> {
   // Reuse the latest draft (unvalidated) attempt for this user/case, or create one if missing.
   const existingDraft = await prisma.caseAttempt.findFirst({
@@ -21,11 +26,11 @@ export async function saveAttempt(input: SaveAttemptInput): Promise<string> {
     const updated = await prisma.caseAttempt.update({
       where: { id: existingDraft.id },
       data: {
-        lvef: input.lvef ?? null,
-        kinetic: input.kinetic ?? null,
-        lge: input.lge ?? null,
-        finalDx: input.finalDx ?? null,
-        report: input.report ?? null,
+        lvef: toNullable(input.lvef ?? null),
+        kinetic: toNullable(input.kinetic ?? null),
+        lge: toNullable(input.lge ?? null),
+        finalDx: toNullable(input.finalDx ?? null),
+        report: toNullable(input.report ?? null),
       },
       select: { id: true },
     })
@@ -36,11 +41,11 @@ export async function saveAttempt(input: SaveAttemptInput): Promise<string> {
       id: crypto.randomUUID(),
       userId: input.userId,
       caseId: input.caseId,
-      lvef: input.lvef ?? null,
-      kinetic: input.kinetic ?? null,
-      lge: input.lge ?? null,
-      finalDx: input.finalDx ?? null,
-      report: input.report ?? null,
+      lvef: toNullable(input.lvef ?? null),
+      kinetic: toNullable(input.kinetic ?? null),
+      lge: toNullable(input.lge ?? null),
+      finalDx: toNullable(input.finalDx ?? null),
+      report: toNullable(input.report ?? null),
     },
     select: { id: true },
   })
