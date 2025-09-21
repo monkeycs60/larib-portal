@@ -1,3 +1,11 @@
+## Fix: Login Suspense Boundary
+
+- Name: Suspense-wrapped login form
+- What it does: Wraps the localized login form in a Suspense boundary with a translated skeleton fallback so `useSearchParams` is resolved without prerender errors.
+- How to use it: Visit `/{locale}/login`; the form now shows a loading skeleton while client-only dependencies hydrate, preventing build failures.
+- Updated files:
+  - `app/[locale]/login/page.tsx`
+
 ## Enhancement: Bestof Personalized Progress Status
 
 - Name: Personalized case progress statuses
