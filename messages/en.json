@@ -233,10 +233,12 @@
       "textContent": "Enter the clinical case content here (optional if PDF is provided)..."
     },
     "hints": { "tags": "Up to 10 tags, comma separated." },
-    "addNewExam": "+ Add New Exam Type",
-    "addNewDisease": "+ Add New Disease",
+    "addNewExam": "+ Create New Exam Type",
+    "addNewDisease": "+ Create New Disease",
     "addNewExamPrompt": "New exam type name",
     "addNewDiseasePrompt": "New disease name",
+    "createExamTypeCta": "Create new exam type",
+    "createDiseaseCta": "Create new disease",
     "createDialog": { "title": "Create New Clinical Case" },
     "content": {
       "section": "Case Content",
@@ -265,6 +267,7 @@
     "confirmDeleteDesc": "This action cannot be undone.",
     "editPlaceholder": "Editing UI coming soon",
     "caseView": {
+      "newBadge": "New",
       "sidebar": { "title": "Case" },
       "attempts": "Attempts",
       "firstTry": "First try",

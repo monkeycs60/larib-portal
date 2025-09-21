@@ -1,6 +1,6 @@
 'use client';
 import { useState, type ReactNode } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
@@ -73,7 +73,7 @@ export default function CreateCaseDialog({
 		clinicalCase?.status ?? 'PUBLISHED'
 	);
 
-  const { register, handleSubmit, setValue, reset, watch } =
+  const { register, handleSubmit, setValue, reset, watch, control } =
     useForm<FormValues>({
       resolver: zodResolver(FormSchema),
     defaultValues: clinicalCase
@@ -127,25 +127,36 @@ export default function CreateCaseDialog({
 		createExamTypeAction,
 		{
 			onSuccess(res) {
-				if (res.data) {
-      setExamList((previous) => [
-        ...previous.filter((examType) => examType.id !== res.data!.id),
-        res.data!,
-      ]);
-					setValue('examType', res.data!.name);
-				}
+				const createdExam = res.data;
+				if (!createdExam) return;
+				setExamList((previous) => {
+					const next = previous.filter((examType) => examType.id !== createdExam.id);
+					next.push(createdExam);
+					next.sort((leftExam, rightExam) => leftExam.name.localeCompare(rightExam.name));
+					return next;
+				});
+				setValue('examType', createdExam.name, {
+					shouldDirty: true,
+					shouldValidate: true,
+				});
 			},
 		}
 	);
 	const { execute: execCreateDisease, isExecuting: creatingDisease } =
 		useAction(createDiseaseTagAction, {
 			onSuccess(res) {
-				if (res.data)
-      setDiseaseList((previous) => [
-        ...previous.filter((disease) => disease.id !== res.data!.id),
-        res.data!,
-      ]);
-				setValue('diseaseTag', res.data!.name);
+				const createdDisease = res.data;
+				if (!createdDisease) return;
+				setDiseaseList((previous) => {
+					const next = previous.filter((disease) => disease.id !== createdDisease.id);
+					next.push(createdDisease);
+					next.sort((leftDisease, rightDisease) => leftDisease.name.localeCompare(rightDisease.name));
+					return next;
+				});
+				setValue('diseaseTag', createdDisease.name, {
+					shouldDirty: true,
+					shouldValidate: true,
+				});
 			},
 		});
 
@@ -309,14 +320,23 @@ export default function CreateCaseDialog({
 										{t('addNewExam')}
 									</button>
 								</div>
-								<Select {...register('examType')}>
-									<option value=''>{t('selectPlaceholder')}</option>
-                    {examList.map((examTypeOption) => (
-                        <option key={examTypeOption.id} value={examTypeOption.name}>
-                            {examTypeOption.name}
-                        </option>
-                    ))}
-								</Select>
+								<Controller
+									name='examType'
+									control={control}
+									render={({ field }) => (
+										<Select
+											{...field}
+											value={field.value ?? ''}
+										>
+										<option value=''>{t('selectPlaceholder')}</option>
+										{examList.map((examTypeOption) => (
+											<option key={examTypeOption.id} value={examTypeOption.name}>
+												{examTypeOption.name}
+											</option>
+										))}
+										</Select>
+									)}
+								/>
 							</div>
 							<div>
 								<label className='block text-sm mb-1'>
@@ -350,14 +370,23 @@ export default function CreateCaseDialog({
 										{t('addNewDisease')}
 									</button>
 								</div>
-								<Select {...register('diseaseTag')}>
-									<option value=''>{t('selectPlaceholder')}</option>
-                    {diseaseList.map((diseaseTagOption) => (
-                        <option key={diseaseTagOption.id} value={diseaseTagOption.name}>
-                            {diseaseTagOption.name}
-                        </option>
-                    ))}
-								</Select>
+								<Controller
+									name='diseaseTag'
+									control={control}
+									render={({ field }) => (
+										<Select
+											{...field}
+											value={field.value ?? ''}
+										>
+										<option value=''>{t('selectPlaceholder')}</option>
+										{diseaseList.map((diseaseTagOption) => (
+											<option key={diseaseTagOption.id} value={diseaseTagOption.name}>
+												{diseaseTagOption.name}
+											</option>
+										))}
+										</Select>
+									)}
+								/>
 							</div>
 						</div>
 					</section>
@@ -500,7 +529,7 @@ export default function CreateCaseDialog({
 					title={t('addNewExam')}
 					label={t('addNewExamPrompt')}
 					placeholder={t('addNewExamPrompt')}
-					confirmText={t('create')}
+					confirmText={t('createExamTypeCta')}
 					cancelText={t('cancel')}
 					value={newExamName}
 					onValueChange={setNewExamName}
@@ -514,7 +543,7 @@ export default function CreateCaseDialog({
 					title={t('addNewDisease')}
 					label={t('addNewDiseasePrompt')}
 					placeholder={t('addNewDiseasePrompt')}
-					confirmText={t('create')}
+					confirmText={t('createDiseaseCta')}
 					cancelText={t('cancel')}
 					value={newDiseaseName}
 					onValueChange={setNewDiseaseName}

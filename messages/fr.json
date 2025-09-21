@@ -231,10 +231,12 @@
       "textContent": "Saisissez le contenu du cas ici (optionnel si un PDF est fourni)..."
     },
     "hints": { "tags": "Jusqu'à 10 tags, séparés par des virgules." },
-    "addNewExam": "+ Ajouter un type d'examen",
-    "addNewDisease": "+ Ajouter une catégorie",
+    "addNewExam": "+ Créer un nouveau type d'examen",
+    "addNewDisease": "+ Créer une nouvelle maladie",
     "addNewExamPrompt": "Nom du nouveau type d'examen",
-    "addNewDiseasePrompt": "Nom de la nouvelle catégorie",
+    "addNewDiseasePrompt": "Nom de la nouvelle maladie",
+    "createExamTypeCta": "Créer le nouveau type d'examen",
+    "createDiseaseCta": "Créer la nouvelle maladie",
     "createDialog": { "title": "Créer un nouveau cas clinique" },
     "content": {
       "section": "Contenu du cas",
@@ -263,6 +265,7 @@
     "confirmDeleteDesc": "Cette action est irréversible.",
     "editPlaceholder": "Interface d'édition à venir",
     "caseView": {
+      "newBadge": "Nouveau",
       "sidebar": { "title": "Cas" },
       "attempts": "Essais",
       "firstTry": "Premier essai",
