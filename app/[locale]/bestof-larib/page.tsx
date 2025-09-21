@@ -55,7 +55,7 @@ export default async function BestofLaribPage({ searchParams }: { searchParams: 
   
 
   return (
-    <div className="space-y-4 p-6 max-w-7xl mx-auto">
+    <div className="space-y-4 py-6 px-12 mx-auto">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">{t('title')}</h1>
@@ -102,89 +102,146 @@ export default async function BestofLaribPage({ searchParams }: { searchParams: 
                 </TableCell>
               </TableRow>
             ) : (
-              cases.map((caseItem) => (
-                <TableRow key={caseItem.id}>
-                  <TableCell>
-                    {caseItem.status === 'PUBLISHED' ? (
-                      <Badge className="bg-green-500 text-white border-transparent">{t('status.published')}</Badge>
-                    ) : (
-                      <Badge className="bg-yellow-400 text-black border-transparent">{t('status.draft')}</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell className="font-medium">{caseItem.name}</TableCell>
-                  <TableCell>{caseItem.examType?.name ?? '-'}</TableCell>
-                  <TableCell>
-                    {caseItem.diseaseTag?.name ? (
-                      <Badge variant="secondary">{caseItem.diseaseTag.name}</Badge>
-                    ) : (
-                      '-'
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={
-                      caseItem.difficulty === 'BEGINNER'
-                        ? 'border-green-500 text-green-700'
-                        : caseItem.difficulty === 'INTERMEDIATE'
-                        ? 'border-amber-500 text-amber-700'
-                        : 'border-red-500 text-red-700'
-                    }>
-                      {t(`difficulty.${(caseItem.difficulty === 'BEGINNER' ? 'beginner' : caseItem.difficulty === 'INTERMEDIATE' ? 'intermediate' : 'advanced')}`)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{new Date(caseItem.createdAt).toLocaleDateString()}</TableCell>
-                  {session?.user?.id && !isAdmin ? (
-                    <TableCell>{typeof caseItem.attemptsCount === 'number' ? caseItem.attemptsCount : 0}</TableCell>
-                  ) : null}
-                  {session?.user?.id && !isAdmin ? (
-                    <TableCell>
-                      <CaseDifficultyCell
-                        key={`${caseItem.id}-${caseItem.personalDifficulty ?? 'unset'}`}
-                        caseId={caseItem.id}
-                        initialDifficulty={caseItem.personalDifficulty ?? null}
-                      />
-                    </TableCell>
-                  ) : null}
-                  <TableCell>
-                    <CaseTagCell
-                      mode={isAdmin ? 'admin' : 'user'}
-                      caseId={caseItem.id}
-                      initialTags={isAdmin ? caseItem.adminTags : caseItem.userTags}
-                    />
-                  </TableCell>
-                  <TableCell className=" flex flex-col gap-2">
-                    <Link href={`/bestof-larib/${caseItem.id}`}>
-                      <Button size="sm" variant="secondary"><Eye />{t('view')}</Button>
-                    </Link>
-                    {session?.user?.id && !isAdmin ? (
-                      <Link href={`/bestof-larib/${caseItem.id}?newAttempt=1`}>
-                        <Button size="sm"><PlusCircle />{t('caseView.startNewAttempt')}</Button>
-                      </Link>
-                    ) : null}
-                    {isAdmin ? (
-                      <>
-                        <CreateCaseDialog
-                          examTypes={examTypes}
-                          diseaseTags={diseaseTags}
-                          clinicalCase={{
-                            id: caseItem.id,
-                            name: caseItem.name,
-                            difficulty: caseItem.difficulty,
-                            status: caseItem.status,
-                            tags: [],
-                            pdfUrl: caseItem.pdfUrl ?? null,
-                            pdfKey: caseItem.pdfKey ?? null,
-                            textContent: caseItem.textContent ?? null,
-                            examType: caseItem.examType ?? null,
-                            diseaseTag: caseItem.diseaseTag ?? null,
-                          }}
-                          trigger={<Button size="sm" variant="outline"><Pencil />{t('edit')}</Button>}
-                        />
-                        <DeleteCaseButton id={caseItem.id} />
-                      </>
-                    ) : null}
-                  </TableCell>
-                </TableRow>
-              ))
+              cases.map((caseItem) => {
+                const progress = caseItem.userAttemptState ?? { hasValidatedAttempt: false, hasDraftAttempt: false }
+                const isUserView = Boolean(session?.user?.id) && !isAdmin
+
+                const statusBadge = (() => {
+                  if (!isUserView) {
+                    const adminBadgeClass = caseItem.status === 'PUBLISHED'
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      : 'bg-amber-50 text-amber-700 border border-amber-200'
+                    const adminLabel = caseItem.status === 'PUBLISHED' ? t('status.published') : t('status.draft')
+                    return <Badge className={`rounded-full px-3 py-1 text-xs font-medium ${adminBadgeClass}`}>{adminLabel}</Badge>
+                  }
+
+                  if (progress.hasValidatedAttempt) {
+                    return <Badge className="rounded-full px-3 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">{t('status.completed')}</Badge>
+                  }
+                  if (progress.hasDraftAttempt) {
+                    return <Badge className="rounded-full px-3 py-1 text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">{t('status.inProgress')}</Badge>
+                  }
+                  return <Badge className="rounded-full px-3 py-1 text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">{t('status.notStarted')}</Badge>
+                })()
+
+                return (
+							<TableRow key={caseItem.id}>
+								<TableCell>{statusBadge}</TableCell>
+								<TableCell className='font-medium'>
+									{caseItem.name}
+								</TableCell>
+								<TableCell>{caseItem.examType?.name ?? '-'}</TableCell>
+								<TableCell>
+									{caseItem.diseaseTag?.name ? (
+										<Badge variant='secondary'>
+											{caseItem.diseaseTag.name}
+										</Badge>
+									) : (
+										'-'
+									)}
+								</TableCell>
+								<TableCell>
+									<Badge
+										variant='outline'
+										className={
+											caseItem.difficulty === 'BEGINNER'
+												? 'border-green-500 text-green-700'
+												: caseItem.difficulty === 'INTERMEDIATE'
+												? 'border-amber-500 text-amber-700'
+												: 'border-red-500 text-red-700'
+										}>
+										{t(
+											`difficulty.${
+												caseItem.difficulty === 'BEGINNER'
+													? 'beginner'
+													: caseItem.difficulty === 'INTERMEDIATE'
+													? 'intermediate'
+													: 'advanced'
+											}`
+										)}
+									</Badge>
+								</TableCell>
+								<TableCell>
+									{new Date(caseItem.createdAt).toLocaleDateString()}
+								</TableCell>
+								{session?.user?.id && !isAdmin ? (
+									<TableCell>
+										{typeof caseItem.attemptsCount === 'number'
+											? caseItem.attemptsCount
+											: 0}
+									</TableCell>
+								) : null}
+								{session?.user?.id && !isAdmin ? (
+									<TableCell>
+										<CaseDifficultyCell
+											key={`${caseItem.id}-${
+												caseItem.personalDifficulty ?? 'unset'
+											}`}
+											caseId={caseItem.id}
+											initialDifficulty={
+												caseItem.personalDifficulty ?? null
+											}
+										/>
+									</TableCell>
+								) : null}
+								<TableCell>
+									<CaseTagCell
+										mode={isAdmin ? 'admin' : 'user'}
+										caseId={caseItem.id}
+										initialTags={
+											isAdmin
+												? caseItem.adminTags
+												: caseItem.userTags
+										}
+									/>
+								</TableCell>
+								<TableCell className='flex flex-col gap-2'>
+									<Link href={`/bestof-larib/${caseItem.id}`}>
+										<Button size='sm' variant='secondary'>
+											<Eye />
+											{t('view')}
+										</Button>
+									</Link>
+									{session?.user?.id && !isAdmin ? (
+										<Link
+											href={`/bestof-larib/${caseItem.id}?newAttempt=1`}>
+											<Button size='sm'>
+												<PlusCircle />
+												{t('caseView.startNewAttempt')}
+											</Button>
+										</Link>
+									) : null}
+									{isAdmin ? (
+										<>
+											<CreateCaseDialog
+												examTypes={examTypes}
+												diseaseTags={diseaseTags}
+												clinicalCase={{
+													id: caseItem.id,
+													name: caseItem.name,
+													difficulty: caseItem.difficulty,
+													status: caseItem.status,
+													tags: [],
+													pdfUrl: caseItem.pdfUrl ?? null,
+													pdfKey: caseItem.pdfKey ?? null,
+													textContent:
+														caseItem.textContent ?? null,
+													examType: caseItem.examType ?? null,
+													diseaseTag: caseItem.diseaseTag ?? null,
+												}}
+												trigger={
+													<Button size='sm' variant='outline'>
+														<Pencil />
+														{t('edit')}
+													</Button>
+												}
+											/>
+											<DeleteCaseButton id={caseItem.id} />
+										</>
+									) : null}
+								</TableCell>
+							</TableRow>
+						);})
             )}
           </TableBody>
         </Table>

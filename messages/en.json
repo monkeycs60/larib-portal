@@ -216,7 +216,10 @@
     },
     "status": {
       "draft": "Draft",
-      "published": "Published"
+      "published": "Published",
+      "completed": "Completed",
+      "inProgress": "In progress",
+      "notStarted": "Not started"
     },
     "fields": {
       "caseName": "Case Name",

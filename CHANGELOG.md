@@ -1,3 +1,14 @@
+## Enhancement: Bestof Personalized Progress Status
+
+- Name: Personalized case progress statuses
+- What it does: Replaces the generic Published/Draft label with user-specific progress states (Completed, In progress, Not started) based on each user's validated and draft attempts while keeping the admin view unchanged.
+- How to use it: As a user, open `/{locale}/bestof-larib` to see the new status badges reflect your own progress for every clinical case; admins still see the publication status.
+- Updated files:
+  - `app/[locale]/bestof-larib/page.tsx`
+  - `lib/services/bestof-larib.ts`
+  - `messages/en.json`
+  - `messages/fr.json`
+
 ## Enhancement: Bestof Quick New Attempt Entry
 
 - Name: New attempt shortcut from cases list

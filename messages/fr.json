@@ -214,7 +214,10 @@
     },
     "status": {
       "draft": "Brouillon",
-      "published": "Publié"
+      "published": "Publié",
+      "completed": "Terminé",
+      "inProgress": "En cours",
+      "notStarted": "Non commencé"
     },
     "fields": {
       "caseName": "Nom du cas",

@@ -38,11 +38,17 @@ export async function listClinicalCases(): Promise<ClinicalCaseListItem[]> {
 
 export type CaseDisplayTag = { id: string; name: string; color: string; description: string | null }
 
+export type UserAttemptState = {
+  hasValidatedAttempt: boolean
+  hasDraftAttempt: boolean
+}
+
 export type ClinicalCaseWithDisplayTags = Omit<ClinicalCaseListItem, 'tags'> & {
   adminTags: CaseDisplayTag[]
   userTags: CaseDisplayTag[]
   attemptsCount?: number
   personalDifficulty?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | null
+  userAttemptState?: UserAttemptState
 }
 
 export type CaseListFilters = {
@@ -141,16 +147,27 @@ export async function listClinicalCasesWithDisplayTags(userId?: string | null, f
   // Enrich with attempts count and personalDifficulty for the user
   if (userId && base.length > 0) {
     const caseIds = base.map((b) => b.id)
-    const [attempts, settings] = await Promise.all([
+    const [attempts, settings, attemptStates] = await Promise.all([
       prisma.caseAttempt.groupBy({ by: ['caseId'], where: { userId, caseId: { in: caseIds } }, _count: { _all: true } }),
       prisma.userCaseSettings.findMany({ where: { userId, caseId: { in: caseIds } }, select: { caseId: true, personalDifficulty: true } }),
+      prisma.caseAttempt.findMany({ where: { userId, caseId: { in: caseIds } }, select: { caseId: true, validatedAt: true } }),
     ])
     const attemptsMap = new Map<string, number>(attempts.map((a) => [a.caseId, a._count._all]))
     const pdMap = new Map<string, 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | null>(settings.map((s) => [s.caseId, s.personalDifficulty]))
+    const stateMap = attemptStates.reduce<Map<string, UserAttemptState>>((acc, attempt) => {
+      const current = acc.get(attempt.caseId) ?? { hasValidatedAttempt: false, hasDraftAttempt: false }
+      const nextState: UserAttemptState = {
+        hasValidatedAttempt: current.hasValidatedAttempt || attempt.validatedAt !== null,
+        hasDraftAttempt: current.hasDraftAttempt || attempt.validatedAt === null,
+      }
+      acc.set(attempt.caseId, nextState)
+      return acc
+    }, new Map())
     base = base.map((b) => ({
       ...b,
       attemptsCount: attemptsMap.get(b.id) ?? 0,
       personalDifficulty: pdMap.get(b.id) ?? null,
+      userAttemptState: stateMap.get(b.id) ?? { hasValidatedAttempt: false, hasDraftAttempt: false },
     }))
   }
 
