@@ -151,7 +151,7 @@ export default async function BestofLaribPage({ searchParams }: { searchParams: 
                       initialTags={isAdmin ? caseItem.adminTags : caseItem.userTags}
                     />
                   </TableCell>
-                  <TableCell className="text-right space-x-2">
+                  <TableCell className=" flex flex-col gap-2">
                     <Link href={`/bestof-larib/${caseItem.id}`}>
                       <Button size="sm" variant="secondary"><Eye />{t('view')}</Button>
                     </Link>
