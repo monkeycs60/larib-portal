@@ -1,96 +1,107 @@
-import { Link } from '@/app/i18n/navigation';
+'use client';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Link } from '@/app/i18n/navigation';
 import { Eye, Pencil, PlusCircle } from 'lucide-react';
-import TableOverlay from './table-overlay';
-import DeleteCaseButton from './delete-case-button';
-import CreateCaseDialog from './create-case-dialog';
-import CaseTagCell from './case-tag-cell';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useBestofCasesCache } from '@/lib/stores/bestof-cases-cache';
 import CaseDifficultyCell from './case-difficulty-cell';
+import CaseTagCell from './case-tag-cell';
 import StartNewAttemptLink from './start-new-attempt-link';
+import CreateCaseDialog from './create-case-dialog';
+import DeleteCaseButton from './delete-case-button';
 import SortHeader from './sort-header';
-import CasesTableCacheHydrator from './cases-table-cache-hydrator';
-import type {
-  ClinicalCaseWithDisplayTags,
-  CaseListSortField,
-  ExamType,
-  DiseaseTag,
-} from '@/lib/services/bestof-larib';
-import type { CasesTableTranslations } from './cases-table-fallback';
-import type { BestofCacheKey } from '@/lib/bestof-cache-key';
+import type { ExamType, DiseaseTag } from '@/lib/services/bestof-larib';
 
-function renderStatusBadge({
-  translations,
-  isAdmin,
-  status,
-  progress,
-}: {
-  translations: CasesTableTranslations;
-  isAdmin: boolean;
-  status: ClinicalCaseWithDisplayTags['status'];
-  progress: ClinicalCaseWithDisplayTags['userAttemptState'];
-}) {
-  if (isAdmin) {
-    const adminBadgeClass =
-      status === 'PUBLISHED'
-        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-        : 'bg-amber-50 text-amber-700 border border-amber-200';
-    const adminLabel = status === 'PUBLISHED' ? translations.status.published : translations.status.draft;
-    return <Badge className={`rounded-full px-3 py-1 text-xs font-medium ${adminBadgeClass}`}>{adminLabel}</Badge>;
-  }
+export type CasesTableTranslations = {
+  table: {
+    status: string;
+    name: string;
+    examType: string;
+    disease: string;
+    difficulty: string;
+    createdAt: string;
+    attempts: string;
+    myDifficulty: string;
+    adminTags: string;
+    userTags: string;
+    actions: string;
+  };
+  status: {
+    published: string;
+    draft: string;
+    completed: string;
+    inProgress: string;
+    notStarted: string;
+  };
+  difficulty: {
+    beginner: string;
+    intermediate: string;
+    advanced: string;
+  };
+  actions: {
+    view: string;
+    edit: string;
+    startNewAttempt: string;
+  };
+  empty: string;
+};
 
-  if (progress?.hasValidatedAttempt) {
-    return (
-      <Badge className='rounded-full px-3 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200'>
-        {translations.status.completed}
-      </Badge>
-    );
-  }
-  if (progress?.hasDraftAttempt) {
-    return (
-      <Badge className='rounded-full px-3 py-1 text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200'>
-        {translations.status.inProgress}
-      </Badge>
-    );
-  }
-  return (
-    <Badge className='rounded-full px-3 py-1 text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200'>
-      {translations.status.notStarted}
-    </Badge>
-  );
-}
-
-export default async function CasesTable({
-  casesPromise,
+export default function CasesTableFallback({
+  cacheKeyString,
   isAdmin,
   userId,
+  columnCount,
+  translations,
   examTypes,
   diseaseTags,
   sortField,
   sortDirection,
-  translations,
-  cacheKey,
-  cacheKeyString,
 }: {
-  casesPromise: Promise<ClinicalCaseWithDisplayTags[]>;
+  cacheKeyString: string;
   isAdmin: boolean;
   userId: string | null;
+  columnCount: number;
+  translations: CasesTableTranslations;
   examTypes: ExamType[];
   diseaseTags: DiseaseTag[];
-  sortField?: CaseListSortField;
+  sortField?: string;
   sortDirection?: 'asc' | 'desc';
-  translations: CasesTableTranslations;
-  cacheKey: BestofCacheKey;
-  cacheKeyString: string;
 }) {
-  const cases = await casesPromise;
+  const cachedCases = useBestofCasesCache((state) => state.entries.get(cacheKeyString));
   const isUserView = Boolean(userId) && !isAdmin;
+
+  if (!cachedCases) {
+    return (
+      <div className='rounded-md border'>
+        <div
+          className='grid gap-4 border-b bg-muted/30 p-3'
+          style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }}
+        >
+          {Array.from({ length: columnCount }).map((_, index) => (
+            <Skeleton key={index} className='h-4 w-full' />
+          ))}
+        </div>
+        <div>
+          {Array.from({ length: 8 }).map((_, rowIndex) => (
+            <div
+              key={rowIndex}
+              className='grid gap-4 border-b p-3'
+              style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }}
+            >
+              {Array.from({ length: columnCount }).map((__, cellIndex) => (
+                <Skeleton key={cellIndex} className='h-4 w-full' />
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='relative rounded-md border'>
-      <TableOverlay />
-      <CasesTableCacheHydrator cacheKey={cacheKey} cacheKeyString={cacheKeyString} cases={cases} />
       <Table>
         <TableHeader>
           <TableRow>
@@ -119,12 +130,7 @@ export default async function CasesTable({
             ) : null}
             {isUserView ? (
               <TableHead>
-                <SortHeader
-                  field='personalDifficulty'
-                  label={translations.table.myDifficulty}
-                  activeField={sortField}
-                  direction={sortDirection}
-                />
+                <SortHeader field='personalDifficulty' label={translations.table.myDifficulty} activeField={sortField} direction={sortDirection} />
               </TableHead>
             ) : null}
             <TableHead>{isAdmin ? translations.table.adminTags : translations.table.userTags}</TableHead>
@@ -132,7 +138,7 @@ export default async function CasesTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {cases.length === 0 ? (
+          {cachedCases.length === 0 ? (
             <TableRow>
               <TableCell
                 colSpan={
@@ -144,16 +150,43 @@ export default async function CasesTable({
               </TableCell>
             </TableRow>
           ) : (
-            cases.map((caseItem) => {
-              const statusBadge = renderStatusBadge({
-                isAdmin,
-                status: caseItem.status,
-                progress: caseItem.userAttemptState ?? {
-                  hasValidatedAttempt: false,
-                  hasDraftAttempt: false,
-                },
-                translations,
-              });
+            cachedCases.map((caseItem) => {
+              const statusBadge = (() => {
+                if (!isUserView) {
+                  const adminBadgeClass =
+                    caseItem.status === 'PUBLISHED'
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      : 'bg-amber-50 text-amber-700 border border-amber-200';
+                  const adminLabel =
+                    caseItem.status === 'PUBLISHED'
+                      ? translations.status.published
+                      : translations.status.draft;
+                  return (
+                    <Badge className={`rounded-full px-3 py-1 text-xs font-medium ${adminBadgeClass}`}>
+                      {adminLabel}
+                    </Badge>
+                  );
+                }
+                if (caseItem.userAttemptState?.hasValidatedAttempt) {
+                  return (
+                    <Badge className='rounded-full px-3 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200'>
+                      {translations.status.completed}
+                    </Badge>
+                  );
+                }
+                if (caseItem.userAttemptState?.hasDraftAttempt) {
+                  return (
+                    <Badge className='rounded-full px-3 py-1 text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200'>
+                      {translations.status.inProgress}
+                    </Badge>
+                  );
+                }
+                return (
+                  <Badge className='rounded-full px-3 py-1 text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200'>
+                    {translations.status.notStarted}
+                  </Badge>
+                );
+              })();
 
               return (
                 <TableRow key={caseItem.id}>
@@ -216,7 +249,10 @@ export default async function CasesTable({
                         </Button>
                       </Link>
                       {isUserView ? (
-                        <StartNewAttemptLink href={`/bestof-larib/${caseItem.id}?newAttempt=1`} label={translations.actions.startNewAttempt}>
+                        <StartNewAttemptLink
+                          href={`/bestof-larib/${caseItem.id}?newAttempt=1`}
+                          label={translations.actions.startNewAttempt}
+                        >
                           <PlusCircle />
                         </StartNewAttemptLink>
                       ) : null}

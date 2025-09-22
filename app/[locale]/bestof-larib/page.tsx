@@ -4,19 +4,24 @@ import {
   listClinicalCasesWithDisplayTags,
   listExamTypes,
   listDiseaseTags,
+  serializeCaseFilters,
   type CaseListFilters,
   type CaseListSortField,
 } from '@/lib/services/bestof-larib';
 import { listAdminTags, listUserTags } from '@/lib/services/bestof-larib-tags';
 import { getTypedSession } from '@/lib/auth-helpers';
-import { Skeleton } from '@/components/ui/skeleton';
 import CreateCaseDialog from './components/create-case-dialog';
 import FiltersBar from './components/filters-bar';
 import CasesTable from './components/cases-table';
+import CasesTableFallback, { type CasesTableTranslations } from './components/cases-table-fallback';
+import type { BestofCacheKey } from '@/lib/bestof-cache-key';
+import { serialiseBestofCacheKey } from '@/lib/bestof-cache-key';
 
 export default async function BestofLaribPage({
+  params,
   searchParams,
 }: {
+  params: { locale: string };
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const t = await getTranslations('bestof');
@@ -87,6 +92,16 @@ export default async function BestofLaribPage({
     direction: sortDirection,
   });
 
+  const serializedFilters = serializeCaseFilters(filters);
+  const cacheKey: BestofCacheKey = {
+    locale: params.locale,
+    userId: session?.user?.id ?? null,
+    filters: serializedFilters,
+    sortField,
+    sortDirection,
+  };
+  const cacheKeyString = serialiseBestofCacheKey(cacheKey);
+
   const [examTypes, diseaseTags, adminTags, userTagsList] = await Promise.all([
     listExamTypes(),
     listDiseaseTags(),
@@ -99,6 +114,41 @@ export default async function BestofLaribPage({
   ]);
 
   const canUsePersonalDifficulty = Boolean(session?.user?.id) && !isAdmin;
+  const columnCount = 6 + (canUsePersonalDifficulty ? 2 : 0) + 2;
+
+  const translations: CasesTableTranslations = {
+    table: {
+      status: t('table.status'),
+      name: t('table.name'),
+      examType: t('table.examType'),
+      disease: t('table.disease'),
+      difficulty: t('table.difficulty'),
+      createdAt: t('table.createdAt'),
+      attempts: t('table.attempts'),
+      myDifficulty: t('table.myDifficulty'),
+      adminTags: t('table.adminTags'),
+      userTags: t('table.userTags'),
+      actions: t('table.actions'),
+    },
+    status: {
+      published: t('status.published'),
+      draft: t('status.draft'),
+      completed: t('status.completed'),
+      inProgress: t('status.inProgress'),
+      notStarted: t('status.notStarted'),
+    },
+    difficulty: {
+      beginner: t('difficulty.beginner'),
+      intermediate: t('difficulty.intermediate'),
+      advanced: t('difficulty.advanced'),
+    },
+    actions: {
+      view: t('view'),
+      edit: t('edit'),
+      startNewAttempt: t('caseView.startNewAttempt'),
+    },
+    empty: t('empty'),
+  };
 
   return (
     <div className='space-y-4 py-6 px-12 mx-auto'>
@@ -121,7 +171,21 @@ export default async function BestofLaribPage({
         }}
       />
 
-      <Suspense fallback={<CasesTableFallback isUserView={canUsePersonalDifficulty} />}>
+      <Suspense
+        fallback={
+          <CasesTableFallback
+            cacheKeyString={cacheKeyString}
+            isAdmin={isAdmin}
+            userId={session?.user?.id ?? null}
+            columnCount={columnCount}
+            translations={translations}
+            examTypes={examTypes}
+            diseaseTags={diseaseTags}
+            sortField={sortField}
+            sortDirection={sortDirection}
+          />
+        }
+      >
         <CasesTable
           casesPromise={casesPromise}
           isAdmin={isAdmin}
@@ -130,37 +194,11 @@ export default async function BestofLaribPage({
           diseaseTags={diseaseTags}
           sortField={sortField}
           sortDirection={sortDirection}
+          translations={translations}
+          cacheKey={cacheKey}
+          cacheKeyString={cacheKeyString}
         />
       </Suspense>
-    </div>
-  );
-}
-
-function CasesTableFallback({ isUserView }: { isUserView: boolean }) {
-  const columnCount = 6 + (isUserView ? 2 : 0) + 2;
-  return (
-    <div className='rounded-md border'>
-      <div
-        className='grid gap-4 border-b bg-muted/30 p-3'
-        style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }}
-      >
-        {Array.from({ length: columnCount }).map((_, index) => (
-          <Skeleton key={index} className='h-4 w-full' />
-        ))}
-      </div>
-      <div>
-        {Array.from({ length: 8 }).map((_, rowIndex) => (
-          <div
-            key={rowIndex}
-            className='grid gap-4 border-b p-3'
-            style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }}
-          >
-            {Array.from({ length: columnCount }).map((__, cellIndex) => (
-              <Skeleton key={cellIndex} className='h-4 w-full' />
-            ))}
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
