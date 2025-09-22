@@ -14,6 +14,7 @@ import CaseDifficultyCell from './components/case-difficulty-cell'
 import FiltersBar from './components/filters-bar'
 import SortHeader from './components/sort-header'
 import TableOverlay from './components/table-overlay'
+import StartNewAttemptLink from './components/start-new-attempt-link'
 
 export default async function BestofLaribPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const t = await getTranslations('bestof')
@@ -210,19 +211,23 @@ export default async function BestofLaribPage({ searchParams }: { searchParams: 
 								</TableCell>
                   <TableCell>
                     <div className='flex flex-wrap justify-end gap-2'>
-                      <Link href={`/bestof-larib/${caseItem.id}`} className='inline-flex'>
+                      <Link
+                        href={`/bestof-larib/${caseItem.id}`}
+                        prefetch
+                        className='inline-flex'
+                      >
                         <Button size='sm' variant='secondary' className='gap-1'>
                           <Eye />
                           {t('view')}
                         </Button>
                       </Link>
                       {session?.user?.id && !isAdmin ? (
-                        <Link href={`/bestof-larib/${caseItem.id}?newAttempt=1`} className='inline-flex'>
-                          <Button size='sm' variant='outline' className='gap-1'>
-                            <PlusCircle />
-                            {t('caseView.startNewAttempt')}
-                          </Button>
-                        </Link>
+                        <StartNewAttemptLink
+                          href={`/bestof-larib/${caseItem.id}?newAttempt=1`}
+                          label={t('caseView.startNewAttempt')}
+                        >
+                          <PlusCircle />
+                        </StartNewAttemptLink>
                       ) : null}
                       {isAdmin ? (
                         <>

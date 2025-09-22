@@ -91,6 +91,8 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
 							width={90}
 							height={90}
 							className='rounded'
+							priority
+							fetchPriority='high'
 						/>
 					</Link>
 				</div>

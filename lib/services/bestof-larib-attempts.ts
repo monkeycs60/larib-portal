@@ -1,4 +1,8 @@
+import { cache } from 'react'
+import { unstable_cache } from 'next/cache'
 import { prisma } from '@/lib/prisma'
+import { caseDetailTag, userCasesTag } from './bestof-larib'
+import { caseUserTagsTag } from './bestof-larib-tags'
 
 export type SaveAttemptInput = {
   userId: string
@@ -97,35 +101,51 @@ export type UserCaseState = {
   } | null
 }
 
-export async function getUserCaseState(params: { userId: string; caseId: string }): Promise<UserCaseState> {
+const fetchUserCaseState = async (userId: string, caseId: string): Promise<UserCaseState> => {
   const [settings, lastAttempt] = await Promise.all([
     prisma.userCaseSettings.findUnique({
-      where: { userId_caseId: { userId: params.userId, caseId: params.caseId } },
+      where: { userId_caseId: { userId, caseId } },
       select: { tags: true, personalDifficulty: true, comments: true },
     }),
     prisma.caseAttempt.findFirst({
-      where: { userId: params.userId, caseId: params.caseId },
+      where: { userId, caseId },
       orderBy: [{ validatedAt: 'desc' }, { createdAt: 'desc' }],
       select: { id: true, lvef: true, kinetic: true, lge: true, finalDx: true, report: true, validatedAt: true },
     }),
   ])
 
   return {
-    settings: settings ? {
-      tags: settings.tags,
-      personalDifficulty: settings.personalDifficulty,
-      comments: settings.comments,
-    } : null,
-    lastAttempt: lastAttempt ? {
-      id: lastAttempt.id,
-      lvef: lastAttempt.lvef,
-      kinetic: lastAttempt.kinetic,
-      lge: lastAttempt.lge,
-      finalDx: lastAttempt.finalDx,
-      report: lastAttempt.report,
-      validatedAt: lastAttempt.validatedAt,
-    } : null,
+    settings: settings
+      ? {
+          tags: settings.tags,
+          personalDifficulty: settings.personalDifficulty,
+          comments: settings.comments,
+        }
+      : null,
+    lastAttempt: lastAttempt
+      ? {
+          id: lastAttempt.id,
+          lvef: lastAttempt.lvef,
+          kinetic: lastAttempt.kinetic,
+          lge: lastAttempt.lge,
+          finalDx: lastAttempt.finalDx,
+          report: lastAttempt.report,
+          validatedAt: lastAttempt.validatedAt,
+        }
+      : null,
   }
+}
+
+const cachedUserCaseState = cache(async (userId: string, caseId: string) =>
+  unstable_cache(
+    () => fetchUserCaseState(userId, caseId),
+    ['bestof:user-case-state', userId, caseId],
+    { tags: [userCasesTag(userId), caseDetailTag(caseId), caseUserTagsTag(userId, caseId)] },
+  )(),
+)
+
+export async function getUserCaseState(params: { userId: string; caseId: string }): Promise<UserCaseState> {
+  return cachedUserCaseState(params.userId, params.caseId)
 }
 
 export type CaseAttemptSummary = {
@@ -139,10 +159,28 @@ export type CaseAttemptSummary = {
   report: string | null
 }
 
+const cachedUserCaseAttempts = cache(async (userId: string, caseId: string) =>
+  unstable_cache(
+    () =>
+      prisma.caseAttempt.findMany({
+        where: { userId, caseId },
+        orderBy: [{ validatedAt: 'desc' }, { createdAt: 'desc' }],
+        select: {
+          id: true,
+          createdAt: true,
+          validatedAt: true,
+          lvef: true,
+          kinetic: true,
+          lge: true,
+          finalDx: true,
+          report: true,
+        },
+      }),
+    ['bestof:user-case-attempts', userId, caseId],
+    { tags: [userCasesTag(userId), caseDetailTag(caseId)] },
+  )(),
+)
+
 export async function listUserCaseAttempts(params: { userId: string; caseId: string }): Promise<CaseAttemptSummary[]> {
-  return prisma.caseAttempt.findMany({
-    where: { userId: params.userId, caseId: params.caseId },
-    orderBy: [{ validatedAt: 'desc' }, { createdAt: 'desc' }],
-    select: { id: true, createdAt: true, validatedAt: true, lvef: true, kinetic: true, lge: true, finalDx: true, report: true },
-  })
+  return cachedUserCaseAttempts(params.userId, params.caseId)
 }
