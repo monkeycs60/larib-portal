@@ -1,8 +1,9 @@
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function Loading() {
+  const columnCount = 10
   return (
-    <div className="space-y-4 p-6 max-w-7xl mx-auto">
+    <div className="space-y-4 py-6 px-12">
       <div className="flex items-center justify-between">
         <div className="space-y-2">
           <Skeleton className="h-6 w-48" />
@@ -26,16 +27,23 @@ export default function Loading() {
 
       {/* Table skeleton */}
       <div className="rounded-md border">
-        <div className="grid grid-cols-8 gap-4 p-3 border-b bg-muted/30">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <Skeleton key={i} className="h-4 w-24" />
+        <div
+          className="grid gap-4 border-b bg-muted/30 p-3"
+          style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }}
+        >
+          {Array.from({ length: columnCount }).map((_, i) => (
+            <Skeleton key={i} className="h-4 w-full" />
           ))}
         </div>
         <div>
           {Array.from({ length: 8 }).map((_, r) => (
-            <div key={r} className="grid grid-cols-8 gap-4 p-3 border-b">
-              {Array.from({ length: 8 }).map((__, c) => (
-                <Skeleton key={c} className="h-4 w-24" />
+            <div
+              key={r}
+              className="grid gap-4 border-b p-3"
+              style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }}
+            >
+              {Array.from({ length: columnCount }).map((__, c) => (
+                <Skeleton key={c} className="h-4 w-full" />
               ))}
             </div>
           ))}
@@ -44,4 +52,3 @@ export default function Loading() {
     </div>
   )
 }
-

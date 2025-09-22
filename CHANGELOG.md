@@ -1,11 +1,13 @@
 ## Enhancement: Bestof Attempt Navigation Boost
 
 - Name: Faster attempt opening and LCP optimisations
-- What it does: Prefetches the "Start new attempt" workspace before users click it, caches per-user case state/attempt queries, prioritises the navbar logo for LCP, and enforces HTTP compression for the app shell.
-- How to use it: On `/{locale}/bestof-larib`, hover or focus the "Start new attempt" button to instantly warm the destination; subsequent case openings and returns reuse the cached state and attempt history automatically.
+- What it does: Prefetches the "Start new attempt" workspace before users click it, caches per-user case state/attempt queries, streams the clinical cases table via Suspense with a full-width skeleton, prioritises the navbar logo for LCP, and enforces HTTP compression for the app shell.
+- How to use it: On `/{locale}/bestof-larib`, hover or focus the "Start new attempt" button to instantly warm the destination; the list renders its header immediately while the table hydrates, and subsequent case openings reuse the cached state and attempt history automatically.
 - Updated files:
   - `app/[locale]/bestof-larib/page.tsx`
+  - `app/[locale]/bestof-larib/components/cases-table.tsx`
   - `app/[locale]/bestof-larib/components/start-new-attempt-link.tsx`
+  - `app/[locale]/bestof-larib/loading.tsx`
   - `lib/services/bestof-larib-attempts.ts`
   - `app/[locale]/components/navbar-client.tsx`
   - `next.config.ts`

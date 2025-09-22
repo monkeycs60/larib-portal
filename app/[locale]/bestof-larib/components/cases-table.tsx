@@ -1,0 +1,260 @@
+import { getTranslations } from 'next-intl/server';
+import { Link } from '@/app/i18n/navigation';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Eye, Pencil, PlusCircle } from 'lucide-react';
+import TableOverlay from './table-overlay';
+import DeleteCaseButton from './delete-case-button';
+import CreateCaseDialog from './create-case-dialog';
+import CaseTagCell from './case-tag-cell';
+import CaseDifficultyCell from './case-difficulty-cell';
+import StartNewAttemptLink from './start-new-attempt-link';
+import SortHeader from './sort-header';
+import type {
+  ClinicalCaseWithDisplayTags,
+  CaseListSortField,
+  ExamType,
+  DiseaseTag,
+} from '@/lib/services/bestof-larib';
+
+function renderStatusBadge({
+  t,
+  isAdmin,
+  status,
+  progress,
+}: {
+  t: Awaited<ReturnType<typeof getTranslations>>;
+  isAdmin: boolean;
+  status: ClinicalCaseWithDisplayTags['status'];
+  progress: ClinicalCaseWithDisplayTags['userAttemptState'];
+}) {
+  if (isAdmin) {
+    const adminBadgeClass =
+      status === 'PUBLISHED'
+        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+        : 'bg-amber-50 text-amber-700 border border-amber-200';
+    const adminLabel = status === 'PUBLISHED' ? t('status.published') : t('status.draft');
+    return <Badge className={`rounded-full px-3 py-1 text-xs font-medium ${adminBadgeClass}`}>{adminLabel}</Badge>;
+  }
+
+  if (progress?.hasValidatedAttempt) {
+    return (
+      <Badge className='rounded-full px-3 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200'>
+        {t('status.completed')}
+      </Badge>
+    );
+  }
+  if (progress?.hasDraftAttempt) {
+    return (
+      <Badge className='rounded-full px-3 py-1 text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200'>
+        {t('status.inProgress')}
+      </Badge>
+    );
+  }
+  return (
+    <Badge className='rounded-full px-3 py-1 text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200'>
+      {t('status.notStarted')}
+    </Badge>
+  );
+}
+
+export default async function CasesTable({
+  casesPromise,
+  isAdmin,
+  userId,
+  examTypes,
+  diseaseTags,
+  sortField,
+  sortDirection,
+}: {
+  casesPromise: Promise<ClinicalCaseWithDisplayTags[]>;
+  isAdmin: boolean;
+  userId: string | null;
+  examTypes: ExamType[];
+  diseaseTags: DiseaseTag[];
+  sortField?: CaseListSortField;
+  sortDirection?: 'asc' | 'desc';
+}) {
+  const [t, cases] = await Promise.all([
+    getTranslations('bestof'),
+    casesPromise,
+  ]);
+  const isUserView = Boolean(userId) && !isAdmin;
+
+  return (
+    <div className='relative rounded-md border'>
+      <TableOverlay />
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>
+              <SortHeader field='status' label={t('table.status')} activeField={sortField} direction={sortDirection} />
+            </TableHead>
+            <TableHead>
+              <SortHeader field='name' label={t('table.name')} activeField={sortField} direction={sortDirection} />
+            </TableHead>
+            <TableHead>
+              <SortHeader field='examType' label={t('table.examType')} activeField={sortField} direction={sortDirection} />
+            </TableHead>
+            <TableHead>
+              <SortHeader field='diseaseTag' label={t('table.disease')} activeField={sortField} direction={sortDirection} />
+            </TableHead>
+            <TableHead>
+              <SortHeader field='difficulty' label={t('table.difficulty')} activeField={sortField} direction={sortDirection} />
+            </TableHead>
+            <TableHead>
+              <SortHeader field='createdAt' label={t('table.createdAt')} activeField={sortField} direction={sortDirection} />
+            </TableHead>
+            {isUserView ? (
+              <TableHead>
+                <SortHeader field='attempts' label={t('table.attempts')} activeField={sortField} direction={sortDirection} />
+              </TableHead>
+            ) : null}
+            {isUserView ? (
+              <TableHead>
+                <SortHeader
+                  field='personalDifficulty'
+                  label={t('table.myDifficulty')}
+                  activeField={sortField}
+                  direction={sortDirection}
+                />
+              </TableHead>
+            ) : null}
+            <TableHead>{isAdmin ? t('table.adminTags') : t('table.userTags')}</TableHead>
+            <TableHead className='text-right'>{t('table.actions')}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {cases.length === 0 ? (
+            <TableRow>
+              <TableCell
+                colSpan={
+                  6 + (isUserView ? 2 : 0) + 2
+                }
+                className='text-center text-sm text-muted-foreground'
+              >
+                {t('empty')}
+              </TableCell>
+            </TableRow>
+          ) : (
+            cases.map((caseItem) => {
+              const statusBadge = renderStatusBadge({
+                t,
+                isAdmin,
+                status: caseItem.status,
+                progress: caseItem.userAttemptState ?? {
+                  hasValidatedAttempt: false,
+                  hasDraftAttempt: false,
+                },
+              });
+
+              return (
+                <TableRow key={caseItem.id}>
+                  <TableCell>{statusBadge}</TableCell>
+                  <TableCell className='font-medium'>{caseItem.name}</TableCell>
+                  <TableCell>{caseItem.examType?.name ?? '-'}</TableCell>
+                  <TableCell>
+                    {caseItem.diseaseTag?.name ? (
+                      <Badge variant='secondary'>{caseItem.diseaseTag.name}</Badge>
+                    ) : (
+                      '-'
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant='outline'
+                      className={
+                        caseItem.difficulty === 'BEGINNER'
+                          ? 'border-green-500 text-green-700'
+                          : caseItem.difficulty === 'INTERMEDIATE'
+                          ? 'border-amber-500 text-amber-700'
+                          : 'border-red-500 text-red-700'
+                      }
+                    >
+                      {t(
+                        `difficulty.${
+                          caseItem.difficulty === 'BEGINNER'
+                            ? 'beginner'
+                            : caseItem.difficulty === 'INTERMEDIATE'
+                            ? 'intermediate'
+                            : 'advanced'
+                        }`,
+                      )}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{new Date(caseItem.createdAt).toLocaleDateString()}</TableCell>
+                  {isUserView ? (
+                    <TableCell>{typeof caseItem.attemptsCount === 'number' ? caseItem.attemptsCount : 0}</TableCell>
+                  ) : null}
+                  {isUserView ? (
+                    <TableCell>
+                      <CaseDifficultyCell
+                        key={`${caseItem.id}-${caseItem.personalDifficulty ?? 'unset'}`}
+                        caseId={caseItem.id}
+                        initialDifficulty={caseItem.personalDifficulty ?? null}
+                      />
+                    </TableCell>
+                  ) : null}
+                  <TableCell>
+                    <CaseTagCell
+                      mode={isAdmin ? 'admin' : 'user'}
+                      caseId={caseItem.id}
+                      initialTags={isAdmin ? caseItem.adminTags : caseItem.userTags}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <div className='flex flex-wrap justify-end gap-2'>
+                      <Link href={`/bestof-larib/${caseItem.id}`} prefetch className='inline-flex'>
+                        <Button size='sm' variant='secondary' className='gap-1'>
+                          <Eye />
+                          {t('view')}
+                        </Button>
+                      </Link>
+                      {isUserView ? (
+                        <StartNewAttemptLink href={`/bestof-larib/${caseItem.id}?newAttempt=1`} label={t('caseView.startNewAttempt')}>
+                          <PlusCircle />
+                        </StartNewAttemptLink>
+                      ) : null}
+                      {isAdmin ? (
+                        <>
+                          <span className='inline-flex'>
+                            <CreateCaseDialog
+                              examTypes={examTypes}
+                              diseaseTags={diseaseTags}
+                              clinicalCase={{
+                                id: caseItem.id,
+                                name: caseItem.name,
+                                difficulty: caseItem.difficulty,
+                                status: caseItem.status,
+                                tags: [],
+                                pdfUrl: caseItem.pdfUrl ?? null,
+                                pdfKey: caseItem.pdfKey ?? null,
+                                textContent: caseItem.textContent ?? null,
+                                examType: caseItem.examType ?? null,
+                                diseaseTag: caseItem.diseaseTag ?? null,
+                              }}
+                              trigger={
+                                <Button size='sm' variant='outline' className='gap-1'>
+                                  <Pencil />
+                                  {t('edit')}
+                                </Button>
+                              }
+                            />
+                          </span>
+                          <span className='inline-flex'>
+                            <DeleteCaseButton id={caseItem.id} />
+                          </span>
+                        </>
+                      ) : null}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })
+          )}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
