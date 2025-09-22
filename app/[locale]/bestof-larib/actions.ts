@@ -1,10 +1,25 @@
 "use server"
 import { z } from 'zod'
+import { revalidateTag } from 'next/cache'
 import { adminOnlyAction, authenticatedAction } from '@/actions/safe-action'
-import { createClinicalCase, ensureDiseaseTag, ensureExamType, updateClinicalCase, deleteClinicalCase } from '@/lib/services/bestof-larib'
 import {
+  CASES_TAG,
+  DISEASE_TAGS_TAG,
+  EXAM_TYPES_TAG,
+  caseDetailTag,
+  userCasesTag,
+  createClinicalCase,
+  deleteClinicalCase,
+  ensureDiseaseTag,
+  ensureExamType,
+  updateClinicalCase,
+} from '@/lib/services/bestof-larib'
+import {
+  ADMIN_TAGS_TAG,
   ensureAdminTag,
   ensureUserTag,
+  caseAdminTagsTag,
+  caseUserTagsTag,
   getCaseAdminTagIds,
   getCaseUserTagIds,
   listAdminTags,
@@ -13,12 +28,12 @@ import {
   listUserTags,
   setCaseAdminTags,
   setCaseUserTags,
+  userTagsTag,
   updateAdminTag,
   deleteAdminTag,
   updateUserTag,
   deleteUserTag,
 } from '@/lib/services/bestof-larib-tags'
-
 const CreateCaseSchema = z.object({
   name: z.string().min(1),
   examTypeName: z.string().trim().optional().nullable(),
@@ -51,6 +66,10 @@ export const createCaseAction = authenticatedAction
       ...parsedInput,
       createdById: ctx.userId,
     })
+    revalidateTag(CASES_TAG)
+    revalidateTag(caseDetailTag(created.id))
+    revalidateTag(EXAM_TYPES_TAG)
+    revalidateTag(DISEASE_TAGS_TAG)
     return created
   })
 
@@ -58,6 +77,7 @@ export const createExamTypeAction = adminOnlyAction
   .inputSchema(z.object({ name: z.string().min(1) }))
   .action(async ({ parsedInput }) => {
     const ex = await ensureExamType(parsedInput.name)
+    revalidateTag(EXAM_TYPES_TAG)
     return ex
   })
 
@@ -65,6 +85,7 @@ export const createDiseaseTagAction = adminOnlyAction
   .inputSchema(z.object({ name: z.string().min(1) }))
   .action(async ({ parsedInput }) => {
     const d = await ensureDiseaseTag(parsedInput.name)
+    revalidateTag(DISEASE_TAGS_TAG)
     return d
   })
 
@@ -85,6 +106,8 @@ export const updateCaseAction = adminOnlyAction
       throw new Error('CONTENT_EXCLUSIVE')
     }
     const updated = await updateClinicalCase(parsedInput)
+    revalidateTag(CASES_TAG)
+    revalidateTag(caseDetailTag(parsedInput.id))
     return updated
   })
 
@@ -92,6 +115,8 @@ export const deleteCaseAction = adminOnlyAction
   .inputSchema(z.object({ id: z.string().min(1) }))
   .action(async ({ parsedInput }) => {
     const deleted = await deleteClinicalCase(parsedInput.id)
+    revalidateTag(CASES_TAG)
+    revalidateTag(caseDetailTag(parsedInput.id))
     return deleted
   })
 
@@ -112,13 +137,21 @@ export const getCaseAdminTagIdsAction = adminOnlyAction
 export const ensureAdminTagAction = adminOnlyAction
   .inputSchema(z.object({ name: z.string().min(1), color: z.string().min(1), description: z.string().trim().optional().nullable() }))
   .action(async ({ parsedInput }) => {
-    return await ensureAdminTag({ name: parsedInput.name, color: parsedInput.color, description: parsedInput.description })
+    const created = await ensureAdminTag({ name: parsedInput.name, color: parsedInput.color, description: parsedInput.description })
+    revalidateTag(ADMIN_TAGS_TAG)
+    revalidateTag(CASES_TAG)
+    return created
   })
 
 export const setCaseAdminTagsAction = adminOnlyAction
   .inputSchema(z.object({ caseId: z.string().min(1), tagIds: z.array(z.string().min(1)).default([]) }))
   .action(async ({ parsedInput }) => {
-    return await setCaseAdminTags(parsedInput.caseId, parsedInput.tagIds)
+    const result = await setCaseAdminTags(parsedInput.caseId, parsedInput.tagIds)
+    revalidateTag(caseAdminTagsTag(parsedInput.caseId))
+    revalidateTag(ADMIN_TAGS_TAG)
+    revalidateTag(CASES_TAG)
+    revalidateTag(caseDetailTag(parsedInput.caseId))
+    return result
   })
 
 export const listCasesByAdminTagAction = adminOnlyAction
@@ -142,7 +175,10 @@ export const getCaseUserTagIdsAction = authenticatedAction
 export const ensureUserTagAction = authenticatedAction
   .inputSchema(z.object({ name: z.string().min(1), color: z.string().min(1), description: z.string().trim().optional().nullable() }))
   .action(async ({ parsedInput, ctx }) => {
-    return await ensureUserTag(ctx.userId, { name: parsedInput.name, color: parsedInput.color, description: parsedInput.description })
+    const tag = await ensureUserTag(ctx.userId, { name: parsedInput.name, color: parsedInput.color, description: parsedInput.description })
+    revalidateTag(userTagsTag(ctx.userId))
+    revalidateTag(userCasesTag(ctx.userId))
+    return tag
   })
 
 const UpdateTagSchema = z.object({
@@ -155,31 +191,48 @@ const UpdateTagSchema = z.object({
 export const updateAdminTagAction = adminOnlyAction
   .inputSchema(UpdateTagSchema)
   .action(async ({ parsedInput }) => {
-    return await updateAdminTag(parsedInput)
+    const updated = await updateAdminTag(parsedInput)
+    revalidateTag(ADMIN_TAGS_TAG)
+    revalidateTag(CASES_TAG)
+    return updated
   })
 
 export const updateUserTagAction = authenticatedAction
   .inputSchema(UpdateTagSchema)
   .action(async ({ parsedInput, ctx }) => {
-    return await updateUserTag(ctx.userId, parsedInput)
+    const updated = await updateUserTag(ctx.userId, parsedInput)
+    revalidateTag(userTagsTag(ctx.userId))
+    revalidateTag(userCasesTag(ctx.userId))
+    return updated
   })
 
 export const deleteAdminTagAction = adminOnlyAction
   .inputSchema(z.object({ id: z.string().min(1) }))
   .action(async ({ parsedInput }) => {
-    return await deleteAdminTag(parsedInput.id)
+    const result = await deleteAdminTag(parsedInput.id)
+    revalidateTag(ADMIN_TAGS_TAG)
+    revalidateTag(CASES_TAG)
+    return result
   })
 
 export const deleteUserTagAction = authenticatedAction
   .inputSchema(z.object({ id: z.string().min(1) }))
   .action(async ({ parsedInput, ctx }) => {
-    return await deleteUserTag(ctx.userId, parsedInput.id)
+    const result = await deleteUserTag(ctx.userId, parsedInput.id)
+    revalidateTag(userTagsTag(ctx.userId))
+    revalidateTag(userCasesTag(ctx.userId))
+    return result
   })
 
 export const setCaseUserTagsAction = authenticatedAction
   .inputSchema(z.object({ caseId: z.string().min(1), tagIds: z.array(z.string().min(1)).default([]) }))
   .action(async ({ parsedInput, ctx }) => {
-    return await setCaseUserTags(ctx.userId, parsedInput.caseId, parsedInput.tagIds)
+    const result = await setCaseUserTags(ctx.userId, parsedInput.caseId, parsedInput.tagIds)
+    revalidateTag(caseUserTagsTag(ctx.userId, parsedInput.caseId))
+    revalidateTag(userTagsTag(ctx.userId))
+    revalidateTag(userCasesTag(ctx.userId))
+    revalidateTag(caseDetailTag(parsedInput.caseId))
+    return result
   })
 
 export const listCasesByUserTagAction = authenticatedAction

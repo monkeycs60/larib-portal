@@ -52,11 +52,11 @@ export async function saveAttempt(input: SaveAttemptInput): Promise<string> {
   return created.id
 }
 
-export async function validateAttempt({ userId, attemptId }: { userId: string; attemptId: string }): Promise<boolean> {
-  const attempt = await prisma.caseAttempt.findUnique({ where: { id: attemptId }, select: { id: true, userId: true } })
-  if (!attempt || attempt.userId !== userId) return false
+export async function validateAttempt({ userId, attemptId }: { userId: string; attemptId: string }): Promise<{ ok: boolean; caseId: string | null }> {
+  const attempt = await prisma.caseAttempt.findUnique({ where: { id: attemptId }, select: { id: true, userId: true, caseId: true } })
+  if (!attempt || attempt.userId !== userId) return { ok: false, caseId: null }
   await prisma.caseAttempt.update({ where: { id: attemptId }, data: { validatedAt: new Date() } })
-  return true
+  return { ok: true, caseId: attempt.caseId }
 }
 
 export async function upsertUserSettings(input: { userId: string; caseId: string; tags: string[]; personalDifficulty?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'; comments?: string | null }) {

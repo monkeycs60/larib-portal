@@ -536,3 +536,9 @@ Notes:
   - Added route-level loading skeleton (loading.tsx) to smooth UI during filter changes/navigation
   - Added in-page table overlay loader for smoother filter transitions
   - How to use: Open Bestof Larib list page, use the new filter selects in the top filter bar. Admins will see an "Admin Tag" filter; authenticated users will see a "User Tag" and a "My Difficulty" filter. All filters update the URL query and results dynamically.
+- Performance: Server-side caching for Bestof data and session hydration
+  - `getTypedSession` now leverages React 19 `cache` to avoid duplicate session fetches per request.
+  - Bestof services (`listClinicalCasesWithDisplayTags`, `listExamTypes`, `listDiseaseTags`, tag queries, etc.) use `unstable_cache` with fine-grained tags.
+  - Server actions trigger `revalidateTag` so cached data stays in sync after admin/user changes.
+  - How to use: No manual action needed. Navigate the portal as usual; data-heavy pages now reuse cached results until a relevant mutation runs.
+  - Updated files: `lib/auth-helpers.ts`, `lib/services/bestof-larib.ts`, `lib/services/bestof-larib-tags.ts`, `lib/services/bestof-larib-attempts.ts`, `app/[locale]/bestof-larib/actions.ts`, `app/[locale]/bestof-larib/[id]/actions.ts`.

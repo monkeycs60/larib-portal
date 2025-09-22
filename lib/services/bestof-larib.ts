@@ -1,5 +1,19 @@
+import { cache } from 'react'
+import { unstable_cache } from 'next/cache'
+import { createHash, randomUUID } from 'crypto'
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@/app/generated/prisma'
+
+const hashKey = (value: unknown): string => createHash('sha1').update(JSON.stringify(value)).digest('hex')
+
+export const CASES_TAG = 'bestof:cases'
+export const EXAM_TYPES_TAG = 'bestof:exam-types'
+export const DISEASE_TAGS_TAG = 'bestof:disease-tags'
+const CASE_DETAIL_TAG_PREFIX = 'bestof:case'
+const USER_CASES_TAG_PREFIX = 'bestof:user-cases'
+
+export const caseDetailTag = (caseId: string) => `${CASE_DETAIL_TAG_PREFIX}:${caseId}`
+export const userCasesTag = (userId: string) => `${USER_CASES_TAG_PREFIX}:${userId}`
 
 export type ClinicalCaseListItem = Prisma.ClinicalCaseGetPayload<{
   select: {
@@ -17,8 +31,8 @@ export type ClinicalCaseListItem = Prisma.ClinicalCaseGetPayload<{
   }
 }>
 
-export async function listClinicalCases(): Promise<ClinicalCaseListItem[]> {
-  return prisma.clinicalCase.findMany({
+const listClinicalCasesQuery = async (): Promise<ClinicalCaseListItem[]> =>
+  prisma.clinicalCase.findMany({
     orderBy: { createdAt: 'desc' },
     select: {
       id: true,
@@ -34,6 +48,13 @@ export async function listClinicalCases(): Promise<ClinicalCaseListItem[]> {
       diseaseTag: { select: { id: true, name: true } },
     },
   })
+
+const listClinicalCasesCached = unstable_cache(listClinicalCasesQuery, ['bestof:cases:list'], {
+  tags: [CASES_TAG],
+})
+
+export async function listClinicalCases(): Promise<ClinicalCaseListItem[]> {
+  return listClinicalCasesCached()
 }
 
 export type CaseDisplayTag = { id: string; name: string; color: string; description: string | null }
@@ -65,44 +86,117 @@ export type CaseListFilters = {
   userProgress?: 'COMPLETED' | 'IN_PROGRESS' | 'NOT_STARTED'
 }
 
-export type CaseListSortField = 'name' | 'status' | 'difficulty' | 'createdAt' | 'examType' | 'diseaseTag' | 'attempts' | 'personalDifficulty'
+export type CaseListSortField =
+  | 'name'
+  | 'status'
+  | 'difficulty'
+  | 'createdAt'
+  | 'examType'
+  | 'diseaseTag'
+  | 'attempts'
+  | 'personalDifficulty'
 export type CaseListSort = { field?: CaseListSortField; direction?: 'asc' | 'desc' }
 
-export async function listClinicalCasesWithDisplayTags(userId?: string | null, filters?: CaseListFilters, sort?: CaseListSort): Promise<ClinicalCaseWithDisplayTags[]> {
+export type SerializedCaseFilters = {
+  name?: string
+  status?: 'DRAFT' | 'PUBLISHED'
+  examTypeIds?: string[]
+  diseaseTagIds?: string[]
+  difficulties?: Array<'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'>
+  createdFrom?: string | null
+  createdTo?: string | null
+  adminTagIds?: string[]
+  userTagIds?: string[]
+  myDifficulty?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
+  userProgress?: 'COMPLETED' | 'IN_PROGRESS' | 'NOT_STARTED'
+}
+
+export const serializeCaseFilters = (filters: CaseListFilters | undefined): SerializedCaseFilters => ({
+  name: filters?.name,
+  status: filters?.status,
+  examTypeIds: filters?.examTypeIds ? [...filters.examTypeIds].sort() : undefined,
+  diseaseTagIds: filters?.diseaseTagIds ? [...filters.diseaseTagIds].sort() : undefined,
+  difficulties: filters?.difficulties ? [...filters.difficulties].sort() : undefined,
+  createdFrom: filters?.createdFrom ? filters.createdFrom.toISOString() : undefined,
+  createdTo: filters?.createdTo ? filters.createdTo.toISOString() : undefined,
+  adminTagIds: filters?.adminTagIds ? [...filters.adminTagIds].sort() : undefined,
+  userTagIds: filters?.userTagIds ? [...filters.userTagIds].sort() : undefined,
+  myDifficulty: filters?.myDifficulty,
+  userProgress: filters?.userProgress,
+})
+
+export const deserializeCaseFilters = (filters: SerializedCaseFilters): CaseListFilters => ({
+  name: filters.name,
+  status: filters.status,
+  examTypeIds: filters.examTypeIds,
+  diseaseTagIds: filters.diseaseTagIds,
+  difficulties: filters.difficulties,
+  createdFrom: filters.createdFrom ? new Date(filters.createdFrom) : undefined,
+  createdTo: filters.createdTo ? new Date(filters.createdTo) : undefined,
+  adminTagIds: filters.adminTagIds,
+  userTagIds: filters.userTagIds,
+  myDifficulty: filters.myDifficulty,
+  userProgress: filters.userProgress,
+})
+
+export type ClinicalCasesLoadInput = {
+  userId: string | null
+  filters: CaseListFilters | undefined
+  sort?: CaseListSort
+  includeContent: boolean
+}
+
+type ClinicalCasesCacheArgs = {
+  userId: string | null
+  filters: SerializedCaseFilters | null
+  sort: CaseListSort | null
+  includeContent: boolean
+}
+
+const buildClinicalCasesTags = (userId: string | null): string[] =>
+  userId ? [CASES_TAG, userCasesTag(userId)] : [CASES_TAG]
+
+const fetchClinicalCases = async ({
+  userId,
+  filters,
+  sort,
+  includeContent,
+}: ClinicalCasesLoadInput): Promise<ClinicalCaseWithDisplayTags[]> => {
   const where = {
     name: filters?.name ? { contains: filters.name, mode: 'insensitive' } : undefined,
     status: filters?.status ?? undefined,
     examTypeId: filters?.examTypeIds?.length ? { in: filters.examTypeIds } : undefined,
     diseaseTagId: filters?.diseaseTagIds?.length ? { in: filters.diseaseTagIds } : undefined,
     difficulty: filters?.difficulties?.length ? { in: filters.difficulties } : undefined,
-    createdAt: filters?.createdFrom || filters?.createdTo ? {
-      gte: filters?.createdFrom ?? undefined,
-      lte: filters?.createdTo ?? undefined,
-    } : undefined,
-    // Admin tag filter (any-of)
+    createdAt:
+      filters?.createdFrom || filters?.createdTo
+        ? {
+            gte: filters?.createdFrom ?? undefined,
+            lte: filters?.createdTo ?? undefined,
+          }
+        : undefined,
     adminTags: filters?.adminTagIds?.length ? { some: { tagId: { in: filters.adminTagIds } } } : undefined,
-    // User tag filter (scoped to current user)
-    userTags: filters?.userTagIds?.length && userId ? { some: { tag: { id: { in: filters.userTagIds }, userId } } } : undefined,
-    // Personal difficulty filter (from UserCaseSettings) scoped to current user
-    UserCaseSettings: filters?.myDifficulty && userId ? { some: { userId, personalDifficulty: filters.myDifficulty } } : undefined,
+    userTags:
+      filters?.userTagIds?.length && userId ? { some: { tag: { id: { in: filters.userTagIds }, userId } } } : undefined,
+    UserCaseSettings:
+      filters?.myDifficulty && userId ? { some: { userId, personalDifficulty: filters.myDifficulty } } : undefined,
   }
 
   const orderBy = (() => {
-    const dir = sort?.direction ?? 'desc'
+    const direction = sort?.direction ?? 'desc'
     switch (sort?.field) {
       case 'name':
-        return { name: dir }
+        return { name: direction }
       case 'status':
-        return { status: dir }
+        return { status: direction }
       case 'difficulty':
-        return { difficulty: dir }
+        return { difficulty: direction }
       case 'createdAt':
-        return { createdAt: dir }
+        return { createdAt: direction }
       case 'examType':
-        return { examType: { name: dir } }
+        return { examType: { name: direction } }
       case 'diseaseTag':
-        return { diseaseTag: { name: dir } }
-      // attempts and personalDifficulty are sorted in-memory below
+        return { diseaseTag: { name: direction } }
       default:
         return { createdAt: 'desc' as const }
     }
@@ -116,10 +210,13 @@ export async function listClinicalCasesWithDisplayTags(userId?: string | null, f
       name: true,
       difficulty: true,
       status: true,
-      // legacy string[] tags kept in DB but not exposed here
-      pdfUrl: true,
-      pdfKey: true,
-      textContent: true,
+      ...(includeContent
+        ? {
+            pdfUrl: true,
+            pdfKey: true,
+            textContent: true,
+          }
+        : {}),
       createdAt: true,
       examType: { select: { id: true, name: true } },
       diseaseTag: { select: { id: true, name: true } },
@@ -130,46 +227,78 @@ export async function listClinicalCasesWithDisplayTags(userId?: string | null, f
       },
     },
   })
-  let base: ClinicalCaseWithDisplayTags[] = rows.map((r) => ({
-    id: r.id,
-    name: r.name,
-    difficulty: r.difficulty,
-    status: r.status,
-    pdfUrl: r.pdfUrl,
-    pdfKey: r.pdfKey,
-    textContent: r.textContent,
-    createdAt: r.createdAt,
-    examType: r.examType,
-    diseaseTag: r.diseaseTag,
-    adminTags: r.adminTags.map((at) => ({ id: at.tag.id, name: at.tag.name, color: at.tag.color, description: at.tag.description ?? null })),
-    userTags: r.userTags.map((ut) => ({ id: ut.tag.id, name: ut.tag.name, color: ut.tag.color, description: ut.tag.description ?? null })),
+
+  let base: ClinicalCaseWithDisplayTags[] = rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    difficulty: row.difficulty,
+    status: row.status,
+    ...(includeContent
+      ? {
+          pdfUrl: 'pdfUrl' in row ? row.pdfUrl ?? null : null,
+          pdfKey: 'pdfKey' in row ? row.pdfKey ?? null : null,
+          textContent: 'textContent' in row ? row.textContent ?? null : null,
+        }
+      : {}),
+    createdAt: row.createdAt,
+    examType: row.examType,
+    diseaseTag: row.diseaseTag,
+    adminTags: row.adminTags.map((adminTag) => ({
+      id: adminTag.tag.id,
+      name: adminTag.tag.name,
+      color: adminTag.tag.color,
+      description: adminTag.tag.description ?? null,
+    })),
+    userTags: row.userTags.map((userTag) => ({
+      id: userTag.tag.id,
+      name: userTag.tag.name,
+      color: userTag.tag.color,
+      description: userTag.tag.description ?? null,
+    })),
   }))
 
-  // Enrich with attempts count and personalDifficulty for the user
   if (userId && base.length > 0) {
-    const caseIds = base.map((b) => b.id)
-    const [attempts, settings, attemptStates] = await Promise.all([
-      prisma.caseAttempt.groupBy({ by: ['caseId'], where: { userId, caseId: { in: caseIds }, validatedAt: { not: null } }, _count: { _all: true } }),
-      prisma.userCaseSettings.findMany({ where: { userId, caseId: { in: caseIds } }, select: { caseId: true, personalDifficulty: true } }),
-      prisma.caseAttempt.findMany({ where: { userId, caseId: { in: caseIds } }, select: { caseId: true, validatedAt: true } }),
+    const caseIds = base.map((entry) => entry.id)
+    const [settings, attemptRows] = await Promise.all([
+      prisma.userCaseSettings.findMany({
+        where: { userId, caseId: { in: caseIds } },
+        select: { caseId: true, personalDifficulty: true },
+      }),
+      prisma.caseAttempt.findMany({
+        where: { userId, caseId: { in: caseIds } },
+        select: { caseId: true, validatedAt: true },
+      }),
     ])
-    const attemptsMap = new Map<string, number>(attempts.map((a) => [a.caseId, a._count._all]))
-    const pdMap = new Map<string, 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | null>(settings.map((s) => [s.caseId, s.personalDifficulty]))
-    const stateMap = attemptStates.reduce<Map<string, UserAttemptState>>((acc, attempt) => {
-      const current = acc.get(attempt.caseId) ?? { hasValidatedAttempt: false, hasDraftAttempt: false }
-      const nextState: UserAttemptState = {
-        hasValidatedAttempt: current.hasValidatedAttempt || attempt.validatedAt !== null,
-        hasDraftAttempt: current.hasDraftAttempt || attempt.validatedAt === null,
+
+    const difficultyByCase = new Map<string, 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | null>(
+      settings.map((setting) => [setting.caseId, setting.personalDifficulty]),
+    )
+
+    const summaryByCase = attemptRows.reduce<Map<string, { validated: number; hasValidated: boolean; hasDraft: boolean }>>(
+      (accumulator, attempt) => {
+        const current = accumulator.get(attempt.caseId) ?? { validated: 0, hasValidated: false, hasDraft: false }
+        const hasValidated = current.hasValidated || attempt.validatedAt !== null
+        const hasDraft = current.hasDraft || attempt.validatedAt === null
+        const validated = attempt.validatedAt !== null ? current.validated + 1 : current.validated
+        accumulator.set(attempt.caseId, { validated, hasValidated, hasDraft })
+        return accumulator
+      },
+      new Map(),
+    )
+
+    base = base.map((entry) => {
+      const summary = summaryByCase.get(entry.id)
+      const state: UserAttemptState = {
+        hasValidatedAttempt: summary?.hasValidated ?? false,
+        hasDraftAttempt: summary?.hasDraft ?? false,
       }
-      acc.set(attempt.caseId, nextState)
-      return acc
-    }, new Map())
-    base = base.map((b) => ({
-      ...b,
-      attemptsCount: attemptsMap.get(b.id) ?? 0,
-      personalDifficulty: pdMap.get(b.id) ?? null,
-      userAttemptState: stateMap.get(b.id) ?? { hasValidatedAttempt: false, hasDraftAttempt: false },
-    }))
+      return {
+        ...entry,
+        attemptsCount: summary?.validated ?? 0,
+        personalDifficulty: difficultyByCase.get(entry.id) ?? null,
+        userAttemptState: state,
+      }
+    })
   }
 
   if (userId && filters?.userProgress) {
@@ -181,31 +310,94 @@ export async function listClinicalCasesWithDisplayTags(userId?: string | null, f
     })
   }
 
-  // In-memory sort for enriched fields or case-insensitive name
   if (sort?.field === 'attempts') {
-    const dir = sort.direction === 'asc' ? 1 : -1
-    base.sort((a, b) => ((a.attemptsCount ?? 0) - (b.attemptsCount ?? 0)) * dir)
+    const direction = sort.direction === 'asc' ? 1 : -1
+    base.sort((a, b) => ((a.attemptsCount ?? 0) - (b.attemptsCount ?? 0)) * direction)
   } else if (sort?.field === 'personalDifficulty') {
     const order = { BEGINNER: 0, INTERMEDIATE: 1, ADVANCED: 2 } as const
-    const dir = sort.direction === 'asc' ? 1 : -1
-    base.sort((a, b) => ((order[a.personalDifficulty ?? 'BEGINNER'] - order[b.personalDifficulty ?? 'BEGINNER']) * dir))
+    const direction = sort.direction === 'asc' ? 1 : -1
+    base.sort(
+      (a, b) => (order[a.personalDifficulty ?? 'BEGINNER'] - order[b.personalDifficulty ?? 'BEGINNER']) * direction,
+    )
   } else if (sort?.field === 'name') {
-    const dir = sort.direction === 'desc' ? -1 : 1
-    base.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }) * dir)
+    const direction = sort.direction === 'desc' ? -1 : 1
+    base.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }) * direction)
   }
 
   return base
 }
 
+const cachedClinicalCases = cache(async (serializedArgs: string): Promise<ClinicalCaseWithDisplayTags[]> => {
+  const payload = JSON.parse(serializedArgs) as ClinicalCasesCacheArgs
+  const tags = buildClinicalCasesTags(payload.userId)
+  const filters = payload.filters ? deserializeCaseFilters(payload.filters) : undefined
+  const key = hashKey(payload)
+
+  return unstable_cache(
+    () =>
+      fetchClinicalCases({
+        userId: payload.userId,
+        filters,
+        sort: payload.sort ?? undefined,
+        includeContent: payload.includeContent,
+      }),
+    ['bestof:cases', key],
+    { tags },
+  )()
+})
+
+export const loadClinicalCases = async ({
+  userId,
+  filters,
+  sort,
+  includeContent,
+}: ClinicalCasesLoadInput): Promise<ClinicalCaseWithDisplayTags[]> => {
+  const serializedFilters = filters ? serializeCaseFilters(filters) : null
+  const cacheArgs: ClinicalCasesCacheArgs = {
+    userId,
+    filters: serializedFilters,
+    sort: sort ?? null,
+    includeContent,
+  }
+
+  return cachedClinicalCases(JSON.stringify(cacheArgs))
+}
+
+export async function listClinicalCasesWithDisplayTags(
+  userId?: string | null,
+  filters?: CaseListFilters,
+  sort?: CaseListSort,
+  options?: { includeContent?: boolean },
+): Promise<ClinicalCaseWithDisplayTags[]> {
+  return loadClinicalCases({
+    userId: userId ?? null,
+    filters,
+    sort,
+    includeContent: Boolean(options?.includeContent),
+  })
+}
+
 export type ExamType = { id: string; name: string }
 export type DiseaseTag = { id: string; name: string }
 
+const listExamTypesCached = unstable_cache(
+  () => prisma.examType.findMany({ select: { id: true, name: true }, orderBy: { name: 'asc' } }),
+  ['bestof:exam-types:list'],
+  { tags: [EXAM_TYPES_TAG] },
+)
+
 export async function listExamTypes(): Promise<ExamType[]> {
-  return prisma.examType.findMany({ select: { id: true, name: true }, orderBy: { name: 'asc' } })
+  return listExamTypesCached()
 }
 
+const listDiseaseTagsCached = unstable_cache(
+  () => prisma.diseaseTag.findMany({ select: { id: true, name: true }, orderBy: { name: 'asc' } }),
+  ['bestof:disease-tags:list'],
+  { tags: [DISEASE_TAGS_TAG] },
+)
+
 export async function listDiseaseTags(): Promise<DiseaseTag[]> {
-  return prisma.diseaseTag.findMany({ select: { id: true, name: true }, orderBy: { name: 'asc' } })
+  return listDiseaseTagsCached()
 }
 
 export async function ensureExamType(name: string): Promise<ExamType> {
@@ -213,7 +405,7 @@ export async function ensureExamType(name: string): Promise<ExamType> {
   const existing = await prisma.examType.findUnique({ where: { name: trimmed } })
   if (existing) return { id: existing.id, name: existing.name }
   const created = await prisma.examType.create({
-    data: { id: crypto.randomUUID(), name: trimmed },
+    data: { id: randomUUID(), name: trimmed },
     select: { id: true, name: true },
   })
   return created
@@ -224,7 +416,7 @@ export async function ensureDiseaseTag(name: string): Promise<DiseaseTag> {
   const existing = await prisma.diseaseTag.findUnique({ where: { name: trimmed } })
   if (existing) return { id: existing.id, name: existing.name }
   const created = await prisma.diseaseTag.create({
-    data: { id: crypto.randomUUID(), name: trimmed },
+    data: { id: randomUUID(), name: trimmed },
     select: { id: true, name: true },
   })
   return created
@@ -248,7 +440,7 @@ export async function createClinicalCase(data: CreateClinicalCaseInput) {
   const disease = data.diseaseTagName ? await ensureDiseaseTag(data.diseaseTagName) : null
   const created = await prisma.clinicalCase.create({
     data: {
-      id: crypto.randomUUID(),
+      id: randomUUID(),
       name: data.name,
       difficulty: data.difficulty,
       status: data.status,
@@ -308,8 +500,8 @@ export async function deleteClinicalCase(id: string) {
   return { id }
 }
 
-export async function getCaseById(id: string) {
-  return prisma.clinicalCase.findUnique({
+const fetchCaseById = async (id: string) =>
+  prisma.clinicalCase.findUnique({
     where: { id },
     select: {
       id: true,
@@ -324,4 +516,13 @@ export async function getCaseById(id: string) {
       diseaseTag: { select: { id: true, name: true } },
     },
   })
+
+const cachedCaseById = cache(async (id: string) =>
+  unstable_cache(() => fetchCaseById(id), ['bestof:case', id], {
+    tags: [CASES_TAG, caseDetailTag(id)],
+  })(),
+)
+
+export async function getCaseById(id: string) {
+  return cachedCaseById(id)
 }

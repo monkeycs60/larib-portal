@@ -1,9 +1,11 @@
 "use server"
 
 import { z } from 'zod'
+import { revalidateTag } from 'next/cache'
 import { authenticatedAction } from '@/actions/safe-action'
 import { saveAttempt, validateAttempt, upsertUserSettings } from '@/lib/services/bestof-larib-attempts'
 import { htmlToPlainText } from '@/lib/html'
+import { caseDetailTag, userCasesTag } from '@/lib/services/bestof-larib'
 
 const ReportSchemaStrict = z.string().refine((value) => htmlToPlainText(value).length >= 10, { message: 'REPORT_TOO_SHORT' })
 
@@ -28,6 +30,8 @@ export const saveAttemptAction = authenticatedAction
       finalDx: parsedInput.finalDx,
       report: parsedInput.report,
     })
+    revalidateTag(userCasesTag(ctx.userId))
+    revalidateTag(caseDetailTag(parsedInput.caseId))
     return { attemptId }
   })
 
@@ -35,8 +39,12 @@ const ValidateAttemptSchema = z.object({ attemptId: z.string().min(1) })
 export const validateAttemptAction = authenticatedAction
   .inputSchema(ValidateAttemptSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const ok = await validateAttempt({ userId: ctx.userId, attemptId: parsedInput.attemptId })
-    return { ok }
+    const result = await validateAttempt({ userId: ctx.userId, attemptId: parsedInput.attemptId })
+    if (result.caseId) {
+      revalidateTag(userCasesTag(ctx.userId))
+      revalidateTag(caseDetailTag(result.caseId))
+    }
+    return result
   })
 
 const UpsertSettingsSchema = z.object({
@@ -56,6 +64,8 @@ export const upsertSettingsAction = authenticatedAction
       personalDifficulty: parsedInput.personalDifficulty,
       comments: parsedInput.comments ?? null,
     })
+    revalidateTag(userCasesTag(ctx.userId))
+    revalidateTag(caseDetailTag(parsedInput.caseId))
     return settings
   })
 
@@ -91,6 +101,8 @@ export const saveAllAction = authenticatedAction
       finalDx: parsedInput.analysis.finalDx,
       report: parsedInput.report,
     })
+    revalidateTag(userCasesTag(ctx.userId))
+    revalidateTag(caseDetailTag(parsedInput.caseId))
     return { attemptId }
   })
 
@@ -113,6 +125,8 @@ export const saveAllAndValidateAction = authenticatedAction
       finalDx: parsedInput.analysis.finalDx,
       report: parsedInput.report,
     })
-    const ok = await validateAttempt({ userId: ctx.userId, attemptId })
-    return { attemptId, ok }
+    const result = await validateAttempt({ userId: ctx.userId, attemptId })
+    revalidateTag(userCasesTag(ctx.userId))
+    revalidateTag(caseDetailTag(parsedInput.caseId))
+    return { attemptId, ok: result.ok }
   })
