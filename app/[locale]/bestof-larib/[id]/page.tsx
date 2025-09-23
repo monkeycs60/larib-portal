@@ -1,13 +1,12 @@
 import { getTranslations } from 'next-intl/server';
 import { getCaseById } from '@/lib/services/bestof-larib';
-import { Link } from '@/app/i18n/navigation';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft } from 'lucide-react';
 import { getTypedSession } from '@/lib/auth-helpers';
 import WorkArea, { PrefillState } from './work-area';
 import type { CaseAttemptSummary } from '@/lib/services/bestof-larib-attempts';
 import { getUserCaseState, listUserCaseAttempts } from '@/lib/services/bestof-larib-attempts';
 import { listUserTags, getCaseUserTagIds } from '@/lib/services/bestof-larib-tags';
+import BackButton from './components/back-button';
 
 export default async function CaseViewPage({
 	params,
@@ -75,11 +74,7 @@ export default async function CaseViewPage({
         <div className='space-y-4 py-6 px-12 mx-auto'>
             <div className='flex items-center justify-between gap-4'>
                 <div className='flex items-center gap-3 flex-wrap'>
-                    <Badge asChild variant='outline'>
-                        <Link href={'/bestof-larib'} className='cursor-pointer'>
-                            <ArrowLeft className='mr-1' /> {t('back')}
-                        </Link>
-                    </Badge>
+                    <BackButton />
                     <h1 className='text-2xl font-semibold'>{c.name}</h1>
                     {c.examType?.name ? (
                         <Badge variant='secondary'>{c.examType.name}</Badge>
