@@ -1,3 +1,11 @@
+## Enhancement: Admin Legend Integration
+
+- Name: Compact status legend
+- What it does: Moves the status legend into the Congés admin table header with smaller badges so it no longer consumes an entire card.
+- How to use it: Open the Congés admin overview; the legend now appears inline above the table for quick reference without extra scrolling.
+- Updated files:
+  - `app/[locale]/conges/components/admin-dashboard.tsx`
+
 ## Enhancement: Admin Departure Highlighting
 
 - Name: Departed teammates styling

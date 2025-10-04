@@ -291,22 +291,6 @@ export function AdminDashboard({ data }: AdminDashboardProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>{data.summaryTitle}</CardTitle>
-          <CardDescription>{data.summarySubtitle}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className='flex flex-wrap gap-3'>
-            {(Object.entries(data.legendLabels) as Array<[keyof typeof data.legendLabels, string]>).map(([key, label]) => (
-              <Badge key={key} variant={statusVariant[key] ?? 'secondary'}>
-                {label}
-              </Badge>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
           <CardTitle>{data.pendingLabels.title}</CardTitle>
           <CardDescription>{data.pendingLabels.subtitle}</CardDescription>
         </CardHeader>
@@ -366,8 +350,18 @@ export function AdminDashboard({ data }: AdminDashboardProps) {
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle>{data.tableTitle}</CardTitle>
+        <CardHeader className='space-y-3'>
+          <div>
+            <CardTitle>{data.tableTitle}</CardTitle>
+            <CardDescription className='text-xs'>{data.summarySubtitle}</CardDescription>
+          </div>
+          <div className='flex flex-wrap gap-2 text-[10px] font-medium uppercase tracking-wide text-muted-foreground'>
+            {(Object.entries(data.legendLabels) as Array<[keyof typeof data.legendLabels, string]>).map(([key, label]) => (
+              <Badge key={key} variant={statusVariant[key] ?? 'secondary'} className='px-2 py-0 text-[10px]'>
+                {label}
+              </Badge>
+            ))}
+          </div>
         </CardHeader>
         <CardContent className='overflow-x-auto'>
           <Table>
