@@ -1,3 +1,11 @@
+## Enhancement: Admin Page Hierarchy
+
+- Name: Admin-first congés layout
+- What it does: Reorders the congés page for admins so pending approvals and the team overview appear before analytics and the calendar.
+- How to use it: Log in as an admin; the pending requests card now greets you first, followed by the team table, summary cards, and finally the calendar.
+- Updated files:
+  - `app/[locale]/conges/page.tsx`
+
 ## Enhancement: Admin Legend Integration
 
 - Name: Compact status legend

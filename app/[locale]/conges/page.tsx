@@ -223,6 +223,148 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
     USER: t('roles.user'),
   } as const
 
+  const summarySection = (
+    <section className='px-6'>
+      <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-5'>
+        {summaryCards.map((card) => (
+          <Card key={card.label}>
+            <CardHeader className='pb-2'>
+              <CardTitle className='text-sm font-medium text-muted-foreground'>{card.label}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className='text-2xl font-semibold'>{card.value}</div>
+              {card.helper ? (
+                <div className='text-sm font-medium text-orange-500'>{card.helper}</div>
+              ) : null}
+            </CardContent>
+          </Card>
+        ))}
+        <Card>
+          <CardHeader className='pb-2'>
+            <CardTitle className='text-sm font-medium text-muted-foreground'>{t('summary.contractLabel')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className='text-sm'>{contractInfo}</div>
+            {contractDatesInfo ? (
+              <div className='mt-1 text-xs text-muted-foreground'>{contractDatesInfo}</div>
+            ) : null}
+          </CardContent>
+        </Card>
+      </div>
+    </section>
+  )
+
+  const calendarSection = (
+    <section className='px-6 grid gap-6 lg:grid-cols-[2fr_1fr]'>
+      <LeaveCalendar
+        content={{
+          activeMonthIso: activeMonth.toISOString(),
+          calendar: calendarData.calendar,
+          navigation: {
+            basePath: '/conges',
+            previousMonth: previousMonthParam,
+            nextMonth: nextMonthParam,
+            label: calendarLabel,
+          },
+          weekdayLabels,
+          emptyLabel: t('calendar.empty'),
+          moreLabel: (count) => t('calendar.more', { count }),
+        }}
+      />
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('today.title')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {calendarData.todaysAbsences.length === 0 ? (
+            <p className='text-sm text-muted-foreground'>{t('today.none')}</p>
+          ) : (
+            <ul className='space-y-2'>
+              {calendarData.todaysAbsences.map((absence) => (
+                <li key={absence.userId} className='flex items-center justify-between rounded-md border p-3'>
+                  <div>
+                    <div className='font-medium'>{fullName(absence.firstName, absence.lastName)}</div>
+                    {absence.position ? (
+                      <p className='text-xs text-muted-foreground'>{absence.position}</p>
+                    ) : null}
+                  </div>
+                  <Badge variant='outline'>{roleLabels[absence.role]}</Badge>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+    </section>
+  )
+
+  const historySection = (
+    <section className='px-6'>
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('history.title')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {userDashboard.history.length === 0 ? (
+            <p className='text-sm text-muted-foreground'>{t('history.empty')}</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t('history.columns.period')}</TableHead>
+                  <TableHead>{t('history.columns.days')}</TableHead>
+                  <TableHead>{t('history.columns.status')}</TableHead>
+                  <TableHead>{t('history.columns.reason')}</TableHead>
+                  <TableHead>{t('history.columns.decision')}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {userDashboard.history.map((entry) => {
+                  const dayCount = countLeaveDays(new Date(entry.startDate), new Date(entry.endDate))
+                  const dayCountLabel = t('history.dayCount', { count: dayCount })
+                  return (
+                    <TableRow key={entry.id}>
+                      <TableCell>
+                        <div className='font-medium'>
+                          {new Date(entry.startDate).toLocaleDateString()} – {new Date(entry.endDate).toLocaleDateString()}
+                        </div>
+                      </TableCell>
+                      <TableCell>{dayCountLabel}</TableCell>
+                      <TableCell>
+                        <Badge variant={statusBadgeVariant[entry.status]}>{statusLabels[entry.status]}</Badge>
+                      </TableCell>
+                      <TableCell>{entry.reason ?? '—'}</TableCell>
+                      <TableCell>
+                        {entry.decisionAt ? (
+                          <div className='flex flex-col text-sm'>
+                            <span>{new Date(entry.decisionAt).toLocaleDateString()}</span>
+                            {entry.approverName ? (
+                              <span className='text-xs text-muted-foreground'>{entry.approverName}</span>
+                            ) : null}
+                          </div>
+                        ) : (
+                          <span className='text-sm text-muted-foreground'>—</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    </section>
+  )
+
+  const adminSection = adminData ? (
+    <section className='px-6'>
+      <Suspense fallback={<div className='text-sm text-muted-foreground'>{t('admin.loading')}</div>}>
+        <AdminDashboard data={adminData} />
+      </Suspense>
+    </section>
+  ) : null
+
   return (
     <div className='space-y-8 py-6'>
       <header className='px-6'>
@@ -235,141 +377,20 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
         </div>
       </header>
 
-      <section className='px-6'>
-        <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-5'>
-          {summaryCards.map((card) => (
-            <Card key={card.label}>
-              <CardHeader className='pb-2'>
-                <CardTitle className='text-sm font-medium text-muted-foreground'>{card.label}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className='text-2xl font-semibold'>{card.value}</div>
-                {card.helper ? (
-                  <div className='text-sm font-medium text-orange-500'>{card.helper}</div>
-                ) : null}
-              </CardContent>
-            </Card>
-          ))}
-          <Card>
-            <CardHeader className='pb-2'>
-              <CardTitle className='text-sm font-medium text-muted-foreground'>{t('summary.contractLabel')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className='text-sm'>{contractInfo}</div>
-              {contractDatesInfo ? (
-                <div className='mt-1 text-xs text-muted-foreground'>{contractDatesInfo}</div>
-              ) : null}
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      <section className='px-6 grid gap-6 lg:grid-cols-[2fr_1fr]'>
-        <LeaveCalendar
-          content={{
-            activeMonthIso: activeMonth.toISOString(),
-            calendar: calendarData.calendar,
-            navigation: {
-              basePath: '/conges',
-              previousMonth: previousMonthParam,
-              nextMonth: nextMonthParam,
-              label: calendarLabel,
-            },
-            weekdayLabels,
-            emptyLabel: t('calendar.empty'),
-            moreLabel: (count) => t('calendar.more', { count }),
-          }}
-        />
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('today.title')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {calendarData.todaysAbsences.length === 0 ? (
-              <p className='text-sm text-muted-foreground'>{t('today.none')}</p>
-            ) : (
-              <ul className='space-y-2'>
-                {calendarData.todaysAbsences.map((absence) => (
-                  <li key={absence.userId} className='flex items-center justify-between rounded-md border p-3'>
-                    <div>
-                      <div className='font-medium'>{fullName(absence.firstName, absence.lastName)}</div>
-                      {absence.position ? (
-                        <p className='text-xs text-muted-foreground'>{absence.position}</p>
-                      ) : null}
-                    </div>
-                    <Badge variant='outline'>{roleLabels[absence.role]}</Badge>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
-      </section>
-
-      <section className='px-6'>
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('history.title')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {userDashboard.history.length === 0 ? (
-              <p className='text-sm text-muted-foreground'>{t('history.empty')}</p>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t('history.columns.period')}</TableHead>
-                    <TableHead>{t('history.columns.days')}</TableHead>
-                    <TableHead>{t('history.columns.status')}</TableHead>
-                    <TableHead>{t('history.columns.reason')}</TableHead>
-                    <TableHead>{t('history.columns.decision')}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {userDashboard.history.map((entry) => {
-                    const dayCount = countLeaveDays(new Date(entry.startDate), new Date(entry.endDate))
-                    const dayCountLabel = t('history.dayCount', { count: dayCount })
-                    return (
-                      <TableRow key={entry.id}>
-                        <TableCell>
-                          <div className='font-medium'>
-                            {new Date(entry.startDate).toLocaleDateString()} – {new Date(entry.endDate).toLocaleDateString()}
-                          </div>
-                        </TableCell>
-                        <TableCell>{dayCountLabel}</TableCell>
-                        <TableCell>
-                          <Badge variant={statusBadgeVariant[entry.status]}>{statusLabels[entry.status]}</Badge>
-                        </TableCell>
-                        <TableCell>{entry.reason ?? '—'}</TableCell>
-                        <TableCell>
-                          {entry.decisionAt ? (
-                            <div className='flex flex-col text-sm'>
-                              <span>{new Date(entry.decisionAt).toLocaleDateString()}</span>
-                              {entry.approverName ? (
-                                <span className='text-xs text-muted-foreground'>{entry.approverName}</span>
-                              ) : null}
-                            </div>
-                          ) : (
-                            <span className='text-sm text-muted-foreground'>—</span>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
-      </section>
-
-      {adminData ? (
-        <section className='px-6'>
-          <Suspense fallback={<div className='text-sm text-muted-foreground'>{t('admin.loading')}</div>}>
-            <AdminDashboard data={adminData} />
-          </Suspense>
-        </section>
-      ) : null}
+      {session.user.role === 'ADMIN' ? (
+        <>
+          {adminSection}
+          {summarySection}
+          {calendarSection}
+          {historySection}
+        </>
+      ) : (
+        <>
+          {summarySection}
+          {calendarSection}
+          {historySection}
+        </>
+      )}
     </div>
   )
 }
