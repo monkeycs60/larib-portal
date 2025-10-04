@@ -1,3 +1,15 @@
+## Enhancement: Admin Leave Declaration Flow
+
+- Name: Admin self-declared leave auto-approval
+- What it does: Shows admins a "Declare leave" trigger and automatically records their submissions as approved with themselves as the approver.
+- How to use it: Sign in as an admin, open `/{locale}/conges`, and declare a leave; it now skips the pending state and appears in history as approved immediately.
+- Updated files:
+  - `app/[locale]/conges/page.tsx`
+  - `app/[locale]/conges/actions.ts`
+  - `lib/services/conges/index.ts`
+  - `messages/en.json`
+  - `messages/fr.json`
+
 ## Fix: Congés Calendar Locale Navigation
 
 - Name: Locale-aware month navigation links

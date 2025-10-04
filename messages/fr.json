@@ -363,6 +363,7 @@
     "subtitle": "Visualisez votre solde, vos demandes et les absences à venir.",
     "request": {
       "trigger": "Demander un congé",
+      "triggerAdmin": "Déclarer un congé",
       "title": "Envoyer une demande de congé",
       "description": "Sélectionnez les dates de début et de fin, puis ajoutez si besoin un message pour l'administrateur.",
       "start": "Date de début",

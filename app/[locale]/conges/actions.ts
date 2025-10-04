@@ -30,11 +30,14 @@ const requestLeaveSchema = z
 export const requestLeaveAction = authenticatedAction
   .inputSchema(requestLeaveSchema)
   .action(async ({ parsedInput, ctx }) => {
+    const shouldAutoApprove = ctx.user.role === 'ADMIN'
+
     await createLeaveRequest({
       userId: ctx.userId,
       startDate: new Date(parsedInput.startDate),
       endDate: new Date(parsedInput.endDate),
       reason: parsedInput.reason ?? null,
+      autoApprove: shouldAutoApprove ? { approverId: ctx.userId } : undefined,
     })
 
     await revalidateConges()

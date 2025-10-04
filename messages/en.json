@@ -365,6 +365,7 @@
     "subtitle": "Track your allowance, requests, and upcoming absences.",
     "request": {
       "trigger": "Request leave",
+      "triggerAdmin": "Declare leave",
       "title": "Submit a leave request",
       "description": "Select a start and end date, then optionally leave a note for the approvers.",
       "start": "Start date",

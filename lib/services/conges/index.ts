@@ -414,6 +414,9 @@ export async function createLeaveRequest(input: {
   startDate: Date
   endDate: Date
   reason?: string | null
+  autoApprove?: {
+    approverId: string
+  }
 }): Promise<void> {
   const { start, end } = normaliseRange(input.startDate, input.endDate)
 
@@ -430,12 +433,21 @@ export async function createLeaveRequest(input: {
     throw new Error('leaveOverlap')
   }
 
+  const shouldAutoApprove = Boolean(input.autoApprove)
+
   await prisma.leaveRequest.create({
     data: {
       userId: input.userId,
       startDate: start,
       endDate: end,
       reason: input.reason?.trim() || null,
+      ...(shouldAutoApprove
+        ? {
+            status: 'APPROVED',
+            approverId: input.autoApprove?.approverId,
+            decisionAt: new Date(),
+          }
+        : {}),
     },
   })
 }

@@ -88,8 +88,10 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
 
   const weekdayLabels = t.raw('calendar.weekdays') as string[]
 
+  const requestTrigger = session.user.role === 'ADMIN' ? t('request.triggerAdmin') : t('request.trigger')
+
   const requestTranslations = {
-    trigger: t('request.trigger'),
+    trigger: requestTrigger,
     title: t('request.title'),
     description: t('request.description'),
     startLabel: t('request.start'),
