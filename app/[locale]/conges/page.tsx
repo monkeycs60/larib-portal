@@ -151,8 +151,8 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
           created: t('admin.pending.created'),
           period: t('admin.pending.period'),
           reason: t('admin.pending.reason'),
-          daySingular: t('admin.pending.daySingular'),
-          dayPlural: t('admin.pending.dayPlural'),
+          daySingular: t.raw('admin.pending.daySingular') as string,
+          dayPlural: t.raw('admin.pending.dayPlural') as string,
           subtitle: t('admin.pending.subtitle', { days: adminDashboard.pendingDaysTotal }),
         },
         toasts: {

@@ -28,13 +28,13 @@ const requestLeaveSchema = z
   })
 
 export const requestLeaveAction = authenticatedAction
-  .schema(requestLeaveSchema)
-  .action(async ({ input, ctx }) => {
+  .inputSchema(requestLeaveSchema)
+  .action(async ({ parsedInput, ctx }) => {
     await createLeaveRequest({
       userId: ctx.userId,
-      startDate: new Date(input.startDate),
-      endDate: new Date(input.endDate),
-      reason: input.reason ?? null,
+      startDate: new Date(parsedInput.startDate),
+      endDate: new Date(parsedInput.endDate),
+      reason: parsedInput.reason ?? null,
     })
 
     await revalidateConges()
@@ -48,11 +48,11 @@ const updateStatusSchema = z.object({
 })
 
 export const updateLeaveStatusAction = adminOnlyAction
-  .schema(updateStatusSchema)
-  .action(async ({ input, ctx }) => {
+  .inputSchema(updateStatusSchema)
+  .action(async ({ parsedInput, ctx }) => {
     await updateLeaveStatus({
-      requestId: input.requestId,
-      status: input.status,
+      requestId: parsedInput.requestId,
+      status: parsedInput.status,
       approverId: ctx.userId,
     })
 
@@ -67,11 +67,11 @@ const updateAllocationSchema = z.object({
 })
 
 export const updateLeaveAllocationAction = adminOnlyAction
-  .schema(updateAllocationSchema)
-  .action(async ({ input }) => {
+  .inputSchema(updateAllocationSchema)
+  .action(async ({ parsedInput }) => {
     await updateLeaveAllocation({
-      userId: input.userId,
-      totalAllocationDays: input.totalAllocationDays,
+      userId: parsedInput.userId,
+      totalAllocationDays: parsedInput.totalAllocationDays,
     })
 
     await revalidateConges()
