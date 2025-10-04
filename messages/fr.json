@@ -450,7 +450,18 @@
         "departure": "Avant départ",
         "lastLeave": "Dernier congé",
         "status": "Statut",
-        "save": "Enregistrer"
+        "save": "Enregistrer",
+        "edit": "Ajuster"
+      },
+      "allocationModal": {
+        "title": "Ajuster le capital de congés",
+        "description": "Utilisez ces contrôles pour ajuster le capital annuel de congés.",
+        "current": "Total actuel",
+        "decrease": "Diminuer le capital",
+        "increase": "Augmenter le capital",
+        "inputLabel": "Saisie manuelle (jours)",
+        "cancel": "Annuler",
+        "confirm": "Enregistrer"
       },
       "roles": {
         "admin": "Admin",

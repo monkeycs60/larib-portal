@@ -452,7 +452,18 @@
         "departure": "Until departure",
         "lastLeave": "Last leave",
         "status": "Status",
-        "save": "Save"
+        "save": "Save",
+        "edit": "Adjust"
+      },
+      "allocationModal": {
+        "title": "Adjust leave allowance",
+        "description": "Use the controls below to tweak the annual leave allocation.",
+        "current": "Current total",
+        "decrease": "Decrease allowance",
+        "increase": "Increase allowance",
+        "inputLabel": "Manual entry (days)",
+        "cancel": "Cancel",
+        "confirm": "Save changes"
       },
       "roles": {
         "admin": "Admin",

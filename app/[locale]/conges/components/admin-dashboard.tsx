@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import { useAction } from 'next-safe-action/hooks'
 import { toast } from 'sonner'
 import {
@@ -15,6 +15,16 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Minus, Pencil, Plus } from 'lucide-react'
 import { updateLeaveAllocationAction, updateLeaveStatusAction } from '../actions'
 import type { AdminUserRow, PendingLeaveRequestAdmin } from '@/lib/services/conges'
 
@@ -38,6 +48,7 @@ type AdminDashboardProps = {
       lastLeave: string
       status: string
       save: string
+      edit: string
     }
     statusLabels: {
       ADMIN: string
@@ -56,6 +67,16 @@ type AdminDashboardProps = {
       dayPlural: string
       subtitle: string
     }
+    allocationModal: {
+      title: string
+      description: string
+      current: string
+      decrease: string
+      increase: string
+      inputLabel: string
+      cancel: string
+      confirm: string
+    }
     toasts: {
       allocationSaved: string
       allocationInvalid: string
@@ -66,7 +87,7 @@ type AdminDashboardProps = {
   }
 }
 
-type AllocationState = Record<string, string>
+type AllocationState = Record<string, number>
 
 const statusVariant: Record<AdminUserRow['status'], 'destructive' | 'secondary' | 'default' | 'outline'> = {
   CRITICAL: 'destructive',
@@ -79,14 +100,23 @@ const statusVariant: Record<AdminUserRow['status'], 'destructive' | 'secondary' 
 export function AdminDashboard({ data }: AdminDashboardProps) {
   const initialAllocations = useMemo<AllocationState>(() => {
     return data.rows.reduce<AllocationState>((acc, row) => {
-      acc[row.userId] = row.totalAllocationDays.toString()
+      acc[row.userId] = row.totalAllocationDays
       return acc
     }, {})
   }, [data.rows])
 
   const [allocations, setAllocations] = useState<AllocationState>(initialAllocations)
   const [activeAllocationUser, setActiveAllocationUser] = useState<string | null>(null)
+  const [allocationDialog, setAllocationDialog] = useState<{
+    userId: string
+    value: number
+    inputValue: string
+  } | null>(null)
   const [activeStatusRequest, setActiveStatusRequest] = useState<string | null>(null)
+
+  useEffect(() => {
+    setAllocations(initialAllocations)
+  }, [initialAllocations])
 
   const { execute: saveAllocation, isExecuting: savingAllocation } = useAction(updateLeaveAllocationAction, {
     onSuccess: () => {
@@ -110,17 +140,63 @@ export function AdminDashboard({ data }: AdminDashboardProps) {
     },
   })
 
-  const handleAllocationSave = async (userId: string) => {
-    const raw = allocations[userId]
-    const parsed = Number.parseInt(raw, 10)
-    if (Number.isNaN(parsed)) {
+  const openAllocationDialog = (userId: string) => {
+    const current = allocations[userId] ?? data.rows.find((row) => row.userId === userId)?.totalAllocationDays ?? 0
+    setAllocationDialog({ userId, value: current, inputValue: current.toString() })
+  }
+
+  const closeAllocationDialog = () => {
+    if (allocationDialog && allocationDialog.userId === activeAllocationUser && savingAllocation) {
+      return
+    }
+    setAllocationDialog(null)
+  }
+
+  const adjustAllocationValue = (delta: number) => {
+    setAllocationDialog((prev) => {
+      if (!prev) {
+        return prev
+      }
+      const nextValue = Math.max(prev.value + delta, 0)
+      return { ...prev, value: nextValue, inputValue: nextValue.toString() }
+    })
+  }
+
+  const handleAllocationInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const rawValue = event.target.value.replace(/[^0-9]/g, '')
+    setAllocationDialog((prev) => {
+      if (!prev) {
+        return prev
+      }
+      if (rawValue === '') {
+        return { ...prev, inputValue: '' }
+      }
+      const parsed = Number.parseInt(rawValue, 10)
+      return {
+        ...prev,
+        inputValue: rawValue,
+        value: Number.isNaN(parsed) ? prev.value : parsed,
+      }
+    })
+  }
+
+  const handleAllocationSave = async (userId: string, overrideValue?: number) => {
+    const nextValue = overrideValue ?? allocations[userId]
+    if (!Number.isInteger(nextValue) || nextValue < 0) {
       toast.error(data.toasts.allocationInvalid)
       return
     }
 
     setActiveAllocationUser(userId)
-    await saveAllocation({ userId, totalAllocationDays: parsed })
-    setActiveAllocationUser(null)
+    try {
+      await saveAllocation({ userId, totalAllocationDays: nextValue })
+      setAllocations((prev) => ({ ...prev, [userId]: nextValue }))
+      setAllocationDialog(null)
+    } catch (error) {
+      // toast handled in onError
+    } finally {
+      setActiveAllocationUser(null)
+    }
   }
 
   const handleStatusChange = async (requestId: string, status: 'APPROVED' | 'REJECTED') => {
@@ -131,6 +207,87 @@ export function AdminDashboard({ data }: AdminDashboardProps) {
 
   return (
     <div className='space-y-6'>
+      <Dialog
+        open={isAllocationDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            closeAllocationDialog()
+          }
+        }}
+      >
+        <DialogContent
+          onInteractOutside={(event) => {
+            if (isDialogSaving) {
+              event.preventDefault()
+            }
+          }}
+          onEscapeKeyDown={(event) => {
+            if (isDialogSaving) {
+              event.preventDefault()
+            }
+          }}
+        >
+          <DialogHeader>
+            <DialogTitle>{data.allocationModal.title}</DialogTitle>
+            <DialogDescription>{data.allocationModal.description}</DialogDescription>
+          </DialogHeader>
+          <div className='space-y-6'>
+            <div>
+              <p className='text-sm text-muted-foreground'>{data.allocationModal.current}</p>
+              <div className='mt-3 flex items-center justify-center gap-3'>
+                <Button
+                  type='button'
+                  size='icon'
+                  variant='outline'
+                  disabled={isDialogSaving || (allocationDialog?.value ?? 0) === 0}
+                  onClick={() => adjustAllocationValue(-1)}
+                >
+                  <Minus className='h-4 w-4' />
+                  <span className='sr-only'>{data.allocationModal.decrease}</span>
+                </Button>
+                <div className='min-w-[4rem] text-center text-3xl font-semibold'>{allocationDialog?.value ?? 0}</div>
+                <Button
+                  type='button'
+                  size='icon'
+                  variant='outline'
+                  disabled={isDialogSaving}
+                  onClick={() => adjustAllocationValue(1)}
+                >
+                  <Plus className='h-4 w-4' />
+                  <span className='sr-only'>{data.allocationModal.increase}</span>
+                </Button>
+              </div>
+            </div>
+            <div className='space-y-2'>
+              <Label htmlFor='allocation-input'>{data.allocationModal.inputLabel}</Label>
+              <Input
+                id='allocation-input'
+                inputMode='numeric'
+                value={allocationDialog?.inputValue ?? ''}
+                onChange={handleAllocationInputChange}
+                disabled={isDialogSaving}
+              />
+            </div>
+          </div>
+          <DialogFooter className='gap-2'>
+            <Button type='button' variant='outline' disabled={isDialogSaving} onClick={closeAllocationDialog}>
+              {data.allocationModal.cancel}
+            </Button>
+            <Button
+              type='button'
+              disabled={isConfirmDisabled}
+              onClick={() => {
+                if (allocationDialog) {
+                  void handleAllocationSave(allocationDialog.userId, allocationDialog.value)
+                }
+              }}
+            >
+              {data.allocationModal.confirm}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Card>
         <CardHeader>
           <CardTitle>{data.summaryTitle}</CardTitle>
@@ -231,7 +388,7 @@ export function AdminDashboard({ data }: AdminDashboardProps) {
             <TableBody>
               {data.rows.map((row) => {
                 const displayName = [row.firstName, row.lastName].filter(Boolean).join(' ').trim() || row.email
-                const allocationValue = allocations[row.userId] ?? row.totalAllocationDays.toString()
+                const allocationValue = allocations[row.userId] ?? row.totalAllocationDays
                 const isSaving = savingAllocation && activeAllocationUser === row.userId
                 const departureValue = row.monthsUntilDeparture != null || row.daysUntilDeparture != null
                   ? `${row.monthsUntilDeparture ?? '-'} mo / ${row.daysUntilDeparture ?? '-'} d`
@@ -247,23 +404,16 @@ export function AdminDashboard({ data }: AdminDashboardProps) {
                     </TableCell>
                     <TableCell>{data.statusLabels[row.role]}</TableCell>
                     <TableCell>
-                      <div className='flex items-center gap-2'>
-                        <Input
-                          value={allocationValue}
-                          onChange={(event) => {
-                            const next = event.target.value.replace(/[^0-9]/g, '')
-                            setAllocations((prev) => ({ ...prev, [row.userId]: next }))
-                          }}
-                          inputMode='numeric'
-                          className='w-20'
-                        />
+                      <div className='flex items-center justify-between gap-2'>
+                        <span className='font-medium'>{allocationValue}</span>
                         <Button
-                          size='sm'
-                          variant='outline'
+                          size='icon'
+                          variant='ghost'
                           disabled={isSaving}
-                          onClick={() => void handleAllocationSave(row.userId)}
+                          onClick={() => openAllocationDialog(row.userId)}
                         >
-                          {data.tableLabels.save}
+                          <Pencil className='h-4 w-4' />
+                          <span className='sr-only'>{data.tableLabels.edit}</span>
                         </Button>
                       </div>
                     </TableCell>

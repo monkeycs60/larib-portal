@@ -1,3 +1,14 @@
+## Enhancement: Admin Leave Allocation Modal
+
+- Name: Modal allocation adjustments for admins
+- What it does: Replaces inline allowance editing with a dedicated dialog that offers +/- controls and manual input, preventing accidental edits while giving precise control.
+- How to use it: From the Congés admin table, click the pencil icon next to a teammate’s allocation, adjust the value in the modal, then save to persist the update.
+- Updated files:
+  - `app/[locale]/conges/components/admin-dashboard.tsx`
+  - `app/[locale]/conges/page.tsx`
+  - `messages/en.json`
+  - `messages/fr.json`
+
 ## Enhancement: Congés Leave Validation Guardrails
 
 - Name: Pending-aware remaining days and stricter request validation
