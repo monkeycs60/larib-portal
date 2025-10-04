@@ -16,7 +16,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { updateLeaveAllocationAction, updateLeaveStatusAction } from '../actions'
-import { AdminUserRow, PendingLeaveRequestAdmin } from '@/lib/services/conges'
+import type { AdminUserRow, PendingLeaveRequestAdmin } from '@/lib/services/conges'
 
 type AdminDashboardProps = {
   data: {

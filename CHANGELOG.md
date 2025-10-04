@@ -1,3 +1,12 @@
+## Fix: Congés Prisma Client Runtime Error
+
+- Name: Admin dashboard type-only imports + restored migration
+- What it does: Swaps the admin dashboard’s Prisma-dependent imports to be type-only so the client bundle no longer executes server code, preventing the `prisma.leaveRequest` undefined crash, and reinstates the missing best-of performance indexes migration so Prisma CLI checks succeed.
+- How to use it: Pull the update, run `npx prisma migrate dev` to ensure migrations are in sync, then navigate to `/{locale}/conges`—the page now renders without server crashes and Prisma commands run cleanly.
+- Updated files:
+  - `app/[locale]/conges/components/admin-dashboard.tsx`
+  - `prisma/migrations/20250921174357_bestof_perf_indexes/migration.sql`
+
 ## Feature: Congés Leave Management App
 
 - Name: Congés leave dashboard for users and admins
