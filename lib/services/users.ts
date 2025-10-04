@@ -16,6 +16,7 @@ export type UserWithAdminFields = Prisma.UserGetPayload<{
     position: true
     arrivalDate: true
     departureDate: true
+    congesTotalDays: true
     profilePhoto: true
     applications: true
     createdAt: true
@@ -40,6 +41,7 @@ export async function listUsers(): Promise<UserWithAdminFields[]> {
       position: true,
       arrivalDate: true,
       departureDate: true,
+      congesTotalDays: true,
       profilePhoto: true,
       applications: true,
       createdAt: true,
@@ -75,6 +77,7 @@ export type UpdateUserInput = {
   departureDate?: Date | null
   profilePhoto?: string | null
   profilePhotoKey?: string | null
+  congesTotalDays?: number
   applications?: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'>
 }
 
@@ -99,6 +102,7 @@ export async function updateUser(data: UpdateUserInput): Promise<UserWithAdminFi
       position: true,
       arrivalDate: true,
       departureDate: true,
+      congesTotalDays: true,
       profilePhoto: true,
       applications: true,
       createdAt: true,
@@ -129,6 +133,7 @@ export async function createPlaceholderUser(data: CreatePlaceholderUserInput): P
       lastName: data.lastName ?? null,
       language: data.language ?? 'EN',
       position: data.position ?? null,
+      congesTotalDays: 0,
       applications: data.applications ?? [],
       departureDate: data.departureDate ?? null,
     },
@@ -146,6 +151,7 @@ export async function createPlaceholderUser(data: CreatePlaceholderUserInput): P
       position: true,
       arrivalDate: true,
       departureDate: true,
+      congesTotalDays: true,
       profilePhoto: true,
       applications: true,
       createdAt: true,

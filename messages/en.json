@@ -359,5 +359,120 @@
       "last30": "Last 30 days",
       "custom": "Custom"
     }
+  },
+  "conges": {
+    "title": "Leave management",
+    "subtitle": "Track your allowance, requests, and upcoming absences.",
+    "request": {
+      "trigger": "Request leave",
+      "title": "Submit a leave request",
+      "description": "Select a start and end date, then optionally leave a note for the approvers.",
+      "start": "Start date",
+      "end": "End date",
+      "reason": "Reason",
+      "optional": "Optional message for approvers",
+      "submit": "Send request",
+      "cancel": "Cancel",
+      "success": "Leave request sent",
+      "missingRange": "Select a start and end date before submitting"
+    },
+    "errors": {
+      "overlap": "You already have a request covering that period.",
+      "invalidRange": "The end date must be after the start date.",
+      "missingRange": "Please choose a start and end date."
+    },
+    "summary": {
+      "totalAllocation": "Allocated days",
+      "approved": "Approved",
+      "pending": "Pending",
+      "remaining": "Remaining",
+      "balanceAfterPending": "Balance after pending",
+      "contractLabel": "Contract span",
+      "contractDuration": "{value} days between arrival and departure",
+      "contractUnavailable": "Arrival or departure date missing",
+      "contractDates": "{arrival} → {departure}"
+    },
+    "calendar": {
+      "title": "Calendar – {month} {year}",
+      "empty": "—",
+      "more": "+{count}",
+      "weekdays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    },
+    "today": {
+      "title": "Who is off today",
+      "none": "Nobody is absent today"
+    },
+    "history": {
+      "title": "Request history",
+      "empty": "You have not submitted any leave requests yet.",
+      "columns": {
+        "period": "Period",
+        "days": "Days",
+        "status": "Status",
+        "reason": "Reason",
+        "decision": "Decision"
+      },
+      "dayCount": "{count, plural, one {# day} other {# days}}",
+      "status": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "cancelled": "Cancelled"
+      }
+    },
+    "roles": {
+      "admin": "Admin",
+      "user": "User"
+    },
+    "admin": {
+      "loading": "Loading leave dashboard…",
+      "legendTitle": "Status legend",
+      "legendSubtitle": "Understand each alert level at a glance.",
+      "tableTitle": "Team leave overview",
+      "legend": {
+        "critical": "Critical: <5 days remaining or >80% used",
+        "warningUsage": "Warning: 60–80% of allowance used",
+        "warningInactive": "Warning: no leave taken in 2+ months",
+        "good": "Good: healthy allowance",
+        "unallocated": "Unallocated allowance"
+      },
+      "table": {
+        "user": "Team member",
+        "role": "Role",
+        "allocation": "Total days",
+        "approved": "Approved",
+        "pending": "Pending",
+        "remaining": "Remaining",
+        "balance": "Balance",
+        "percentage": "% used",
+        "departure": "Until departure",
+        "lastLeave": "Last leave",
+        "status": "Status",
+        "save": "Save"
+      },
+      "roles": {
+        "admin": "Admin",
+        "user": "User"
+      },
+      "pending": {
+        "title": "Pending requests ({count})",
+        "subtitle": "Total pending days: {days}",
+        "empty": "No pending requests at the moment.",
+        "approve": "Approve",
+        "reject": "Reject",
+        "created": "Created",
+        "period": "Period",
+        "reason": "Reason",
+        "daySingular": "{count} day",
+        "dayPlural": "{count} days"
+      },
+      "toasts": {
+        "allocationSaved": "Allowance updated",
+        "allocationInvalid": "Enter a valid number of days",
+        "statusApproved": "Request approved",
+        "statusRejected": "Request rejected",
+        "statusError": "Could not update request status"
+      }
+    }
   }
 }

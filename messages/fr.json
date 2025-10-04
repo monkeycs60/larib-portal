@@ -357,5 +357,120 @@
       "last30": "30 derniers jours",
       "custom": "Personnalisée"
     }
+  },
+  "conges": {
+    "title": "Gestion des congés",
+    "subtitle": "Visualisez votre solde, vos demandes et les absences à venir.",
+    "request": {
+      "trigger": "Demander un congé",
+      "title": "Envoyer une demande de congé",
+      "description": "Sélectionnez les dates de début et de fin, puis ajoutez si besoin un message pour l'administrateur.",
+      "start": "Date de début",
+      "end": "Date de fin",
+      "reason": "Motif",
+      "optional": "Message optionnel pour l'approbateur",
+      "submit": "Envoyer la demande",
+      "cancel": "Annuler",
+      "success": "Demande de congé envoyée",
+      "missingRange": "Sélectionnez une date de début et de fin avant d'envoyer"
+    },
+    "errors": {
+      "overlap": "Vous avez déjà une demande sur cette période.",
+      "invalidRange": "La date de fin doit être postérieure à la date de début.",
+      "missingRange": "Veuillez choisir des dates de début et de fin."
+    },
+    "summary": {
+      "totalAllocation": "Capital de congés",
+      "approved": "Approuvés",
+      "pending": "En attente",
+      "remaining": "Restants",
+      "balanceAfterPending": "Solde après demandes",
+      "contractLabel": "Période de contrat",
+      "contractDuration": "{value} jours entre l'arrivée et le départ",
+      "contractUnavailable": "Date d'arrivée ou de départ manquante",
+      "contractDates": "{arrival} → {departure}"
+    },
+    "calendar": {
+      "title": "Calendrier – {month} {year}",
+      "empty": "—",
+      "more": "+{count}",
+      "weekdays": ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
+    },
+    "today": {
+      "title": "Absents aujourd'hui",
+      "none": "Personne n'est absent aujourd'hui"
+    },
+    "history": {
+      "title": "Historique des demandes",
+      "empty": "Vous n'avez pas encore fait de demande de congé.",
+      "columns": {
+        "period": "Période",
+        "days": "Jours",
+        "status": "Statut",
+        "reason": "Motif",
+        "decision": "Décision"
+      },
+      "dayCount": "{count, plural, one {# jour} other {# jours}}",
+      "status": {
+        "pending": "En attente",
+        "approved": "Approuvée",
+        "rejected": "Refusée",
+        "cancelled": "Annulée"
+      }
+    },
+    "roles": {
+      "admin": "Admin",
+      "user": "Utilisateur"
+    },
+    "admin": {
+      "loading": "Chargement du tableau des congés…",
+      "legendTitle": "Légende des statuts",
+      "legendSubtitle": "Comprenez chaque niveau d'alerte en un coup d'œil.",
+      "tableTitle": "Vue d'ensemble de l'équipe",
+      "legend": {
+        "critical": "Critique : <5 jours restants ou >80 % utilisés",
+        "warningUsage": "Alerte : 60–80 % du capital utilisé",
+        "warningInactive": "Alerte : aucun congé depuis plus de 2 mois",
+        "good": "Bon : capital sain",
+        "unallocated": "Capital non défini"
+      },
+      "table": {
+        "user": "Collaborateur",
+        "role": "Rôle",
+        "allocation": "Total",
+        "approved": "Approuvés",
+        "pending": "En attente",
+        "remaining": "Restants",
+        "balance": "Solde",
+        "percentage": "% utilisé",
+        "departure": "Avant départ",
+        "lastLeave": "Dernier congé",
+        "status": "Statut",
+        "save": "Enregistrer"
+      },
+      "roles": {
+        "admin": "Admin",
+        "user": "Utilisateur"
+      },
+      "pending": {
+        "title": "Demandes en attente ({count})",
+        "subtitle": "Total des jours en attente : {days}",
+        "empty": "Aucune demande en attente pour le moment.",
+        "approve": "Approuver",
+        "reject": "Refuser",
+        "created": "Créée",
+        "period": "Période",
+        "reason": "Motif",
+        "daySingular": "{count} jour",
+        "dayPlural": "{count} jours"
+      },
+      "toasts": {
+        "allocationSaved": "Capital mis à jour",
+        "allocationInvalid": "Entrez un nombre de jours valide",
+        "statusApproved": "Demande approuvée",
+        "statusRejected": "Demande refusée",
+        "statusError": "Impossible de mettre à jour le statut"
+      }
+    }
   }
 }

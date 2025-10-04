@@ -1,3 +1,21 @@
+## Feature: Congés Leave Management App
+
+- Name: Congés leave dashboard for users and admins
+- What it does: Adds a dedicated leave management sub-app with Prisma models for leave requests and totals, a user dashboard showing allowance, pending/approved balances, a shared organisational calendar, same-day absences, and history, plus an admin workspace with pending approvals, per-user metrics, inline allowance edits, and risk legend.
+- How to use it: From `/{locale}/conges`, users can submit new requests via the dialog, browse the calendar month by month, and review their history; admins additionally see the pending approvals list and can approve/refuse requests or adjust allowances inline.
+- Updated files:
+  - `prisma/schema.prisma`
+  - `prisma/migrations/20251004223603_conges_init/migration.sql`
+  - `lib/services/conges/index.ts`
+  - `lib/services/users.ts`
+  - `app/[locale]/conges/page.tsx`
+  - `app/[locale]/conges/actions.ts`
+  - `app/[locale]/conges/components/request-leave-dialog.tsx`
+  - `app/[locale]/conges/components/leave-calendar.tsx`
+  - `app/[locale]/conges/components/admin-dashboard.tsx`
+  - `messages/en.json`
+  - `messages/fr.json`
+
 ## Enhancement: Bestof Attempt Navigation Boost
 
 - Name: Faster attempt opening and LCP optimisations
