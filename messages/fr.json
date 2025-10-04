@@ -451,7 +451,8 @@
         "lastLeave": "Dernier congé",
         "status": "Statut",
         "save": "Enregistrer",
-        "edit": "Ajuster"
+        "edit": "Ajuster",
+        "departed": "Déjà parti"
       },
       "allocationModal": {
         "title": "Ajuster le capital de congés",

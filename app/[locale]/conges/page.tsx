@@ -136,6 +136,7 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
           status: t('admin.table.status'),
           save: t('admin.table.save'),
           edit: t('admin.table.edit'),
+          departed: t('admin.table.departed'),
         },
         allocationModal: {
           title: t('admin.allocationModal.title'),

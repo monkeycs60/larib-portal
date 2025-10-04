@@ -1,5 +1,4 @@
 - We cannot change month in the calendar (server error + redirection to dashboard) surely because of application link (locale is repeated twice ) GET /en/en/conges?month=2025-09 404 in 53ms
 - 'Request leave' button must have different name for admins: 'Declare leave' ; and the submission must be auto-accepted (because it is admin)
-- If 'until departure' is less than 0 (the guy already left), so that add a special label and make the line grayed out
 - status legend must be more discrete or more integrated in the table (take less space) for admin
 - change hierarchy of the page for admins: pending on top then table overview then days card then calendar

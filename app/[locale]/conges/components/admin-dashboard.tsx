@@ -49,6 +49,7 @@ type AdminDashboardProps = {
       status: string
       save: string
       edit: string
+      departed: string
     }
     statusLabels: {
       ADMIN: string
@@ -390,14 +391,25 @@ export function AdminDashboard({ data }: AdminDashboardProps) {
                 const displayName = [row.firstName, row.lastName].filter(Boolean).join(' ').trim() || row.email
                 const allocationValue = allocations[row.userId] ?? row.totalAllocationDays
                 const isSaving = savingAllocation && activeAllocationUser === row.userId
-                const departureValue = row.monthsUntilDeparture != null || row.daysUntilDeparture != null
+                const hasDeparted = row.daysUntilDeparture != null && row.daysUntilDeparture < 0
+                const rawDepartureValue = row.monthsUntilDeparture != null || row.daysUntilDeparture != null
                   ? `${row.monthsUntilDeparture ?? '-'} mo / ${row.daysUntilDeparture ?? '-'} d`
                   : '—'
+                const departureDisplay = hasDeparted ? (
+                  <Badge variant='outline' className='text-xs font-medium'>
+                    {data.tableLabels.departed}
+                  </Badge>
+                ) : (
+                  rawDepartureValue
+                )
                 const lastLeaveValue = row.lastLeaveDate ? new Date(row.lastLeaveDate).toLocaleDateString() : '—'
                 const percentageValue = `${Math.round(row.percentageUsed)}%`
 
                 return (
-                  <TableRow key={row.userId}>
+                  <TableRow
+                    key={row.userId}
+                    className={hasDeparted ? 'bg-muted/40 text-muted-foreground' : undefined}
+                  >
                     <TableCell>
                       <div className='font-medium'>{displayName}</div>
                       <div className='text-xs text-muted-foreground'>{row.email}</div>
@@ -422,7 +434,7 @@ export function AdminDashboard({ data }: AdminDashboardProps) {
                     <TableCell>{row.remainingDays}</TableCell>
                     <TableCell>{row.balanceAfterPending}</TableCell>
                     <TableCell>{percentageValue}</TableCell>
-                    <TableCell>{departureValue}</TableCell>
+                    <TableCell>{departureDisplay}</TableCell>
                     <TableCell>{lastLeaveValue}</TableCell>
                     <TableCell>
                       <Badge variant={statusVariant[row.status]}>{data.legendLabels[row.status]}</Badge>

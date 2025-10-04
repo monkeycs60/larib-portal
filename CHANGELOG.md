@@ -1,3 +1,14 @@
+## Enhancement: Admin Departure Highlighting
+
+- Name: Departed teammates styling
+- What it does: Automatically greys out admin overview rows for teammates whose departure date has passed and replaces the countdown with a "Departed" badge.
+- How to use it: Open the Congés admin overview; any user with a past departure date now appears subdued with a clear departed label.
+- Updated files:
+  - `app/[locale]/conges/components/admin-dashboard.tsx`
+  - `app/[locale]/conges/page.tsx`
+  - `messages/en.json`
+  - `messages/fr.json`
+
 ## Enhancement: Admin Leave Allocation Modal
 
 - Name: Modal allocation adjustments for admins

@@ -453,7 +453,8 @@
         "lastLeave": "Last leave",
         "status": "Status",
         "save": "Save",
-        "edit": "Adjust"
+        "edit": "Adjust",
+        "departed": "Departed"
       },
       "allocationModal": {
         "title": "Adjust leave allowance",
