@@ -79,8 +79,8 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
   const previousMonth = subMonths(activeMonth, 1)
   const nextMonth = addMonths(activeMonth, 1)
 
-  const prevHref = `${applicationLink(locale, '/conges')}?month=${format(previousMonth, 'yyyy-MM')}`
-  const nextHref = `${applicationLink(locale, '/conges')}?month=${format(nextMonth, 'yyyy-MM')}`
+  const previousMonthParam = format(previousMonth, 'yyyy-MM')
+  const nextMonthParam = format(nextMonth, 'yyyy-MM')
   const calendarLabel = t('calendar.title', {
     month: format(activeMonth, 'LLLL', { locale: dateLocale }),
     year: format(activeMonth, 'yyyy', { locale: dateLocale }),
@@ -249,8 +249,9 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
             activeMonthIso: activeMonth.toISOString(),
             calendar: calendarData.calendar,
             navigation: {
-              previousHref: prevHref,
-              nextHref: nextHref,
+              basePath: '/conges',
+              previousMonth: previousMonthParam,
+              nextMonth: nextMonthParam,
               label: calendarLabel,
             },
             weekdayLabels,

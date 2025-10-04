@@ -1,3 +1,12 @@
+## Fix: Congés Calendar Locale Navigation
+
+- Name: Locale-aware month navigation links
+- What it does: Updates the congés calendar controls to build their links with the i18n router so the active locale is no longer duplicated in the URL when switching months.
+- How to use it: Visit `/{locale}/conges` and move between months using the calendar arrows; navigation now stays within the current locale without 404 errors.
+- Updated files:
+  - `app/[locale]/conges/page.tsx`
+  - `app/[locale]/conges/components/leave-calendar.tsx`
+
 ## Fix: Congés Runtime Stability
 
 - Name: Admin dashboard type-only imports + restored migration + safe actions

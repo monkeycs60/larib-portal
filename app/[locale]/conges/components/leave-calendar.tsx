@@ -18,8 +18,9 @@ type LeaveCalendarProps = {
     activeMonthIso: string
     calendar: CalendarDay[]
     navigation: {
-      previousHref: string
-      nextHref: string
+      basePath: string
+      previousMonth: string
+      nextMonth: string
       label: string
     }
     weekdayLabels: string[]
@@ -57,10 +58,24 @@ export function LeaveCalendar({ content }: LeaveCalendarProps) {
         </div>
         <div className='flex items-center gap-2'>
           <Button asChild variant='outline' size='sm'>
-            <Link href={content.navigation.previousHref}>&larr;</Link>
+            <Link
+              href={{
+                pathname: content.navigation.basePath,
+                query: { month: content.navigation.previousMonth },
+              }}
+            >
+              &larr;
+            </Link>
           </Button>
           <Button asChild variant='outline' size='sm'>
-            <Link href={content.navigation.nextHref}>&rarr;</Link>
+            <Link
+              href={{
+                pathname: content.navigation.basePath,
+                query: { month: content.navigation.nextMonth },
+              }}
+            >
+              &rarr;
+            </Link>
           </Button>
         </div>
       </CardHeader>
