@@ -1,0 +1,6 @@
+- We cannot change month in the calendar (server error + redirection to dashboard) surely because of application link (locale is repeated twice ) GET /en/en/conges?month=2025-09 404 in 53ms
+- 'Request leave' button must have different name for admins: 'Declare leave' ; and the submission must be auto-accepted (because it is admin)
+- In the team leave overview table, you should not be able to modify 'total days' on fly if you are admin: instead ad a pencil that opens a modal with a input field to modify the total days specifying the current value but this input should not be central in the modal ; i want the basic option with the current total and a '-' (minus) button to decrement the total days and a '+' button to increment the total days
+- If 'until departure' is less than 0 (the guy already left), so that add a special label and make the line grayed out
+- status legend must be more discrete or more integrated in the table (take less space) for admin
+- change hierarchy of the page for admins: pending on top then table overview then days card then calendar

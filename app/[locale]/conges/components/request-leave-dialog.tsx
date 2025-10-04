@@ -37,6 +37,8 @@ type RequestLeaveDialogProps = {
     overlapError: string
     invalidRange: string
     missingRange: string
+    insufficientDays: string
+    pastDate: string
   }
   defaultMonthIso: string
 }
@@ -81,6 +83,16 @@ export function RequestLeaveDialog({ translations, defaultMonthIso }: RequestLea
 
       if (error.validationErrors?.fieldErrors?.endDate) {
         toast.error(translations.invalidRange)
+        return
+      }
+
+      if (error.serverError === 'insufficientDays') {
+        toast.error(translations.insufficientDays)
+        return
+      }
+
+      if (error.serverError === 'pastDate') {
+        toast.error(translations.pastDate)
         return
       }
 

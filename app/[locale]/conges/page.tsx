@@ -104,6 +104,8 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
     overlapError: t('errors.overlap'),
     invalidRange: t('errors.invalidRange'),
     missingRange: t('errors.missingRange'),
+    insufficientDays: t('errors.insufficientDays'),
+    pastDate: t('errors.pastDate'),
   }
 
   const statusLabels = {
@@ -167,7 +169,12 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
       }
     : null
 
-  const summaryItems = [
+  const pendingImpactLabel =
+    userDashboard.summary.pendingDays > 0
+      ? t('summary.pendingImpact', { count: userDashboard.summary.pendingDays })
+      : null
+
+  const summaryCards = [
     {
       label: t('summary.totalAllocation'),
       value: userDashboard.summary.totalAllocationDays,
@@ -182,11 +189,8 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
     },
     {
       label: t('summary.remaining'),
-      value: userDashboard.summary.remainingDays,
-    },
-    {
-      label: t('summary.balanceAfterPending'),
       value: userDashboard.summary.balanceAfterPending,
+      helper: pendingImpactLabel,
     },
   ]
 
@@ -221,13 +225,16 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
 
       <section className='px-6'>
         <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-5'>
-          {summaryItems.map((card) => (
+          {summaryCards.map((card) => (
             <Card key={card.label}>
               <CardHeader className='pb-2'>
                 <CardTitle className='text-sm font-medium text-muted-foreground'>{card.label}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className='text-2xl font-semibold'>{card.value}</div>
+                {card.helper ? (
+                  <div className='text-sm font-medium text-orange-500'>{card.helper}</div>
+                ) : null}
               </CardContent>
             </Card>
           ))}

@@ -1,3 +1,15 @@
+## Enhancement: Congés Leave Validation Guardrails
+
+- Name: Pending-aware remaining days and stricter request validation
+- What it does: Blocks leave declarations in the past or beyond the remaining allowance (accounting for existing pending requests), updates the remaining days card to reflect the post-pending balance, and surfaces pending days in orange parentheses.
+- How to use it: Submit a new leave request; attempts that exceed your available balance now error with a localized message, and pending requests immediately reduce the displayed remaining days.
+- Updated files:
+  - `app/[locale]/conges/components/request-leave-dialog.tsx`
+  - `app/[locale]/conges/page.tsx`
+  - `lib/services/conges/index.ts`
+  - `messages/en.json`
+  - `messages/fr.json`
+
 ## Enhancement: Admin Leave Declaration Flow
 
 - Name: Admin self-declared leave auto-approval

@@ -420,17 +420,53 @@ export async function createLeaveRequest(input: {
 }): Promise<void> {
   const { start, end } = normaliseRange(input.startDate, input.endDate)
 
-  const overlapping = await prisma.leaveRequest.findFirst({
+  const today = startOfDay(new Date())
+  if (start < today) {
+    throw new Error('pastDate')
+  }
+
+  const existingRequests = await prisma.leaveRequest.findMany({
     where: {
       userId: input.userId,
       status: { in: ['PENDING', 'APPROVED'] },
-      startDate: { lte: end },
-      endDate: { gte: start },
     },
+    select: {
+      startDate: true,
+      endDate: true,
+      status: true,
+    },
+  })
+
+  const overlapping = existingRequests.some((request) => {
+    const requestStart = startOfDay(request.startDate)
+    const requestEnd = endOfDay(request.endDate)
+    return requestStart <= end && requestEnd >= start
   })
 
   if (overlapping) {
     throw new Error('leaveOverlap')
+  }
+
+  const requestedDays = countLeaveDays(start, end)
+
+  const approvedDays = existingRequests
+    .filter((request) => request.status === 'APPROVED')
+    .reduce((total, request) => total + countLeaveDays(request.startDate, request.endDate), 0)
+
+  const pendingDays = existingRequests
+    .filter((request) => request.status === 'PENDING')
+    .reduce((total, request) => total + countLeaveDays(request.startDate, request.endDate), 0)
+
+  const user = await prisma.user.findUniqueOrThrow({
+    where: { id: input.userId },
+    select: { congesTotalDays: true },
+  })
+
+  const totalAllocationDays = user.congesTotalDays ?? 0
+  const availableAfterPending = Math.max(totalAllocationDays - approvedDays - pendingDays, 0)
+
+  if (requestedDays > availableAfterPending) {
+    throw new Error('insufficientDays')
   }
 
   const shouldAutoApprove = Boolean(input.autoApprove)

@@ -380,7 +380,9 @@
     "errors": {
       "overlap": "You already have a request covering that period.",
       "invalidRange": "The end date must be after the start date.",
-      "missingRange": "Please choose a start and end date."
+      "missingRange": "Please choose a start and end date.",
+      "pastDate": "The start date must be today or later.",
+      "insufficientDays": "You do not have enough remaining days for this leave."
     },
     "summary": {
       "totalAllocation": "Allocated days",
@@ -388,6 +390,7 @@
       "pending": "Pending",
       "remaining": "Remaining",
       "balanceAfterPending": "Balance after pending",
+      "pendingImpact": "({count, plural, one {# pending day} other {# pending days}})",
       "contractLabel": "Contract span",
       "contractDuration": "{value} days between arrival and departure",
       "contractUnavailable": "Arrival or departure date missing",

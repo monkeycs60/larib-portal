@@ -378,7 +378,9 @@
     "errors": {
       "overlap": "Vous avez déjà une demande sur cette période.",
       "invalidRange": "La date de fin doit être postérieure à la date de début.",
-      "missingRange": "Veuillez choisir des dates de début et de fin."
+      "missingRange": "Veuillez choisir des dates de début et de fin.",
+      "pastDate": "La date de début doit être aujourd'hui ou plus tard.",
+      "insufficientDays": "Vous n'avez pas assez de jours restants pour cette demande."
     },
     "summary": {
       "totalAllocation": "Capital de congés",
@@ -386,6 +388,7 @@
       "pending": "En attente",
       "remaining": "Restants",
       "balanceAfterPending": "Solde après demandes",
+      "pendingImpact": "({count, plural, one {# jour en attente} other {# jours en attente}})",
       "contractLabel": "Période de contrat",
       "contractDuration": "{value} jours entre l'arrivée et le départ",
       "contractUnavailable": "Date d'arrivée ou de départ manquante",
