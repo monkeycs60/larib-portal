@@ -206,6 +206,10 @@ export function AdminDashboard({ data }: AdminDashboardProps) {
     setActiveStatusRequest(null)
   }
 
+  const isAllocationDialogOpen = allocationDialog !== null
+  const isDialogSaving = allocationDialog !== null && activeAllocationUser === allocationDialog.userId && savingAllocation
+  const isConfirmDisabled = isDialogSaving || allocationDialog === null || allocationDialog.inputValue === ''
+
   return (
     <div className='space-y-6'>
       <Dialog
