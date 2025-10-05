@@ -19,7 +19,8 @@ const AddUserSchema = z.object({
   firstName: z.string().optional(),
   lastName: z.string().optional(),
   position: z.string().optional(),
-  accessEndDate: z.string().optional(),
+  arrivalDate: z.string().min(1),
+  departureDate: z.string().min(1),
   applications: z.array(z.enum(["BESTOF_LARIB","CONGES","CARDIOLARIB"]))
 })
 
@@ -84,7 +85,7 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
   // Email preview values
   const previewEmail = watch('email') || 'user@example.com'
   const previewPos = watch('position')
-  const previewEnd = watch('accessEndDate')
+  const previewEnd = watch('departureDate')
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -131,8 +132,12 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
               </Select>
             </div>
             <div>
-              <label className="block text-sm mb-1">{t('accessEndDate')}</label>
-              <Input type="date" {...register('accessEndDate')} />
+              <label className="block text-sm mb-1">{t('arrivalDate')}</label>
+              <Input type="date" required {...register('arrivalDate')} />
+            </div>
+            <div>
+              <label className="block text-sm mb-1">{t('departureDate')}</label>
+              <Input type="date" required {...register('departureDate')} />
             </div>
           </div>
 

@@ -72,14 +72,16 @@ const CreateInviteSchema = z.object({
   position: z.string().trim().optional().nullable(),
   applications: z.array(z.enum(["BESTOF_LARIB", "CONGES", "CARDIOLARIB"]))
     .default([]),
-  accessEndDate: z.string().optional().nullable(), // ISO date
+  arrivalDate: z.string().min(1), // ISO date
+  departureDate: z.string().min(1), // ISO date
   locale: z.enum(["en","fr"]),
 })
 
 export const createUserInviteAction = adminOnlyAction
   .inputSchema(CreateInviteSchema)
   .action(async ({ parsedInput }) => {
-    const departureDate = parsedInput.accessEndDate ? new Date(parsedInput.accessEndDate) : null
+    const arrivalDate = new Date(parsedInput.arrivalDate)
+    const departureDate = new Date(parsedInput.departureDate)
 
     // Create or ensure the position exists if provided
     let positionName: string | null = parsedInput.position ?? null
@@ -97,6 +99,7 @@ export const createUserInviteAction = adminOnlyAction
       language: parsedInput.locale === 'fr' ? 'FR' : 'EN',
       position: positionName,
       applications: parsedInput.applications,
+      arrivalDate,
       departureDate,
     })
 
@@ -109,6 +112,7 @@ export const createUserInviteAction = adminOnlyAction
       role: parsedInput.role,
       position: positionName,
       applications: parsedInput.applications,
+      arrivalDate,
       departureDate,
     })
 

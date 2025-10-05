@@ -8,6 +8,7 @@ export type InvitationPayload = {
   role: 'ADMIN' | 'USER'
   position?: string | null
   applications: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'>
+  arrivalDate?: Date | null
   departureDate?: Date | null
 }
 

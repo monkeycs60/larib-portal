@@ -1,8 +1,8 @@
 ## Enhancement: Congés Calendar Preloading
 
-- Name: Year-buffered congés calendar
-- What it does: Preloads an entire year of approved absences and hydrates calendar navigation on the client, so switching months avoids full page refreshes and shows a skeleton while the calendar chunk loads.
-- How to use it: Open the congés calendar and click the previous or next month buttons; transitions inside the active year are now instant and display the new skeleton briefly on first load.
+- Name: Rolling congés calendar cache
+- What it does: Preloads approved absences across a rolling ±12-month window centred on today (with automatic fallback when navigating further), then hydrates calendar navigation on the client so month switches inside the window stay instant and show a skeleton only while the chunk hydrates.
+- How to use it: Open the congés calendar and jump across months; anything inside the one-year window around today swaps immediately and outside months trigger a traditional refresh once.
 - Updated files:
   - `lib/services/conges/index.ts`
   - `app/[locale]/conges/page.tsx`

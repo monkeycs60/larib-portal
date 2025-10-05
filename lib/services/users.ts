@@ -119,6 +119,7 @@ export type CreatePlaceholderUserInput = {
   language?: 'EN' | 'FR'
   position?: string | null
   applications?: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'>
+  arrivalDate?: Date | null
   departureDate?: Date | null
 }
 
@@ -135,6 +136,7 @@ export async function createPlaceholderUser(data: CreatePlaceholderUserInput): P
       position: data.position ?? null,
       congesTotalDays: 0,
       applications: data.applications ?? [],
+      arrivalDate: data.arrivalDate ?? null,
       departureDate: data.departureDate ?? null,
     },
     select: {
