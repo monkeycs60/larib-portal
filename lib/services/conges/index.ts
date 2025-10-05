@@ -1,13 +1,18 @@
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@/app/generated/prisma'
 import {
+  addMonths,
   differenceInCalendarDays,
   differenceInMonths,
   eachDayOfInterval,
   endOfDay,
   endOfMonth,
+  endOfYear,
+  format,
   startOfDay,
   startOfMonth,
+  startOfYear,
+  subMonths,
 } from 'date-fns'
 
 type LeaveRequestStatus = Prisma.LeaveRequestStatus
@@ -125,17 +130,20 @@ function resolveLocaleDateValue(value: Date | null): string | null {
 }
 
 export async function getLeaveCalendarData(month: Date): Promise<{
-  calendar: CalendarDay[]
+  calendarDays: CalendarDay[]
+  availableMonths: string[]
   todaysAbsences: TodaysAbsence[]
 }> {
-  const monthStart = startOfMonth(month)
-  const monthEnd = endOfMonth(month)
+  const yearStart = startOfYear(month)
+  const yearEnd = endOfYear(month)
+  const rangeStart = startOfMonth(subMonths(yearStart, 1))
+  const rangeEnd = endOfMonth(addMonths(yearEnd, 1))
 
   const approvedLeaves = await prisma.leaveRequest.findMany({
     where: {
       status: 'APPROVED',
-      startDate: { lte: monthEnd },
-      endDate: { gte: monthStart },
+      startDate: { lte: rangeEnd },
+      endDate: { gte: rangeStart },
     },
     include: {
       user: {
@@ -150,9 +158,10 @@ export async function getLeaveCalendarData(month: Date): Promise<{
     },
   })
 
-  const daysInterval = eachDayOfInterval({ start: monthStart, end: monthEnd })
+  const daysInterval = eachDayOfInterval({ start: rangeStart, end: rangeEnd })
+  const availableMonthSet = new Set<string>()
 
-  const calendar = daysInterval.map((day) => {
+  const calendarDays = daysInterval.map((day) => {
     const absentees = approvedLeaves
       .filter((leave) => leave.startDate <= endOfDay(day) && leave.endDate >= startOfDay(day))
       .map((leave) => ({
@@ -161,6 +170,10 @@ export async function getLeaveCalendarData(month: Date): Promise<{
         lastName: leave.user.lastName,
         role: leave.user.role as 'ADMIN' | 'USER',
       }))
+
+    if (day >= yearStart && day <= yearEnd) {
+      availableMonthSet.add(format(day, 'yyyy-MM'))
+    }
 
     return {
       date: day.toISOString(),
@@ -179,7 +192,9 @@ export async function getLeaveCalendarData(month: Date): Promise<{
       position: leave.user.position,
     }))
 
-  return { calendar, todaysAbsences }
+  const availableMonths = Array.from(availableMonthSet).sort()
+
+  return { calendarDays, availableMonths, todaysAbsences }
 }
 
 export async function getUserLeaveDashboard(userId: string): Promise<UserLeaveDashboard> {

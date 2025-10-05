@@ -1,7 +1,6 @@
 import { Suspense } from 'react'
 import { getTranslations } from 'next-intl/server'
-import { startOfMonth, addMonths, subMonths, format } from 'date-fns'
-import { fr as frLocale, enUS } from 'date-fns/locale'
+import { startOfMonth } from 'date-fns'
 import { getTypedSession } from '@/lib/auth-helpers'
 import { redirect } from 'next/navigation'
 import {
@@ -16,6 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { RequestLeaveDialog } from './components/request-leave-dialog'
 import { LeaveCalendar } from './components/leave-calendar'
 import { AdminDashboard } from './components/admin-dashboard'
+import { CalendarSkeleton } from './components/calendar-skeleton'
 import { applicationLink } from '@/lib/application-link'
 
 type PageParams = {
@@ -67,7 +67,6 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
 
   const monthParam = typeof sp?.month === 'string' ? sp.month : null
   const activeMonth = parseMonth(monthParam)
-  const dateLocale = locale === 'fr' ? frLocale : enUS
 
   const [t, userDashboard, calendarData, adminDashboard] = await Promise.all([
     getTranslations({ locale, namespace: 'conges' }),
@@ -75,18 +74,6 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
     getLeaveCalendarData(activeMonth),
     session.user.role === 'ADMIN' ? getAdminLeaveDashboard() : Promise.resolve(null),
   ])
-
-  const previousMonth = subMonths(activeMonth, 1)
-  const nextMonth = addMonths(activeMonth, 1)
-
-  const previousMonthParam = format(previousMonth, 'yyyy-MM')
-  const nextMonthParam = format(nextMonth, 'yyyy-MM')
-  const calendarLabel = t('calendar.title', {
-    month: format(activeMonth, 'LLLL', { locale: dateLocale }),
-    year: format(activeMonth, 'yyyy', { locale: dateLocale }),
-  })
-
-  const weekdayLabels = t.raw('calendar.weekdays') as string[]
 
   const requestTrigger = session.user.role === 'ADMIN' ? t('request.triggerAdmin') : t('request.trigger')
 
@@ -256,21 +243,18 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
 
   const calendarSection = (
     <section className='px-6 grid gap-6 lg:grid-cols-[2fr_1fr]'>
-      <LeaveCalendar
-        content={{
-          activeMonthIso: activeMonth.toISOString(),
-          calendar: calendarData.calendar,
-          navigation: {
-            basePath: '/conges',
-            previousMonth: previousMonthParam,
-            nextMonth: nextMonthParam,
-            label: calendarLabel,
-          },
-          weekdayLabels,
-          emptyLabel: t('calendar.empty'),
-          moreLabel: (count) => t('calendar.more', { count }),
-        }}
-      />
+      <Suspense fallback={<CalendarSkeleton />}>
+        <LeaveCalendar
+          content={{
+            activeMonthIso: activeMonth.toISOString(),
+            calendarDays: calendarData.calendarDays,
+            availableMonths: calendarData.availableMonths,
+            navigation: {
+              baseHref: applicationLink(locale, '/conges'),
+            },
+          }}
+        />
+      </Suspense>
       <Card>
         <CardHeader>
           <CardTitle>{t('today.title')}</CardTitle>
