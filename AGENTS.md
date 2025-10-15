@@ -1,17 +1,5 @@
 # Repository Guidelines
 
-- Always document new feature in CHANGELOG.md: document name + what it does + how to use it. The objective is to have a clear and concise documentation of all app features.
-
-- Use playwright mcp to debug ui issues and test new features :
-   credentials for admin:
-      email: toupin.solenn@gmail.com
-      password: ristifouf
-   credentials for user:
-      email: serizay.clem@gmail.com
-      password: ristifou
-
-- Use postgres mcp to debug database issues and test new features
-
 ### Prohibited Practices
 
 -  **No useEffect**: Use fetch in server components via services, or handle side effects via event handlers

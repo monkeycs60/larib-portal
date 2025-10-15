@@ -13,6 +13,7 @@ import type { CaseAttemptSummary } from '@/lib/services/bestof-larib-attempts'
 import { getActionErrorMessage } from '@/lib/ui/safe-action-error'
 import { useRouter } from '@/app/i18n/navigation'
 import { htmlToPlainText } from '@/lib/html'
+import CaseContentDisplay from './case-content-display'
 
 type Difficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
 
@@ -47,6 +48,7 @@ export default function WorkArea({ meta, defaults, rightPane, attempts, userTagD
 
   const [locked, setLocked] = useState<boolean>(!!prefill?.validatedAt)
   const [pendingAttempt, setPendingAttempt] = useState<CaseAttemptSummary | null>(null)
+  const [contentRevealKey, setContentRevealKey] = useState(0)
 
   const attemptItems = useMemo<CaseAttemptSummary[]>(() => {
     if (!pendingAttempt) return attempts
@@ -70,6 +72,7 @@ export default function WorkArea({ meta, defaults, rightPane, attempts, userTagD
     onSuccess(res) {
       toast.success(t('caseView.validated'))
       setLocked(true)
+      setContentRevealKey(key => key + 1)
       const now = new Date()
       const newItem = { id: res.data?.attemptId ?? crypto.randomUUID(), createdAt: now, validatedAt: now, lvef: analysis.lvef ?? null, kinetic: analysis.kinetic ?? null, lge: analysis.lge ?? null, finalDx: analysis.finalDx ?? null, report: report ?? null }
       setPendingAttempt(newItem)
@@ -142,6 +145,7 @@ export default function WorkArea({ meta, defaults, rightPane, attempts, userTagD
 							setLocked(!!selectedAttempt.validatedAt);
 							setAnalysisKey((key) => key + 1);
 							setReportKey((key) => key + 1);
+							setContentRevealKey((key) => key + 1);
 						},
 						showStartNewAttempt: true,
 						onStartNewAttempt: () => {
@@ -155,6 +159,7 @@ export default function WorkArea({ meta, defaults, rightPane, attempts, userTagD
 							setReport('');
 							setAnalysisKey((key) => key + 1);
 							setReportKey((key) => key + 1);
+							setContentRevealKey((key) => key + 1);
 						},
 					}}
 				/>
@@ -201,7 +206,11 @@ export default function WorkArea({ meta, defaults, rightPane, attempts, userTagD
 				</ResizablePanel>
 				<ResizableHandle withHandle />
 				<ResizablePanel defaultSize={45} minSize={20}>
-					<div className='rounded border p-4 h-fit'>{rightPane}</div>
+					<div className='rounded border p-4 h-fit'>
+						<CaseContentDisplay isLocked={locked} revealKey={contentRevealKey}>
+							{rightPane}
+						</CaseContentDisplay>
+					</div>
 				</ResizablePanel>
 			</ResizablePanelGroup>
 		</div>

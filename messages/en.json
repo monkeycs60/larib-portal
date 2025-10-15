@@ -301,7 +301,10 @@
       "noTagsSelected": "No tags selected",
       "tagsAutoSaved": "Selections are saved automatically.",
       "showAllTags": "Show all tags",
-      "hideTags": "Show fewer"
+      "hideTags": "Show fewer",
+      "contentHiddenBeforeValidation": "You can access the result after submitting your case",
+      "revealContent": "Reveal the result",
+      "clickToReveal": "Click to reveal"
     }
     ,
     "assignTagsTab": "Assign",

@@ -299,7 +299,10 @@
       "noTagsSelected": "Aucun tag sélectionné",
       "tagsAutoSaved": "Les sélections sont enregistrées automatiquement.",
       "showAllTags": "Afficher tous les tags",
-      "hideTags": "Réduire la liste"
+      "hideTags": "Réduire la liste",
+      "contentHiddenBeforeValidation": "Vous pourrez accéder au résultat après avoir soumis votre cas",
+      "revealContent": "Découvrez le résultat",
+      "clickToReveal": "Cliquez pour afficher"
     }
     ,
     "assignTagsTab": "Assigner",
