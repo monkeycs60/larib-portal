@@ -187,7 +187,7 @@ export default function CaseInteractionPanel({ config }: { config: CaseInteracti
               <Button onClick={() => { if (isAdmin) return; const id = lastAttemptId ?? useBestofAttemptStore.getState().getLastAttemptId(caseId) ?? null; if (!id) { toast.error(t('errors.fieldsRequired')); return } execValidate({ attemptId: id }) }} disabled={isAdmin || validating} variant="secondary">{t('caseView.validateCase')}</Button>
             </div>
           )}
-          {showStartNewAttempt ? (
+          {showStartNewAttempt && attempts.filter((attempt) => !!attempt.validatedAt).length > 0 ? (
             <div className="pt-2">
               <Button
                 type="button"

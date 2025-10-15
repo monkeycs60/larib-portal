@@ -656,6 +656,20 @@ Notes:
 
 ## [Unreleased]
 
+- Bestof Larib: Case content reveal after validation
+  - Name: Progressive case content disclosure
+  - What it does: Hides the case content (PDF or rich text) until the user validates their attempt, then requires a click to reveal the result. Content is re-hidden when starting a new attempt or selecting a previous attempt.
+  - How to use it:
+    - On a new attempt (0 validated attempts), the case content shows a lock icon and message "You can access the result after submitting your case".
+    - After validation, the content shows a reveal button "Discover the result" with a green background. Click to display the PDF/rich text.
+    - When switching between attempts or starting a new attempt, the content resets to hidden state.
+    - The "Start new attempt" button is now hidden when no validated attempts exist.
+  - Updated files:
+    - `app/[locale]/bestof-larib/[id]/case-content-display.tsx` (new component for content masking)
+    - `app/[locale]/bestof-larib/[id]/work-area.tsx` (manages contentRevealKey state)
+    - `app/[locale]/bestof-larib/[id]/user-panel.tsx` (hides Start new attempt when 0 attempts)
+    - `messages/en.json` and `messages/fr.json` (added reveal messages)
+
 - Bestof Larib: Added role-specific filters in the cases list
   - Admins can filter by admin tag (global admin tags)
   - Admin Tag filter is now multi-select (uses MultiSelect)
