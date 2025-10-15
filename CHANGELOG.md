@@ -656,6 +656,16 @@ Notes:
 
 ## [Unreleased]
 
+- Bestof Larib: PDF viewer controls for non-admin users
+  - Name: Hide PDF download and print buttons for regular users
+  - What it does: Removes download and print toolbar buttons from the PDF viewer for regular users while keeping full controls visible for admins. Uses CSS-based approach with `#toolbar=0` URL parameter and prevents right-click context menu on PDFs for non-admins.
+  - How to use it:
+    - As a regular user, open any case with a PDF at `/{locale}/bestof-larib/[id]`. The PDF displays without download/print buttons and right-click is disabled on the PDF area.
+    - As an admin, the PDF viewer shows with full default controls (download, print, zoom, etc.) and right-click works normally.
+  - Updated files:
+    - `app/[locale]/bestof-larib/[id]/components/pdf-viewer.tsx` (new component)
+    - `app/[locale]/bestof-larib/[id]/page.tsx` (replaces iframe with PdfViewer component)
+
 - Bestof Larib: Case content reveal after validation
   - Name: Progressive case content disclosure
   - What it does: Hides the case content (PDF or rich text) until the user validates their attempt, then requires a click to reveal the result. Content is re-hidden when starting a new attempt or selecting a previous attempt.

@@ -64,7 +64,7 @@ export type UserAttemptState = {
   hasDraftAttempt: boolean
 }
 
-export type ClinicalCaseWithDisplayTags = Omit<ClinicalCaseListItem, 'tags'> & {
+export type ClinicalCaseWithDisplayTags = ClinicalCaseListItem & {
   adminTags: CaseDisplayTag[]
   userTags: CaseDisplayTag[]
   attemptsCount?: number
@@ -210,6 +210,7 @@ const fetchClinicalCases = async ({
       name: true,
       difficulty: true,
       status: true,
+      tags: true,
       ...(includeContent
         ? {
             pdfUrl: true,
@@ -233,6 +234,7 @@ const fetchClinicalCases = async ({
     name: row.name,
     difficulty: row.difficulty,
     status: row.status,
+    tags: row.tags,
     ...(includeContent
       ? {
           pdfUrl: 'pdfUrl' in row ? row.pdfUrl ?? null : null,

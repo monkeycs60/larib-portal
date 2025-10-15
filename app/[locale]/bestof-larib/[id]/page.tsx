@@ -7,6 +7,7 @@ import type { CaseAttemptSummary } from '@/lib/services/bestof-larib-attempts';
 import { getUserCaseState, listUserCaseAttempts } from '@/lib/services/bestof-larib-attempts';
 import { listUserTags, getCaseUserTagIds } from '@/lib/services/bestof-larib-tags';
 import BackButton from './components/back-button';
+import PdfViewer from './components/pdf-viewer';
 
 export default async function CaseViewPage({
 	params,
@@ -104,7 +105,7 @@ export default async function CaseViewPage({
                             {t('content.section')}
                         </div>
                         {c.pdfUrl ? (
-                            <iframe src={c.pdfUrl} className='w-full h-[70vh] rounded border' />
+                            <PdfViewer pdfUrl={c.pdfUrl} isAdmin={isAdmin} className='w-full h-[70vh] rounded border' />
                         ) : (
                             <div className='rte text-sm' dangerouslySetInnerHTML={{ __html: c.textContent || '' }} />
                         )}

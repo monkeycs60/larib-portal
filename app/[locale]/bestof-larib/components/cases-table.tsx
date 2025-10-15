@@ -61,12 +61,15 @@ function renderStatusBadge({
   );
 }
 
+type AdminTag = { id: string; name: string; color: string; description: string | null };
+
 export default async function CasesTable({
   casesPromise,
   isAdmin,
   userId,
   examTypes,
   diseaseTags,
+  adminTags,
   sortField,
   sortDirection,
   translations,
@@ -78,6 +81,7 @@ export default async function CasesTable({
   userId: string | null;
   examTypes: ExamType[];
   diseaseTags: DiseaseTag[];
+  adminTags: AdminTag[];
   sortField?: CaseListSortField;
   sortDirection?: 'asc' | 'desc';
   translations: CasesTableTranslations;
@@ -230,17 +234,20 @@ export default async function CasesTable({
                             <CreateCaseDialog
                               examTypes={examTypes}
                               diseaseTags={diseaseTags}
+                              isAdmin={isAdmin}
+                              adminTags={adminTags}
                               clinicalCase={{
                                 id: caseItem.id,
                                 name: caseItem.name,
                                 difficulty: caseItem.difficulty,
                                 status: caseItem.status,
-                                tags: [],
+                                tags: caseItem.tags,
                                 pdfUrl: caseItem.pdfUrl ?? null,
                                 pdfKey: caseItem.pdfKey ?? null,
                                 textContent: caseItem.textContent ?? null,
                                 examType: caseItem.examType ?? null,
                                 diseaseTag: caseItem.diseaseTag ?? null,
+                                adminTags: caseItem.adminTags,
                               }}
                               trigger={
                                 <Button size='sm' variant='outline' className='gap-1'>

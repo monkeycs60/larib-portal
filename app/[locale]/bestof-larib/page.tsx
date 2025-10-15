@@ -87,10 +87,17 @@ export default async function BestofLaribPage({
   const sortDirection =
     typeof sp?.dir === 'string' && (sp.dir === 'asc' || sp.dir === 'desc') ? sp.dir : undefined;
 
-  const casesPromise = listClinicalCasesWithDisplayTags(session?.user?.id, filters, {
-    field: sortField,
-    direction: sortDirection,
-  });
+  const casesPromise = listClinicalCasesWithDisplayTags(
+    session?.user?.id,
+    filters,
+    {
+      field: sortField,
+      direction: sortDirection,
+    },
+    {
+      includeContent: isAdmin,
+    }
+  );
 
   const serializedFilters = serializeCaseFilters(filters);
   const cacheKey: BestofCacheKey = {
@@ -102,11 +109,14 @@ export default async function BestofLaribPage({
   };
   const cacheKeyString = serialiseBestofCacheKey(cacheKey);
 
-  const [examTypes, diseaseTags, adminTags, userTagsList] = await Promise.all([
+  const [examTypes, diseaseTags, adminTagsForFilter, adminTagsForDialog, userTagsList] = await Promise.all([
     listExamTypes(),
     listDiseaseTags(),
     isAdmin
       ? listAdminTags().then((rows) => rows.map((row) => ({ id: row.id, name: row.name })))
+      : Promise.resolve([]),
+    isAdmin
+      ? listAdminTags()
       : Promise.resolve([]),
     session?.user?.id
       ? listUserTags(session.user.id).then((rows) => rows.map((row) => ({ id: row.id, name: row.name })))
@@ -157,7 +167,7 @@ export default async function BestofLaribPage({
           <h1 className='text-2xl font-semibold'>{t('title')}</h1>
           <p className='text-sm text-muted-foreground'>{t('subtitle')}</p>
         </div>
-        {isAdmin ? <CreateCaseDialog examTypes={examTypes} diseaseTags={diseaseTags} /> : null}
+        {isAdmin ? <CreateCaseDialog examTypes={examTypes} diseaseTags={diseaseTags} isAdmin={isAdmin} adminTags={adminTagsForDialog} /> : null}
       </div>
 
       <FiltersBar
@@ -165,7 +175,7 @@ export default async function BestofLaribPage({
           examTypes,
           diseaseTags,
           isAdmin,
-          adminTags,
+          adminTags: adminTagsForFilter,
           userTags: userTagsList,
           canUsePersonalDifficulty,
         }}
@@ -181,6 +191,7 @@ export default async function BestofLaribPage({
             translations={translations}
             examTypes={examTypes}
             diseaseTags={diseaseTags}
+            adminTags={adminTagsForDialog}
             sortField={sortField}
             sortDirection={sortDirection}
           />
@@ -192,6 +203,7 @@ export default async function BestofLaribPage({
           userId={session?.user?.id ?? null}
           examTypes={examTypes}
           diseaseTags={diseaseTags}
+          adminTags={adminTagsForDialog}
           sortField={sortField}
           sortDirection={sortDirection}
           translations={translations}

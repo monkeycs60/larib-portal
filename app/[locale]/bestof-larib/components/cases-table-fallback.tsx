@@ -48,6 +48,8 @@ export type CasesTableTranslations = {
   empty: string;
 };
 
+type AdminTag = { id: string; name: string; color: string; description: string | null };
+
 export default function CasesTableFallback({
   cacheKeyString,
   isAdmin,
@@ -56,6 +58,7 @@ export default function CasesTableFallback({
   translations,
   examTypes,
   diseaseTags,
+  adminTags,
   sortField,
   sortDirection,
 }: {
@@ -66,6 +69,7 @@ export default function CasesTableFallback({
   translations: CasesTableTranslations;
   examTypes: ExamType[];
   diseaseTags: DiseaseTag[];
+  adminTags: AdminTag[];
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
 }) {
@@ -114,9 +118,11 @@ export default function CasesTableFallback({
             <TableHead>
               <SortHeader field='examType' label={translations.table.examType} activeField={sortField} direction={sortDirection} />
             </TableHead>
-            <TableHead>
-              <SortHeader field='diseaseTag' label={translations.table.disease} activeField={sortField} direction={sortDirection} />
-            </TableHead>
+            {isAdmin ? (
+              <TableHead>
+                <SortHeader field='diseaseTag' label={translations.table.disease} activeField={sortField} direction={sortDirection} />
+              </TableHead>
+            ) : null}
             <TableHead>
               <SortHeader field='difficulty' label={translations.table.difficulty} activeField={sortField} direction={sortDirection} />
             </TableHead>
@@ -142,7 +148,7 @@ export default function CasesTableFallback({
             <TableRow>
               <TableCell
                 colSpan={
-                  6 + (isUserView ? 2 : 0) + 2
+                  6 + (isAdmin ? 1 : 0) + (isUserView ? 2 : 0) + 2
                 }
                 className='text-center text-sm text-muted-foreground'
               >
@@ -193,13 +199,15 @@ export default function CasesTableFallback({
                   <TableCell>{statusBadge}</TableCell>
                   <TableCell className='font-medium'>{caseItem.name}</TableCell>
                   <TableCell>{caseItem.examType?.name ?? '-'}</TableCell>
-                  <TableCell>
-                    {caseItem.diseaseTag?.name ? (
-                      <Badge variant='secondary'>{caseItem.diseaseTag.name}</Badge>
-                    ) : (
-                      '-'
-                    )}
-                  </TableCell>
+                  {isAdmin ? (
+                    <TableCell>
+                      {caseItem.diseaseTag?.name ? (
+                        <Badge variant='secondary'>{caseItem.diseaseTag.name}</Badge>
+                      ) : (
+                        '-'
+                      )}
+                    </TableCell>
+                  ) : null}
                   <TableCell>
                     <Badge
                       variant='outline'
@@ -262,17 +270,20 @@ export default function CasesTableFallback({
                             <CreateCaseDialog
                               examTypes={examTypes}
                               diseaseTags={diseaseTags}
+                              isAdmin={isAdmin}
+                              adminTags={adminTags}
                               clinicalCase={{
                                 id: caseItem.id,
                                 name: caseItem.name,
                                 difficulty: caseItem.difficulty,
                                 status: caseItem.status,
-                                tags: [],
+                                tags: caseItem.tags,
                                 pdfUrl: caseItem.pdfUrl ?? null,
                                 pdfKey: caseItem.pdfKey ?? null,
                                 textContent: caseItem.textContent ?? null,
                                 examType: caseItem.examType ?? null,
                                 diseaseTag: caseItem.diseaseTag ?? null,
+                                adminTags: caseItem.adminTags,
                               }}
                               trigger={
                                 <Button size='sm' variant='outline' className='gap-1'>
