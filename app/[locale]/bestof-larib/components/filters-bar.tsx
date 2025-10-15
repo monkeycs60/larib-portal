@@ -321,17 +321,19 @@ export default function FiltersBar({
                     responsive
                 />
             </div>
-            <div className='min-w-52'>
-                <label className='block text-xs mb-1'>{t('filters.disease')}</label>
-                <MultiSelect
-                    options={diseaseTags.map(d => ({ label: d.name, value: d.id }))}
-                    defaultValue={diseaseTagIds}
-                    onValueChange={(vals) => { setDiseaseTagIds(vals); pushWith({ diseaseTagId: vals }); }}
-                    placeholder={t('filters.any')}
-                    maxCount={2}
-                    responsive
-                />
-            </div>
+            {isAdmin ? (
+                <div className='min-w-52'>
+                    <label className='block text-xs mb-1'>{t('filters.disease')}</label>
+                    <MultiSelect
+                        options={diseaseTags.map(d => ({ label: d.name, value: d.id }))}
+                        defaultValue={diseaseTagIds}
+                        onValueChange={(vals) => { setDiseaseTagIds(vals); pushWith({ diseaseTagId: vals }); }}
+                        placeholder={t('filters.any')}
+                        maxCount={2}
+                        responsive
+                    />
+                </div>
+            ) : null}
             <div className='min-w-52'>
                 <label className='block text-xs mb-1'>
                     {t('filters.difficulty')}

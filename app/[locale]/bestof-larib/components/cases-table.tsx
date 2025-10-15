@@ -103,9 +103,11 @@ export default async function CasesTable({
             <TableHead>
               <SortHeader field='examType' label={translations.table.examType} activeField={sortField} direction={sortDirection} />
             </TableHead>
-            <TableHead>
-              <SortHeader field='diseaseTag' label={translations.table.disease} activeField={sortField} direction={sortDirection} />
-            </TableHead>
+            {isAdmin ? (
+              <TableHead>
+                <SortHeader field='diseaseTag' label={translations.table.disease} activeField={sortField} direction={sortDirection} />
+              </TableHead>
+            ) : null}
             <TableHead>
               <SortHeader field='difficulty' label={translations.table.difficulty} activeField={sortField} direction={sortDirection} />
             </TableHead>
@@ -136,7 +138,7 @@ export default async function CasesTable({
             <TableRow>
               <TableCell
                 colSpan={
-                  6 + (isUserView ? 2 : 0) + 2
+                  6 + (isAdmin ? 1 : 0) + (isUserView ? 2 : 0) + 2
                 }
                 className='text-center text-sm text-muted-foreground'
               >
@@ -160,13 +162,15 @@ export default async function CasesTable({
                   <TableCell>{statusBadge}</TableCell>
                   <TableCell className='font-medium'>{caseItem.name}</TableCell>
                   <TableCell>{caseItem.examType?.name ?? '-'}</TableCell>
-                  <TableCell>
-                    {caseItem.diseaseTag?.name ? (
-                      <Badge variant='secondary'>{caseItem.diseaseTag.name}</Badge>
-                    ) : (
-                      '-'
-                    )}
-                  </TableCell>
+                  {isAdmin ? (
+                    <TableCell>
+                      {caseItem.diseaseTag?.name ? (
+                        <Badge variant='secondary'>{caseItem.diseaseTag.name}</Badge>
+                      ) : (
+                        '-'
+                      )}
+                    </TableCell>
+                  ) : null}
                   <TableCell>
                     <Badge
                       variant='outline'
