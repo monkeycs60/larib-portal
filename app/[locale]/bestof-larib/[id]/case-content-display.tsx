@@ -9,15 +9,20 @@ type CaseContentDisplayProps = {
 	children: React.ReactNode
 	isLocked: boolean
 	revealKey: number
+	isAdmin: boolean
 }
 
-export default function CaseContentDisplay({ children, isLocked, revealKey }: CaseContentDisplayProps) {
+export default function CaseContentDisplay({ children, isLocked, revealKey, isAdmin }: CaseContentDisplayProps) {
 	const t = useTranslations('bestof.caseView')
 	const [isRevealed, setIsRevealed] = useState(false)
 
 	useEffect(() => {
 		setIsRevealed(false)
 	}, [revealKey])
+
+	if (isAdmin) {
+		return <>{children}</>
+	}
 
 	if (!isLocked) {
 		return (

@@ -207,7 +207,7 @@ export default function WorkArea({ meta, defaults, rightPane, attempts, userTagD
 				<ResizableHandle withHandle />
 				<ResizablePanel defaultSize={45} minSize={20}>
 					<div className='rounded border p-4 h-fit'>
-						<CaseContentDisplay isLocked={locked} revealKey={contentRevealKey}>
+						<CaseContentDisplay isLocked={locked} revealKey={contentRevealKey} isAdmin={isAdmin}>
 							{rightPane}
 						</CaseContentDisplay>
 					</div>
