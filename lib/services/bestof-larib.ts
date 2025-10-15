@@ -245,18 +245,22 @@ const fetchClinicalCases = async ({
     createdAt: row.createdAt,
     examType: row.examType,
     diseaseTag: row.diseaseTag,
-    adminTags: row.adminTags.map((adminTag) => ({
-      id: adminTag.tag.id,
-      name: adminTag.tag.name,
-      color: adminTag.tag.color,
-      description: adminTag.tag.description ?? null,
-    })),
-    userTags: row.userTags.map((userTag) => ({
-      id: userTag.tag.id,
-      name: userTag.tag.name,
-      color: userTag.tag.color,
-      description: userTag.tag.description ?? null,
-    })),
+    adminTags: row.adminTags
+      .map((adminTag) => ({
+        id: adminTag.tag.id,
+        name: adminTag.tag.name,
+        color: adminTag.tag.color,
+        description: adminTag.tag.description ?? null,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name)),
+    userTags: row.userTags
+      .map((userTag) => ({
+        id: userTag.tag.id,
+        name: userTag.tag.name,
+        color: userTag.tag.color,
+        description: userTag.tag.description ?? null,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name)),
   }))
 
   if (userId && base.length > 0) {
