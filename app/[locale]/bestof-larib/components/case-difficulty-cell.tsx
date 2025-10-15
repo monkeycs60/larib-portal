@@ -50,6 +50,7 @@ export default function CaseDifficultyCell({ caseId, initialDifficulty }: { case
       onChange={handleChange}
       disabled={isExecuting || refreshing}
       isLoading={isExecuting || refreshing}
+      minimal
     />
   )
 }

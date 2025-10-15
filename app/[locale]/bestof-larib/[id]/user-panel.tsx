@@ -171,7 +171,7 @@ export default function CaseInteractionPanel({ config }: { config: CaseInteracti
             </div>
             <div className="space-y-1">
               <Label>{t('caseView.myDifficulty')}</Label>
-              <PersonalDifficultyPicker value={difficulty} onChange={onLocalDifficultyChange} disabled={isAdmin} />
+              <PersonalDifficultyPicker value={difficulty} onChange={onLocalDifficultyChange} disabled={isAdmin} minimal />
             </div>
             <div className="space-y-1">
               <Label className="flex items-center gap-2">

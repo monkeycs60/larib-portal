@@ -3,8 +3,7 @@
 import { useState } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
-import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command'
-import { Check, ChevronDown } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
 
@@ -24,9 +23,10 @@ type Props = {
   disabled?: boolean
   isLoading?: boolean
   menuLabel?: string
+  minimal?: boolean
 }
 
-export default function PersonalDifficultyPicker({ value, onChange, disabled, isLoading, menuLabel }: Props) {
+export default function PersonalDifficultyPicker({ value, onChange, disabled, isLoading, menuLabel, minimal }: Props) {
   const t = useTranslations('bestof')
   const [open, setOpen] = useState(false)
 
@@ -54,9 +54,9 @@ export default function PersonalDifficultyPicker({ value, onChange, disabled, is
     },
     {
       value: 'ADVANCED',
-      colorClass: 'bg-rose-500',
-      borderClass: 'border-rose-500/70 bg-rose-50',
-      textClass: 'text-rose-700',
+      colorClass: 'bg-red-500',
+      borderClass: 'border-red-500/70 bg-red-50',
+      textClass: 'text-red-700',
       label: t('difficulty.advanced'),
     },
   ]
@@ -73,48 +73,58 @@ export default function PersonalDifficultyPicker({ value, onChange, disabled, is
   return (
     <Popover open={open} onOpenChange={(next) => { if (!isDisabled) setOpen(next) }}>
       <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          className={cn(
-            'h-auto rounded-full border px-3 py-1 text-sm font-medium transition-colors',
-            'flex items-center gap-2',
-            current.borderClass,
-            current.textClass,
-            isDisabled && 'opacity-60 cursor-not-allowed'
-          )}
-          disabled={isDisabled}
-        >
-          <span className="flex items-center gap-2">
-            <span aria-hidden className={cn('h-2.5 w-2.5 rounded-full', current.colorClass)} />
-            <span>{current.label}</span>
-          </span>
-          <ChevronDown className="size-4 text-muted-foreground" />
-        </Button>
+        {minimal ? (
+          <button
+            type="button"
+            className={cn(
+              'h-3.5 w-3.5 rounded-full transition-all hover:scale-110',
+              current.colorClass,
+              isDisabled && 'opacity-60 cursor-not-allowed'
+            )}
+            disabled={isDisabled}
+            aria-label={current.label}
+          />
+        ) : (
+          <Button
+            type="button"
+            variant="ghost"
+            className={cn(
+              'h-auto rounded-full border px-3 py-1 text-sm font-medium transition-colors',
+              'flex items-center gap-2',
+              current.borderClass,
+              current.textClass,
+              isDisabled && 'opacity-60 cursor-not-allowed'
+            )}
+            disabled={isDisabled}
+          >
+            <span className="flex items-center gap-2">
+              <span aria-hidden className={cn('h-2.5 w-2.5 rounded-full', current.colorClass)} />
+              <span>{current.label}</span>
+            </span>
+            <ChevronDown className="size-4 text-muted-foreground" />
+          </Button>
+        )}
       </PopoverTrigger>
-      <PopoverContent className="w-60 p-0" align="start">
-        <Command>
-          <CommandList>
-            <CommandGroup>
-              {options.map(option => {
-                const isSelected = option.value === value
-                return (
-                  <CommandItem
-                    key={option.value === '' ? 'unset' : option.value}
-                    onSelect={() => handleSelect(option.value)}
-                    className={cn('flex items-center justify-between gap-2 px-3 py-2')}
-                  >
-                    <span className={cn('flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-medium', option.borderClass, option.textClass)}>
-                      <span className={cn('h-2.5 w-2.5 rounded-full', option.colorClass)} />
-                      <span>{option.label}</span>
-                    </span>
-                    <Check className={cn('size-4 transition-opacity', isSelected ? 'opacity-100' : 'opacity-0')} />
-                  </CommandItem>
-                )
-              })}
-            </CommandGroup>
-          </CommandList>
-        </Command>
+      <PopoverContent className="w-auto p-2" align="start">
+        <div className="flex items-center gap-2">
+          {options.map(option => {
+            const isSelected = option.value === value
+            return (
+              <button
+                key={option.value === '' ? 'unset' : option.value}
+                type="button"
+                onClick={() => handleSelect(option.value)}
+                className={cn(
+                  'relative h-5 w-5 rounded-full transition-all hover:scale-110',
+                  option.colorClass,
+                  isSelected && 'ring-2 ring-offset-2 ring-foreground'
+                )}
+                aria-label={option.label}
+                title={option.label}
+              />
+            )
+          })}
+        </div>
       </PopoverContent>
     </Popover>
   )
