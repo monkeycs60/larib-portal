@@ -41,7 +41,7 @@
 		"noAccount": "Vous n'avez pas de compte ?",
 		"switchToLogin": "Connectez-vous ici",
 		"switchToSignup": "Inscrivez-vous ici",
-		"invalidCredentials": "Identifiants invalides",
+		"invalidCredentials": "L'adresse e-mail ou le mot de passe est incorrect",
 		"nameRequired": "Le nom est requis pour l'inscription",
 		"authenticationFailed": "Échec de l'authentification",
 		"googleLoginFailed": "Échec de la connexion Google",

@@ -59,6 +59,9 @@ export function LoginForm({ showSignupLink = true }: LoginFormProps) {
         // Navigate within current locale, then refresh server components
         router.push(applicationLink(locale, '/dashboard'));
         router.refresh();
+      } else if (data && 'error' in data) {
+        // Handle authentication failure returned by the action
+        setError('root', { message: data.error });
       }
     },
   });

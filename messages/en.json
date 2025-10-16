@@ -43,7 +43,7 @@
     "noAccount": "Don't have an account?",
     "switchToLogin": "Login here",
     "switchToSignup": "Sign up here",
-    "invalidCredentials": "Invalid credentials",
+    "invalidCredentials": "The email address or password is incorrect",
     "nameRequired": "Name is required for signup",
     "authenticationFailed": "Authentication failed",
     "googleLoginFailed": "Google login failed",
