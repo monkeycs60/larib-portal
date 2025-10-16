@@ -161,7 +161,8 @@ model CaseAttempt {
   caseId      String
   lvef        String?
   kinetic     String?
-  lge         String?
+  lgePresent  Boolean?
+  lgeDetails  String?
   finalDx     String?
   report      String?
   validatedAt DateTime?

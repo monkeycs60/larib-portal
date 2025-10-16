@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { Switch } from '@/components/ui/switch'
 import UserTagsSection from './user-tags-section'
 import RichTextEditor from '@/components/ui/rich-text-editor'
 import { useTranslations } from 'next-intl'
@@ -42,16 +43,23 @@ type CaseInteractionPanelConfig = {
   hideActions?: boolean
   showStartNewAttempt?: boolean
   onStartNewAttempt?: () => void
-  attempts?: Array<{ id: string; createdAt: string | Date; validatedAt: string | Date | null; lvef: string | null; kinetic: string | null; lge: string | null; finalDx: string | null; report: string | null }>
-  onSelectAttempt?: (a: { id: string; createdAt: string | Date; validatedAt: string | Date | null; lvef: string | null; kinetic: string | null; lge: string | null; finalDx: string | null; report: string | null }) => void
+  attempts?: Array<{ id: string; createdAt: string | Date; validatedAt: string | Date | null; lvef: string | null; kinetic: string | null; lgePresent: boolean | null; lgeDetails: string | null; finalDx: string | null; report: string | null }>
+  onSelectAttempt?: (a: { id: string; createdAt: string | Date; validatedAt: string | Date | null; lvef: string | null; kinetic: string | null; lgePresent: boolean | null; lgeDetails: string | null; finalDx: string | null; report: string | null }) => void
 }
 
 const AnalysisSchema = z.object({
   lvef: z.string().min(1),
   kinetic: z.string().min(1),
-  lge: z.string().min(1),
+  lgePresent: z.boolean(),
+  lgeDetails: z.string().optional(),
   finalDx: z.string().min(1),
-})
+}).refine(
+  (data) => !data.lgePresent || (data.lgePresent && data.lgeDetails && data.lgeDetails.length > 0),
+  {
+    message: 'LGE details are required when LGE is present',
+    path: ['lgeDetails'],
+  }
+)
 
 export default function CaseInteractionPanel({ config }: { config: CaseInteractionPanelConfig }) {
   const t = useTranslations('bestof')
@@ -206,17 +214,18 @@ export default function CaseInteractionPanel({ config }: { config: CaseInteracti
   )
 }
 
-export function AnalysisForm({ isAdmin, caseId, values, onChange, hideInlineSave }: { isAdmin: boolean; caseId: string; values?: { lvef?: string; kinetic?: string; lge?: string; finalDx?: string }; onChange?: (v: { lvef?: string; kinetic?: string; lge?: string; finalDx?: string }) => void; hideInlineSave?: boolean }) {
+export function AnalysisForm({ isAdmin, caseId, values, onChange, hideInlineSave }: { isAdmin: boolean; caseId: string; values?: { lvef?: string; kinetic?: string; lgePresent?: boolean; lgeDetails?: string; finalDx?: string }; onChange?: (v: { lvef?: string; kinetic?: string; lgePresent?: boolean; lgeDetails?: string; finalDx?: string }) => void; hideInlineSave?: boolean }) {
   const t = useTranslations('bestof')
-  const { register, handleSubmit, formState, getValues } = useForm<z.infer<typeof AnalysisSchema>>({
+  const { register, handleSubmit, formState, getValues, setValue, watch } = useForm<z.infer<typeof AnalysisSchema>>({
     resolver: zodResolver(AnalysisSchema),
-    defaultValues: { lvef: values?.lvef ?? '', kinetic: values?.kinetic ?? '', lge: values?.lge ?? '', finalDx: values?.finalDx ?? '' },
+    defaultValues: { lvef: values?.lvef ?? '', kinetic: values?.kinetic ?? '', lgePresent: values?.lgePresent ?? false, lgeDetails: values?.lgeDetails ?? '', finalDx: values?.finalDx ?? '' },
     mode: 'onChange',
   })
   const lvefReg = register('lvef')
   const kineticReg = register('kinetic')
-  const lgeReg = register('lge')
+  const lgeDetailsReg = register('lgeDetails')
   const finalDxReg = register('finalDx')
+  const lgePresent = watch('lgePresent')
   const { execute: execSave, isExecuting } = useAction(saveAttemptAction, {
     onError() { toast.error(t('actionError')) },
     onSuccess(res) {
@@ -256,15 +265,32 @@ export function AnalysisForm({ isAdmin, caseId, values, onChange, hideInlineSave
         />
       </div>
       <div className="grid grid-cols-[180px_1fr] items-center gap-2">
-        <Label>{t('caseView.analysis.lge')}</Label>
-        <Input
-          {...lgeReg}
-          onChange={(e) => { lgeReg.onChange(e); onChange?.({ ...getValues(), lge: e.target.value }) }}
-          aria-invalid={!!formState.errors.lge}
+        <Label htmlFor="lge-switch">{t('caseView.analysis.lgePresent')}</Label>
+        <Switch
+          id="lge-switch"
+          checked={lgePresent}
+          onCheckedChange={(checked) => {
+            setValue('lgePresent', checked)
+            if (!checked) {
+              setValue('lgeDetails', '')
+            }
+            onChange?.({ ...getValues(), lgePresent: checked, lgeDetails: checked ? getValues().lgeDetails : '' })
+          }}
           disabled={isAdmin}
-          placeholder={t('caseView.required')}
         />
       </div>
+      {lgePresent && (
+        <div className="grid grid-cols-[180px_1fr] items-center gap-2">
+          <Label>{t('caseView.analysis.lgeDetails')}</Label>
+          <Input
+            {...lgeDetailsReg}
+            onChange={(e) => { lgeDetailsReg.onChange(e); onChange?.({ ...getValues(), lgeDetails: e.target.value }) }}
+            aria-invalid={!!formState.errors.lgeDetails}
+            disabled={isAdmin}
+            placeholder={t('caseView.analysis.lgeDetailsPlaceholder')}
+          />
+        </div>
+      )}
       <div className="grid grid-cols-[180px_1fr] items-center gap-2">
         <Label>{t('caseView.analysis.finalDx')}</Label>
         <Input

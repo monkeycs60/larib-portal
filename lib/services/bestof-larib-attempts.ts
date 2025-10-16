@@ -9,7 +9,8 @@ export type SaveAttemptInput = {
   caseId: string
   lvef?: string
   kinetic?: string
-  lge?: string
+  lgePresent?: boolean
+  lgeDetails?: string
   finalDx?: string
   report?: string
 }
@@ -32,7 +33,8 @@ export async function saveAttempt(input: SaveAttemptInput): Promise<string> {
       data: {
         lvef: toNullable(input.lvef ?? null),
         kinetic: toNullable(input.kinetic ?? null),
-        lge: toNullable(input.lge ?? null),
+        lgePresent: input.lgePresent ?? null,
+        lgeDetails: toNullable(input.lgeDetails ?? null),
         finalDx: toNullable(input.finalDx ?? null),
         report: toNullable(input.report ?? null),
       },
@@ -47,7 +49,8 @@ export async function saveAttempt(input: SaveAttemptInput): Promise<string> {
       caseId: input.caseId,
       lvef: toNullable(input.lvef ?? null),
       kinetic: toNullable(input.kinetic ?? null),
-      lge: toNullable(input.lge ?? null),
+      lgePresent: input.lgePresent ?? null,
+      lgeDetails: toNullable(input.lgeDetails ?? null),
       finalDx: toNullable(input.finalDx ?? null),
       report: toNullable(input.report ?? null),
     },
@@ -94,7 +97,8 @@ export type UserCaseState = {
     id: string
     lvef: string | null
     kinetic: string | null
-    lge: string | null
+    lgePresent: boolean | null
+    lgeDetails: string | null
     finalDx: string | null
     report: string | null
     validatedAt: Date | null
@@ -110,7 +114,7 @@ const fetchUserCaseState = async (userId: string, caseId: string): Promise<UserC
     prisma.caseAttempt.findFirst({
       where: { userId, caseId },
       orderBy: [{ validatedAt: 'desc' }, { createdAt: 'desc' }],
-      select: { id: true, lvef: true, kinetic: true, lge: true, finalDx: true, report: true, validatedAt: true },
+      select: { id: true, lvef: true, kinetic: true, lgePresent: true, lgeDetails: true, finalDx: true, report: true, validatedAt: true },
     }),
   ])
 
@@ -127,7 +131,8 @@ const fetchUserCaseState = async (userId: string, caseId: string): Promise<UserC
           id: lastAttempt.id,
           lvef: lastAttempt.lvef,
           kinetic: lastAttempt.kinetic,
-          lge: lastAttempt.lge,
+          lgePresent: lastAttempt.lgePresent,
+          lgeDetails: lastAttempt.lgeDetails,
           finalDx: lastAttempt.finalDx,
           report: lastAttempt.report,
           validatedAt: lastAttempt.validatedAt,
@@ -154,7 +159,8 @@ export type CaseAttemptSummary = {
   validatedAt: Date | null
   lvef: string | null
   kinetic: string | null
-  lge: string | null
+  lgePresent: boolean | null
+  lgeDetails: string | null
   finalDx: string | null
   report: string | null
 }
@@ -171,7 +177,8 @@ const cachedUserCaseAttempts = cache(async (userId: string, caseId: string) =>
           validatedAt: true,
           lvef: true,
           kinetic: true,
-          lge: true,
+          lgePresent: true,
+          lgeDetails: true,
           finalDx: true,
           report: true,
         },

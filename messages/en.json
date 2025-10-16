@@ -283,7 +283,9 @@
       "analysis": {
         "lvef": "LVEF",
         "kinetic": "Kinetic disorders",
-        "lge": "LGE presence",
+        "lgePresent": "LGE present?",
+        "lgeDetails": "LGE details",
+        "lgeDetailsPlaceholder": "Specify LGE location and characteristics...",
         "finalDx": "Final diagnosis"
       },
       "required": "Required",

@@ -281,7 +281,9 @@
       "analysis": {
         "lvef": "FEVG",
         "kinetic": "Troubles cinétiques",
-        "lge": "Présence de LGE",
+        "lgePresent": "LGE présent ?",
+        "lgeDetails": "Détails du LGE",
+        "lgeDetailsPlaceholder": "Précisez la localisation et les caractéristiques...",
         "finalDx": "Diagnostic final"
       },
       "required": "Requis",

@@ -13,7 +13,8 @@ const SaveAttemptSchema = z.object({
   caseId: z.string().min(1),
   lvef: z.string().optional(),
   kinetic: z.string().optional(),
-  lge: z.string().optional(),
+  lgePresent: z.boolean().optional(),
+  lgeDetails: z.string().optional(),
   finalDx: z.string().optional(),
   report: z.string().optional(),
 })
@@ -26,7 +27,8 @@ export const saveAttemptAction = authenticatedAction
       caseId: parsedInput.caseId,
       lvef: parsedInput.lvef,
       kinetic: parsedInput.kinetic,
-      lge: parsedInput.lge,
+      lgePresent: parsedInput.lgePresent,
+      lgeDetails: parsedInput.lgeDetails,
       finalDx: parsedInput.finalDx,
       report: parsedInput.report,
     })
@@ -74,7 +76,7 @@ const SaveAllSchema = z.object({
   tags: z.array(z.string()).max(50),
   personalDifficulty: z.enum(['BEGINNER','INTERMEDIATE','ADVANCED']).nullable(),
   comments: z.string().nullable(),
-  analysis: z.object({ lvef: z.string().optional(), kinetic: z.string().optional(), lge: z.string().optional(), finalDx: z.string().optional() }),
+  analysis: z.object({ lvef: z.string().optional(), kinetic: z.string().optional(), lgePresent: z.boolean().optional(), lgeDetails: z.string().optional(), finalDx: z.string().optional() }),
   report: z.string().optional(),
 })
 
@@ -97,7 +99,8 @@ export const saveAllAction = authenticatedAction
       caseId: parsedInput.caseId,
       lvef: parsedInput.analysis.lvef,
       kinetic: parsedInput.analysis.kinetic,
-      lge: parsedInput.analysis.lge,
+      lgePresent: parsedInput.analysis.lgePresent,
+      lgeDetails: parsedInput.analysis.lgeDetails,
       finalDx: parsedInput.analysis.finalDx,
       report: parsedInput.report,
     })
@@ -121,7 +124,8 @@ export const saveAllAndValidateAction = authenticatedAction
       caseId: parsedInput.caseId,
       lvef: parsedInput.analysis.lvef,
       kinetic: parsedInput.analysis.kinetic,
-      lge: parsedInput.analysis.lge,
+      lgePresent: parsedInput.analysis.lgePresent,
+      lgeDetails: parsedInput.analysis.lgeDetails,
       finalDx: parsedInput.analysis.finalDx,
       report: parsedInput.report,
     })

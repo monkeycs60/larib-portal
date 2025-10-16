@@ -21,7 +21,7 @@ export type PrefillState = {
   tags: string[]
   comments: string | null
   personalDifficulty: Difficulty | null
-  analysis: { lvef?: string; kinetic?: string; lge?: string; finalDx?: string }
+  analysis: { lvef?: string; kinetic?: string; lgePresent?: boolean; lgeDetails?: string; finalDx?: string }
   report?: string | null
   validatedAt?: string | null
 }
@@ -39,8 +39,8 @@ export default function WorkArea({ meta, defaults, rightPane, attempts, userTagD
   const [comments, setComments] = useState<string>(prefill?.comments ?? '')
   const [personalDifficulty, setPersonalDifficulty] = useState<Difficulty | ''>((prefill?.personalDifficulty ?? '') as Difficulty | '')
 
-  const [analysis, setAnalysis] = useState<{ lvef?: string; kinetic?: string; lge?: string; finalDx?: string}>(
-    prefill?.analysis ?? { lvef: '', kinetic: '', lge: '', finalDx: '' },
+  const [analysis, setAnalysis] = useState<{ lvef?: string; kinetic?: string; lgePresent?: boolean; lgeDetails?: string; finalDx?: string}>(
+    prefill?.analysis ?? { lvef: '', kinetic: '', lgePresent: undefined, lgeDetails: '', finalDx: '' },
   )
   const [analysisKey, setAnalysisKey] = useState(0)
   const [report, setReport] = useState<string>(prefill?.report ?? '')
@@ -74,7 +74,7 @@ export default function WorkArea({ meta, defaults, rightPane, attempts, userTagD
       setLocked(true)
       setContentRevealKey(key => key + 1)
       const now = new Date()
-      const newItem = { id: res.data?.attemptId ?? crypto.randomUUID(), createdAt: now, validatedAt: now, lvef: analysis.lvef ?? null, kinetic: analysis.kinetic ?? null, lge: analysis.lge ?? null, finalDx: analysis.finalDx ?? null, report: report ?? null }
+      const newItem = { id: res.data?.attemptId ?? crypto.randomUUID(), createdAt: now, validatedAt: now, lvef: analysis.lvef ?? null, kinetic: analysis.kinetic ?? null, lgePresent: analysis.lgePresent ?? null, lgeDetails: analysis.lgeDetails ?? null, finalDx: analysis.finalDx ?? null, report: report ?? null }
       setPendingAttempt(newItem)
       startRefresh(() => router.refresh())
     },
@@ -95,7 +95,11 @@ export default function WorkArea({ meta, defaults, rightPane, attempts, userTagD
 
   function onValidate() {
     if (isAdmin || locked) return
-    if (!analysis.lvef || !analysis.kinetic || !analysis.lge || !analysis.finalDx) {
+    if (!analysis.lvef || !analysis.kinetic || analysis.lgePresent === undefined || !analysis.finalDx) {
+      toast.error(t('errors.fieldsRequired'))
+      return
+    }
+    if (analysis.lgePresent && !analysis.lgeDetails) {
       toast.error(t('errors.fieldsRequired'))
       return
     }
@@ -138,7 +142,8 @@ export default function WorkArea({ meta, defaults, rightPane, attempts, userTagD
 							setAnalysis({
 								lvef: selectedAttempt.lvef ?? '',
 								kinetic: selectedAttempt.kinetic ?? '',
-								lge: selectedAttempt.lge ?? '',
+								lgePresent: selectedAttempt.lgePresent ?? undefined,
+								lgeDetails: selectedAttempt.lgeDetails ?? '',
 								finalDx: selectedAttempt.finalDx ?? '',
 							});
 							setReport(selectedAttempt.report ?? '');
@@ -153,7 +158,8 @@ export default function WorkArea({ meta, defaults, rightPane, attempts, userTagD
 							setAnalysis({
 								lvef: '',
 								kinetic: '',
-								lge: '',
+								lgePresent: undefined,
+								lgeDetails: '',
 								finalDx: '',
 							});
 							setReport('');
