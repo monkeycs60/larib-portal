@@ -10,6 +10,9 @@ import {
 } from '@/lib/services/bestof-larib';
 import { listAdminTags, listUserTags } from '@/lib/services/bestof-larib-tags';
 import { getTypedSession } from '@/lib/auth-helpers';
+import { Link } from '@/app/i18n/navigation';
+import { Button } from '@/components/ui/button';
+import { ChartBar } from 'lucide-react';
 import CreateCaseDialog from './components/create-case-dialog';
 import FiltersBar from './components/filters-bar';
 import CasesTable from './components/cases-table';
@@ -167,7 +170,17 @@ export default async function BestofLaribPage({
           <h1 className='text-2xl font-semibold'>{t('title')}</h1>
           <p className='text-sm text-muted-foreground'>{t('subtitle')}</p>
         </div>
-        {isAdmin ? <CreateCaseDialog examTypes={examTypes} diseaseTags={diseaseTags} isAdmin={isAdmin} adminTags={adminTagsForDialog} /> : null}
+        {isAdmin ? (
+          <div className='flex items-center gap-3'>
+            <Link href='/bestof-larib/statistics'>
+              <Button variant='outline'>
+                <ChartBar className='size-4 mr-2' />
+                Statistics
+              </Button>
+            </Link>
+            <CreateCaseDialog examTypes={examTypes} diseaseTags={diseaseTags} isAdmin={isAdmin} adminTags={adminTagsForDialog} />
+          </div>
+        ) : null}
       </div>
 
       <FiltersBar

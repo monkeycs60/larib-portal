@@ -696,3 +696,41 @@ Notes:
   - Server actions trigger `revalidateTag` so cached data stays in sync after admin/user changes.
   - How to use: No manual action needed. Navigate the portal as usual; data-heavy pages now reuse cached results until a relevant mutation runs.
   - Updated files: `lib/auth-helpers.ts`, `lib/services/bestof-larib.ts`, `lib/services/bestof-larib-tags.ts`, `lib/services/bestof-larib-attempts.ts`, `app/[locale]/bestof-larib/actions.ts`, `app/[locale]/bestof-larib/[id]/actions.ts`.
+
+## Feature: Bestof Larib Statistics Dashboard (Admin-only)
+
+- Name: User progress and completion statistics
+- What it does: Adds a dedicated Statistics page at `/{locale}/bestof-larib/statistics` accessible only to admins. Displays comprehensive user statistics including total cases completed, active users count, average cases per user, most practiced case, detailed user table showing completion by difficulty level, last activity tracking, and regularity metrics. Includes visual charts for completion trends over time, top users, and distribution by difficulty level. Supports advanced filtering by users, date range, exam types, disease tags, difficulty levels, and admin tags.
+- How to use it:
+  - As an admin, navigate to `/{locale}/bestof-larib` and click the "Statistics" button in the header (next to "Create Case").
+  - View overview metrics cards showing global statistics.
+  - Browse the user statistics table to see individual user progress, including:
+    - Total cases completed
+    - Breakdown by difficulty level (Beginner, Intermediate, Advanced)
+    - Last activity date and days since last completion
+    - Regularity score (cases per week)
+    - Activity status badge (Very active, Active, Inactive)
+  - Use filters to narrow down data by specific users, date ranges, categories, or tags.
+  - View interactive charts showing completion trends, top users, and difficulty distribution.
+- Features:
+  - **Overview Cards**: Total completed cases, active users, average per user, most practiced case
+  - **User Statistics Table**: Comprehensive per-user metrics with sortable columns
+  - **Activity Tracking**: Days since last activity with color-coded status badges (green ≤7 days, orange ≤30 days, red >30 days)
+  - **Regularity Metrics**: Calculates cases completed per week based on user activity span
+  - **Advanced Filters**: Multi-select filters for users, exam types, disease tags, difficulties, admin tags, and date ranges
+  - **Interactive Charts**:
+    - Line chart showing completion trends over time (weekly grouping)
+    - Horizontal bar chart displaying top 10 users by completion count
+    - Vertical bar chart showing distribution across difficulty levels
+  - **Fully Localized**: Complete French and English translations
+  - **Cached Performance**: Uses Next.js `unstable_cache` for optimized data fetching
+- Updated files:
+  - New: `lib/services/bestof-larib-stats.ts` (statistics service with user/global stats, completion trends)
+  - New: `app/[locale]/bestof-larib/statistics/page.tsx` (admin-only statistics page)
+  - New: `app/[locale]/bestof-larib/components/bestof-stats-filters.tsx` (filters component)
+  - New: `app/[locale]/bestof-larib/components/bestof-stats-overview.tsx` (overview metrics cards)
+  - New: `app/[locale]/bestof-larib/components/bestof-stats-user-table.tsx` (user statistics table)
+  - New: `app/[locale]/bestof-larib/components/bestof-stats-charts.tsx` (Recharts visualizations)
+  - Modified: `app/[locale]/bestof-larib/page.tsx` (added Statistics button for admins)
+  - Modified: `messages/en.json` (added `bestof.statistics` section)
+  - Modified: `messages/fr.json` (added `bestof.statistics` section)

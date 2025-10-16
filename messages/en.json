@@ -363,6 +363,44 @@
       "last7": "Last 7 days",
       "last30": "Last 30 days",
       "custom": "Custom"
+    },
+    "statistics": {
+      "title": "Statistics",
+      "subtitle": "Track user progress and completion rates.",
+      "overview": {
+        "totalCases": "Total cases completed",
+        "activeUsers": "Active users",
+        "avgPerUser": "Average per user",
+        "mostPracticed": "Most practiced case"
+      },
+      "table": {
+        "user": "User",
+        "totalCompleted": "Total completed",
+        "beginner": "Beginner",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced",
+        "lastActivity": "Last activity",
+        "daysSince": "Days since",
+        "regularity": "Regularity"
+      },
+      "charts": {
+        "byCategory": "Cases by category",
+        "overTime": "Completion over time",
+        "topUsers": "Top users",
+        "distribution": "Distribution by difficulty"
+      },
+      "filters": {
+        "allUsers": "All users",
+        "selectUser": "Select user(s)",
+        "period": "Period"
+      },
+      "activity": {
+        "veryActive": "Very active",
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "perWeek": "per week",
+      "noCasesCompleted": "No cases completed yet"
     }
   },
   "conges": {

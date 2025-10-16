@@ -361,6 +361,44 @@
       "last7": "7 derniers jours",
       "last30": "30 derniers jours",
       "custom": "Personnalisée"
+    },
+    "statistics": {
+      "title": "Statistiques",
+      "subtitle": "Suivez la progression et les taux de complétion des utilisateurs.",
+      "overview": {
+        "totalCases": "Total de cas complétés",
+        "activeUsers": "Utilisateurs actifs",
+        "avgPerUser": "Moyenne par utilisateur",
+        "mostPracticed": "Cas le plus pratiqué"
+      },
+      "table": {
+        "user": "Utilisateur",
+        "totalCompleted": "Total complété",
+        "beginner": "Débutant",
+        "intermediate": "Intermédiaire",
+        "advanced": "Avancé",
+        "lastActivity": "Dernière activité",
+        "daysSince": "Jours écoulés",
+        "regularity": "Régularité"
+      },
+      "charts": {
+        "byCategory": "Cas par catégorie",
+        "overTime": "Évolution dans le temps",
+        "topUsers": "Top utilisateurs",
+        "distribution": "Répartition par difficulté"
+      },
+      "filters": {
+        "allUsers": "Tous les utilisateurs",
+        "selectUser": "Sélectionner utilisateur(s)",
+        "period": "Période"
+      },
+      "activity": {
+        "veryActive": "Très actif",
+        "active": "Actif",
+        "inactive": "Inactif"
+      },
+      "perWeek": "par semaine",
+      "noCasesCompleted": "Aucun cas complété pour le moment"
     }
   },
   "conges": {
