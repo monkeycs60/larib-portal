@@ -19,15 +19,17 @@ export type UserStatistics = {
   userId: string;
   userName: string;
   userEmail: string;
-  totalCompleted: number;
+  userPosition: string | null;
+  uniqueCasesCompleted: number;
+  totalAttempts: number;
   completedByDifficulty: {
-    beginner: number;
-    intermediate: number;
-    advanced: number;
+    beginner: { uniqueCases: number; totalAttempts: number };
+    intermediate: { uniqueCases: number; totalAttempts: number };
+    advanced: { uniqueCases: number; totalAttempts: number };
   };
-  completedByExamType: Record<string, { count: number; name: string }>;
-  completedByDisease: Record<string, { count: number; name: string }>;
-  completedByAdminTag: Record<string, { count: number; name: string; color: string }>;
+  completedByExamType: Record<string, { uniqueCases: number; totalAttempts: number; name: string }>;
+  completedByDisease: Record<string, { uniqueCases: number; totalAttempts: number; name: string }>;
+  completedByAdminTag: Record<string, { uniqueCases: number; totalAttempts: number; name: string; color: string }>;
   lastCompletedAt: Date | null;
   daysSinceLastActivity: number | null;
   regularityPerWeek: number;
@@ -107,6 +109,7 @@ const fetchUserStatisticsData = async (filters?: StatsFilters) => {
           email: true,
           firstName: true,
           lastName: true,
+          position: true,
         },
       },
       c: {
@@ -133,135 +136,209 @@ const fetchUserStatisticsData = async (filters?: StatsFilters) => {
     orderBy: { validatedAt: 'desc' },
   });
 
-  const userMap = new Map<string, UserStatistics>();
+  type UserTracking = {
+    uniqueCases: Set<string>;
+    totalAttempts: number;
+    uniqueCasesByDifficulty: {
+      beginner: { cases: Set<string>; attempts: number };
+      intermediate: { cases: Set<string>; attempts: number };
+      advanced: { cases: Set<string>; attempts: number };
+    };
+    uniqueCasesByExamType: Map<string, { cases: Set<string>; attempts: number; name: string }>;
+    uniqueCasesByDisease: Map<string, { cases: Set<string>; attempts: number; name: string }>;
+    uniqueCasesByAdminTag: Map<string, { cases: Set<string>; attempts: number; name: string; color: string }>;
+    user: {
+      id: string;
+      name: string;
+      email: string;
+      position: string | null;
+    };
+    lastCompletedAt: Date | null;
+    firstCompletedAt: Date | null;
+  };
+
+  const userMap = new Map<string, UserTracking>();
 
   for (const attempt of attempts) {
     if (!attempt.validatedAt) continue;
 
     const userId = attempt.userId;
-    const existing = userMap.get(userId);
-
+    const caseId = attempt.caseId;
     const displayName = attempt.user.firstName
       ? `${attempt.user.firstName} ${attempt.user.lastName || ''}`.trim()
       : attempt.user.name || attempt.user.email;
 
-    if (!existing) {
+    if (!userMap.has(userId)) {
       userMap.set(userId, {
-        userId,
-        userName: displayName,
-        userEmail: attempt.user.email,
-        totalCompleted: 1,
-        completedByDifficulty: {
-          beginner: attempt.c.difficulty === 'BEGINNER' ? 1 : 0,
-          intermediate: attempt.c.difficulty === 'INTERMEDIATE' ? 1 : 0,
-          advanced: attempt.c.difficulty === 'ADVANCED' ? 1 : 0,
+        uniqueCases: new Set(),
+        totalAttempts: 0,
+        uniqueCasesByDifficulty: {
+          beginner: { cases: new Set(), attempts: 0 },
+          intermediate: { cases: new Set(), attempts: 0 },
+          advanced: { cases: new Set(), attempts: 0 },
         },
-        completedByExamType: attempt.c.examType
-          ? {
-              [attempt.c.examType.id]: {
-                count: 1,
-                name: attempt.c.examType.name,
-              },
-            }
-          : {},
-        completedByDisease: attempt.c.diseaseTag
-          ? {
-              [attempt.c.diseaseTag.id]: {
-                count: 1,
-                name: attempt.c.diseaseTag.name,
-              },
-            }
-          : {},
-        completedByAdminTag: attempt.c.adminTags.reduce<Record<string, { count: number; name: string; color: string }>>(
-          (accumulator, adminTagOnCase) => {
-            accumulator[adminTagOnCase.tag.id] = {
-              count: 1,
-              name: adminTagOnCase.tag.name,
-              color: adminTagOnCase.tag.color,
-            };
-            return accumulator;
-          },
-          {},
-        ),
+        uniqueCasesByExamType: new Map(),
+        uniqueCasesByDisease: new Map(),
+        uniqueCasesByAdminTag: new Map(),
+        user: {
+          id: userId,
+          name: displayName,
+          email: attempt.user.email,
+          position: attempt.user.position,
+        },
         lastCompletedAt: attempt.validatedAt,
-        daysSinceLastActivity: Math.floor((Date.now() - attempt.validatedAt.getTime()) / (1000 * 60 * 60 * 24)),
-        regularityPerWeek: 0,
         firstCompletedAt: attempt.validatedAt,
       });
-    } else {
-      existing.totalCompleted += 1;
+    }
 
-      if (attempt.c.difficulty === 'BEGINNER') existing.completedByDifficulty.beginner += 1;
-      else if (attempt.c.difficulty === 'INTERMEDIATE') existing.completedByDifficulty.intermediate += 1;
-      else if (attempt.c.difficulty === 'ADVANCED') existing.completedByDifficulty.advanced += 1;
+    const tracking = userMap.get(userId)!;
+    tracking.uniqueCases.add(caseId);
+    tracking.totalAttempts += 1;
 
-      if (attempt.c.examType) {
-        const examTypeId = attempt.c.examType.id;
-        if (existing.completedByExamType[examTypeId]) {
-          existing.completedByExamType[examTypeId].count += 1;
-        } else {
-          existing.completedByExamType[examTypeId] = {
-            count: 1,
-            name: attempt.c.examType.name,
-          };
-        }
+    if (attempt.c.difficulty === 'BEGINNER') {
+      tracking.uniqueCasesByDifficulty.beginner.cases.add(caseId);
+      tracking.uniqueCasesByDifficulty.beginner.attempts += 1;
+    } else if (attempt.c.difficulty === 'INTERMEDIATE') {
+      tracking.uniqueCasesByDifficulty.intermediate.cases.add(caseId);
+      tracking.uniqueCasesByDifficulty.intermediate.attempts += 1;
+    } else if (attempt.c.difficulty === 'ADVANCED') {
+      tracking.uniqueCasesByDifficulty.advanced.cases.add(caseId);
+      tracking.uniqueCasesByDifficulty.advanced.attempts += 1;
+    }
+
+    if (attempt.c.examType) {
+      const examTypeId = attempt.c.examType.id;
+      if (!tracking.uniqueCasesByExamType.has(examTypeId)) {
+        tracking.uniqueCasesByExamType.set(examTypeId, {
+          cases: new Set(),
+          attempts: 0,
+          name: attempt.c.examType.name,
+        });
       }
+      const examTypeData = tracking.uniqueCasesByExamType.get(examTypeId)!;
+      examTypeData.cases.add(caseId);
+      examTypeData.attempts += 1;
+    }
 
-      if (attempt.c.diseaseTag) {
-        const diseaseId = attempt.c.diseaseTag.id;
-        if (existing.completedByDisease[diseaseId]) {
-          existing.completedByDisease[diseaseId].count += 1;
-        } else {
-          existing.completedByDisease[diseaseId] = {
-            count: 1,
-            name: attempt.c.diseaseTag.name,
-          };
-        }
+    if (attempt.c.diseaseTag) {
+      const diseaseId = attempt.c.diseaseTag.id;
+      if (!tracking.uniqueCasesByDisease.has(diseaseId)) {
+        tracking.uniqueCasesByDisease.set(diseaseId, {
+          cases: new Set(),
+          attempts: 0,
+          name: attempt.c.diseaseTag.name,
+        });
       }
+      const diseaseData = tracking.uniqueCasesByDisease.get(diseaseId)!;
+      diseaseData.cases.add(caseId);
+      diseaseData.attempts += 1;
+    }
 
-      for (const adminTagOnCase of attempt.c.adminTags) {
-        const tagId = adminTagOnCase.tag.id;
-        if (existing.completedByAdminTag[tagId]) {
-          existing.completedByAdminTag[tagId].count += 1;
-        } else {
-          existing.completedByAdminTag[tagId] = {
-            count: 1,
-            name: adminTagOnCase.tag.name,
-            color: adminTagOnCase.tag.color,
-          };
-        }
+    for (const adminTagOnCase of attempt.c.adminTags) {
+      const tagId = adminTagOnCase.tag.id;
+      if (!tracking.uniqueCasesByAdminTag.has(tagId)) {
+        tracking.uniqueCasesByAdminTag.set(tagId, {
+          cases: new Set(),
+          attempts: 0,
+          name: adminTagOnCase.tag.name,
+          color: adminTagOnCase.tag.color,
+        });
       }
+      const tagData = tracking.uniqueCasesByAdminTag.get(tagId)!;
+      tagData.cases.add(caseId);
+      tagData.attempts += 1;
+    }
 
-      if (attempt.validatedAt > (existing.lastCompletedAt || new Date(0))) {
-        existing.lastCompletedAt = attempt.validatedAt;
-        existing.daysSinceLastActivity = Math.floor((Date.now() - attempt.validatedAt.getTime()) / (1000 * 60 * 60 * 24));
-      }
+    if (attempt.validatedAt > (tracking.lastCompletedAt || new Date(0))) {
+      tracking.lastCompletedAt = attempt.validatedAt;
+    }
 
-      if (attempt.validatedAt < (existing.firstCompletedAt || new Date())) {
-        existing.firstCompletedAt = attempt.validatedAt;
-      }
+    if (attempt.validatedAt < (tracking.firstCompletedAt || new Date())) {
+      tracking.firstCompletedAt = attempt.validatedAt;
     }
   }
 
-  for (const stats of userMap.values()) {
-    if (stats.firstCompletedAt && stats.lastCompletedAt) {
-      const daysDiff = Math.max(
-        1,
-        Math.floor((stats.lastCompletedAt.getTime() - stats.firstCompletedAt.getTime()) / (1000 * 60 * 60 * 24)),
-      );
-      const weeksDiff = daysDiff / 7;
-      stats.regularityPerWeek = weeksDiff > 0 ? Number((stats.totalCompleted / weeksDiff).toFixed(2)) : 0;
+  const result: UserStatistics[] = [];
+
+  for (const [userId, tracking] of userMap.entries()) {
+    const daysSinceLastActivity = tracking.lastCompletedAt
+      ? Math.floor((Date.now() - tracking.lastCompletedAt.getTime()) / (1000 * 60 * 60 * 24))
+      : null;
+
+    const daysDiff =
+      tracking.firstCompletedAt && tracking.lastCompletedAt
+        ? Math.max(1, Math.floor((tracking.lastCompletedAt.getTime() - tracking.firstCompletedAt.getTime()) / (1000 * 60 * 60 * 24)))
+        : 1;
+    const weeksDiff = daysDiff / 7;
+    const regularityPerWeek = weeksDiff > 0 ? Number((tracking.uniqueCases.size / weeksDiff).toFixed(2)) : 0;
+
+    const completedByExamType: Record<string, { uniqueCases: number; totalAttempts: number; name: string }> = {};
+    for (const [examTypeId, data] of tracking.uniqueCasesByExamType.entries()) {
+      completedByExamType[examTypeId] = {
+        uniqueCases: data.cases.size,
+        totalAttempts: data.attempts,
+        name: data.name,
+      };
     }
+
+    const completedByDisease: Record<string, { uniqueCases: number; totalAttempts: number; name: string }> = {};
+    for (const [diseaseId, data] of tracking.uniqueCasesByDisease.entries()) {
+      completedByDisease[diseaseId] = {
+        uniqueCases: data.cases.size,
+        totalAttempts: data.attempts,
+        name: data.name,
+      };
+    }
+
+    const completedByAdminTag: Record<string, { uniqueCases: number; totalAttempts: number; name: string; color: string }> = {};
+    for (const [tagId, data] of tracking.uniqueCasesByAdminTag.entries()) {
+      completedByAdminTag[tagId] = {
+        uniqueCases: data.cases.size,
+        totalAttempts: data.attempts,
+        name: data.name,
+        color: data.color,
+      };
+    }
+
+    result.push({
+      userId,
+      userName: tracking.user.name,
+      userEmail: tracking.user.email,
+      userPosition: tracking.user.position,
+      uniqueCasesCompleted: tracking.uniqueCases.size,
+      totalAttempts: tracking.totalAttempts,
+      completedByDifficulty: {
+        beginner: {
+          uniqueCases: tracking.uniqueCasesByDifficulty.beginner.cases.size,
+          totalAttempts: tracking.uniqueCasesByDifficulty.beginner.attempts,
+        },
+        intermediate: {
+          uniqueCases: tracking.uniqueCasesByDifficulty.intermediate.cases.size,
+          totalAttempts: tracking.uniqueCasesByDifficulty.intermediate.attempts,
+        },
+        advanced: {
+          uniqueCases: tracking.uniqueCasesByDifficulty.advanced.cases.size,
+          totalAttempts: tracking.uniqueCasesByDifficulty.advanced.attempts,
+        },
+      },
+      completedByExamType,
+      completedByDisease,
+      completedByAdminTag,
+      lastCompletedAt: tracking.lastCompletedAt,
+      daysSinceLastActivity,
+      regularityPerWeek,
+      firstCompletedAt: tracking.firstCompletedAt,
+    });
   }
 
-  return Array.from(userMap.values()).sort((a, b) => b.totalCompleted - a.totalCompleted);
+  return result.sort((a, b) => b.uniqueCasesCompleted - a.uniqueCasesCompleted);
 };
 
 const cachedUserStatistics = cache(async (filtersJson: string) => {
   const filters = JSON.parse(filtersJson) as StatsFilters | undefined;
   return unstable_cache(
     () => fetchUserStatisticsData(filters),
-    ['bestof:stats:users', filtersJson],
+    ['bestof:stats:users:v2', filtersJson],
     { tags: [STATS_TAG, CASES_TAG] },
   )();
 });
@@ -298,7 +375,8 @@ const fetchGlobalStatisticsData = async (filters?: StatsFilters) => {
   ]);
 
   const uniqueUsers = new Set(attempts.map((attempt) => attempt.userId));
-  const totalCompleted = attempts.length;
+  const uniqueCases = new Set(attempts.map((attempt) => attempt.caseId));
+  const totalCompleted = uniqueCases.size;
   const avgPerUser = uniqueUsers.size > 0 ? Number((totalCompleted / uniqueUsers.size).toFixed(2)) : 0;
 
   let mostPracticedCase = null;
@@ -345,7 +423,7 @@ const cachedGlobalStatistics = cache(async (filtersJson: string) => {
   const filters = JSON.parse(filtersJson) as StatsFilters | undefined;
   return unstable_cache(
     () => fetchGlobalStatisticsData(filters),
-    ['bestof:stats:global', filtersJson],
+    ['bestof:stats:global:v2', filtersJson],
     { tags: [STATS_TAG, CASES_TAG] },
   )();
 });
@@ -404,7 +482,7 @@ const cachedCompletionTrend = cache(async (filtersJson: string, groupBy: 'day' |
   const filters = JSON.parse(filtersJson) as StatsFilters | undefined;
   return unstable_cache(
     () => fetchCompletionTrendData(filters, groupBy),
-    ['bestof:stats:trend', filtersJson, groupBy],
+    ['bestof:stats:trend:v2', filtersJson, groupBy],
     { tags: [STATS_TAG, CASES_TAG] },
   )();
 });
@@ -440,4 +518,265 @@ export const listAllUsersWithAttempts = async (): Promise<Array<{ id: string; na
     name: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.name || user.email,
     email: user.email,
   }));
+};
+
+export type UserCompletionTrend = {
+  userId: string;
+  userName: string;
+  color: string;
+  trends: { period: string; cumulativeCount: number }[];
+};
+
+const fetchUserCompletionTrendsData = async (filters?: StatsFilters, groupBy: 'day' | 'week' | 'month' = 'week') => {
+  const where = buildAttemptWhereClause({ filters });
+
+  const attempts = await prisma.caseAttempt.findMany({
+    where,
+    select: {
+      userId: true,
+      caseId: true,
+      validatedAt: true,
+      user: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          name: true,
+          email: true,
+        },
+      },
+    },
+    orderBy: { validatedAt: 'asc' },
+  });
+
+  const userTrendsMap = new Map<string, { name: string; uniqueCasesByPeriod: Map<string, Set<string>> }>();
+
+  for (const attempt of attempts) {
+    if (!attempt.validatedAt) continue;
+
+    const userId = attempt.userId;
+    const caseId = attempt.caseId;
+    const displayName = attempt.user.firstName
+      ? `${attempt.user.firstName} ${attempt.user.lastName || ''}`.trim()
+      : attempt.user.name || attempt.user.email;
+
+    if (!userTrendsMap.has(userId)) {
+      userTrendsMap.set(userId, {
+        name: displayName,
+        uniqueCasesByPeriod: new Map(),
+      });
+    }
+
+    const date = new Date(attempt.validatedAt);
+    let periodKey: string;
+
+    if (groupBy === 'day') {
+      periodKey = date.toISOString().split('T')[0];
+    } else if (groupBy === 'week') {
+      const year = date.getFullYear();
+      const weekNumber = getWeekNumber(date);
+      periodKey = `${year}-W${String(weekNumber).padStart(2, '0')}`;
+    } else {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      periodKey = `${year}-${month}`;
+    }
+
+    const userData = userTrendsMap.get(userId);
+    if (userData) {
+      if (!userData.uniqueCasesByPeriod.has(periodKey)) {
+        userData.uniqueCasesByPeriod.set(periodKey, new Set());
+      }
+      userData.uniqueCasesByPeriod.get(periodKey)!.add(caseId);
+    }
+  }
+
+  const colors = [
+    'hsl(221, 83%, 53%)',
+    'hsl(262, 83%, 58%)',
+    'hsl(142, 76%, 36%)',
+    'hsl(38, 92%, 50%)',
+    'hsl(0, 84%, 60%)',
+  ];
+  let colorIndex = 0;
+
+  const result: UserCompletionTrend[] = [];
+
+  for (const [userId, userData] of userTrendsMap.entries()) {
+    const sortedPeriods = Array.from(userData.uniqueCasesByPeriod.keys()).sort();
+    const uniqueCasesSeenSoFar = new Set<string>();
+
+    const trends = sortedPeriods.map((period) => {
+      const casesInPeriod = userData.uniqueCasesByPeriod.get(period)!;
+      for (const caseId of casesInPeriod) {
+        uniqueCasesSeenSoFar.add(caseId);
+      }
+      return { period, cumulativeCount: uniqueCasesSeenSoFar.size };
+    });
+
+    result.push({
+      userId,
+      userName: userData.name,
+      color: colors[colorIndex % colors.length],
+      trends,
+    });
+
+    colorIndex++;
+  }
+
+  return result;
+};
+
+const cachedUserCompletionTrends = cache(async (filtersJson: string, groupBy: 'day' | 'week' | 'month') => {
+  const filters = JSON.parse(filtersJson) as StatsFilters | undefined;
+  return unstable_cache(
+    () => fetchUserCompletionTrendsData(filters, groupBy),
+    ['bestof:stats:user-trends:v2', filtersJson, groupBy],
+    { tags: [STATS_TAG, CASES_TAG] },
+  )();
+});
+
+export const getUserCompletionTrends = async (
+  filters?: StatsFilters,
+  groupBy: 'day' | 'week' | 'month' = 'week',
+): Promise<UserCompletionTrend[]> => {
+  return cachedUserCompletionTrends(JSON.stringify(filters || {}), groupBy);
+};
+
+export type UserCaseHistoryItem = {
+  caseId: string;
+  caseName: string;
+  examType: string | null;
+  examTypeId: string | null;
+  difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+  submittedAt: Date;
+  attemptId: string;
+};
+
+const fetchUserCaseHistoryData = async (userId: string, filters?: Omit<StatsFilters, 'userIds'>) => {
+  const where = buildAttemptWhereClause({ filters: { ...filters, userIds: [userId] } });
+
+  const attempts = await prisma.caseAttempt.findMany({
+    where,
+    select: {
+      id: true,
+      caseId: true,
+      validatedAt: true,
+      c: {
+        select: {
+          id: true,
+          name: true,
+          difficulty: true,
+          examType: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: { validatedAt: 'desc' },
+  });
+
+  return attempts
+    .filter((attempt) => attempt.validatedAt !== null)
+    .map((attempt) => ({
+      caseId: attempt.c.id,
+      caseName: attempt.c.name,
+      examType: attempt.c.examType?.name || null,
+      examTypeId: attempt.c.examType?.id || null,
+      difficulty: attempt.c.difficulty,
+      submittedAt: attempt.validatedAt as Date,
+      attemptId: attempt.id,
+    }));
+};
+
+const cachedUserCaseHistory = cache(async (userId: string, filtersJson: string) => {
+  const filters = JSON.parse(filtersJson) as Omit<StatsFilters, 'userIds'> | undefined;
+  return unstable_cache(
+    () => fetchUserCaseHistoryData(userId, filters),
+    ['bestof:stats:user-history:v2', userId, filtersJson],
+    { tags: [STATS_TAG, CASES_TAG] },
+  )();
+});
+
+export const getUserCaseHistory = async (
+  userId: string,
+  filters?: Omit<StatsFilters, 'userIds'>,
+): Promise<UserCaseHistoryItem[]> => {
+  return cachedUserCaseHistory(userId, JSON.stringify(filters || {}));
+};
+
+export type UserExamTypeStats = {
+  examTypeId: string;
+  examTypeName: string;
+  completed: number;
+  total: number;
+  percentage: number;
+};
+
+export const getUserExamTypeStats = async (userId: string): Promise<UserExamTypeStats[]> => {
+  const [completedAttempts, allExamTypes] = await Promise.all([
+    prisma.caseAttempt.findMany({
+      where: {
+        userId,
+        validatedAt: { not: null },
+      },
+      select: {
+        caseId: true,
+        c: {
+          select: {
+            examTypeId: true,
+            examType: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    }),
+    prisma.examType.findMany({
+      select: {
+        id: true,
+        name: true,
+        _count: {
+          select: {
+            cases: {
+              where: {
+                status: 'PUBLISHED',
+              },
+            },
+          },
+        },
+      },
+    }),
+  ]);
+
+  const completedByExamType: Record<string, Set<string>> = {};
+  for (const attempt of completedAttempts) {
+    const examTypeId = attempt.c.examTypeId;
+    if (examTypeId) {
+      if (!completedByExamType[examTypeId]) {
+        completedByExamType[examTypeId] = new Set();
+      }
+      completedByExamType[examTypeId].add(attempt.caseId);
+    }
+  }
+
+  return allExamTypes.map((examType) => {
+    const uniqueCases = completedByExamType[examType.id]?.size || 0;
+    const total = examType._count.cases;
+    const percentage = total > 0 ? Math.round((uniqueCases / total) * 100) : 0;
+
+    return {
+      examTypeId: examType.id,
+      examTypeName: examType.name,
+      completed: uniqueCases,
+      total,
+      percentage,
+    };
+  });
 };

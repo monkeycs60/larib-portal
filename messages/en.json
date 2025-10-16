@@ -69,7 +69,6 @@
     "role": "Role",
     "department": "Department",
     "createPassword": "Create Password",
-    "confirmPassword": "Confirm Password",
     "createAccount": "Create Account",
     "namePlaceholder": "Enter your full name",
     "createPasswordPlaceholder": "Enter your password",
@@ -159,8 +158,7 @@
     "deleted": "User deleted",
     "actionError": "Action failed",
     "positionCreated": "Position created"
-  }
-  ,
+  },
   "upload": {
     "selectFile": "Select image",
     "changeImage": "Change image",
@@ -171,8 +169,7 @@
     "fileTooLarge": "File is too large",
     "invalidType": "Invalid file type",
     "hint": "PNG, JPG, or WEBP up to 5MB"
-  }
-  ,
+  },
   "bestof": {
     "title": "Clinical Cases",
     "subtitle": "Browse and practice on clinical cases.",
@@ -232,14 +229,18 @@
       "customTags": "Enter comma-separated tags",
       "textContent": "Enter the clinical case content here (optional if PDF is provided)..."
     },
-    "hints": { "tags": "Up to 10 tags, comma separated." },
+    "hints": {
+      "tags": "Up to 10 tags, comma separated."
+    },
     "addNewExam": "+ Create New Exam Type",
     "addNewDisease": "+ Create New Disease",
     "addNewExamPrompt": "New exam type name",
     "addNewDiseasePrompt": "New disease name",
     "createExamTypeCta": "Create new exam type",
     "createDiseaseCta": "Create new disease",
-    "createDialog": { "title": "Create New Clinical Case" },
+    "createDialog": {
+      "title": "Create New Clinical Case"
+    },
     "content": {
       "section": "Case Content",
       "helper": "Provide either a PDF file or text content (not both). One is required.",
@@ -268,7 +269,9 @@
     "editPlaceholder": "Editing UI coming soon",
     "caseView": {
       "newBadge": "New",
-      "sidebar": { "title": "Case" },
+      "sidebar": {
+        "title": "Case"
+      },
       "attempts": "Attempts",
       "firstTry": "First try",
       "personalSettings": "Personal Settings",
@@ -292,10 +295,8 @@
       "requiredBeforeValidation": "Required before validating the case.",
       "savedDraft": "Progress saved",
       "personalDifficultySaved": "Personal difficulty updated",
-      "validated": "Case validated"
-      ,
-      "startNewAttempt": "Start new attempt"
-      ,
+      "validated": "Case validated",
+      "startNewAttempt": "Start new attempt",
       "noAttempts": "No attempts yet",
       "attemptDraft": "draft",
       "attemptValidated": "validated",
@@ -307,8 +308,7 @@
       "contentHiddenBeforeValidation": "You can access the result after submitting your case",
       "revealContent": "Reveal the result",
       "clickToReveal": "Click to reveal"
-    }
-    ,
+    },
     "assignTagsTab": "Assign",
     "manageTagsTab": "Manage",
     "casesByTagTab": "Cases",
@@ -334,8 +334,7 @@
     "confirmDeleteTag": "Delete tag?",
     "confirmDeleteTagDescription": "This will remove the tag from all cases. This action cannot be undone.",
     "tagDeleted": "Tag deleted",
-    "close": "Close"
-    ,
+    "close": "Close",
     "editTags": "Update Tags",
     "filters": {
       "search": "Search",
@@ -381,7 +380,10 @@
         "advanced": "Advanced",
         "lastActivity": "Last activity",
         "daysSince": "Days since",
-        "regularity": "Regularity"
+        "regularity": "Regularity",
+        "position": "Position",
+        "casesByType": "Cases by Type",
+        "viewProfile": "View Profile"
       },
       "charts": {
         "byCategory": "Cases by category",
@@ -400,7 +402,22 @@
         "inactive": "Inactive"
       },
       "perWeek": "per week",
-      "noCasesCompleted": "No cases completed yet"
+      "noCasesCompleted": "No cases completed yet",
+      "userProfile": {
+        "backToStatistics": "Back to statistics",
+        "stats": {
+          "totalCompleted": "Total completed",
+          "beginner": "Beginner",
+          "intermediate": "Intermediate",
+          "advanced": "Advanced"
+        },
+        "caseHistory": {
+          "title": "Case History"
+        },
+        "examTypeStats": {
+          "title": "Stats by Exam Type"
+        }
+      }
     }
   },
   "conges": {
@@ -443,7 +460,15 @@
       "title": "Calendar – {month} {year}",
       "empty": "—",
       "more": "+{count}",
-      "weekdays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+      "weekdays": [
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat",
+        "Sun"
+      ]
     },
     "today": {
       "title": "Who is off today",

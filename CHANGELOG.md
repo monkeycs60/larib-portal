@@ -734,3 +734,113 @@ Notes:
   - Modified: `app/[locale]/bestof-larib/page.tsx` (added Statistics button for admins)
   - Modified: `messages/en.json` (added `bestof.statistics` section)
   - Modified: `messages/fr.json` (added `bestof.statistics` section)
+
+## Fix: Bestof Larib Statistics - Unique Cases vs Attempts Correction + Visual Improvements
+
+- Name: Statistics logic correction (unique cases vs total attempts) + modern chart design
+- What it does: **Critical fix** + visual enhancements to the Statistics Dashboard:
+  - **Fixed Logic**: Corrected fundamental counting issue where attempts were mistakenly counted as unique cases
+    - Now properly distinguishes between unique cases completed and total attempts
+    - Example: User with 2 attempts on same case now shows "1 case completed (2 attempts)" instead of "2 cases"
+    - Fixed "ECG 2/1 (200%)" bug in exam type stats → now correctly shows "ECG 1/1 (100%)"
+    - Cases by Type column now displays unique cases: "ECG: 1 XPS: 1" instead of attempt counts
+    - Progress Over Time chart now tracks cumulative unique cases (not attempts)
+    - Regularity metrics now calculate based on unique cases per week
+  - **Visual Improvements**: Complete chart redesign with modern aesthetics
+    - Replaced generic black/dark colors with vibrant semantic colors
+    - Difficulty levels: Green (Beginner) → Orange (Intermediate) → Rouge (Advanced)
+    - Added gradient effects to all bars (vertical gradients for distribution, horizontal for top users)
+    - Top Users chart: Blue → Violet gradient with rounded corners (radius 8)
+    - Distribution chart: Individual gradients per difficulty level
+    - Progress Over Time: Thicker lines (strokeWidth 3), white-filled dots with colored borders, enhanced active dots
+    - Improved grid styling: Subtle dashed lines (5 5) with reduced opacity (0.3)
+    - Enhanced axes: Better colors, larger tick font (12px), thicker axis lines (1.5px)
+    - Increased chart height from 300px to 400px for better readability
+  - **Case History Enhancement**: Added attempt number badges (#1, #2) for cases with multiple attempts
+- How to use it:
+  - The statistics now accurately reflect reality:
+    - If Clement completed "Second case" twice, it shows 1 unique case (not 2)
+    - The "Cases by Type" column shows how many different cases per exam type
+    - Case History table displays attempt badges when a case was done multiple times
+  - Charts are now colorful and modern with professional gradients
+- Technical details:
+  - Modified `UserStatistics` type: added `uniqueCasesCompleted` and `totalAttempts` fields
+  - Changed `completedByExamType` structure: `{ uniqueCases: number; totalAttempts: number; name: string }`
+  - Refactored `fetchUserStatisticsData` to use `Set<caseId>` for tracking unique cases
+  - Updated `fetchUserCompletionTrendsData` to count unique cases per period (not attempts)
+  - Fixed `getUserExamTypeStats` to use `Set<caseId>` instead of counting all attempts
+  - Charts now use dedicated `COLORS` constant with HSL values for consistency
+- Updated files:
+  - Modified: `lib/services/bestof-larib-stats.ts` (complete logic rewrite with Sets)
+  - Modified: `app/[locale]/bestof-larib/components/bestof-stats-user-table.tsx` (uniqueCases display)
+  - Modified: `app/[locale]/bestof-larib/components/bestof-stats-charts.tsx` (colors, gradients, styling)
+  - Modified: `app/[locale]/bestof-larib/statistics/users/[userId]/page.tsx` (uniqueCases in cards)
+  - Modified: `app/[locale]/bestof-larib/statistics/users/[userId]/components/user-case-history.tsx` (attempt badges)
+
+## Fix: Bestof Larib Statistics - Display Format Bug Fixes
+
+- Name: Statistics display bugs resolution - "(X attempts)" format + undefined values
+- What it does: Fixes critical display bugs in the Statistics Dashboard:
+  - **Global Statistics Bug**: Fixed total cases count showing attempts instead of unique cases (e.g., was showing 3, now correctly shows 2 unique cases)
+  - **User Profile Format**: All stat cards now display "X (Y attempts)" format consistently
+    - Total completed: "2 (3 attempts)"
+    - Beginner: "1 (1 attempt)"
+    - Advanced: "1 (2 attempts)"
+  - **Cases by Type Undefined**: Fixed "ECG: undefined XPS: undefined" error with defensive checks
+  - **Charts Data**: Added fallback values for all charts to handle undefined data gracefully
+  - **Data Structure Update**: Modified `completedByDifficulty` to track both unique cases and attempts per difficulty level
+    - Old: `{ beginner: number, intermediate: number, advanced: number }`
+    - New: `{ beginner: { uniqueCases: number, totalAttempts: number }, ... }`
+  - **Statistics Table**: Updated difficulty columns to access new nested structure
+- How to use it:
+  - All statistics now display correctly with the "(X attempts)" format showing both unique cases and total attempts
+  - User profile cards show accurate data without undefined values
+  - Charts render properly without missing bars or data
+- Technical details:
+  - Updated `UserStatistics` type with nested difficulty structure
+  - Modified `UserTracking` type to track attempts per difficulty level
+  - Updated `fetchGlobalStatisticsData` to use `Set<caseId>` for counting unique cases
+  - Added defensive checks (`?? 0`) throughout components for undefined values
+  - Maintained backward compatibility for all existing chart configurations
+- Updated files:
+  - Modified: `lib/services/bestof-larib-stats.ts` (type definitions, tracking logic, result building)
+  - Modified: `app/[locale]/bestof-larib/statistics/users/[userId]/page.tsx` (card display format)
+  - Modified: `app/[locale]/bestof-larib/components/bestof-stats-user-table.tsx` (difficulty columns, defensive checks)
+  - Modified: `app/[locale]/bestof-larib/components/bestof-stats-charts.tsx` (distribution data calculation, top users fallback)
+
+## Enhancement: Bestof Larib Statistics Dashboard Improvements
+
+- Name: Enhanced statistics with multi-user trends, user positions, exam type breakdown, and individual user profiles
+- What it does: Significantly improves the Statistics Dashboard with new features:
+  - **Multi-line Progress Over Time Chart**: Shows cumulative case completion for each selected user with color-coded lines, allowing admins to compare progress across multiple users simultaneously
+  - **Enhanced User Table**: Added "Position" column displaying user job positions, "Cases by Type" column showing exam type breakdown (e.g., "ECG: 2 Echo: 1 CT: 4"), and "View Profile" action button linking to individual user profiles
+  - **Individual User Profile Pages**: New dedicated page at `/{locale}/bestof-larib/statistics/users/[userId]` displaying:
+    - User information header with name, email, and position
+    - Quick stats cards showing total completed, beginner, intermediate, and advanced case counts
+    - Case History table listing the 10 most recent completed cases with case name, exam type, difficulty badge, submission date, and view action
+    - Exam Type Stats widget with progress bars showing completion percentage per exam type (format: "ECG 1/1 100%")
+  - **Service Layer Enhancements**: Added position tracking in user statistics, per-user cumulative trend calculation with color assignment, case history retrieval, and exam type completion stats
+  - **Fully Localized**: Complete French and English translations for all new features
+- How to use it:
+  - Navigate to `/{locale}/bestof-larib/statistics` as an admin
+  - View the improved Progress Over Time chart showing individual user progress lines with a legend
+  - Browse the enhanced user table with position and cases by type breakdown
+  - Click "View Profile" on any user row to open their individual profile page
+  - On the profile page, review their completion stats, case history, and exam type progress
+- Features:
+  - **Cumulative Trends**: Each user gets a colored line showing total cases completed over time (weekly periods)
+  - **Position Display**: Shows user job position in table and profile header
+  - **Exam Type Breakdown**: Quick view of completion counts per exam type in main table
+  - **Case History**: Detailed list of completed cases with full metadata and navigation
+  - **Exam Type Progress**: Visual progress bars showing completion percentage against total available cases per exam type
+  - **Direct Navigation**: Click through from statistics table to individual profiles, then to specific cases
+- Updated files:
+  - Modified: `lib/services/bestof-larib-stats.ts` (added position field, getUserCompletionTrends, getUserCaseHistory, getUserExamTypeStats)
+  - Modified: `app/[locale]/bestof-larib/statistics/page.tsx` (switched to getUserCompletionTrends)
+  - Modified: `app/[locale]/bestof-larib/components/bestof-stats-charts.tsx` (multi-line chart with user trends)
+  - Modified: `app/[locale]/bestof-larib/components/bestof-stats-user-table.tsx` (added position, cases by type, view profile columns)
+  - New: `app/[locale]/bestof-larib/statistics/users/[userId]/page.tsx` (individual user profile page)
+  - New: `app/[locale]/bestof-larib/statistics/users/[userId]/components/user-case-history.tsx` (case history table)
+  - New: `app/[locale]/bestof-larib/statistics/users/[userId]/components/user-exam-type-widget.tsx` (exam type stats widget)
+  - Modified: `messages/en.json` (added table.position, table.casesByType, table.viewProfile, userProfile section)
+  - Modified: `messages/fr.json` (added table.position, table.casesByType, table.viewProfile, userProfile section)

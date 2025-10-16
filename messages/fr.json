@@ -1,99 +1,98 @@
 {
-	"navigation": {
-		"home": "Accueil",
-		"profile": "Profil",
-		"login": "Connexion",
-		"logout": "Déconnexion",
-		"signup": "S'inscrire",
-		"loading": "Chargement...",
-		"loggingOut": "Déconnexion en cours...",
-		"appName": "Nom de l'application",
-		"editProfile": "Modifier le profil",
-		"welcomeBackUser": "Bon retour, {name}",
-		"applications": "Applications"
-	},
-	"home": {
-		"title": "Bonjour le monde",
-		"welcome": "Bienvenue",
-		"welcomeMessage": "Vous êtes connecté(e) avec succès à votre compte.",
-		"welcomeToApp": "Bienvenue sur FeedbackApp",
-		"appDescription": "La meilleure façon de collecter et gérer les commentaires des utilisateurs.",
-		"whatToDo": "Que souhaitez-vous faire ?",
-		"goToDashboard": "Accéder au tableau de bord",
-		"goToProfile": "Voir le profil",
-		"dashboard": "Tableau de bord",
-		"dashboardDescription": "Consultez votre tableau de bord et vos analyses.",
-		"profile": "Profil",
-		"profileDescription": "Gérez votre profil et vos paramètres.",
-		"settings": "Paramètres",
-		"settingsDescription": "Configurez vos préférences d'application."
-	},
-	"auth": {
-		"loginTitle": "Connexion",
-		"signupTitle": "Inscription",
-		"email": "E-mail",
-		"password": "Mot de passe",
-		"confirmPassword": "Confirmer le mot de passe",
-		"name": "Nom",
-		"loginButton": "Se connecter",
-		"signupButton": "S'inscrire",
-		"alreadyHaveAccount": "Vous avez déjà un compte ?",
-		"noAccount": "Vous n'avez pas de compte ?",
-		"switchToLogin": "Connectez-vous ici",
-		"switchToSignup": "Inscrivez-vous ici",
-		"invalidCredentials": "L'adresse e-mail ou le mot de passe est incorrect",
-		"nameRequired": "Le nom est requis pour l'inscription",
-		"authenticationFailed": "Échec de l'authentification",
-		"googleLoginFailed": "Échec de la connexion Google",
-		"loading": "Chargement...",
-		"orContinueWith": "Ou continuer avec",
-		"nameMinLength": "Le nom doit contenir au moins 2 caractères",
-		"invalidEmail": "Adresse e-mail invalide",
-		"passwordMinLength": "Le mot de passe doit contenir au moins 6 caractères",
-		"welcomeBack": "Bon retour",
-		"signInToAccount": "Connectez-vous à votre compte pour continuer",
-		"forgotPassword": "Mot de passe oublié ?",
-		"emailPlaceholder": "Saisissez votre e-mail",
-		"passwordPlaceholder": "Saisissez votre mot de passe",
-		"signIn": "Se connecter",
-		"signUp": "S'inscrire",
-		"or": "ou",
-		"demoCredentials": "Identifiants de démonstration :",
-		"userCredentials": "Utilisateur",
-		"adminCredentials": "Administrateur",
-		"welcomeToTeam": "Bienvenue dans l'équipe !",
-		"invitedByMessage": "Vous avez été invité(e) par Sarah Smith à rejoindre la plateforme",
-		"yourInformation": "Vos informations",
-		"role": "Rôle",
-		"department": "Département",
-		"createPassword": "Créer un mot de passe",
-		"confirmPassword": "Confirmer le mot de passe",
-		"createAccount": "Créer un compte",
-		"namePlaceholder": "Saisissez votre nom complet",
-		"createPasswordPlaceholder": "Saisissez votre mot de passe",
-		"confirmPasswordPlaceholder": "Confirmez votre mot de passe",
-		"passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
-		"passwordRequirements": "Le mot de passe doit contenir au moins 8 caractères incluant majuscules, minuscules et chiffres."
-	},
-	"profile": {
-		"title": "Profil",
-		"welcome": "Bienvenue sur votre profil",
-		"saved": "Profil mis à jour",
-		"saveError": "Échec de l'enregistrement du profil"
-	},
-	"dashboard": {
-		"title": "Tableau de bord",
-		"welcome": "Bienvenue sur votre tableau de bord",
-		"appsSectionTitle": "Accéder aux applications",
-		"openApp": "Accéder",
-		"adminSectionTitle": "Administration",
-		"appDesc_BESTOF_LARIB": "Cas cliniques et contenus pédagogiques Best of Larib.",
-		"appDesc_CONGES": "Gérez vos congés et demandes d'absences.",
-		"appDesc_CARDIOLARIB": "Ressources et outils dédiés à CardioLarib."
-	},
+  "navigation": {
+    "home": "Accueil",
+    "profile": "Profil",
+    "login": "Connexion",
+    "logout": "Déconnexion",
+    "signup": "S'inscrire",
+    "loading": "Chargement...",
+    "loggingOut": "Déconnexion en cours...",
+    "appName": "Nom de l'application",
+    "editProfile": "Modifier le profil",
+    "welcomeBackUser": "Bon retour, {name}",
+    "applications": "Applications"
+  },
+  "home": {
+    "title": "Bonjour le monde",
+    "welcome": "Bienvenue",
+    "welcomeMessage": "Vous êtes connecté(e) avec succès à votre compte.",
+    "welcomeToApp": "Bienvenue sur FeedbackApp",
+    "appDescription": "La meilleure façon de collecter et gérer les commentaires des utilisateurs.",
+    "whatToDo": "Que souhaitez-vous faire ?",
+    "goToDashboard": "Accéder au tableau de bord",
+    "goToProfile": "Voir le profil",
+    "dashboard": "Tableau de bord",
+    "dashboardDescription": "Consultez votre tableau de bord et vos analyses.",
+    "profile": "Profil",
+    "profileDescription": "Gérez votre profil et vos paramètres.",
+    "settings": "Paramètres",
+    "settingsDescription": "Configurez vos préférences d'application."
+  },
+  "auth": {
+    "loginTitle": "Connexion",
+    "signupTitle": "Inscription",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "name": "Nom",
+    "loginButton": "Se connecter",
+    "signupButton": "S'inscrire",
+    "alreadyHaveAccount": "Vous avez déjà un compte ?",
+    "noAccount": "Vous n'avez pas de compte ?",
+    "switchToLogin": "Connectez-vous ici",
+    "switchToSignup": "Inscrivez-vous ici",
+    "invalidCredentials": "L'adresse e-mail ou le mot de passe est incorrect",
+    "nameRequired": "Le nom est requis pour l'inscription",
+    "authenticationFailed": "Échec de l'authentification",
+    "googleLoginFailed": "Échec de la connexion Google",
+    "loading": "Chargement...",
+    "orContinueWith": "Ou continuer avec",
+    "nameMinLength": "Le nom doit contenir au moins 2 caractères",
+    "invalidEmail": "Adresse e-mail invalide",
+    "passwordMinLength": "Le mot de passe doit contenir au moins 6 caractères",
+    "welcomeBack": "Bon retour",
+    "signInToAccount": "Connectez-vous à votre compte pour continuer",
+    "forgotPassword": "Mot de passe oublié ?",
+    "emailPlaceholder": "Saisissez votre e-mail",
+    "passwordPlaceholder": "Saisissez votre mot de passe",
+    "signIn": "Se connecter",
+    "signUp": "S'inscrire",
+    "or": "ou",
+    "demoCredentials": "Identifiants de démonstration :",
+    "userCredentials": "Utilisateur",
+    "adminCredentials": "Administrateur",
+    "welcomeToTeam": "Bienvenue dans l'équipe !",
+    "invitedByMessage": "Vous avez été invité(e) par Sarah Smith à rejoindre la plateforme",
+    "yourInformation": "Vos informations",
+    "role": "Rôle",
+    "department": "Département",
+    "createPassword": "Créer un mot de passe",
+    "createAccount": "Créer un compte",
+    "namePlaceholder": "Saisissez votre nom complet",
+    "createPasswordPlaceholder": "Saisissez votre mot de passe",
+    "confirmPasswordPlaceholder": "Confirmez votre mot de passe",
+    "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
+    "passwordRequirements": "Le mot de passe doit contenir au moins 8 caractères incluant majuscules, minuscules et chiffres."
+  },
+  "profile": {
+    "title": "Profil",
+    "welcome": "Bienvenue sur votre profil",
+    "saved": "Profil mis à jour",
+    "saveError": "Échec de l'enregistrement du profil"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "welcome": "Bienvenue sur votre tableau de bord",
+    "appsSectionTitle": "Accéder aux applications",
+    "openApp": "Accéder",
+    "adminSectionTitle": "Administration",
+    "appDesc_BESTOF_LARIB": "Cas cliniques et contenus pédagogiques Best of Larib.",
+    "appDesc_CONGES": "Gérez vos congés et demandes d'absences.",
+    "appDesc_CARDIOLARIB": "Ressources et outils dédiés à CardioLarib."
+  },
   "metadata": {
-		"title": "FeedbackApp",
-		"description": "Application de feedback utilisateur"
+    "title": "FeedbackApp",
+    "description": "Application de feedback utilisateur"
   },
   "welcome": {
     "title": "Définissez votre mot de passe",
@@ -105,37 +104,37 @@
     "genericError": "Nous n'avons pas pu terminer votre demande. Veuillez réessayer."
   },
   "admin": {
-		"title": "Admin",
-		"usersNav": "Gestion des utilisateurs",
-		"usersTitle": "Gestion des utilisateurs",
-		"usersSubtitle": "Voir, éditer et supprimer des utilisateurs.",
-		"actions": "Actions",
-		"edit": "Éditer",
-		"editUser": "Éditer l'utilisateur",
-		"delete": "Supprimer",
-		"deleting": "Suppression...",
+    "title": "Admin",
+    "usersNav": "Gestion des utilisateurs",
+    "usersTitle": "Gestion des utilisateurs",
+    "usersSubtitle": "Voir, éditer et supprimer des utilisateurs.",
+    "actions": "Actions",
+    "edit": "Éditer",
+    "editUser": "Éditer l'utilisateur",
+    "delete": "Supprimer",
+    "deleting": "Suppression...",
     "confirmDelete": "Voulez-vous vraiment supprimer cet utilisateur ?",
     "confirmDeleteDesc": "Cette action est irréversible.",
-		"save": "Enregistrer",
-		"saving": "Enregistrement...",
-		"cancel": "Annuler",
-		"name": "Nom",
-		"email": "E-mail",
-		"role": "Rôle",
-		"roleAdmin": "Administrateur",
-		"roleUser": "Utilisateur",
-		"phone": "Téléphone",
-		"country": "Pays",
-		"birthDate": "Date de naissance",
-		"language": "Langue",
-		"position": "Poste",
-		"arrivalDate": "Date d'arrivée",
-		"departureDate": "Date de départ",
-		"profilePhoto": "Photo de profil",
-		"applications": "Applications autorisées",
-		"app_BESTOF_LARIB": "bestof-larib",
-		"app_CONGES": "conges",
-		"app_CARDIOLARIB": "cardiolarib",
+    "save": "Enregistrer",
+    "saving": "Enregistrement...",
+    "cancel": "Annuler",
+    "name": "Nom",
+    "email": "E-mail",
+    "role": "Rôle",
+    "roleAdmin": "Administrateur",
+    "roleUser": "Utilisateur",
+    "phone": "Téléphone",
+    "country": "Pays",
+    "birthDate": "Date de naissance",
+    "language": "Langue",
+    "position": "Poste",
+    "arrivalDate": "Date d'arrivée",
+    "departureDate": "Date de départ",
+    "profilePhoto": "Photo de profil",
+    "applications": "Applications autorisées",
+    "app_BESTOF_LARIB": "bestof-larib",
+    "app_CONGES": "conges",
+    "app_CARDIOLARIB": "cardiolarib",
     "firstName": "Prénom",
     "lastName": "Nom de famille",
     "addUser": "Ajouter un utilisateur",
@@ -157,8 +156,7 @@
     "deleted": "Utilisateur supprimé",
     "actionError": "Échec de l'action",
     "positionCreated": "Poste créé"
-  }
-  ,
+  },
   "upload": {
     "selectFile": "Choisir une image",
     "changeImage": "Changer l'image",
@@ -169,8 +167,7 @@
     "fileTooLarge": "Fichier trop volumineux",
     "invalidType": "Type de fichier invalide",
     "hint": "PNG, JPG ou WEBP jusqu'à 5 Mo"
-  }
-  ,
+  },
   "bestof": {
     "title": "Cas cliniques",
     "subtitle": "Consultez et entraînez-vous sur des cas cliniques.",
@@ -230,14 +227,18 @@
       "customTags": "Entrez des tags séparés par des virgules",
       "textContent": "Saisissez le contenu du cas ici (optionnel si un PDF est fourni)..."
     },
-    "hints": { "tags": "Jusqu'à 10 tags, séparés par des virgules." },
+    "hints": {
+      "tags": "Jusqu'à 10 tags, séparés par des virgules."
+    },
     "addNewExam": "+ Créer un nouveau type d'examen",
     "addNewDisease": "+ Créer une nouvelle maladie",
     "addNewExamPrompt": "Nom du nouveau type d'examen",
     "addNewDiseasePrompt": "Nom de la nouvelle maladie",
     "createExamTypeCta": "Créer le nouveau type d'examen",
     "createDiseaseCta": "Créer la nouvelle maladie",
-    "createDialog": { "title": "Créer un nouveau cas clinique" },
+    "createDialog": {
+      "title": "Créer un nouveau cas clinique"
+    },
     "content": {
       "section": "Contenu du cas",
       "helper": "Fournissez un fichier PDF ou un contenu texte (pas les deux). L'un est requis.",
@@ -266,7 +267,9 @@
     "editPlaceholder": "Interface d'édition à venir",
     "caseView": {
       "newBadge": "Nouveau",
-      "sidebar": { "title": "Cas" },
+      "sidebar": {
+        "title": "Cas"
+      },
       "attempts": "Essais",
       "firstTry": "Premier essai",
       "personalSettings": "Paramètres personnels",
@@ -290,10 +293,8 @@
       "requiredBeforeValidation": "À compléter avant de valider le cas.",
       "savedDraft": "Brouillon enregistré",
       "personalDifficultySaved": "Niveau personnel mis à jour",
-      "validated": "Cas validé"
-      ,
-      "startNewAttempt": "Nouvel essai"
-      ,
+      "validated": "Cas validé",
+      "startNewAttempt": "Nouvel essai",
       "noAttempts": "Aucun essai",
       "attemptDraft": "brouillon",
       "attemptValidated": "validé",
@@ -305,8 +306,7 @@
       "contentHiddenBeforeValidation": "Vous pourrez accéder au résultat après avoir soumis votre cas",
       "revealContent": "Découvrez le résultat",
       "clickToReveal": "Cliquez pour afficher"
-    }
-    ,
+    },
     "assignTagsTab": "Assigner",
     "manageTagsTab": "Gérer",
     "casesByTagTab": "Cas",
@@ -332,8 +332,7 @@
     "confirmDeleteTag": "Supprimer le tag ?",
     "confirmDeleteTagDescription": "Le tag sera retiré de tous les cas. Cette action est irréversible.",
     "tagDeleted": "Tag supprimé",
-    "close": "Fermer"
-    ,
+    "close": "Fermer",
     "editTags": "Mettre à jour les tags",
     "filters": {
       "search": "Recherche",
@@ -379,7 +378,10 @@
         "advanced": "Avancé",
         "lastActivity": "Dernière activité",
         "daysSince": "Jours écoulés",
-        "regularity": "Régularité"
+        "regularity": "Régularité",
+        "position": "Position",
+        "casesByType": "Cas par Type",
+        "viewProfile": "Voir le profil"
       },
       "charts": {
         "byCategory": "Cas par catégorie",
@@ -398,7 +400,22 @@
         "inactive": "Inactif"
       },
       "perWeek": "par semaine",
-      "noCasesCompleted": "Aucun cas complété pour le moment"
+      "noCasesCompleted": "Aucun cas complété pour le moment",
+      "userProfile": {
+        "backToStatistics": "Retour aux statistiques",
+        "stats": {
+          "totalCompleted": "Total complété",
+          "beginner": "Débutant",
+          "intermediate": "Intermédiaire",
+          "advanced": "Avancé"
+        },
+        "caseHistory": {
+          "title": "Historique des cas"
+        },
+        "examTypeStats": {
+          "title": "Statistiques par type d'examen"
+        }
+      }
     }
   },
   "conges": {
@@ -441,7 +458,15 @@
       "title": "Calendrier – {month} {year}",
       "empty": "—",
       "more": "+{count}",
-      "weekdays": ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
+      "weekdays": [
+        "Lun",
+        "Mar",
+        "Mer",
+        "Jeu",
+        "Ven",
+        "Sam",
+        "Dim"
+      ]
     },
     "today": {
       "title": "Absents aujourd'hui",

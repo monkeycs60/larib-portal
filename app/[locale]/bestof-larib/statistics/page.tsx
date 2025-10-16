@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import {
   getUserStatistics,
   getGlobalStatistics,
-  getCompletionTrend,
+  getUserCompletionTrends,
   listAllUsersWithAttempts,
   type StatsFilters,
 } from '@/lib/services/bestof-larib-stats';
@@ -67,10 +67,10 @@ export default async function BestofStatisticsPage({
         : undefined,
   };
 
-  const [globalStats, userStats, trendData, users, examTypes, diseaseTags, adminTags] = await Promise.all([
+  const [globalStats, userStats, userTrendData, users, examTypes, diseaseTags, adminTags] = await Promise.all([
     getGlobalStatistics(filters),
     getUserStatistics(filters),
-    getCompletionTrend(filters, 'week'),
+    getUserCompletionTrends(filters, 'week'),
     listAllUsersWithAttempts(),
     listExamTypes(),
     listDiseaseTags(),
@@ -86,7 +86,9 @@ export default async function BestofStatisticsPage({
 
   const tableTranslations = {
     user: t('table.user'),
+    position: t('table.position'),
     totalCompleted: t('table.totalCompleted'),
+    casesByType: t('table.casesByType'),
     beginner: t('table.beginner'),
     intermediate: t('table.intermediate'),
     advanced: t('table.advanced'),
@@ -95,6 +97,7 @@ export default async function BestofStatisticsPage({
     regularity: t('table.regularity'),
     perWeek: t('perWeek'),
     noCasesCompleted: t('noCasesCompleted'),
+    viewProfile: t('table.viewProfile'),
     activity: {
       veryActive: t('activity.veryActive'),
       active: t('activity.active'),
@@ -147,7 +150,7 @@ export default async function BestofStatisticsPage({
 
       <div className='space-y-4'>
         <h2 className='text-xl font-semibold'>Charts</h2>
-        <BestofStatsCharts userStats={userStats} trendData={trendData} translations={chartsTranslations} />
+        <BestofStatsCharts userStats={userStats} userTrendData={userTrendData} translations={chartsTranslations} />
       </div>
     </div>
   );
