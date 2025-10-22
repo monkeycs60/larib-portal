@@ -9,7 +9,7 @@ import { listUserTags, getCaseUserTagIds } from '@/lib/services/bestof-larib-tag
 import BackButton from './components/back-button';
 import PdfViewer from './components/pdf-viewer';
 
-export default async function CaseViewPage({
+async function CaseViewPageContent({
 	params,
 	searchParams,
 }: {
@@ -115,4 +115,14 @@ export default async function CaseViewPage({
             />
         </div>
     );
+}
+
+export default async function CaseViewPage({
+	params,
+	searchParams,
+}: {
+	params: Promise<{ locale: string; id: string }>;
+	searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+	return <CaseViewPageContent params={params} searchParams={searchParams} />;
 }

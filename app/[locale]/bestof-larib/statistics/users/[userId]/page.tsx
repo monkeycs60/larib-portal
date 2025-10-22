@@ -11,7 +11,7 @@ import { prisma } from '@/lib/prisma';
 import UserCaseHistory from './components/user-case-history';
 import UserExamTypeWidget from './components/user-exam-type-widget';
 
-export default async function UserProfilePage({
+async function UserProfilePageContent({
   params,
 }: {
   params: Promise<{ locale: string; userId: string }>;
@@ -159,4 +159,12 @@ export default async function UserProfilePage({
       </div>
     </div>
   );
+}
+
+export default async function UserProfilePage({
+  params,
+}: {
+  params: Promise<{ locale: string; userId: string }>;
+}) {
+  return <UserProfilePageContent params={params} />;
 }

@@ -20,7 +20,7 @@ import CasesTableFallback, { type CasesTableTranslations } from './components/ca
 import type { BestofCacheKey } from '@/lib/bestof-cache-key';
 import { serialiseBestofCacheKey } from '@/lib/bestof-cache-key';
 
-export default async function BestofLaribPage({
+async function BestofLaribPageContent({
   params,
   searchParams,
 }: {
@@ -227,4 +227,14 @@ export default async function BestofLaribPage({
       </Suspense>
     </div>
   );
+}
+
+export default async function BestofLaribPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  return <BestofLaribPageContent params={params} searchParams={searchParams} />;
 }

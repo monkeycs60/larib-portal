@@ -19,7 +19,7 @@ import BestofStatsOverview from '../components/bestof-stats-overview';
 import BestofStatsUserTable from '../components/bestof-stats-user-table';
 import BestofStatsCharts from '../components/bestof-stats-charts';
 
-export default async function BestofStatisticsPage({
+async function BestofStatisticsPageContent({
   params,
   searchParams,
 }: {
@@ -155,4 +155,14 @@ export default async function BestofStatisticsPage({
       </div>
     </div>
   );
+}
+
+export default async function BestofStatisticsPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  return <BestofStatisticsPageContent params={params} searchParams={searchParams} />;
 }
