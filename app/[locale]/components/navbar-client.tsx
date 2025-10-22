@@ -82,7 +82,7 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
 			<div className='container mx-auto flex h-20 items-center justify-between px-4'>
 				<div className='flex items-center'>
 					<Link
-						href={`/${locale}`}
+						href={`/`}
 						title='Larib Portal Home'
 						className='inline-flex items-center'>
 						<Image
