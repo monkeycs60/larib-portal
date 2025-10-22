@@ -10,6 +10,8 @@ import {
   userCasesTag,
   createClinicalCase,
   deleteClinicalCase,
+  deleteDiseaseTags,
+  deleteExamTypes,
   ensureDiseaseTag,
   ensureExamType,
   updateClinicalCase,
@@ -87,6 +89,22 @@ export const createDiseaseTagAction = adminOnlyAction
     const d = await ensureDiseaseTag(parsedInput.name)
     revalidateTag(DISEASE_TAGS_TAG)
     return d
+  })
+
+export const deleteExamTypesAction = adminOnlyAction
+  .inputSchema(z.object({ ids: z.array(z.string().min(1)).min(1) }))
+  .action(async ({ parsedInput }) => {
+    await deleteExamTypes(parsedInput.ids)
+    revalidateTag(EXAM_TYPES_TAG)
+    return { deleted: parsedInput.ids.length }
+  })
+
+export const deleteDiseaseTagsAction = adminOnlyAction
+  .inputSchema(z.object({ ids: z.array(z.string().min(1)).min(1) }))
+  .action(async ({ parsedInput }) => {
+    await deleteDiseaseTags(parsedInput.ids)
+    revalidateTag(DISEASE_TAGS_TAG)
+    return { deleted: parsedInput.ids.length }
   })
 
 const UpdateCaseSchema = CreateCaseSchema.extend({ id: z.string().min(1) })

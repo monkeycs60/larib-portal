@@ -236,6 +236,14 @@
     "addNewDiseasePrompt": "Nom de la nouvelle maladie",
     "createExamTypeCta": "Créer le nouveau type d'examen",
     "createDiseaseCta": "Créer la nouvelle maladie",
+    "deleteSelected": "Supprimer la sélection",
+    "itemsSelected": "{count} élément(s) sélectionné(s)",
+    "confirmDeleteItems": "Supprimer {count} élément(s) ?",
+    "confirmDeleteItemsDesc": "Cette action est irréversible. Ces éléments ne peuvent pas être supprimés s'ils sont utilisés par des cas existants.",
+    "deletingItems": "Suppression...",
+    "itemsDeleted": "{count} élément(s) supprimé(s) avec succès",
+    "deleteError": "Impossible de supprimer : utilisé par {count} cas",
+    "deleteGenericError": "Échec de la suppression",
     "createDialog": {
       "title": "Créer un nouveau cas clinique"
     },

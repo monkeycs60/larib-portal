@@ -12,17 +12,27 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { TagInput } from '@/components/ui/tag-input';
-import { InputDialog } from '@/components/ui/input-dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus } from 'lucide-react';
 import { useAction } from 'next-safe-action/hooks';
-import { createCaseAction, createDiseaseTagAction, createExamTypeAction, updateCaseAction, setCaseAdminTagsAction, ensureAdminTagAction } from '../actions';
+import { createCaseAction, createDiseaseTagAction, createExamTypeAction, updateCaseAction, setCaseAdminTagsAction, ensureAdminTagAction, deleteExamTypesAction, deleteDiseaseTagsAction } from '../actions';
 import { toast } from 'sonner';
+import DeletableSelectManager from './deletable-select-manager';
 
 const FormSchema = z.object({
 	name: z.string().min(1),
@@ -200,25 +210,84 @@ export default function CreateCaseDialog({
 			},
 		});
 
-	const [examDialogOpen, setExamDialogOpen] = useState(false);
-	const [newExamName, setNewExamName] = useState('');
-	async function confirmAddExam() {
-		const name = newExamName.trim();
-		if (!name) return;
-		await execCreateExam({ name });
-		setExamDialogOpen(false);
-		setNewExamName('');
-	}
+	const [manageExamTypesOpen, setManageExamTypesOpen] = useState(false);
+	const [manageDiseaseTagsOpen, setManageDiseaseTagsOpen] = useState(false);
+	const [selectedExamTypeIds, setSelectedExamTypeIds] = useState<string[]>([]);
+	const [selectedDiseaseTagIds, setSelectedDiseaseTagIds] = useState<string[]>([]);
+	const [confirmDeleteExamTypesOpen, setConfirmDeleteExamTypesOpen] = useState(false);
+	const [confirmDeleteDiseaseTagsOpen, setConfirmDeleteDiseaseTagsOpen] = useState(false);
 
-	const [diseaseDialogOpen, setDiseaseDialogOpen] = useState(false);
-	const [newDiseaseName, setNewDiseaseName] = useState('');
-	async function confirmAddDisease() {
-		const name = newDiseaseName.trim();
-		if (!name) return;
+	const { execute: execDeleteExamTypes, isExecuting: deletingExamTypes } = useAction(
+		deleteExamTypesAction,
+		{
+			onSuccess(res) {
+				const deleted = res.data?.deleted ?? 0;
+				setExamList((previous) => previous.filter((exam) => !res.data));
+				toast.success(t('itemsDeleted', { count: deleted }));
+				setManageExamTypesOpen(false);
+			},
+			onError({ error }) {
+				const errorMessage = error?.serverError;
+				if (typeof errorMessage === 'string') {
+					const match = errorMessage.match(/(\d+)\s+case/);
+					if (match) {
+						const count = Number.parseInt(match[1], 10);
+						toast.error(t('deleteError', { count }));
+						return;
+					}
+				}
+				toast.error(t('deleteGenericError'));
+			},
+		}
+	);
+
+	const { execute: execDeleteDiseaseTags, isExecuting: deletingDiseaseTags } = useAction(
+		deleteDiseaseTagsAction,
+		{
+			onSuccess(res) {
+				const deleted = res.data?.deleted ?? 0;
+				setDiseaseList((previous) => previous.filter((disease) => !res.data));
+				toast.success(t('itemsDeleted', { count: deleted }));
+				setManageDiseaseTagsOpen(false);
+			},
+			onError({ error }) {
+				const errorMessage = error?.serverError;
+				if (typeof errorMessage === 'string') {
+					const match = errorMessage.match(/(\d+)\s+case/);
+					if (match) {
+						const count = Number.parseInt(match[1], 10);
+						toast.error(t('deleteError', { count }));
+						return;
+					}
+				}
+				toast.error(t('deleteGenericError'));
+			},
+		}
+	);
+
+	const handleDeleteExamTypes = async () => {
+		if (selectedExamTypeIds.length === 0) return;
+		await execDeleteExamTypes({ ids: selectedExamTypeIds });
+		setExamList((previous) => previous.filter((exam) => !selectedExamTypeIds.includes(exam.id)));
+		setSelectedExamTypeIds([]);
+		setConfirmDeleteExamTypesOpen(false);
+	};
+
+	const handleDeleteDiseaseTags = async () => {
+		if (selectedDiseaseTagIds.length === 0) return;
+		await execDeleteDiseaseTags({ ids: selectedDiseaseTagIds });
+		setDiseaseList((previous) => previous.filter((disease) => !selectedDiseaseTagIds.includes(disease.id)));
+		setSelectedDiseaseTagIds([]);
+		setConfirmDeleteDiseaseTagsOpen(false);
+	};
+
+	const handleCreateExamType = async (name: string) => {
+		await execCreateExam({ name });
+	};
+
+	const handleCreateDiseaseTag = async (name: string) => {
 		await execCreateDisease({ name });
-		setDiseaseDialogOpen(false);
-		setNewDiseaseName('');
-	}
+	};
 
 	async function uploadPdf(file: File) {
 		if (file.type !== 'application/pdf') {
@@ -380,16 +449,14 @@ export default function CreateCaseDialog({
 									<label className='block text-sm mb-1'>
 										{t('fields.examType')}
 									</label>
-									<button
-										type='button'
-										className='text-xs text-blue-600'
-										onClick={() => {
-											setExamDialogOpen(true);
-											setNewExamName('');
-										}}
-										disabled={creatingExam}>
-										{t('addNewExam')}
-									</button>
+									{isAdmin && (
+										<button
+											type='button'
+											className='text-xs text-blue-600'
+											onClick={() => setManageExamTypesOpen(true)}>
+											Manage
+										</button>
+									)}
 								</div>
 								<Controller
 									name='examType'
@@ -430,16 +497,14 @@ export default function CreateCaseDialog({
 									<label className='block text-sm mb-1'>
 										{t('fields.disease')}
 									</label>
-									<button
-										type='button'
-										className='text-xs text-blue-600'
-										onClick={() => {
-											setDiseaseDialogOpen(true);
-											setNewDiseaseName('');
-										}}
-										disabled={creatingDisease}>
-										{t('addNewDisease')}
-									</button>
+									{isAdmin && (
+										<button
+											type='button'
+											className='text-xs text-blue-600'
+											onClick={() => setManageDiseaseTagsOpen(true)}>
+											Manage
+										</button>
+									)}
 								</div>
 								<Controller
 									name='diseaseTag'
@@ -664,34 +729,6 @@ export default function CreateCaseDialog({
               </Button>
             </DialogFooter>
 				</form>
-				<InputDialog
-					open={examDialogOpen}
-					onOpenChange={setExamDialogOpen}
-					title={t('addNewExam')}
-					label={t('addNewExamPrompt')}
-					placeholder={t('addNewExamPrompt')}
-					confirmText={t('createExamTypeCta')}
-					cancelText={t('cancel')}
-					value={newExamName}
-					onValueChange={setNewExamName}
-					onConfirm={confirmAddExam}
-					loading={creatingExam}
-					minLength={2}
-				/>
-				<InputDialog
-					open={diseaseDialogOpen}
-					onOpenChange={setDiseaseDialogOpen}
-					title={t('addNewDisease')}
-					label={t('addNewDiseasePrompt')}
-					placeholder={t('addNewDiseasePrompt')}
-					confirmText={t('createDiseaseCta')}
-					cancelText={t('cancel')}
-					value={newDiseaseName}
-					onValueChange={setNewDiseaseName}
-					onConfirm={confirmAddDisease}
-					loading={creatingDisease}
-					minLength={2}
-				/>
 			</DialogContent>
 
 			<Dialog open={tagDialogOpen} onOpenChange={setTagDialogOpen}>
@@ -755,6 +792,112 @@ export default function CreateCaseDialog({
 					</form>
 				</DialogContent>
 			</Dialog>
+
+			<Dialog open={manageExamTypesOpen} onOpenChange={setManageExamTypesOpen}>
+				<DialogContent className='max-w-md'>
+					<DialogHeader>
+						<DialogTitle>Manage Exam Types</DialogTitle>
+					</DialogHeader>
+					<DeletableSelectManager
+						options={examList}
+						onDelete={handleDeleteExamTypes}
+						onCreate={handleCreateExamType}
+						disabled={deletingExamTypes || creatingExam}
+						deleting={deletingExamTypes}
+						creating={creatingExam}
+						createLabel={t('addNewExamPrompt')}
+						createPlaceholder={t('addNewExamPrompt')}
+						selectedIds={selectedExamTypeIds}
+						onSelectedIdsChange={setSelectedExamTypeIds}
+					/>
+					<DialogFooter>
+						<Button
+							type='button'
+							variant='outline'
+							onClick={() => setManageExamTypesOpen(false)}
+							disabled={deletingExamTypes || creatingExam}
+						>
+							Close
+						</Button>
+						<Button
+							type='button'
+							variant='destructive'
+							onClick={() => setConfirmDeleteExamTypesOpen(true)}
+							disabled={deletingExamTypes || creatingExam || selectedExamTypeIds.length === 0}
+						>
+							{deletingExamTypes ? t('deletingItems') : t('deleteSelected')}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+
+			<Dialog open={manageDiseaseTagsOpen} onOpenChange={setManageDiseaseTagsOpen}>
+				<DialogContent className='max-w-md'>
+					<DialogHeader>
+						<DialogTitle>Manage Disease Tags</DialogTitle>
+					</DialogHeader>
+					<DeletableSelectManager
+						options={diseaseList}
+						onDelete={handleDeleteDiseaseTags}
+						onCreate={handleCreateDiseaseTag}
+						disabled={deletingDiseaseTags || creatingDisease}
+						deleting={deletingDiseaseTags}
+						creating={creatingDisease}
+						createLabel={t('addNewDiseasePrompt')}
+						createPlaceholder={t('addNewDiseasePrompt')}
+						selectedIds={selectedDiseaseTagIds}
+						onSelectedIdsChange={setSelectedDiseaseTagIds}
+					/>
+					<DialogFooter>
+						<Button
+							type='button'
+							variant='outline'
+							onClick={() => setManageDiseaseTagsOpen(false)}
+							disabled={deletingDiseaseTags || creatingDisease}
+						>
+							Close
+						</Button>
+						<Button
+							type='button'
+							variant='destructive'
+							onClick={() => setConfirmDeleteDiseaseTagsOpen(true)}
+							disabled={deletingDiseaseTags || creatingDisease || selectedDiseaseTagIds.length === 0}
+						>
+							{deletingDiseaseTags ? t('deletingItems') : t('deleteSelected')}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+
+			<AlertDialog open={confirmDeleteExamTypesOpen} onOpenChange={setConfirmDeleteExamTypesOpen}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>{t('confirmDeleteItems', { count: selectedExamTypeIds.length })}</AlertDialogTitle>
+						<AlertDialogDescription>{t('confirmDeleteItemsDesc')}</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+						<AlertDialogAction onClick={handleDeleteExamTypes} className='bg-destructive text-white hover:bg-destructive/90'>
+							{t('delete')}
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
+
+			<AlertDialog open={confirmDeleteDiseaseTagsOpen} onOpenChange={setConfirmDeleteDiseaseTagsOpen}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>{t('confirmDeleteItems', { count: selectedDiseaseTagIds.length })}</AlertDialogTitle>
+						<AlertDialogDescription>{t('confirmDeleteItemsDesc')}</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+						<AlertDialogAction onClick={handleDeleteDiseaseTags} className='bg-destructive text-white hover:bg-destructive/90'>
+							{t('delete')}
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</Dialog>
 	);
 }

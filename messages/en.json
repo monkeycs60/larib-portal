@@ -238,6 +238,14 @@
     "addNewDiseasePrompt": "New disease name",
     "createExamTypeCta": "Create new exam type",
     "createDiseaseCta": "Create new disease",
+    "deleteSelected": "Delete Selected",
+    "itemsSelected": "{count} item(s) selected",
+    "confirmDeleteItems": "Delete {count} item(s)?",
+    "confirmDeleteItemsDesc": "This action cannot be undone. These items cannot be deleted if they are in use by existing cases.",
+    "deletingItems": "Deleting...",
+    "itemsDeleted": "Successfully deleted {count} item(s)",
+    "deleteError": "Cannot delete: in use by {count} case(s)",
+    "deleteGenericError": "Failed to delete items",
     "createDialog": {
       "title": "Create New Clinical Case"
     },

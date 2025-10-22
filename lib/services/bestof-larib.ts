@@ -532,3 +532,43 @@ const cachedCaseById = cache(async (id: string) =>
 export async function getCaseById(id: string) {
   return cachedCaseById(id)
 }
+
+export async function deleteExamTypes(ids: string[]): Promise<void> {
+  if (ids.length === 0) return
+
+  const casesUsingExamTypes = await prisma.clinicalCase.findFirst({
+    where: { examTypeId: { in: ids } },
+    select: { id: true },
+  })
+
+  if (casesUsingExamTypes) {
+    const count = await prisma.clinicalCase.count({
+      where: { examTypeId: { in: ids } },
+    })
+    throw new Error(`Cannot delete exam types: ${count} case(s) are using them`)
+  }
+
+  await prisma.examType.deleteMany({
+    where: { id: { in: ids } },
+  })
+}
+
+export async function deleteDiseaseTags(ids: string[]): Promise<void> {
+  if (ids.length === 0) return
+
+  const casesUsingDiseaseTags = await prisma.clinicalCase.findFirst({
+    where: { diseaseTagId: { in: ids } },
+    select: { id: true },
+  })
+
+  if (casesUsingDiseaseTags) {
+    const count = await prisma.clinicalCase.count({
+      where: { diseaseTagId: { in: ids } },
+    })
+    throw new Error(`Cannot delete disease tags: ${count} case(s) are using them`)
+  }
+
+  await prisma.diseaseTag.deleteMany({
+    where: { id: { in: ids } },
+  })
+}
