@@ -567,7 +567,7 @@ export default function CreateCaseDialog({
 									<div className='text-sm truncate mr-3'>
 										{t('content.pdfSelected')}
 									</div>
-									<div className='flex gap-2'>
+									<div className='flex gap-2 items-center'>
 										<a
 											href={pdfUrl}
 											target='_blank'
