@@ -23,14 +23,15 @@ export default async function BestofStatisticsPage({
   params,
   searchParams,
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const t = await getTranslations('bestof.statistics');
   const session = await getTypedSession();
+  const { locale } = await params;
 
   if (!session || session.user.role !== 'ADMIN') {
-    redirect(applicationLink(params.locale, '/bestof-larib'));
+    redirect(applicationLink(locale, '/bestof-larib'));
   }
 
   const sp = await searchParams;

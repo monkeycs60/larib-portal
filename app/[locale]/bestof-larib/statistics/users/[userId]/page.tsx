@@ -14,17 +14,18 @@ import UserExamTypeWidget from './components/user-exam-type-widget';
 export default async function UserProfilePage({
   params,
 }: {
-  params: { locale: string; userId: string };
+  params: Promise<{ locale: string; userId: string }>;
 }) {
   const t = await getTranslations('bestof.statistics.userProfile');
   const session = await getTypedSession();
+  const { locale, userId } = await params;
 
   if (!session || session.user.role !== 'ADMIN') {
-    redirect(applicationLink(params.locale, '/bestof-larib'));
+    redirect(applicationLink(locale, '/bestof-larib'));
   }
 
   const user = await prisma.user.findUnique({
-    where: { id: params.userId },
+    where: { id: userId },
     select: {
       id: true,
       email: true,
@@ -44,9 +45,9 @@ export default async function UserProfilePage({
     : user.name || user.email;
 
   const [userStats, caseHistory, examTypeStats] = await Promise.all([
-    getUserStatistics({ userIds: [params.userId] }),
-    getUserCaseHistory(params.userId),
-    getUserExamTypeStats(params.userId),
+    getUserStatistics({ userIds: [userId] }),
+    getUserCaseHistory(userId),
+    getUserExamTypeStats(userId),
   ]);
 
   const userStat = userStats[0];

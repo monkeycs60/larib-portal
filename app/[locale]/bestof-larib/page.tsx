@@ -24,12 +24,13 @@ export default async function BestofLaribPage({
   params,
   searchParams,
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const t = await getTranslations('bestof');
   const session = await getTypedSession();
   const sp = await searchParams;
+  const { locale } = await params;
 
   const asArray = (value: string | string[] | undefined): string[] | undefined => {
     if (!value) return undefined;
@@ -104,7 +105,7 @@ export default async function BestofLaribPage({
 
   const serializedFilters = serializeCaseFilters(filters);
   const cacheKey: BestofCacheKey = {
-    locale: params.locale,
+    locale,
     userId: session?.user?.id ?? null,
     filters: serializedFilters,
     sortField,

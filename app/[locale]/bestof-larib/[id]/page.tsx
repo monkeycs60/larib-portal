@@ -13,11 +13,12 @@ export default async function CaseViewPage({
 	params,
 	searchParams,
 }: {
-	params: { locale: string; id: string };
+	params: Promise<{ locale: string; id: string }>;
 	searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
 	const t = await getTranslations('bestof');
 	const sp = await searchParams;
+	const { id } = await params;
 	const shouldStartNewAttempt = (() => {
 		const raw = sp?.newAttempt;
 		if (!raw) return false;
@@ -25,7 +26,7 @@ export default async function CaseViewPage({
 		return raw === '1' || raw === 'true';
 	})();
 	const [c, session] = await Promise.all([
-		getCaseById(params.id),
+		getCaseById(id),
 		getTypedSession(),
 	]);
 	if (!c) return <div className='p-6'>{t('notFound')}</div>;
