@@ -30,7 +30,6 @@ async function BestofLaribPageContent({
   const t = await getTranslations('bestof');
   const session = await getTypedSession();
   const sp = await searchParams;
-  const { locale } = await params;
 
   const asArray = (value: string | string[] | undefined): string[] | undefined => {
     if (!value) return undefined;
@@ -104,6 +103,7 @@ async function BestofLaribPageContent({
   );
 
   const serializedFilters = serializeCaseFilters(filters);
+  const { locale } = await params;
   const cacheKey: BestofCacheKey = {
     locale,
     userId: session?.user?.id ?? null,
