@@ -196,7 +196,7 @@
       "case": "Case",
       "name": "Name",
       "examType": "Exam Type",
-      "disease": "Disease Tag",
+      "disease": "Disease",
       "difficulty": "Difficulty",
       "status": "Status",
       "createdAt": "Created",
@@ -221,7 +221,7 @@
     "fields": {
       "caseName": "Case Name",
       "examType": "Exam Type",
-      "disease": "Disease Tag",
+      "disease": "Disease",
       "difficulty": "Difficulty",
       "customTags": "Custom Tags"
     },
