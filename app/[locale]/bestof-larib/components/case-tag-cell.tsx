@@ -2,10 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import CaseTagQuickPicker, { type CaseDisplayTag } from './case-tag-quick-picker'
-import TagManagerDialog from './tag-manager-dialog'
-import { Settings2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 type Mode = 'admin' | 'user'
@@ -31,18 +28,7 @@ export default function CaseTagCell({ mode, caseId, initialTags }: { mode: Mode;
 					))
 				)}
 			</div>
-			<div className="flex items-center gap-1">
-				<CaseTagQuickPicker mode={mode} caseId={caseId} assignedTags={assignedTags} onChange={setAssignedTags} />
-				<TagManagerDialog
-					mode={mode}
-					caseId={caseId}
-					trigger={
-						<Button type="button" size="icon" variant="ghost" aria-label={t('manageTags') || 'Manage tags'}>
-							<Settings2 className="size-4" />
-						</Button>
-					}
-				/>
-			</div>
+			<CaseTagQuickPicker mode={mode} caseId={caseId} assignedTags={assignedTags} onChange={setAssignedTags} />
 		</div>
 	)
 }

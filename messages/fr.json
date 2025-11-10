@@ -340,6 +340,8 @@
     "confirmDeleteTag": "Supprimer le tag ?",
     "confirmDeleteTagDescription": "Le tag sera retiré de tous les cas. Cette action est irréversible.",
     "tagDeleted": "Tag supprimé",
+    "tagCreated": "Tag créé",
+    "tagsManager": "Gestion des tags",
     "close": "Fermer",
     "editTags": "Mettre à jour les tags",
     "filters": {

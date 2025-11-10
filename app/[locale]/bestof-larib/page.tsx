@@ -17,6 +17,7 @@ import CreateCaseDialog from './components/create-case-dialog';
 import FiltersBar from './components/filters-bar';
 import CasesTable from './components/cases-table';
 import CasesTableFallback, { type CasesTableTranslations } from './components/cases-table-fallback';
+import TagsManagerModal from './components/tags-manager-modal';
 import type { BestofCacheKey } from '@/lib/bestof-cache-key';
 import { serialiseBestofCacheKey } from '@/lib/bestof-cache-key';
 
@@ -171,17 +172,20 @@ async function BestofLaribPageContent({
           <h1 className='text-2xl font-semibold'>{t('title')}</h1>
           <p className='text-sm text-muted-foreground'>{t('subtitle')}</p>
         </div>
-        {isAdmin ? (
-          <div className='flex items-center gap-3'>
-            <Link href='/bestof-larib/statistics'>
-              <Button variant='outline'>
-                <ChartBar className='size-4 mr-2' />
-                Statistics
-              </Button>
-            </Link>
-            <CreateCaseDialog examTypes={examTypes} diseaseTags={diseaseTags} isAdmin={isAdmin} adminTags={adminTagsForDialog} />
-          </div>
-        ) : null}
+        <div className='flex items-center gap-3'>
+          <TagsManagerModal isAdmin={isAdmin} />
+          {isAdmin ? (
+            <>
+              <Link href='/bestof-larib/statistics'>
+                <Button variant='outline'>
+                  <ChartBar className='size-4 mr-2' />
+                  Statistics
+                </Button>
+              </Link>
+              <CreateCaseDialog examTypes={examTypes} diseaseTags={diseaseTags} isAdmin={isAdmin} adminTags={adminTagsForDialog} />
+            </>
+          ) : null}
+        </div>
       </div>
 
       <FiltersBar
