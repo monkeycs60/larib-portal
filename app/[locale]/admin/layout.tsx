@@ -21,5 +21,5 @@ export default async function AdminLayout({
   await getTranslations({ locale, namespace: 'admin' })
 
   // Sidebar removed; simple content container
-  return <div className="min-h-[calc(100vh-4rem)] p-6">{children}</div>
+  return <div className="min-h-[calc(100vh-4rem)] py-6 px-8">{children}</div>
 }

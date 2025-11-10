@@ -73,7 +73,7 @@ async function CaseViewPageContent({
 	})();
 
     return (
-        <div className='space-y-4 py-6 px-12 mx-auto'>
+        <div className='space-y-4 py-6 px-8 mx-auto'>
             <div className='flex items-center justify-between gap-4'>
                 <div className='flex items-center gap-3 flex-wrap'>
                     <BackButton />

@@ -53,7 +53,7 @@ async function UserProfilePageContent({
   const userStat = userStats[0];
 
   return (
-    <div className='space-y-6 py-6 px-12 mx-auto'>
+    <div className='space-y-6 py-6 px-8 mx-auto'>
       <div className='flex items-center justify-between'>
         <div>
           <div className='flex items-center gap-3 mb-2'>

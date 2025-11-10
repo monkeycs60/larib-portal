@@ -79,7 +79,7 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
 
 	return (
 		<nav className='sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60'>
-			<div className='container mx-auto flex h-20 items-center justify-between px-4'>
+			<div className='mx-auto flex h-20 items-center justify-between px-8'>
 				<div className='flex items-center'>
 					<Link
 						href={`/`}

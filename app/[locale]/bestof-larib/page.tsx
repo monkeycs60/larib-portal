@@ -166,7 +166,7 @@ async function BestofLaribPageContent({
   };
 
   return (
-    <div className='space-y-4 py-6 px-12 mx-auto'>
+    <div className='space-y-4 py-6 px-8 mx-auto'>
       <div className='flex items-center justify-between'>
         <div>
           <h1 className='text-2xl font-semibold'>{t('title')}</h1>
