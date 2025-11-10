@@ -194,7 +194,7 @@
       "case": "Cas",
       "name": "Nom",
       "examType": "Type d'examen",
-      "disease": "Maladie",
+      "disease": "Diagnostic",
       "difficulty": "Difficulté",
       "status": "Statut",
       "createdAt": "Créé le",
@@ -219,7 +219,7 @@
     "fields": {
       "caseName": "Nom du cas",
       "examType": "Type d'examen",
-      "disease": "Maladie",
+      "disease": "Diagnostic",
       "difficulty": "Niveau de difficulté",
       "customTags": "Tags personnalisés"
     },
@@ -350,7 +350,7 @@
       "status": "Statut",
       "progress": "Progression",
       "exam": "Examen",
-      "disease": "Pathologie",
+      "disease": "Diagnostic",
       "difficulty": "Difficulté",
       "adminTag": "Tag admin",
       "userTag": "Tag utilisateur",

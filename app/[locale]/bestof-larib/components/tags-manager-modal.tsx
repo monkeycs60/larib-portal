@@ -45,7 +45,7 @@ const defaultForm: TagFormState = {
 	description: '',
 }
 
-export default function TagsManagerModal({ isAdmin, trigger }: { isAdmin: boolean; trigger?: ReactNode }) {
+export default function TagsManagerModal({ isAdmin, trigger, onClose, disableRouterRefresh }: { isAdmin: boolean; trigger?: ReactNode; onClose?: () => void; disableRouterRefresh?: boolean }) {
 	const t = useTranslations('bestof')
 	const router = useRouter()
 	const [open, setOpen] = useState(false)
@@ -81,7 +81,9 @@ export default function TagsManagerModal({ isAdmin, trigger }: { isAdmin: boolea
 			setTags((previous) => sortTags([...previous.filter((tag) => tag.id !== created.id), { ...created, caseCount: previous.find((tag) => tag.id === created.id)?.caseCount ?? 0 }]))
 			toast.success(t('tagCreated') || 'Tag created')
 			setForm({ ...defaultForm })
-			router.refresh()
+			if (!disableRouterRefresh) {
+				router.refresh()
+			}
 		},
 		onError({ error }) {
 			const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError')
@@ -95,7 +97,9 @@ export default function TagsManagerModal({ isAdmin, trigger }: { isAdmin: boolea
 			setTags((previous) => sortTags([...previous.filter((tag) => tag.id !== created.id), { ...created, caseCount: previous.find((tag) => tag.id === created.id)?.caseCount ?? 0 }]))
 			toast.success(t('tagCreated') || 'Tag created')
 			setForm({ ...defaultForm })
-			router.refresh()
+			if (!disableRouterRefresh) {
+				router.refresh()
+			}
 		},
 		onError({ error }) {
 			const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError')
@@ -110,7 +114,9 @@ export default function TagsManagerModal({ isAdmin, trigger }: { isAdmin: boolea
 			setTags((previous) => sortTags(previous.map((tag) => (tag.id === updated.id ? { ...tag, ...updated } : tag))))
 			toast.success(t('updated'))
 			setForm({ ...defaultForm })
-			router.refresh()
+			if (!disableRouterRefresh) {
+				router.refresh()
+			}
 		},
 		onError({ error }) {
 			const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError')
@@ -124,7 +130,9 @@ export default function TagsManagerModal({ isAdmin, trigger }: { isAdmin: boolea
 			setTags((previous) => sortTags(previous.map((tag) => (tag.id === updated.id ? { ...tag, ...updated } : tag))))
 			toast.success(t('updated'))
 			setForm({ ...defaultForm })
-			router.refresh()
+			if (!disableRouterRefresh) {
+				router.refresh()
+			}
 		},
 		onError({ error }) {
 			const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError')
@@ -139,7 +147,9 @@ export default function TagsManagerModal({ isAdmin, trigger }: { isAdmin: boolea
 			setTags((previous) => previous.filter((tag) => tag.id !== removed.id))
 			setDeleteCandidate(null)
 			toast.success(t('tagDeleted') || 'Tag deleted')
-			router.refresh()
+			if (!disableRouterRefresh) {
+				router.refresh()
+			}
 		},
 		onError({ error }) {
 			const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError')
@@ -153,7 +163,9 @@ export default function TagsManagerModal({ isAdmin, trigger }: { isAdmin: boolea
 			setTags((previous) => previous.filter((tag) => tag.id !== removed.id))
 			setDeleteCandidate(null)
 			toast.success(t('tagDeleted') || 'Tag deleted')
-			router.refresh()
+			if (!disableRouterRefresh) {
+				router.refresh()
+			}
 		},
 		onError({ error }) {
 			const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError')
@@ -175,6 +187,10 @@ export default function TagsManagerModal({ isAdmin, trigger }: { isAdmin: boolea
 			setForm({ ...defaultForm })
 			setDeleteCandidate(null)
 			await listTags.execute()
+		} else {
+			if (onClose) {
+				onClose()
+			}
 		}
 	}
 
@@ -304,7 +320,7 @@ export default function TagsManagerModal({ isAdmin, trigger }: { isAdmin: boolea
 						</div>
 					</div>
 					<div className="flex justify-end pt-2">
-						<Button type="button" variant="outline" onClick={() => setOpen(false)}>{t('close') || 'Close'}</Button>
+						<Button type="button" variant="outline" onClick={() => void handleOpen(false)}>{t('close') || 'Close'}</Button>
 					</div>
 				</DialogContent>
 			</Dialog>

@@ -1,5 +1,5 @@
 'use client';
-import { useState, type ReactNode } from 'react';
+import { useState, useRef, type ReactNode } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -28,11 +28,12 @@ import { Select } from '@/components/ui/select';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { TagInput } from '@/components/ui/tag-input';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus } from 'lucide-react';
+import { Plus, Settings } from 'lucide-react';
 import { useAction } from 'next-safe-action/hooks';
-import { createCaseAction, createDiseaseTagAction, createExamTypeAction, updateCaseAction, setCaseAdminTagsAction, ensureAdminTagAction, deleteExamTypesAction, deleteDiseaseTagsAction } from '../actions';
+import { createCaseAction, createDiseaseTagAction, createExamTypeAction, updateCaseAction, setCaseAdminTagsAction, deleteExamTypesAction, deleteDiseaseTagsAction, listAdminTagsAction } from '../actions';
 import { toast } from 'sonner';
 import DeletableSelectManager from './deletable-select-manager';
+import TagsManagerModal from './tags-manager-modal';
 
 const FormSchema = z.object({
 	name: z.string().min(1),
@@ -94,11 +95,8 @@ export default function CreateCaseDialog({
 	const [selectedAdminTags, setSelectedAdminTags] = useState<string[]>(
 		clinicalCase?.adminTags?.map((tag) => tag.id) ?? []
 	);
-	const [tagDialogOpen, setTagDialogOpen] = useState(false);
-	const [newTagName, setNewTagName] = useState('');
-	const [newTagColor, setNewTagColor] = useState('#3b82f6');
-	const [newTagDescription, setNewTagDescription] = useState('');
 	const [localAdminTags, setLocalAdminTags] = useState<AdminTag[]>(adminTags ?? []);
+	const tagsManagerTriggerRef = useRef<HTMLButtonElement>(null);
 
   const { register, handleSubmit, setValue, reset, watch, control } =
     useForm<FormValues>({
@@ -154,24 +152,17 @@ export default function CreateCaseDialog({
       toast.error(msg);
     },
   });
-  const { execute: execEnsureAdminTag, isExecuting: creatingTag } = useAction(ensureAdminTagAction, {
+  const { execute: execListAdminTags } = useAction(listAdminTagsAction, {
     onSuccess(res) {
-      const created = res.data as AdminTag | undefined;
-      if (!created) return;
-      setLocalAdminTags((previous) => [...previous, created].sort((tagA, tagB) => tagA.name.localeCompare(tagB.name)));
-      setSelectedAdminTags((previous) => [...previous, created.id]);
-      setNewTagName('');
-      setNewTagColor('#3b82f6');
-      setNewTagDescription('');
-      setTagDialogOpen(false);
-      toast.success(t('updated'));
-    },
-    onError({ error }) {
-      const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError');
-      toast.error(msg);
+      const tags = Array.isArray(res.data) ? (res.data as AdminTag[]) : [];
+      setLocalAdminTags(tags);
     },
   });
-  const isExecuting = creatingCase || updatingCase || settingTags || creatingTag;
+  const isExecuting = creatingCase || updatingCase || settingTags;
+
+	function handleTagsManagerClose() {
+		void execListAdminTags();
+	}
 
 	const { execute: execCreateExam, isExecuting: creatingExam } = useAction(
 		createExamTypeAction,
@@ -322,20 +313,6 @@ export default function CreateCaseDialog({
 		setValue('pdfKey', undefined);
 	}
 
-	function handleCreateTag(event: React.FormEvent) {
-		event.preventDefault();
-		const name = newTagName.trim();
-		if (!name) {
-			toast.error(t('errors.fieldsRequired'));
-			return;
-		}
-		void execEnsureAdminTag({
-			name,
-			color: newTagColor,
-			description: newTagDescription.trim() || null,
-		});
-	}
-
 	const onSubmit = handleSubmit(async (values) => {
 		// Allow saving draft without content; enforce for published only
 		if (statusToCreate === 'PUBLISHED') {
@@ -415,10 +392,14 @@ export default function CreateCaseDialog({
 					});
 					setStatusToCreate(clinicalCase.status);
 					setSelectedAdminTags(clinicalCase.adminTags?.map((tag) => tag.id) ?? []);
-					setLocalAdminTags(adminTags ?? []);
+					if (isAdmin) {
+						void execListAdminTags();
+					}
 				}
 				if (next && !clinicalCase) {
-					setLocalAdminTags(adminTags ?? []);
+					if (isAdmin) {
+						void execListAdminTags();
+					}
 				}
 			}}
 		>
@@ -536,10 +517,10 @@ export default function CreateCaseDialog({
 										type='button'
 										size='sm'
 										variant='ghost'
-										onClick={() => setTagDialogOpen(true)}
+										onClick={() => tagsManagerTriggerRef.current?.click()}
 									>
-										<Plus className='size-4 mr-1' />
-										Create New Tag
+										<Settings className='size-4 mr-1' />
+										{t('tagsManager')}
 									</Button>
 								</div>
 
@@ -729,68 +710,6 @@ export default function CreateCaseDialog({
 				</form>
 			</DialogContent>
 
-			<Dialog open={tagDialogOpen} onOpenChange={setTagDialogOpen}>
-				<DialogContent className='max-w-md'>
-					<DialogHeader>
-						<DialogTitle>Create New Admin Tag</DialogTitle>
-					</DialogHeader>
-					<form onSubmit={handleCreateTag} className='space-y-4'>
-						<div className='space-y-2'>
-							<label className='text-sm font-medium'>Name</label>
-							<Input
-								value={newTagName}
-								onChange={(event) => setNewTagName(event.target.value)}
-								placeholder='e.g. Must-know'
-								autoFocus
-							/>
-						</div>
-						<div className='space-y-2'>
-							<label className='text-sm font-medium'>Color</label>
-							<div className='flex items-center gap-2'>
-								<input
-									type='color'
-									value={newTagColor}
-									onChange={(event) => setNewTagColor(event.target.value)}
-									className='h-10 w-14 rounded border cursor-pointer'
-								/>
-								<Input
-									value={newTagColor}
-									onChange={(event) => setNewTagColor(event.target.value)}
-									className='font-mono'
-								/>
-							</div>
-						</div>
-						<div className='space-y-2'>
-							<label className='text-sm font-medium'>Description (Optional)</label>
-							<Textarea
-								value={newTagDescription}
-								onChange={(event) => setNewTagDescription(event.target.value)}
-								placeholder='Optional description...'
-								rows={3}
-							/>
-						</div>
-						<DialogFooter>
-							<Button
-								type='button'
-								variant='outline'
-								onClick={() => {
-									setTagDialogOpen(false);
-									setNewTagName('');
-									setNewTagColor('#3b82f6');
-									setNewTagDescription('');
-								}}
-								disabled={creatingTag}
-							>
-								Cancel
-							</Button>
-							<Button type='submit' disabled={creatingTag}>
-								{creatingTag ? 'Creating...' : 'Create Tag'}
-							</Button>
-						</DialogFooter>
-					</form>
-				</DialogContent>
-			</Dialog>
-
 			<Dialog open={manageExamTypesOpen} onOpenChange={setManageExamTypesOpen}>
 				<DialogContent className='max-w-md'>
 					<DialogHeader>
@@ -896,6 +815,22 @@ export default function CreateCaseDialog({
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>
+
+			{isAdmin && adminTags && (
+				<TagsManagerModal
+					isAdmin={true}
+					trigger={
+						<button
+							ref={tagsManagerTriggerRef}
+							style={{ display: 'none' }}
+							type='button'
+							aria-hidden='true'
+						/>
+					}
+					onClose={handleTagsManagerClose}
+					disableRouterRefresh={true}
+				/>
+			)}
 		</Dialog>
 	);
 }
