@@ -112,9 +112,11 @@ export default async function CasesTable({
                 <SortHeader field='diseaseTag' label={translations.table.disease} activeField={sortField} direction={sortDirection} />
               </TableHead>
             ) : null}
-            <TableHead>
-              <SortHeader field='difficulty' label={translations.table.difficulty} activeField={sortField} direction={sortDirection} />
-            </TableHead>
+            {isAdmin ? (
+              <TableHead>
+                <SortHeader field='difficulty' label={translations.table.difficulty} activeField={sortField} direction={sortDirection} />
+              </TableHead>
+            ) : null}
             <TableHead>
               <SortHeader field='createdAt' label={translations.table.createdAt} activeField={sortField} direction={sortDirection} />
             </TableHead>
@@ -175,26 +177,28 @@ export default async function CasesTable({
                       )}
                     </TableCell>
                   ) : null}
-                  <TableCell>
-                    <Badge
-                      variant='outline'
-                      className={
-                        caseItem.difficulty === 'BEGINNER'
-                          ? 'border-green-500 text-green-700'
-                          : caseItem.difficulty === 'INTERMEDIATE'
-                          ? 'border-amber-500 text-amber-700'
-                          : 'border-red-500 text-red-700'
-                      }
-                    >
-                      {translations.difficulty[
-                        caseItem.difficulty === 'BEGINNER'
-                          ? 'beginner'
-                          : caseItem.difficulty === 'INTERMEDIATE'
-                          ? 'intermediate'
-                          : 'advanced'
-                      ]}
-                    </Badge>
-                  </TableCell>
+                  {isAdmin ? (
+                    <TableCell>
+                      <Badge
+                        variant='outline'
+                        className={
+                          caseItem.difficulty === 'BEGINNER'
+                            ? 'border-green-500 text-green-700'
+                            : caseItem.difficulty === 'INTERMEDIATE'
+                            ? 'border-amber-500 text-amber-700'
+                            : 'border-red-500 text-red-700'
+                        }
+                      >
+                        {translations.difficulty[
+                          caseItem.difficulty === 'BEGINNER'
+                            ? 'beginner'
+                            : caseItem.difficulty === 'INTERMEDIATE'
+                            ? 'intermediate'
+                            : 'advanced'
+                        ]}
+                      </Badge>
+                    </TableCell>
+                  ) : null}
                   <TableCell>{new Date(caseItem.createdAt).toLocaleDateString()}</TableCell>
                   {isUserView ? (
                     <TableCell>{typeof caseItem.attemptsCount === 'number' ? caseItem.attemptsCount : 0}</TableCell>
