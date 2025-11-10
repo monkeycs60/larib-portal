@@ -222,9 +222,7 @@ export default function CreateCaseDialog({
 		{
 			onSuccess(res) {
 				const deleted = res.data?.deleted ?? 0;
-				setExamList((previous) => previous.filter((exam) => !res.data));
 				toast.success(t('itemsDeleted', { count: deleted }));
-				setManageExamTypesOpen(false);
 			},
 			onError({ error }) {
 				const errorMessage = error?.serverError;
@@ -246,9 +244,7 @@ export default function CreateCaseDialog({
 		{
 			onSuccess(res) {
 				const deleted = res.data?.deleted ?? 0;
-				setDiseaseList((previous) => previous.filter((disease) => !res.data));
 				toast.success(t('itemsDeleted', { count: deleted }));
-				setManageDiseaseTagsOpen(false);
 			},
 			onError({ error }) {
 				const errorMessage = error?.serverError;
@@ -271,6 +267,7 @@ export default function CreateCaseDialog({
 		setExamList((previous) => previous.filter((exam) => !selectedExamTypeIds.includes(exam.id)));
 		setSelectedExamTypeIds([]);
 		setConfirmDeleteExamTypesOpen(false);
+		setManageExamTypesOpen(false);
 	};
 
 	const handleDeleteDiseaseTags = async () => {
@@ -279,6 +276,7 @@ export default function CreateCaseDialog({
 		setDiseaseList((previous) => previous.filter((disease) => !selectedDiseaseTagIds.includes(disease.id)));
 		setSelectedDiseaseTagIds([]);
 		setConfirmDeleteDiseaseTagsOpen(false);
+		setManageDiseaseTagsOpen(false);
 	};
 
 	const handleCreateExamType = async (name: string) => {
