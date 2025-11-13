@@ -4,12 +4,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
+import { X } from 'lucide-react';
 
 type Props = {
 	accept: string;
 	maxSize: number;
 	valueUrl?: string | null;
 	onUploaded: (res: { url: string; key: string }) => void;
+	onDeleted?: () => void;
 	disabled?: boolean;
 };
 
@@ -18,6 +20,7 @@ export function FileUpload({
 	maxSize,
 	valueUrl,
 	onUploaded,
+	onDeleted,
 	disabled,
 }: Props) {
 	const t = useTranslations('upload');
@@ -31,7 +34,7 @@ export function FileUpload({
 		inputRef.current?.click();
 	}
 
-	function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+	async function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
 		const f = e.target.files?.[0];
 		if (!f) return;
 		if (!f.type.startsWith('image/')) {
@@ -45,10 +48,11 @@ export function FileUpload({
 		setFile(f);
 		const url = URL.createObjectURL(f);
 		setPreview(url);
+
+		await uploadFile(f);
 	}
 
-	async function doUpload() {
-		if (!file) return;
+	async function uploadFile(fileToUpload: File) {
 		setUploading(true);
 		try {
 			type AllowedMime = 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif';
@@ -58,14 +62,13 @@ export function FileUpload({
 				'image/webp',
 				'image/gif',
 			];
-			if (!allowed.includes(file.type as AllowedMime)) throw new Error('invalid_type');
+			if (!allowed.includes(fileToUpload.type as AllowedMime)) throw new Error('invalid_type');
 
 			const fd = new FormData();
-			fd.append('file', file);
+			fd.append('file', fileToUpload);
 			const res = await fetch('/api/uploads/avatar', { method: 'POST', body: fd });
 			if (!res.ok) throw new Error('upload_failed');
 			const data = (await res.json()) as { url: string; key: string };
-			// Persist immediately server-side so refresh keeps the avatar
 			const { saveProfilePhotoAction } = await import('@/actions/avatar');
 			const saveRes = await saveProfilePhotoAction({ url: data.url, key: data.key });
 			if ((saveRes as any)?.serverError) throw new Error('save_failed');
@@ -76,6 +79,9 @@ export function FileUpload({
 		} catch (e) {
 			console.error(e);
 			alert(t('uploadFailed'));
+			setFile(null);
+			if (preview) URL.revokeObjectURL(preview);
+			setPreview(null);
 		} finally {
 			setUploading(false);
 		}
@@ -88,25 +94,65 @@ export function FileUpload({
 		if (inputRef.current) inputRef.current.value = '';
 	}
 
+	async function handleDelete() {
+		console.log('[FileUpload] handleDelete - START');
+		if (!onDeleted) {
+			console.log('[FileUpload] handleDelete - NO onDeleted callback, returning');
+			return;
+		}
+		console.log('[FileUpload] handleDelete - Setting uploading to true');
+		setUploading(true);
+		try {
+			console.log('[FileUpload] handleDelete - Importing deleteProfilePhotoAction');
+			const { deleteProfilePhotoAction } = await import('@/actions/avatar');
+			console.log('[FileUpload] handleDelete - Calling deleteProfilePhotoAction');
+			const result = await deleteProfilePhotoAction();
+			console.log('[FileUpload] handleDelete - Result:', result);
+			if (result?.serverError) {
+				console.error('[FileUpload] handleDelete - Server error:', result.serverError);
+				throw new Error('delete_failed');
+			}
+			console.log('[FileUpload] handleDelete - Calling onDeleted callback');
+			onDeleted();
+			console.log('[FileUpload] handleDelete - Photo deleted successfully');
+		} catch (error) {
+			console.error('[FileUpload] handleDelete - ERROR:', error);
+			alert(t('uploadFailed'));
+		} finally {
+			setUploading(false);
+		}
+	}
+
 	return (
 		<div className='flex items-start gap-4'>
-			<div className='size-20 relative rounded overflow-hidden bg-muted'>
+			<div className='size-20 relative rounded bg-muted group'>
 				{preview ? (
 					// Local preview
 					// eslint-disable-next-line @next/next/no-img-element
 					<img
 						src={preview}
 						alt='preview'
-						className='object-cover w-full h-full'
+						className='object-cover w-full h-full rounded'
 					/>
 				) : currentUrl ? (
-					<Image
-						src={currentUrl}
-						alt='avatar'
-						fill
-						sizes='80px'
-						className='object-cover'
-					/>
+					<>
+						<Image
+							src={currentUrl}
+							alt='avatar'
+							fill
+							sizes='80px'
+							className='object-cover rounded'
+						/>
+						{onDeleted && !disabled && !uploading && (
+							<button
+								type='button'
+								onClick={handleDelete}
+								className='absolute top-1 right-1 bg-black/50 hover:bg-black/70 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity'
+							>
+								<X className='w-3 h-3 text-white' />
+							</button>
+						)}
+					</>
 				) : null}
 			</div>
 			<div className='flex flex-col gap-2'>
@@ -116,25 +162,8 @@ export function FileUpload({
 						variant='secondary'
 						onClick={onPick}
 						disabled={disabled || uploading}>
-						{currentUrl || preview ? t('changeImage') : t('selectFile')}
+						{uploading ? t('uploading') : currentUrl || preview ? t('changeImage') : t('selectFile')}
 					</Button>
-					{file ? (
-						<Button
-							type='button'
-							onClick={doUpload}
-							disabled={disabled || uploading}>
-							{uploading ? t('uploading') : t('upload')}
-						</Button>
-					) : null}
-					{preview ? (
-						<Button
-							type='button'
-							variant='ghost'
-							onClick={clearSelection}
-							disabled={disabled || uploading}>
-							{t('remove')}
-						</Button>
-					) : null}
 				</div>
 				<Input
 					ref={inputRef}

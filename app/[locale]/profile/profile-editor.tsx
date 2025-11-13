@@ -50,6 +50,10 @@ export function ProfileEditor({ initial, positions = [] }: Props) {
     defaultValues: initial,
   })
 
+  console.log('[ProfileEditor] Component render - initial.birthDate:', initial.birthDate)
+  console.log('[ProfileEditor] Component render - form.getValues(birthDate):', form.getValues('birthDate'))
+  console.log('[ProfileEditor] Component render - form.watch(birthDate):', form.watch('birthDate'))
+
   const { execute } = useAction(updateSelfProfileAction, {
     onSuccess() {
       toast.success(tProfile('saved'))
@@ -77,6 +81,7 @@ export function ProfileEditor({ initial, positions = [] }: Props) {
 
   async function saveAll() {
     const v = form.getValues()
+    console.log('[ProfileEditor] saveAll - Form values:', v)
 
     // Build payload ensuring optional empties are treated as null and
     // non-editable fields are preserved from initial values.
@@ -94,9 +99,15 @@ export function ProfileEditor({ initial, positions = [] }: Props) {
       ...(initial.isAdmin ? { applications: v.applications } : {}),
     }
 
+    console.log('[ProfileEditor] saveAll - Payload to send:', payload)
+    console.log('[ProfileEditor] saveAll - birthDate specifically:', payload.birthDate)
+
     setSaving(true)
     try {
       await execute(payload)
+      console.log('[ProfileEditor] saveAll - Execute successful')
+    } catch (error) {
+      console.error('[ProfileEditor] saveAll - Execute error:', error)
     } finally {
       setSaving(false)
     }
@@ -106,11 +117,6 @@ export function ProfileEditor({ initial, positions = [] }: Props) {
   function toggleApp(app: NonNullable<ProfileEditorValues['applications']>[number]) {
     if (apps.has(app)) apps.delete(app); else apps.add(app)
     form.setValue('applications', Array.from(apps))
-  }
-
-  function dateValue(): string | undefined {
-    const v = form.getValues('birthDate')
-    return v ?? undefined
   }
 
   const { execute: execCreatePos, isExecuting: creatingPos } = useAction(createPositionAction, {
@@ -177,7 +183,17 @@ export function ProfileEditor({ initial, positions = [] }: Props) {
         </div>
         <div className="space-y-1">
           <div className="text-sm text-gray-500">{tAdmin('birthDate')}</div>
-          <Input type="date" defaultValue={dateValue()} {...form.register('birthDate')} />
+          <Input
+            key={`birthdate-${initial.birthDate}`}
+            type="date"
+            value={form.watch('birthDate') ?? ''}
+            onChange={(e) => {
+              console.log('[ProfileEditor] birthDate onChange - e.target.value:', e.target.value)
+              console.log('[ProfileEditor] birthDate onChange - Setting to:', e.target.value || null)
+              form.setValue('birthDate', e.target.value || null)
+              console.log('[ProfileEditor] birthDate onChange - Current form value:', form.getValues('birthDate'))
+            }}
+          />
         </div>
         <div className="space-y-1">
           <div className="text-sm text-gray-500">{tAdmin('language')}</div>
@@ -210,7 +226,9 @@ export function ProfileEditor({ initial, positions = [] }: Props) {
             valueUrl={form.watch('profilePhoto') ?? null}
             onUploaded={({ url }) => {
               form.setValue('profilePhoto', url)
-              toast.success(tProfile('saved'))
+            }}
+            onDeleted={() => {
+              form.setValue('profilePhoto', null)
             }}
           />
           {/* Keep the value in form state for server action */}

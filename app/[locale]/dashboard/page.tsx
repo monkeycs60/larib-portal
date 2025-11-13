@@ -3,6 +3,7 @@ import { Link } from '@/app/i18n/navigation'
 import { getTranslations } from 'next-intl/server'
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { formatUserName } from '@/lib/format-user-name'
 // Note: i18n Link auto-prefixes the active locale; pass non-localized paths
 
 export default async function DashboardPage({
@@ -12,7 +13,7 @@ export default async function DashboardPage({
 }) {
   // Require authentication - will redirect to login if not authenticated
   const session = await requireAuth()
-  
+
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'dashboard' })
 
@@ -24,6 +25,13 @@ export default async function DashboardPage({
     return app === 'BESTOF_LARIB' ? '/bestof-larib' : app === 'CONGES' ? '/conges' : '/cardiolarib'
   }
 
+  const userName = formatUserName({
+    firstName: session.user.firstName,
+    lastName: session.user.lastName,
+    name: session.user.name,
+    email: session.user.email
+  })
+
   return (
     <div className="min-h-screen">
       <div className="p-8">
@@ -33,7 +41,7 @@ export default async function DashboardPage({
             {t('title')}
           </h1>
           <p className="text-gray-600 mt-2">
-            {t('welcome')}, {session.user.name || session.user.email}!
+            {t('welcome')}, {userName}!
           </p>
         </header>
         

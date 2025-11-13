@@ -26,17 +26,11 @@ export const createAdminAction = actionClient
       throw new Error("USER_ALREADY_EXISTS")
     }
 
-    const adminCount = await prisma.user.count({
-      where: { role: "ADMIN" }
-    })
-
-    const adminNumber = adminCount + 1
-
     const result = await auth.api.signUpEmail({
       body: {
         email: parsedInput.email,
         password: parsedInput.password,
-        name: `Admin User ${adminNumber}`,
+        name: parsedInput.email,
       },
     })
 
