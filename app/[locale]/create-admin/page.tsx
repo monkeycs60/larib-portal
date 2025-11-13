@@ -10,7 +10,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { createAdminAction } from "./actions"
 import { useAction } from "next-safe-action/hooks"
 import { toast } from "sonner"
-import { useRouter } from "@/app/i18n/navigation"
 import { AlertCircle, Eye, EyeOff } from "lucide-react"
 import { useState } from "react"
 
@@ -27,7 +26,6 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>
 
 export default function CreateAdminPage() {
-  const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [showAccessCode, setShowAccessCode] = useState(false)
@@ -47,7 +45,7 @@ export default function CreateAdminPage() {
       toast.success("Compte administrateur créé avec succès !")
       reset()
       setTimeout(() => {
-        router.push("/login")
+        window.location.href = "/dashboard"
       }, 1500)
     },
     onError: ({ error }) => {
