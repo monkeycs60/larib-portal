@@ -251,7 +251,7 @@
       "title": "Create New Clinical Case"
     },
     "content": {
-      "section": "Case Content",
+      "section": "Case Report",
       "helper": "Provide either a PDF file or text content (not both). One is required.",
       "pdf": "Clinical Case PDF",
       "text": "Text Content",
@@ -295,7 +295,7 @@
       "analysis": {
         "lvef": "LVEF",
         "kinetic": "Kinetic disorders",
-        "lgePresent": "LGE present?",
+        "lgePresent": "LGE presence",
         "lgeDetails": "LGE details",
         "lgeDetailsPlaceholder": "Specify LGE location and characteristics...",
         "finalDx": "Final diagnosis"

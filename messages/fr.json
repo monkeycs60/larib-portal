@@ -249,7 +249,7 @@
       "title": "Créer un nouveau cas clinique"
     },
     "content": {
-      "section": "Contenu du cas",
+      "section": "Compte rendu du cas",
       "helper": "Fournissez un fichier PDF ou un contenu texte (pas les deux). L'un est requis.",
       "pdf": "PDF du cas clinique",
       "text": "Contenu texte",
@@ -293,7 +293,7 @@
       "analysis": {
         "lvef": "FEVG",
         "kinetic": "Troubles cinétiques",
-        "lgePresent": "LGE présent ?",
+        "lgePresent": "LGE présent",
         "lgeDetails": "Détails du LGE",
         "lgeDetailsPlaceholder": "Précisez la localisation et les caractéristiques...",
         "finalDx": "Diagnostic final"
