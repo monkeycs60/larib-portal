@@ -813,6 +813,7 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
 						<Button
 							ref={buttonRef}
 							{...props}
+							variant="outline"
 							onClick={handleTogglePopover}
 							disabled={disabled}
 							role='combobox'
@@ -824,10 +825,10 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
 								getAllOptions().length
 							} options selected. ${placeholder}`}
 							className={cn(
-								'flex p-1 rounded-md border min-h-10 h-auto items-center justify-between bg-inherit hover:bg-inherit [&_svg]:pointer-events-auto',
+								'flex p-1 rounded-md border h-9 items-center justify-between bg-transparent hover:bg-accent [&_svg]:pointer-events-auto',
 								autoSize ? 'w-auto' : 'w-full',
-								responsiveSettings.compactMode && 'min-h-8 text-sm',
-								screenSize === 'mobile' && 'min-h-12 text-base',
+								responsiveSettings.compactMode && 'h-8 text-sm',
+								screenSize === 'mobile' && 'h-12 text-base',
 								disabled && 'opacity-50 cursor-not-allowed',
 								className
 							)}
@@ -1025,11 +1026,11 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
 									</div>
 								</div>
 							) : (
-								<div className='flex items-center justify-between w-full mx-auto'>
-									<span className='text-sm text-muted-foreground mx-3'>
+								<div className='flex items-center justify-between w-full px-2 py-1'>
+									<span className='text-sm text-muted-foreground truncate'>
 										{placeholder}
 									</span>
-									<ChevronDown className='h-4 cursor-pointer text-muted-foreground mx-2' />
+									<ChevronDown className='h-4 w-4 shrink-0 cursor-pointer text-muted-foreground' />
 								</div>
 							)}
 						</Button>

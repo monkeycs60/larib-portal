@@ -353,7 +353,7 @@ export default function FiltersBar({
                 />
             </div>
 			{canUsePersonalDifficulty ? (
-				<div>
+				<div className='min-w-44'>
 					<label className='block text-xs mb-1'>{t('filters.myDifficulty')}</label>
 					<SingleSelect
 						value={myDifficulty}
@@ -371,7 +371,7 @@ export default function FiltersBar({
 					/>
 				</div>
 			) : null}
-			<div>
+			<div className='min-w-44'>
 				<label className='block text-xs mb-1'>
 					{t('filters.dateRange')}
 				</label>
@@ -398,7 +398,7 @@ export default function FiltersBar({
 			</div>
 			{datePreset === 'custom' ? (
 				<>
-					<div>
+					<div className='min-w-44'>
 						<label className='block text-xs mb-1'>
 							{t('filters.dateFrom')}
 						</label>
@@ -414,7 +414,7 @@ export default function FiltersBar({
 							}}
 						/>
 					</div>
-					<div>
+					<div className='min-w-44'>
 						<label className='block text-xs mb-1'>
 							{t('filters.dateTo')}
 						</label>

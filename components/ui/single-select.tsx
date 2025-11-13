@@ -60,13 +60,13 @@ export function SingleSelect({
 					aria-expanded={isPopoverOpen}
 					disabled={disabled}
 					className={cn(
-						'flex h-9 w-full items-center justify-between bg-transparent px-3 py-2 text-sm',
+						'flex h-9 w-full items-center justify-between text-muted-foreground bg-transparent px-3 py-2 text-sm',
 						disabled && 'opacity-50 cursor-not-allowed',
 						className
 					)}
 				>
 					<span className={cn(
-						'truncate',
+						'text-sm truncate',
 						!selectedOption && 'text-muted-foreground'
 					)}>
 						{selectedOption ? selectedOption.label : placeholder}
