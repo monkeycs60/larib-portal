@@ -5,6 +5,7 @@ import { listPositions, ensurePosition } from '@/lib/services/positions'
 import { createInvitation } from '@/lib/services/invitations'
 import { sendWelcomeEmail } from '@/lib/services/email'
 import { adminOnlyAction } from "@/actions/safe-action"
+import { Prisma } from "@/app/generated/prisma"
 
 const UpdateUserSchema = z.object({
   id: z.string().min(1),
@@ -60,8 +61,15 @@ export const deleteUserAction = adminOnlyAction
     if (ctx.user.id === parsedInput.id) {
       throw new Error("CANNOT_DELETE_SELF")
     }
-    await deleteUserById(parsedInput.id)
-    return { ok: true }
+    try {
+      await deleteUserById(parsedInput.id)
+      return { ok: true }
+    } catch (error: unknown) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
+        throw new Error("CANNOT_DELETE_USER_WITH_CLINICAL_CASES")
+      }
+      throw error
+    }
   })
 
 const CreateInviteSchema = z.object({
