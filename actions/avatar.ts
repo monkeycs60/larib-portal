@@ -20,13 +20,10 @@ export const saveProfilePhotoAction = authenticatedAction
 export const deleteProfilePhotoAction = authenticatedAction
   .inputSchema(z.object({}))
   .action(async ({ ctx }) => {
-    console.log('[deleteProfilePhotoAction] START - userId:', ctx.userId)
     const updated = await updateUser({
       id: ctx.userId,
       profilePhoto: null,
       profilePhotoKey: null,
     })
-    console.log('[deleteProfilePhotoAction] Updated user:', updated)
-    console.log('[deleteProfilePhotoAction] Returning ok=true, profilePhoto:', updated.profilePhoto)
     return { ok: true as const, profilePhoto: updated.profilePhoto }
   })

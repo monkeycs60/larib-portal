@@ -82,13 +82,8 @@ export type UpdateUserInput = {
 }
 
 export async function updateUser(data: UpdateUserInput): Promise<UserWithAdminFields> {
-  console.log('[updateUser] START - Full data object:', data)
   const { id, ...rest } = data
-  console.log('[updateUser] User ID:', id)
-  console.log('[updateUser] Data to update (rest):', rest)
-  console.log('[updateUser] birthDate specifically:', rest.birthDate)
-
-  const result = await prisma.user.update({
+  return prisma.user.update({
     where: { id },
     data: {
       ...rest,
@@ -114,12 +109,6 @@ export async function updateUser(data: UpdateUserInput): Promise<UserWithAdminFi
       updatedAt: true,
     },
   })
-
-  console.log('[updateUser] Result from Prisma:', result)
-  console.log('[updateUser] Result birthDate:', result.birthDate)
-  console.log('[updateUser] Result profilePhoto:', result.profilePhoto)
-
-  return result
 }
 
 export type CreatePlaceholderUserInput = {

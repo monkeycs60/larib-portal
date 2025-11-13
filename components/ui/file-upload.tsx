@@ -95,28 +95,17 @@ export function FileUpload({
 	}
 
 	async function handleDelete() {
-		console.log('[FileUpload] handleDelete - START');
-		if (!onDeleted) {
-			console.log('[FileUpload] handleDelete - NO onDeleted callback, returning');
-			return;
-		}
-		console.log('[FileUpload] handleDelete - Setting uploading to true');
+		if (!onDeleted) return;
 		setUploading(true);
 		try {
-			console.log('[FileUpload] handleDelete - Importing deleteProfilePhotoAction');
 			const { deleteProfilePhotoAction } = await import('@/actions/avatar');
-			console.log('[FileUpload] handleDelete - Calling deleteProfilePhotoAction');
 			const result = await deleteProfilePhotoAction();
-			console.log('[FileUpload] handleDelete - Result:', result);
 			if (result?.serverError) {
-				console.error('[FileUpload] handleDelete - Server error:', result.serverError);
 				throw new Error('delete_failed');
 			}
-			console.log('[FileUpload] handleDelete - Calling onDeleted callback');
 			onDeleted();
-			console.log('[FileUpload] handleDelete - Photo deleted successfully');
 		} catch (error) {
-			console.error('[FileUpload] handleDelete - ERROR:', error);
+			console.error(error);
 			alert(t('uploadFailed'));
 		} finally {
 			setUploading(false);
