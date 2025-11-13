@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter, usePathname } from '@/app/i18n/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Select } from '@/components/ui/select';
+import { SingleSelect } from '@/components/ui/single-select';
 import { MultiSelect } from '@/components/ui/multiselect';
 import { useBestofLoadingStore } from '@/lib/stores/bestof-loading';
 
@@ -291,24 +291,25 @@ export default function FiltersBar({
             )}
             <div className='min-w-44'>
                 <label className='block text-xs mb-1'>{t('filters.status')}</label>
-                <Select
+                <SingleSelect
                     value={status}
-					onChange={(e) => {
-						setStatus(e.target.value);
-						pushWith({ status: e.target.value });
-					}}>
-					<option value=''>{t('filters.any')}</option>
-					{(isAdmin ? [
-					  { value: 'PUBLISHED', label: t('status.published') },
-					  { value: 'DRAFT', label: t('status.draft') },
-					] : [
-					  { value: 'completed', label: t('status.completed') },
-					  { value: 'in-progress', label: t('status.inProgress') },
-					  { value: 'not-started', label: t('status.notStarted') },
-					]).map((opt) => (
-					  <option key={opt.value} value={opt.value}>{opt.label}</option>
-					))}
-				</Select>
+					onChange={(value) => {
+						setStatus(value);
+						pushWith({ status: value });
+					}}
+					options={[
+						{ value: '', label: t('filters.any') },
+						...(isAdmin ? [
+						  { value: 'PUBLISHED', label: t('status.published') },
+						  { value: 'DRAFT', label: t('status.draft') },
+						] : [
+						  { value: 'completed', label: t('status.completed') },
+						  { value: 'in-progress', label: t('status.inProgress') },
+						  { value: 'not-started', label: t('status.notStarted') },
+						])
+					]}
+					placeholder={t('filters.any')}
+				/>
 			</div>
             <div className='min-w-52'>
                 <label className='block text-xs mb-1'>{t('filters.exam')}</label>
@@ -354,41 +355,46 @@ export default function FiltersBar({
 			{canUsePersonalDifficulty ? (
 				<div>
 					<label className='block text-xs mb-1'>{t('filters.myDifficulty')}</label>
-					<Select
+					<SingleSelect
 						value={myDifficulty}
-						onChange={(e) => {
-							setMyDifficulty(e.target.value);
-							pushWith({ myDifficulty: e.target.value });
-						}}>
-						<option value=''>{t('filters.any')}</option>
-						<option value='BEGINNER'>{t('difficulty.beginner')}</option>
-						<option value='INTERMEDIATE'>{t('difficulty.intermediate')}</option>
-						<option value='ADVANCED'>{t('difficulty.advanced')}</option>
-					</Select>
+						onChange={(value) => {
+							setMyDifficulty(value);
+							pushWith({ myDifficulty: value });
+						}}
+						options={[
+							{ value: '', label: t('filters.any') },
+							{ value: 'BEGINNER', label: t('difficulty.beginner') },
+							{ value: 'INTERMEDIATE', label: t('difficulty.intermediate') },
+							{ value: 'ADVANCED', label: t('difficulty.advanced') },
+						]}
+						placeholder={t('filters.any')}
+					/>
 				</div>
 			) : null}
 			<div>
 				<label className='block text-xs mb-1'>
 					{t('filters.dateRange')}
 				</label>
-				<Select
+				<SingleSelect
 					value={datePreset}
-					onChange={(e) => {
-						const v = e.target.value;
-						setDatePreset(v);
-						applyPreset(v);
-					}}>
-					<option value=''>{t('filters.any')}</option>
-					<option value='today'>{t('filters.today')}</option>
-					<option value='yesterday'>{t('filters.yesterday')}</option>
-					<option value='thisWeek'>{t('filters.thisWeek')}</option>
-					<option value='lastWeek'>{t('filters.lastWeek')}</option>
-					<option value='thisMonth'>{t('filters.thisMonth')}</option>
-					<option value='lastMonth'>{t('filters.lastMonth')}</option>
-					<option value='last7'>{t('filters.last7')}</option>
-					<option value='last30'>{t('filters.last30')}</option>
-					<option value='custom'>{t('filters.custom')}</option>
-				</Select>
+					onChange={(value) => {
+						setDatePreset(value);
+						applyPreset(value);
+					}}
+					options={[
+						{ value: '', label: t('filters.any') },
+						{ value: 'today', label: t('filters.today') },
+						{ value: 'yesterday', label: t('filters.yesterday') },
+						{ value: 'thisWeek', label: t('filters.thisWeek') },
+						{ value: 'lastWeek', label: t('filters.lastWeek') },
+						{ value: 'thisMonth', label: t('filters.thisMonth') },
+						{ value: 'lastMonth', label: t('filters.lastMonth') },
+						{ value: 'last7', label: t('filters.last7') },
+						{ value: 'last30', label: t('filters.last30') },
+						{ value: 'custom', label: t('filters.custom') },
+					]}
+					placeholder={t('filters.any')}
+				/>
 			</div>
 			{datePreset === 'custom' ? (
 				<>
