@@ -11,18 +11,26 @@ import { createAdminAction } from "./actions"
 import { useAction } from "next-safe-action/hooks"
 import { toast } from "sonner"
 import { useRouter } from "@/app/i18n/navigation"
-import { AlertCircle } from "lucide-react"
+import { AlertCircle, Eye, EyeOff } from "lucide-react"
+import { useState } from "react"
 
 const formSchema = z.object({
   email: z.string().email("Email invalide"),
   password: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères"),
+  confirmPassword: z.string().min(8, "Confirmez votre mot de passe"),
   accessCode: z.string().min(1, "Code d'accès requis"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Les mots de passe ne correspondent pas",
+  path: ["confirmPassword"],
 })
 
 type FormData = z.infer<typeof formSchema>
 
 export default function CreateAdminPage() {
   const router = useRouter()
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [showAccessCode, setShowAccessCode] = useState(false)
 
   const {
     register,
@@ -86,25 +94,68 @@ export default function CreateAdminPage() {
 
             <div className="space-y-2">
               <Label htmlFor="password">Mot de passe</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                {...register("password")}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  {...register("password")}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
               {errors.password && (
                 <p className="text-sm text-destructive">{errors.password.message}</p>
               )}
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  {...register("confirmPassword")}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {errors.confirmPassword && (
+                <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="accessCode">Code d'accès</Label>
-              <Input
-                id="accessCode"
-                type="password"
-                placeholder="Code de sécurité"
-                {...register("accessCode")}
-              />
+              <div className="relative">
+                <Input
+                  id="accessCode"
+                  type={showAccessCode ? "text" : "password"}
+                  placeholder="Code de sécurité"
+                  {...register("accessCode")}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowAccessCode(!showAccessCode)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  {showAccessCode ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
               {errors.accessCode && (
                 <p className="text-sm text-destructive">{errors.accessCode.message}</p>
               )}

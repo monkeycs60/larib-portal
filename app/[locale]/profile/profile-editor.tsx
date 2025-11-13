@@ -81,8 +81,8 @@ export function ProfileEditor({ initial, positions = [] }: Props) {
     // Build payload ensuring optional empties are treated as null and
     // non-editable fields are preserved from initial values.
     const payload: ProfileEditorValues = {
-      firstName: initial.firstName ?? null,
-      lastName: initial.lastName ?? null,
+      firstName: initial.isAdmin ? toNullIfEmpty(v.firstName) as string | null | undefined : initial.firstName ?? null,
+      lastName: initial.isAdmin ? toNullIfEmpty(v.lastName) as string | null | undefined : initial.lastName ?? null,
       phoneNumber: toNullIfEmpty(v.phoneNumber) as string | null | undefined,
       birthDate: toNullIfEmpty(v.birthDate) as string | null | undefined,
       language: v.language,
@@ -148,11 +148,19 @@ export function ProfileEditor({ initial, positions = [] }: Props) {
         </div>
         <div className="space-y-1">
           <div className="text-sm text-gray-500">{tAdmin('firstName')}</div>
-          <Input value={initial.firstName ?? ''} disabled />
+          {initial.isAdmin ? (
+            <Input {...form.register('firstName')} placeholder={tAdmin('firstName')} />
+          ) : (
+            <Input value={initial.firstName ?? ''} disabled />
+          )}
         </div>
         <div className="space-y-1">
           <div className="text-sm text-gray-500">{tAdmin('lastName')}</div>
-          <Input value={initial.lastName ?? ''} disabled />
+          {initial.isAdmin ? (
+            <Input {...form.register('lastName')} placeholder={tAdmin('lastName')} />
+          ) : (
+            <Input value={initial.lastName ?? ''} disabled />
+          )}
         </div>
         <div className="space-y-1">
           <div className="text-sm text-gray-500">{tAdmin('phone')}</div>

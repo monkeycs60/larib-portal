@@ -3,23 +3,13 @@
 import { z } from "zod"
 import { actionClient } from "@/actions/safe-action"
 import { prisma } from "@/lib/prisma"
-import { scrypt, randomBytes, randomUUID } from "crypto"
+import { auth } from "@/lib/auth"
 
 const CreateAdminSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   accessCode: z.string().min(1),
 })
-
-async function hashPassword(password: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const salt = randomBytes(16)
-    scrypt(password, salt, 64, (err, derivedKey) => {
-      if (err) reject(err)
-      resolve(salt.toString("hex") + ":" + derivedKey.toString("hex"))
-    })
-  })
-}
 
 export const createAdminAction = actionClient
   .inputSchema(CreateAdminSchema)
@@ -36,29 +26,33 @@ export const createAdminAction = actionClient
       throw new Error("USER_ALREADY_EXISTS")
     }
 
-    const hashedPassword = await hashPassword(parsedInput.password)
-    const userId = randomUUID()
+    const adminCount = await prisma.user.count({
+      where: { role: "ADMIN" }
+    })
 
-    const user = await prisma.user.create({
-      data: {
-        id: userId,
+    const adminNumber = adminCount + 1
+
+    const result = await auth.api.signUpEmail({
+      body: {
         email: parsedInput.email,
-        emailVerified: true,
+        password: parsedInput.password,
+        name: `Admin User ${adminNumber}`,
+      },
+    })
+
+    if ('error' in result && result.error) {
+      throw new Error(result.error.message || 'SIGNUP_FAILED')
+    }
+
+    await prisma.user.update({
+      where: { email: parsedInput.email },
+      data: {
         role: "ADMIN",
+        emailVerified: true,
         language: "FR",
         applications: ["BESTOF_LARIB", "CONGES", "CARDIOLARIB"],
       }
     })
 
-    await prisma.account.create({
-      data: {
-        id: randomUUID(),
-        accountId: parsedInput.email,
-        providerId: "credential",
-        userId: user.id,
-        password: hashedPassword,
-      }
-    })
-
-    return { success: true, userId: user.id }
+    return { success: true }
   })
