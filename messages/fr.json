@@ -266,7 +266,7 @@
       "exclusivePdfDisabled": "Un contenu texte est présent — l'upload PDF est désactivé",
       "exclusiveTextDisabled": "Un PDF est présent — l'éditeur de texte est désactivé",
       "invalidPdf": "Fichier PDF invalide",
-      "pdfTooLarge": "PDF trop volumineux : taille maximale 20Mo",
+      "pdfTooLarge": "PDF trop volumineux : taille maximale 30Mo",
       "uploadFailed": "Échec de l'upload",
       "reportTooShort": "Le compte rendu clinique doit contenir au moins 10 caractères"
     },

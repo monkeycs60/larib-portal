@@ -268,7 +268,7 @@
       "exclusivePdfDisabled": "Text content is present — PDF upload is disabled",
       "exclusiveTextDisabled": "A PDF is present — text editor is disabled",
       "invalidPdf": "Invalid PDF file",
-      "pdfTooLarge": "PDF is too large: max size is 20MB",
+      "pdfTooLarge": "PDF is too large: max size is 30MB",
       "uploadFailed": "Upload failed",
       "reportTooShort": "Clinical report must be at least 10 characters"
     },

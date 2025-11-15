@@ -1,4 +1,5 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { getR2Config, r2PublicUrlForKey } from './storage'
 
 let s3Client: S3Client | null = null
@@ -39,4 +40,25 @@ export async function r2PutObject(
     }),
   )
   return { key, url: r2PublicUrlForKey(key) }
+}
+
+export async function r2GetSignedUploadUrl(
+  key: string,
+  contentType: string,
+  expiresIn = 3600,
+): Promise<{ uploadUrl: string; key: string; publicUrl: string }> {
+  const cfg = getR2Config()
+  const command = new PutObjectCommand({
+    Bucket: cfg.bucket,
+    Key: key,
+    ContentType: contentType,
+  })
+
+  const uploadUrl = await getSignedUrl(client(), command, { expiresIn })
+
+  return {
+    uploadUrl,
+    key,
+    publicUrl: r2PublicUrlForKey(key),
+  }
 }

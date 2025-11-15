@@ -283,22 +283,38 @@ export default function CreateCaseDialog({
 			toast.error(t('errors.invalidPdf'));
 			return;
 		}
-		if (file.size > 20 * 1024 * 1024) {
+		if (file.size > 30 * 1024 * 1024) {
 			toast.error(t('errors.pdfTooLarge'));
 			return;
 		}
 		setPdfUploading(true);
 		try {
-			const fd = new FormData();
-			fd.append('file', file);
-			const res = await fetch('/api/uploads/clinical-pdf', {
+			const signedUrlRes = await fetch('/api/uploads/clinical-pdf-signed', {
 				method: 'POST',
-				body: fd,
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					filename: file.name,
+					contentType: file.type,
+				}),
 			});
-			if (!res.ok) throw new Error('upload_failed');
-			const data = (await res.json()) as { url: string; key: string };
-			setValue('pdfUrl', data.url);
-			setValue('pdfKey', data.key);
+			if (!signedUrlRes.ok) throw new Error('signed_url_failed');
+			const signedUrlData = (await signedUrlRes.json()) as {
+				uploadUrl: string;
+				key: string;
+				publicUrl: string;
+			};
+
+			const uploadRes = await fetch(signedUrlData.uploadUrl, {
+				method: 'PUT',
+				body: file,
+				headers: {
+					'Content-Type': file.type,
+				},
+			});
+			if (!uploadRes.ok) throw new Error('upload_failed');
+
+			setValue('pdfUrl', signedUrlData.publicUrl);
+			setValue('pdfKey', signedUrlData.key);
 			toast.success(t('pdfUploaded'));
 		} catch (e: unknown) {
 			console.error(e);
