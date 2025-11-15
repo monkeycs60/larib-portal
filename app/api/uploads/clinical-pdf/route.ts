@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
   if (!AllowedPdf.includes(contentType as typeof AllowedPdf[number])) {
     return NextResponse.json({ error: 'invalid_type' }, { status: 400 })
   }
-  if (size > 10 * 1024 * 1024) {
+  if (size > 30 * 1024 * 1024) {
     return NextResponse.json({ error: 'file_too_large' }, { status: 400 })
   }
 
