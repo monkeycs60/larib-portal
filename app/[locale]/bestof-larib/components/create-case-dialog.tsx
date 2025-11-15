@@ -311,14 +311,37 @@ export default function CreateCaseDialog({
 					'Content-Type': file.type,
 				},
 			});
-			if (!uploadRes.ok) throw new Error('upload_failed');
+
+			if (!uploadRes.ok) {
+				if (file.size <= 4.5 * 1024 * 1024) {
+					console.warn('Direct upload failed, trying fallback for small file...');
+					const fd = new FormData();
+					fd.append('file', file);
+					const fallbackRes = await fetch('/api/uploads/clinical-pdf', {
+						method: 'POST',
+						body: fd,
+					});
+					if (!fallbackRes.ok) throw new Error('fallback_upload_failed');
+					const fallbackData = (await fallbackRes.json()) as { url: string; key: string };
+					setValue('pdfUrl', fallbackData.url);
+					setValue('pdfKey', fallbackData.key);
+					toast.success(t('pdfUploaded'));
+					return;
+				}
+				throw new Error('upload_failed');
+			}
 
 			setValue('pdfUrl', signedUrlData.publicUrl);
 			setValue('pdfKey', signedUrlData.key);
 			toast.success(t('pdfUploaded'));
 		} catch (e: unknown) {
 			console.error(e);
-			toast.error(t('errors.uploadFailed') + ' ' + e);
+			const errorMessage = e instanceof Error ? e.message : String(e);
+			if (errorMessage.includes('CORS') || errorMessage.includes('cors')) {
+				toast.error(t('errors.uploadFailed') + ' - CORS configuration needed on R2. See docs/R2_CORS_CONFIGURATION.md');
+			} else {
+				toast.error(t('errors.uploadFailed') + ' ' + errorMessage);
+			}
 		} finally {
 			setPdfUploading(false);
 		}

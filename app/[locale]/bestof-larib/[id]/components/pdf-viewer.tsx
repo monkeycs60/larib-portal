@@ -20,6 +20,8 @@ export default function PdfViewer({ pdfUrl, isAdmin, className }: PdfViewerProps
 	const [numPages, setNumPages] = useState<number>(0)
 	const [zoom, setZoom] = useState(1.0)
 
+	const proxyUrl = `/api/pdf-proxy?url=${encodeURIComponent(pdfUrl)}`
+
 	const handleContextMenu = (event: React.MouseEvent) => {
 		if (!isAdmin) {
 			event.preventDefault()
@@ -34,7 +36,7 @@ export default function PdfViewer({ pdfUrl, isAdmin, className }: PdfViewerProps
 		return (
 			<div className={cn("relative overflow-hidden", className)}>
 				<iframe
-					src={pdfUrl}
+					src={proxyUrl}
 					className="w-full h-full"
 					style={{
 						border: 'none',
@@ -76,7 +78,7 @@ export default function PdfViewer({ pdfUrl, isAdmin, className }: PdfViewerProps
 			</div>
 			<div className="overflow-auto h-full w-full">
 				<Document
-					file={pdfUrl}
+					file={proxyUrl}
 					onLoadSuccess={({ numPages }) => setNumPages(numPages)}
 					className="flex flex-col items-center gap-4 py-4"
 				>
