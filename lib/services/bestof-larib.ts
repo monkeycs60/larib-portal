@@ -428,6 +428,26 @@ export async function ensureDiseaseTag(name: string): Promise<DiseaseTag> {
   return created
 }
 
+export async function updateExamType(id: string, name: string): Promise<ExamType> {
+  const trimmed = name.trim()
+  const updated = await prisma.examType.update({
+    where: { id },
+    data: { name: trimmed },
+    select: { id: true, name: true },
+  })
+  return updated
+}
+
+export async function updateDiseaseTag(id: string, name: string): Promise<DiseaseTag> {
+  const trimmed = name.trim()
+  const updated = await prisma.diseaseTag.update({
+    where: { id },
+    data: { name: trimmed },
+    select: { id: true, name: true },
+  })
+  return updated
+}
+
 export type CreateClinicalCaseInput = {
   name: string
   examTypeName?: string | null

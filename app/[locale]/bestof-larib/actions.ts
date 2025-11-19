@@ -15,6 +15,8 @@ import {
   ensureDiseaseTag,
   ensureExamType,
   updateClinicalCase,
+  updateDiseaseTag,
+  updateExamType,
 } from '@/lib/services/bestof-larib'
 import {
   ADMIN_TAGS_TAG,
@@ -105,6 +107,22 @@ export const deleteDiseaseTagsAction = adminOnlyAction
     await deleteDiseaseTags(parsedInput.ids)
     revalidateTag(DISEASE_TAGS_TAG)
     return { deleted: parsedInput.ids.length }
+  })
+
+export const updateExamTypeAction = adminOnlyAction
+  .inputSchema(z.object({ id: z.string().min(1), name: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    const updated = await updateExamType(parsedInput.id, parsedInput.name)
+    revalidateTag(EXAM_TYPES_TAG)
+    return updated
+  })
+
+export const updateDiseaseTagAction = adminOnlyAction
+  .inputSchema(z.object({ id: z.string().min(1), name: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    const updated = await updateDiseaseTag(parsedInput.id, parsedInput.name)
+    revalidateTag(DISEASE_TAGS_TAG)
+    return updated
   })
 
 const UpdateCaseSchema = CreateCaseSchema.extend({ id: z.string().min(1) })

@@ -30,7 +30,7 @@ import { TagInput } from '@/components/ui/tag-input';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, Settings } from 'lucide-react';
 import { useAction } from 'next-safe-action/hooks';
-import { createCaseAction, createDiseaseTagAction, createExamTypeAction, updateCaseAction, setCaseAdminTagsAction, deleteExamTypesAction, deleteDiseaseTagsAction, listAdminTagsAction } from '../actions';
+import { createCaseAction, createDiseaseTagAction, createExamTypeAction, updateCaseAction, setCaseAdminTagsAction, deleteExamTypesAction, deleteDiseaseTagsAction, listAdminTagsAction, updateExamTypeAction, updateDiseaseTagAction } from '../actions';
 import { toast } from 'sonner';
 import DeletableSelectManager from './deletable-select-manager';
 import TagsManagerModal from './tags-manager-modal';
@@ -252,6 +252,50 @@ export default function CreateCaseDialog({
 		}
 	);
 
+	const { execute: execUpdateExamType, isExecuting: updatingExamType } = useAction(
+		updateExamTypeAction,
+		{
+			onSuccess(res) {
+				const updated = res.data;
+				if (!updated) return;
+				setExamList((previous) => {
+					const next = previous.map((exam) =>
+						exam.id === updated.id ? updated : exam
+					);
+					next.sort((leftExam, rightExam) => leftExam.name.localeCompare(rightExam.name));
+					return next;
+				});
+				toast.success(t('updated'));
+			},
+			onError({ error }) {
+				const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError');
+				toast.error(msg);
+			},
+		}
+	);
+
+	const { execute: execUpdateDiseaseTag, isExecuting: updatingDiseaseTag } = useAction(
+		updateDiseaseTagAction,
+		{
+			onSuccess(res) {
+				const updated = res.data;
+				if (!updated) return;
+				setDiseaseList((previous) => {
+					const next = previous.map((disease) =>
+						disease.id === updated.id ? updated : disease
+					);
+					next.sort((leftDisease, rightDisease) => leftDisease.name.localeCompare(rightDisease.name));
+					return next;
+				});
+				toast.success(t('updated'));
+			},
+			onError({ error }) {
+				const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError');
+				toast.error(msg);
+			},
+		}
+	);
+
 	const handleDeleteExamTypes = async () => {
 		if (selectedExamTypeIds.length === 0) return;
 		await execDeleteExamTypes({ ids: selectedExamTypeIds });
@@ -276,6 +320,14 @@ export default function CreateCaseDialog({
 
 	const handleCreateDiseaseTag = async (name: string) => {
 		await execCreateDisease({ name });
+	};
+
+	const handleUpdateExamType = async (id: string, name: string) => {
+		await execUpdateExamType({ id, name });
+	};
+
+	const handleUpdateDiseaseTag = async (id: string, name: string) => {
+		await execUpdateDiseaseTag({ id, name });
 	};
 
 	async function uploadPdf(file: File) {
@@ -752,17 +804,20 @@ export default function CreateCaseDialog({
 			<Dialog open={manageExamTypesOpen} onOpenChange={setManageExamTypesOpen}>
 				<DialogContent className='max-w-md'>
 					<DialogHeader>
-						<DialogTitle>Manage Exam Types</DialogTitle>
+						<DialogTitle>{t('manageExamTypes')}</DialogTitle>
 					</DialogHeader>
 					<DeletableSelectManager
 						options={examList}
 						onDelete={handleDeleteExamTypes}
 						onCreate={handleCreateExamType}
-						disabled={deletingExamTypes || creatingExam}
+						onUpdate={handleUpdateExamType}
+						disabled={deletingExamTypes || creatingExam || updatingExamType}
 						deleting={deletingExamTypes}
 						creating={creatingExam}
+						updating={updatingExamType}
 						createLabel={t('addNewExamPrompt')}
 						createPlaceholder={t('addNewExamPrompt')}
+						createButtonLabel={t('createExamTypeCta')}
 						selectedIds={selectedExamTypeIds}
 						onSelectedIdsChange={setSelectedExamTypeIds}
 					/>
@@ -771,15 +826,15 @@ export default function CreateCaseDialog({
 							type='button'
 							variant='outline'
 							onClick={() => setManageExamTypesOpen(false)}
-							disabled={deletingExamTypes || creatingExam}
+							disabled={deletingExamTypes || creatingExam || updatingExamType}
 						>
-							Close
+							{t('close')}
 						</Button>
 						<Button
 							type='button'
 							variant='destructive'
 							onClick={() => setConfirmDeleteExamTypesOpen(true)}
-							disabled={deletingExamTypes || creatingExam || selectedExamTypeIds.length === 0}
+							disabled={deletingExamTypes || creatingExam || updatingExamType || selectedExamTypeIds.length === 0}
 						>
 							{deletingExamTypes ? t('deletingItems') : t('deleteSelected')}
 						</Button>
@@ -790,17 +845,20 @@ export default function CreateCaseDialog({
 			<Dialog open={manageDiseaseTagsOpen} onOpenChange={setManageDiseaseTagsOpen}>
 				<DialogContent className='max-w-md'>
 					<DialogHeader>
-						<DialogTitle>Manage Disease Tags</DialogTitle>
+						<DialogTitle>{t('manageDiagnosis')}</DialogTitle>
 					</DialogHeader>
 					<DeletableSelectManager
 						options={diseaseList}
 						onDelete={handleDeleteDiseaseTags}
 						onCreate={handleCreateDiseaseTag}
-						disabled={deletingDiseaseTags || creatingDisease}
+						onUpdate={handleUpdateDiseaseTag}
+						disabled={deletingDiseaseTags || creatingDisease || updatingDiseaseTag}
 						deleting={deletingDiseaseTags}
 						creating={creatingDisease}
+						updating={updatingDiseaseTag}
 						createLabel={t('addNewDiseasePrompt')}
 						createPlaceholder={t('addNewDiseasePrompt')}
+						createButtonLabel={t('createDiseaseCta')}
 						selectedIds={selectedDiseaseTagIds}
 						onSelectedIdsChange={setSelectedDiseaseTagIds}
 					/>
@@ -809,15 +867,15 @@ export default function CreateCaseDialog({
 							type='button'
 							variant='outline'
 							onClick={() => setManageDiseaseTagsOpen(false)}
-							disabled={deletingDiseaseTags || creatingDisease}
+							disabled={deletingDiseaseTags || creatingDisease || updatingDiseaseTag}
 						>
-							Close
+							{t('close')}
 						</Button>
 						<Button
 							type='button'
 							variant='destructive'
 							onClick={() => setConfirmDeleteDiseaseTagsOpen(true)}
-							disabled={deletingDiseaseTags || creatingDisease || selectedDiseaseTagIds.length === 0}
+							disabled={deletingDiseaseTags || creatingDisease || updatingDiseaseTag || selectedDiseaseTagIds.length === 0}
 						>
 							{deletingDiseaseTags ? t('deletingItems') : t('deleteSelected')}
 						</Button>
