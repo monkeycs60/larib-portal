@@ -3,7 +3,7 @@ import { Link } from '@/app/i18n/navigation'
 import { getTranslations } from 'next-intl/server'
 import { formatUserName } from '@/lib/format-user-name'
 import * as motion from "framer-motion/client"
-import { Users, ArrowRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 
 export default async function DashboardPage({
   params
@@ -16,7 +16,8 @@ export default async function DashboardPage({
   const adminT = await getTranslations({ locale, namespace: 'admin' })
 
   const allApps = (session.user.applications ?? []) as Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'>
-  const apps = allApps.filter(app => app !== 'CARDIOLARIB')
+  const appOrder: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'> = ['BESTOF_LARIB', 'CONGES', 'CARDIOLARIB']
+  const apps = appOrder.filter(app => app !== 'CARDIOLARIB' && allApps.includes(app))
 
   function appSlug(app: 'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'): string {
     return app === 'BESTOF_LARIB' ? '/bestof-larib' : app === 'CONGES' ? '/conges' : '/cardiolarib'
@@ -160,27 +161,43 @@ export default async function DashboardPage({
                 <div className="h-px flex-1 bg-border/60" />
               </div>
               
-              <motion.div 
+              <motion.div
                 variants={container}
                 initial="hidden"
                 animate="show"
-                className="grid grid-cols-1 md:grid-cols-3 gap-6"
+                className="grid grid-cols-1 md:grid-cols-2 gap-6"
               >
                 <motion.div variants={item}>
                   <Link href={'/admin/users'} className="block h-full">
-                    <div className="group h-full relative overflow-hidden rounded-[2rem] bg-secondary/30 transition-all duration-500 hover:bg-secondary/50 hover:shadow-xl hover:shadow-black/5">
-                      <div className="p-10">
-                        <div className="mb-6 w-16 h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center text-foreground group-hover:scale-110 transition-transform duration-500">
-                          <Users className="w-8 h-8" />
+                    <div className="group h-full relative overflow-hidden rounded-[2rem] bg-secondary dark:bg-card transition-all duration-500 hover:shadow-2xl hover:shadow-black/5 hover:-translate-y-1">
+                      <div className="absolute top-6 right-6 z-10">
+                         <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/50 backdrop-blur-sm text-foreground transition-all duration-500 group-hover:bg-white group-hover:scale-110">
+                            <ArrowRight className="w-5 h-5 -rotate-45 group-hover:rotate-0 transition-transform duration-500" />
+                         </div>
+                      </div>
+
+                      <div className="p-10 h-full flex flex-col">
+                        <div className="mb-6">
+                          <div className="w-14 h-14 mb-6 text-primary transition-transform duration-500 group-hover:scale-110">
+                            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                              <circle cx="18" cy="16" r="6" stroke="currentColor" strokeWidth="2" fill="none"/>
+                              <path d="M6 38c0-6.627 5.373-12 12-12s12 5.373 12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>
+                              <circle cx="34" cy="18" r="5" stroke="currentColor" strokeWidth="2" fill="none"/>
+                              <path d="M42 38c0-5.523-4.477-10-10-10-1.5 0-2.9.33-4.17.92" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>
+                            </svg>
+                          </div>
+                          <h3 className="text-2xl font-serif font-medium text-foreground mb-2 group-hover:text-primary transition-colors duration-300">
+                            {adminT('usersNav')}
+                          </h3>
+                          <p className="text-base text-muted-foreground leading-relaxed max-w-md">
+                            {adminT('usersSubtitle')}
+                          </p>
                         </div>
-                        <h3 className="text-2xl font-serif font-medium text-foreground mb-2">
-                          {adminT('usersNav')}
-                        </h3>
-                        <p className="text-muted-foreground leading-relaxed mb-8">
-                          {adminT('usersSubtitle')}
-                        </p>
-                        <div className="flex items-center text-sm font-medium text-foreground group-hover:translate-x-2 transition-transform duration-300">
-                          Access Admin Panel <ArrowRight className="ml-2 w-4 h-4" />
+
+                        <div className="mt-auto pt-8">
+                          <span className="inline-flex items-center text-sm font-medium uppercase tracking-wider text-primary">
+                            {t('openApp')}
+                          </span>
                         </div>
                       </div>
                     </div>
