@@ -93,8 +93,8 @@
     "appDesc_CARDIOLARIB": "Resources and tools dedicated to CardioLarib."
   },
   "metadata": {
-    "title": "FeedbackApp",
-    "description": "User feedback application"
+    "title": "Larib Portal",
+    "description": "Larib Portal for applications"
   },
   "welcome": {
     "title": "Set your password",
@@ -135,8 +135,8 @@
     "departureDate": "Departure date",
     "profilePhoto": "Profile photo",
     "applications": "Allowed applications",
-    "app_BESTOF_LARIB": "bestof-larib",
-    "app_CONGES": "conges",
+    "app_BESTOF_LARIB": "Training Best-of",
+    "app_CONGES": "Leave management",
     "app_CARDIOLARIB": "cardiolarib",
     "firstName": "First name",
     "lastName": "Last name",
@@ -147,10 +147,13 @@
     "selectPlaceholder": "Select...",
     "accessEndDate": "Access end date",
     "welcomeEmailPreview": "Welcome Email Preview",
-    "welcomeEmailSubject": "Welcome to Clinical Case Training Platform",
-    "welcomeEmailBodyLine1": "Welcome! Your account has been created as a User with the position of {position}.",
-    "passwordSetupLink": "Password Setup Link",
-    "welcomeEmailBodyEndDate": "Your account access will expire on {date}.",
+    "welcomeEmailSubject": "Welcome to Cardio Larib portal",
+    "welcomeEmailBodyLine1": "This is an automatic message to invite you to join our team intranet platform, the Cardio Larib Portal.",
+    "passwordSetupLink": "Set up link",
+    "welcomeEmailBodyEndDate": "Your account will be valid until {date}.",
+    "emailLanguage": "Email language",
+    "emailLanguageEn": "English",
+    "emailLanguageFr": "French",
     "createAndSend": "Create User & Send Welcome Email",
     "creating": "Creating...",
     "positionGeneric": "Position",

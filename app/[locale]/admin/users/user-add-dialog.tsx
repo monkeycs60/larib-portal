@@ -21,7 +21,8 @@ const AddUserSchema = z.object({
   position: z.string().optional(),
   arrivalDate: z.string().min(1),
   departureDate: z.string().min(1),
-  applications: z.array(z.enum(["BESTOF_LARIB","CONGES","CARDIOLARIB"]))
+  applications: z.array(z.enum(["BESTOF_LARIB","CONGES","CARDIOLARIB"])),
+  emailLanguage: z.enum(['en','fr'])
 })
 
 type AddUserValues = z.infer<typeof AddUserSchema>
@@ -52,7 +53,7 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
 
   const { register, handleSubmit, setValue, watch, reset } = useForm<AddUserValues>({
     resolver: zodResolver(AddUserSchema),
-    defaultValues: { role: 'USER', applications: [] },
+    defaultValues: { role: 'USER', applications: [], emailLanguage: (locale as 'en' | 'fr') },
   })
 
   const apps = new Set(watch('applications'))
@@ -64,7 +65,7 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
   const onSubmit = handleSubmit(async (values) => {
     await execute({
       ...values,
-      locale: (locale as 'en'|'fr'),
+      locale: values.emailLanguage,
     })
     setOpen(false)
     reset()
@@ -86,6 +87,19 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
   const previewEmail = watch('email') || 'user@example.com'
   const previewPos = watch('position')
   const previewEnd = watch('departureDate')
+  const emailLang = watch('emailLanguage') || 'en'
+
+  // Preview translations based on selected email language
+  const previewSubject = emailLang === 'fr'
+    ? 'Bienvenue sur le portail Cardio Larib'
+    : 'Welcome to Cardio Larib portal'
+  const previewBody = emailLang === 'fr'
+    ? 'Ceci est un message automatique pour vous inviter à rejoindre la plateforme intranet de notre équipe, le portail Cardio Larib.'
+    : 'This is an automatic message to invite you to join our team intranet platform, the Cardio Larib Portal.'
+  const previewLink = emailLang === 'fr' ? 'Lien d\'accès' : 'Set up link'
+  const previewEndDate = emailLang === 'fr'
+    ? `Votre compte sera valide jusqu'au ${previewEnd}.`
+    : `Your account will be valid until ${previewEnd}.`
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -139,6 +153,13 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
               <label className="block text-sm mb-1">{t('departureDate')}</label>
               <Input type="date" required {...register('departureDate')} />
             </div>
+            <div>
+              <label className="block text-sm mb-1">{t('emailLanguage')}</label>
+              <Select {...register('emailLanguage')}>
+                <option value="en">{t('emailLanguageEn')}</option>
+                <option value="fr">{t('emailLanguageFr')}</option>
+              </Select>
+            </div>
           </div>
 
           <div>
@@ -165,12 +186,12 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
             <div className="text-sm font-medium mb-2">{t('welcomeEmailPreview')}</div>
             <div className="text-sm text-muted-foreground">
               <div><strong>To:</strong> {previewEmail}</div>
-              <div><strong>Subject:</strong> {t('welcomeEmailSubject')}</div>
+              <div><strong>Subject:</strong> {previewSubject}</div>
             </div>
             <div className="mt-2 text-sm bg-gray-50 rounded p-3 border">
-              <p>{t('welcomeEmailBodyLine1', { position: previewPos || t('positionGeneric') })}</p>
-              <p className="mt-2">[{t('passwordSetupLink')}]</p>
-              {previewEnd && <p className="mt-2">{t('welcomeEmailBodyEndDate', { date: previewEnd })}</p>}
+              <p>{previewBody}</p>
+              <p className="mt-2">[{previewLink}]</p>
+              {previewEnd && <p className="mt-2">{previewEndDate}</p>}
             </div>
           </div>
 
