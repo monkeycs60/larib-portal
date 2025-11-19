@@ -78,7 +78,7 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
 	};
 
 	return (
-		<nav className='sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60'>
+		<nav className='sticky top-0 z-50 w-full bg-primary shadow-lg'>
 			<div className='mx-auto flex h-20 items-center justify-between px-8'>
 				<div className='flex items-center'>
 					<Link
@@ -90,7 +90,7 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
 							alt='Larib Portal logo'
 							width={90}
 							height={90}
-							className='rounded'
+							className='rounded brightness-0 invert'
 							priority
 							fetchPriority='high'
 						/>
@@ -104,6 +104,7 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
 						variant='outline'
 						size='sm'
 						onClick={toggleLanguage}
+						className='border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white'
 						title={
 							locale === 'en' ? 'Switch to French' : 'Passer en anglais'
 						}>
@@ -116,11 +117,11 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
                             <DropdownMenuTrigger asChild>
                                 <button
                                     aria-label='Account menu'
-                                    className='group inline-flex items-center rounded-full p-[2px] focus:outline-none cursor-pointer transition-colors hover:bg-[linear-gradient(135deg,#6366f1,#06b6d4)]'>
+                                    className='group inline-flex items-center rounded-full p-[2px] focus:outline-none cursor-pointer transition-all hover:ring-2 hover:ring-white/50'>
                                     <div className='rounded-full bg-white'>
-                                        <Avatar className='size-9 rounded-full border border-gray-200 text-white transition-colors group-hover:border-transparent'>
+                                        <Avatar className='size-9 rounded-full border-2 border-white text-white transition-colors'>
                                             <AvatarImage src={avatarSrc} alt={displayName} />
-                                            <AvatarFallback className='bg-[#0a0a1a] text-white font-semibold'>
+                                            <AvatarFallback className='bg-accent text-accent-foreground font-semibold'>
                                                 {initials}
                                             </AvatarFallback>
                                         </Avatar>
@@ -129,11 +130,11 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
                             </DropdownMenuTrigger>
 								<DropdownMenuContent align='end' className='w-72'>
                                 <DropdownMenuLabel className='flex items-start gap-3 py-2'>
-                                    <div className='rounded-full p-[2px] bg-[linear-gradient(135deg,#6366f1,#06b6d4)]'>
+                                    <div className='rounded-full p-[2px] bg-primary'>
                                         <div className='rounded-full bg-white'>
-                                            <Avatar className='size-10 rounded-full border border-gray-200 text-white'>
+                                            <Avatar className='size-10 rounded-full border border-border text-white'>
                                                 <AvatarImage src={avatarSrc} alt={displayName} />
-                                                <AvatarFallback className='bg-[#0a0a1a] text-white font-semibold'>
+                                                <AvatarFallback className='bg-accent text-accent-foreground font-semibold'>
                                                     {initials}
                                                 </AvatarFallback>
                                             </Avatar>
@@ -212,7 +213,7 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
 					) : (
 						<div className='flex items-center gap-2'>
 							<Link href='/login'>
-								<Button variant='outline' size='sm'>
+								<Button variant='outline' size='sm' className='border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white'>
 									{t('login')}
 								</Button>
 							</Link>
