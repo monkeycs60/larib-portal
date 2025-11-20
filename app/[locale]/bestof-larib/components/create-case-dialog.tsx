@@ -4,6 +4,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 import {
 	Dialog,
 	DialogContent,
@@ -85,6 +86,7 @@ export default function CreateCaseDialog({
   adminTags?: AdminTag[];
 }) {
 	const t = useTranslations('bestof');
+	const router = useRouter();
 	const [open, setOpen] = useState(false);
 	const [examList, setExamList] = useState(examTypes);
 	const [diseaseList, setDiseaseList] = useState(diseaseTags);
@@ -97,6 +99,7 @@ export default function CreateCaseDialog({
 	);
 	const [localAdminTags, setLocalAdminTags] = useState<AdminTag[]>(adminTags ?? []);
 	const tagsManagerTriggerRef = useRef<HTMLButtonElement>(null);
+	const [hasDataChanges, setHasDataChanges] = useState(false);
 
   const { register, handleSubmit, setValue, reset, watch, control } =
     useForm<FormValues>({
@@ -127,20 +130,12 @@ export default function CreateCaseDialog({
 	const tags = watch('tags') || [];
 
   const { execute: execCreate, isExecuting: creatingCase } = useAction(createCaseAction, {
-    onSuccess() {
-      toast.success(t('created'));
-      window.location.reload();
-    },
     onError({ error }) {
       const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError');
       toast.error(msg);
     },
   });
   const { execute: execUpdate, isExecuting: updatingCase } = useAction(updateCaseAction, {
-    onSuccess() {
-      toast.success(t('updated'));
-      window.location.reload();
-    },
     onError({ error }) {
       const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError');
       toast.error(msg);
@@ -180,6 +175,7 @@ export default function CreateCaseDialog({
 					shouldDirty: true,
 					shouldValidate: true,
 				});
+				setHasDataChanges(true);
 			},
 		}
 	);
@@ -198,6 +194,7 @@ export default function CreateCaseDialog({
 					shouldDirty: true,
 					shouldValidate: true,
 				});
+				setHasDataChanges(true);
 			},
 		});
 
@@ -258,6 +255,11 @@ export default function CreateCaseDialog({
 			onSuccess(res) {
 				const updated = res.data;
 				if (!updated) return;
+				const oldExam = examList.find((exam) => exam.id === updated.id);
+				const currentValue = watch('examType');
+				if (oldExam && currentValue === oldExam.name) {
+					setValue('examType', updated.name, { shouldDirty: true });
+				}
 				setExamList((previous) => {
 					const next = previous.map((exam) =>
 						exam.id === updated.id ? updated : exam
@@ -265,6 +267,7 @@ export default function CreateCaseDialog({
 					next.sort((leftExam, rightExam) => leftExam.name.localeCompare(rightExam.name));
 					return next;
 				});
+				setHasDataChanges(true);
 				toast.success(t('updated'));
 			},
 			onError({ error }) {
@@ -280,6 +283,11 @@ export default function CreateCaseDialog({
 			onSuccess(res) {
 				const updated = res.data;
 				if (!updated) return;
+				const oldDisease = diseaseList.find((disease) => disease.id === updated.id);
+				const currentValue = watch('diseaseTag');
+				if (oldDisease && currentValue === oldDisease.name) {
+					setValue('diseaseTag', updated.name, { shouldDirty: true });
+				}
 				setDiseaseList((previous) => {
 					const next = previous.map((disease) =>
 						disease.id === updated.id ? updated : disease
@@ -287,6 +295,7 @@ export default function CreateCaseDialog({
 					next.sort((leftDisease, rightDisease) => leftDisease.name.localeCompare(rightDisease.name));
 					return next;
 				});
+				setHasDataChanges(true);
 				toast.success(t('updated'));
 			},
 			onError({ error }) {
@@ -303,6 +312,7 @@ export default function CreateCaseDialog({
 		setSelectedExamTypeIds([]);
 		setConfirmDeleteExamTypesOpen(false);
 		setManageExamTypesOpen(false);
+		setHasDataChanges(true);
 	};
 
 	const handleDeleteDiseaseTags = async () => {
@@ -312,6 +322,7 @@ export default function CreateCaseDialog({
 		setSelectedDiseaseTagIds([]);
 		setConfirmDeleteDiseaseTagsOpen(false);
 		setManageDiseaseTagsOpen(false);
+		setHasDataChanges(true);
 	};
 
 	const handleCreateExamType = async (name: string) => {
@@ -424,7 +435,7 @@ export default function CreateCaseDialog({
 		}
 
     if (clinicalCase) {
-      await execUpdate({
+      const updateResult = await execUpdate({
         id: clinicalCase.id,
         name: values.name,
         examTypeName: values.examType || null,
@@ -436,12 +447,19 @@ export default function CreateCaseDialog({
         textContent: values.textContent || null,
         status: statusToCreate,
       });
+      if (!updateResult?.data) {
+        if (updateResult?.serverError) {
+          toast.error(typeof updateResult.serverError === 'string' ? updateResult.serverError : t('actionError'));
+        }
+        return;
+      }
       if (isAdmin && adminTags) {
         await execSetAdminTags({
           caseId: clinicalCase.id,
           tagIds: selectedAdminTags,
         });
       }
+      toast.success(t('updated'));
     } else {
       const result = await execCreate({
         name: values.name,
@@ -454,15 +472,23 @@ export default function CreateCaseDialog({
         textContent: values.textContent || null,
         status: statusToCreate,
       });
-      if (isAdmin && adminTags && result?.data?.id) {
+      if (!result?.data?.id) {
+        if (result?.serverError) {
+          toast.error(typeof result.serverError === 'string' ? result.serverError : t('actionError'));
+        }
+        return;
+      }
+      if (isAdmin && adminTags) {
         await execSetAdminTags({
           caseId: result.data.id,
           tagIds: selectedAdminTags,
         });
       }
+      toast.success(t('created'));
     }
 		setOpen(false);
 		reset();
+		router.refresh();
 	});
 
 	return (
@@ -491,6 +517,9 @@ export default function CreateCaseDialog({
 					if (isAdmin) {
 						void execListAdminTags();
 					}
+				}
+				if (!next && hasDataChanges) {
+					router.refresh();
 				}
 			}}
 		>

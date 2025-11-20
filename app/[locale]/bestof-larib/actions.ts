@@ -114,6 +114,7 @@ export const updateExamTypeAction = adminOnlyAction
   .action(async ({ parsedInput }) => {
     const updated = await updateExamType(parsedInput.id, parsedInput.name)
     revalidateTag(EXAM_TYPES_TAG)
+    revalidateTag(CASES_TAG)
     return updated
   })
 
@@ -122,6 +123,7 @@ export const updateDiseaseTagAction = adminOnlyAction
   .action(async ({ parsedInput }) => {
     const updated = await updateDiseaseTag(parsedInput.id, parsedInput.name)
     revalidateTag(DISEASE_TAGS_TAG)
+    revalidateTag(CASES_TAG)
     return updated
   })
 
