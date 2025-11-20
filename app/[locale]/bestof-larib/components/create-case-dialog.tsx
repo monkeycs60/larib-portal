@@ -129,19 +129,19 @@ export default function CreateCaseDialog({
 	})();
 	const tags = watch('tags') || [];
 
-  const { execute: execCreate, isExecuting: creatingCase } = useAction(createCaseAction, {
+  const { executeAsync: execCreate, isExecuting: creatingCase } = useAction(createCaseAction, {
     onError({ error }) {
       const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError');
       toast.error(msg);
     },
   });
-  const { execute: execUpdate, isExecuting: updatingCase } = useAction(updateCaseAction, {
+  const { executeAsync: execUpdate, isExecuting: updatingCase } = useAction(updateCaseAction, {
     onError({ error }) {
       const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError');
       toast.error(msg);
     },
   });
-  const { execute: execSetAdminTags, isExecuting: settingTags } = useAction(setCaseAdminTagsAction, {
+  const { executeAsync: execSetAdminTags, isExecuting: settingTags } = useAction(setCaseAdminTagsAction, {
     onError({ error }) {
       const msg = typeof error?.serverError === 'string' ? error.serverError : t('actionError');
       toast.error(msg);
@@ -447,12 +447,7 @@ export default function CreateCaseDialog({
         textContent: values.textContent || null,
         status: statusToCreate,
       });
-      if (!updateResult?.data) {
-        if (updateResult?.serverError) {
-          toast.error(typeof updateResult.serverError === 'string' ? updateResult.serverError : t('actionError'));
-        }
-        return;
-      }
+      if (!updateResult?.data) return;
       if (isAdmin && adminTags) {
         await execSetAdminTags({
           caseId: clinicalCase.id,
@@ -460,6 +455,9 @@ export default function CreateCaseDialog({
         });
       }
       toast.success(t('updated'));
+      setOpen(false);
+      reset();
+      router.refresh();
     } else {
       const result = await execCreate({
         name: values.name,
@@ -472,23 +470,19 @@ export default function CreateCaseDialog({
         textContent: values.textContent || null,
         status: statusToCreate,
       });
-      if (!result?.data?.id) {
-        if (result?.serverError) {
-          toast.error(typeof result.serverError === 'string' ? result.serverError : t('actionError'));
-        }
-        return;
-      }
+      const createdId = result?.data?.id;
+      if (!createdId) return;
       if (isAdmin && adminTags) {
         await execSetAdminTags({
-          caseId: result.data.id,
+          caseId: createdId,
           tagIds: selectedAdminTags,
         });
       }
       toast.success(t('created'));
+      setOpen(false);
+      reset();
+      router.refresh();
     }
-		setOpen(false);
-		reset();
-		router.refresh();
 	});
 
 	return (
