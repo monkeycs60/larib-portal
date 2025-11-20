@@ -1,5 +1,6 @@
 "use server"
 import { z } from "zod"
+import { revalidatePath } from "next/cache"
 import { authenticatedAction } from "@/actions/safe-action"
 import { updateUser } from "@/lib/services/users"
 
@@ -40,17 +41,24 @@ export const updateSelfProfileAction = authenticatedAction
     } as const
 
     if (isAdmin) {
-      return await updateUser({
+      const result = await updateUser({
         ...basePayload,
-        // Do not wipe the stored key when editing unrelated fields.
-        // profilePhotoKey is only set by the avatar save action.
         role: parsedInput.role ?? ctx.user.role,
         applications: parsedInput.applications ?? ctx.user.applications ?? [],
       })
+
+      revalidatePath('/en', 'layout')
+      revalidatePath('/fr', 'layout')
+
+      return result
     }
 
-    // Non-admin cannot change role/applications
-    return await updateUser({
+    const result = await updateUser({
       ...basePayload,
     })
+
+    revalidatePath('/en', 'layout')
+    revalidatePath('/fr', 'layout')
+
+    return result
   })
