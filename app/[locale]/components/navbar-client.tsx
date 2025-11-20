@@ -82,7 +82,7 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
 			<div className='mx-auto flex h-20 items-center justify-between px-8'>
 				<div className='flex items-center'>
 					<Link
-						href={`/`}
+						href={user ? '/dashboard' : '/'}
 						title='Larib Portal Home'
 						className='inline-flex items-center'>
 						<Image
