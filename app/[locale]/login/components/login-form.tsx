@@ -75,7 +75,7 @@ export function LoginForm({ showSignupLink = true }: LoginFormProps) {
   };
 
   return (
-    <div className="max-w-md mx-auto">
+    <div className="max-w-md mx-auto w-full">
       <Card>
         <CardHeader className="text-center space-y-4">
           <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto">
@@ -153,13 +153,6 @@ export function LoginForm({ showSignupLink = true }: LoginFormProps) {
               {isExecuting ? t('loading') : t('signIn')}
             </Button>
           </form>
-
-          {/* Demo credentials info */}
-          <div className="p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground">
-            <p className="font-medium mb-1">{t('demoCredentials')}</p>
-            <p>{t('userCredentials')}: demo@company.com / password</p>
-            <p>{t('adminCredentials')}: admin@company.com / admin123</p>
-          </div>
 
           {showSignupLink && (
             <div className="text-center">

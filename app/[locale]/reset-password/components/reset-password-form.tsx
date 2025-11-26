@@ -48,7 +48,7 @@ export function ResetPasswordForm() {
 
   if (errorParam === 'INVALID_TOKEN' || !token) {
     return (
-      <div className="max-w-md mx-auto">
+      <div className="max-w-md mx-auto w-full">
         <Card>
           <CardHeader className="text-center space-y-4">
             <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto">
@@ -100,7 +100,7 @@ export function ResetPasswordForm() {
 
   if (isSuccess) {
     return (
-      <div className="max-w-md mx-auto">
+      <div className="max-w-md mx-auto w-full">
         <Card>
           <CardHeader className="text-center space-y-4">
             <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto">
@@ -126,7 +126,7 @@ export function ResetPasswordForm() {
   }
 
   return (
-    <div className="max-w-md mx-auto">
+    <div className="max-w-md mx-auto w-full">
       <Card>
         <CardHeader className="text-center space-y-4">
           <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto">
