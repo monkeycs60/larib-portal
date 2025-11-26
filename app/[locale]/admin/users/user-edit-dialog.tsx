@@ -34,7 +34,6 @@ const FormSchema = z.object({
 	position: z.string().optional(),
 	arrivalDate: z.string().optional(),
 	departureDate: z.string().optional(),
-	profilePhoto: z.string().optional(),
 	applications: z.array(z.enum(['BESTOF_LARIB', 'CONGES', 'CARDIOLARIB'])),
 });
 
@@ -220,15 +219,6 @@ export function UserEditDialog({
 								{t('departureDate')}
 							</label>
 							<Input type='date' {...register('departureDate')} />
-						</div>
-						<div className='md:col-span-2'>
-							<label className='block text-sm mb-1'>
-								{t('profilePhoto')}
-							</label>
-							<Input
-								placeholder='https://...'
-								{...register('profilePhoto')}
-							/>
 						</div>
 					</div>
 

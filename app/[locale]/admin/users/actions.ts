@@ -15,12 +15,11 @@ const UpdateUserSchema = z.object({
   phoneNumber: z.string().trim().optional().nullable(),
   role: z.enum(["ADMIN", "USER"]),
   country: z.string().trim().optional().nullable(),
-  birthDate: z.string().optional().nullable(), // ISO date string
+  birthDate: z.string().optional().nullable(),
   language: z.enum(["EN", "FR"]).optional(),
   position: z.string().trim().optional().nullable(),
-  arrivalDate: z.string().optional().nullable(), // ISO date string
-  departureDate: z.string().optional().nullable(), // ISO date string
-  profilePhoto: z.string().url().optional().nullable(),
+  arrivalDate: z.string().optional().nullable(),
+  departureDate: z.string().optional().nullable(),
   applications: z.array(z.enum(["BESTOF_LARIB", "CONGES", "CARDIOLARIB"]))
     .default([]),
   locale: z.enum(["en", "fr"]).optional(),
@@ -47,7 +46,6 @@ export const updateUserAction = adminOnlyAction
       position: parsedInput.position ?? null,
       arrivalDate,
       departureDate,
-      profilePhoto: parsedInput.profilePhoto ?? null,
       applications: parsedInput.applications,
     })
     return updated

@@ -109,7 +109,6 @@ export function UserTable({ users, positions, locale }: { users: UserRow[]; posi
                     position: u.position ?? undefined,
                     arrivalDate: u.arrivalDate ? new Date(u.arrivalDate as unknown as string).toISOString().slice(0,10) : undefined,
                     departureDate: u.departureDate ? new Date(u.departureDate as unknown as string).toISOString().slice(0,10) : undefined,
-                    profilePhoto: u.profilePhoto ?? undefined,
                     applications: (u.applications ?? []) as UserFormValues['applications'],
                   }}
                 />
