@@ -68,3 +68,64 @@ export async function sendWelcomeEmail(params: WelcomeEmailParams): Promise<{ id
   return { id: json.id ?? '' }
 }
 
+type ResetPasswordEmailParams = {
+  to: string
+  resetUrl: string
+  locale: 'en' | 'fr'
+}
+
+function renderResetPasswordEmail({ resetUrl, locale }: ResetPasswordEmailParams) {
+  const subject = locale === 'fr'
+    ? 'Réinitialisation de votre mot de passe'
+    : 'Reset your password'
+
+  const greeting = locale === 'fr' ? 'Bonjour,' : 'Hello,'
+  const intro = locale === 'fr'
+    ? 'Vous avez demandé à réinitialiser votre mot de passe. Cliquez sur le lien ci-dessous pour créer un nouveau mot de passe.'
+    : 'You requested to reset your password. Click the link below to create a new password.'
+  const ctaText = locale === 'fr' ? 'Réinitialiser mon mot de passe' : 'Reset my password'
+  const expiryNote = locale === 'fr'
+    ? 'Ce lien expirera dans 1 heure. Si vous n\'avez pas demandé cette réinitialisation, vous pouvez ignorer cet e-mail.'
+    : 'This link will expire in 1 hour. If you did not request this reset, you can ignore this email.'
+
+  const text = `${greeting}\n\n${intro}\n\n${resetUrl}\n\n${expiryNote}`
+
+  const html = `
+    <div style="font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <p>${greeting}</p>
+      <p>${intro}</p>
+      <p style="margin: 24px 0;">
+        <a href="${resetUrl}" style="background:#111827;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block">${ctaText}</a>
+      </p>
+      <p style="color:#666;font-size:14px;">${expiryNote}</p>
+    </div>
+  `
+  return { subject, text, html }
+}
+
+export async function sendResetPasswordEmail(params: ResetPasswordEmailParams): Promise<{ id: string } | { error: string }> {
+  const { subject, text, html } = renderResetPasswordEmail(params)
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) return { error: 'RESEND_API_KEY missing' }
+  const from = process.env.RESEND_FROM || 'noreply@your-domain.com'
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from,
+      to: [params.to],
+      subject,
+      text,
+      html,
+    }),
+  })
+  if (!res.ok) {
+    return { error: `RESEND_REQUEST_FAILED_${res.status}` }
+  }
+  const json = await res.json() as { id?: string }
+  return { id: json.id ?? '' }
+}
+

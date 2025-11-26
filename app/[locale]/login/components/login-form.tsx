@@ -74,10 +74,6 @@ export function LoginForm({ showSignupLink = true }: LoginFormProps) {
     setShowPassword(prev => !prev);
   };
 
-  const handleForgotPassword = () => {
-    // TODO: Implement forgot password functionality
-  };
-
   return (
     <div className="max-w-md mx-auto">
       <Card>
@@ -112,14 +108,12 @@ export function LoginForm({ showSignupLink = true }: LoginFormProps) {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">{t('password')}</Label>
-                <Button
-                  type="button"
-                  variant="link"
-                  className="px-0 h-auto"
-                  onClick={handleForgotPassword}
+                <Link
+                  href={applicationLink(locale, '/forgot-password')}
+                  className="text-sm text-primary hover:underline"
                 >
                   {t('forgotPassword')}
-                </Button>
+                </Link>
               </div>
               <div className="relative">
                 <Input
