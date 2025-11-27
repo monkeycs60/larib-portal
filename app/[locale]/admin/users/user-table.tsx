@@ -1,6 +1,7 @@
 "use client"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import { RelativeTime } from "@/components/ui/relative-time"
 import { useTranslations } from "next-intl"
 import { UserEditDialog, type UserFormValues } from "./user-edit-dialog"
 import { AddUserDialog } from './user-add-dialog'
@@ -61,6 +62,7 @@ export function UserTable({ users, positions, locale }: { users: UserRow[]; posi
             <TableHead>{t('language')}</TableHead>
             <TableHead>{t('position')}</TableHead>
             <TableHead>{t('applications')}</TableHead>
+            <TableHead>{t('createdAt')}</TableHead>
             <TableHead className="text-right">{t('actions')}</TableHead>
           </TableRow>
         </TableHeader>
@@ -92,6 +94,9 @@ export function UserTable({ users, positions, locale }: { users: UserRow[]; posi
                     </span>
                   ))}
                 </div>
+              </TableCell>
+              <TableCell>
+                {u.createdAt ? <RelativeTime date={u.createdAt} /> : '—'}
               </TableCell>
               <TableCell className="text-right space-x-2">
                 <UserEditDialog

@@ -2,6 +2,7 @@ import { Link } from '@/app/i18n/navigation';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { RelativeTime } from '@/components/ui/relative-time';
 import { Eye, Pencil, PlusCircle } from 'lucide-react';
 import TableOverlay from './table-overlay';
 import DeleteCaseButton from './delete-case-button';
@@ -208,9 +209,9 @@ export default async function CasesTable({
                   <TableCell>
                     {isUserView
                       ? caseItem.firstCompletedAt
-                        ? new Date(caseItem.firstCompletedAt).toLocaleDateString()
+                        ? <RelativeTime date={caseItem.firstCompletedAt} />
                         : '-'
-                      : new Date(caseItem.createdAt).toLocaleDateString()}
+                      : <RelativeTime date={caseItem.createdAt} />}
                   </TableCell>
                   {isUserView ? (
                     <TableCell>{typeof caseItem.attemptsCount === 'number' ? caseItem.attemptsCount : 0}</TableCell>
