@@ -1,5 +1,6 @@
 "use server"
 import { z } from "zod"
+import { revalidatePath } from "next/cache"
 import { deleteUserById, updateUser, createPlaceholderUser } from "@/lib/services/users"
 import { listPositions, ensurePosition } from '@/lib/services/positions'
 import { createInvitation } from '@/lib/services/invitations'
@@ -48,6 +49,7 @@ export const updateUserAction = adminOnlyAction
       departureDate,
       applications: parsedInput.applications,
     })
+    revalidatePath('/admin/users')
     return updated
   })
 
