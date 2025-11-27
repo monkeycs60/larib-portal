@@ -16,7 +16,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAction } from 'next-safe-action/hooks'
 import { saveAttemptAction, upsertSettingsAction, validateAttemptAction } from './actions'
-import { CheckCircle2, Eye } from 'lucide-react'
+import { CheckCircle2, Eye, PanelLeftClose } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getActionErrorMessage } from '@/lib/ui/safe-action-error'
 import { useBestofAttemptStore } from '@/lib/stores/bestof-attempts'
@@ -45,6 +45,7 @@ type CaseInteractionPanelConfig = {
   onStartNewAttempt?: () => void
   attempts?: Array<{ id: string; createdAt: string | Date; validatedAt: string | Date | null; lvef: string | null; kinetic: string | null; lgePresent: boolean | null; lgeDetails: string | null; finalDx: string | null; report: string | null }>
   onSelectAttempt?: (a: { id: string; createdAt: string | Date; validatedAt: string | Date | null; lvef: string | null; kinetic: string | null; lgePresent: boolean | null; lgeDetails: string | null; finalDx: string | null; report: string | null }) => void
+  onCollapse?: () => void
 }
 
 const AnalysisSchema = z.object({
@@ -78,6 +79,7 @@ export default function CaseInteractionPanel({ config }: { config: CaseInteracti
     onStartNewAttempt,
     attempts = [],
     onSelectAttempt,
+    onCollapse,
   } = config
 
   const [tags, setTags] = useState<string[]>(cTags ?? defaultTags)
@@ -131,7 +133,20 @@ export default function CaseInteractionPanel({ config }: { config: CaseInteracti
         <CardContent className="space-y-4">
 
           <div className="space-y-2">
-            <div className="font-medium">{t('caseView.attempts')}</div>
+            <div className="flex items-center justify-between mb-4">
+              <div className="font-medium">{t('caseView.attempts')}</div>
+              {onCollapse && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onCollapse}
+                  title={t('caseView.hideSidebar')}
+                  className="h-8 w-8"
+                >
+                  <PanelLeftClose className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
             <div className="flex flex-col gap-2 max-h-44 overflow-auto pr-1">
               {attempts.filter((attempt) => !!attempt.validatedAt).length === 0 ? (
                 <div className="text-sm text-muted-foreground">{t('caseView.noAttempts')}</div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState, useTransition } from 'react'
+import { useLayoutEffect, useMemo, useState, useTransition } from 'react'
 import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable'
@@ -14,6 +14,8 @@ import { getActionErrorMessage } from '@/lib/ui/safe-action-error'
 import { useRouter } from '@/app/i18n/navigation'
 import { htmlToPlainText } from '@/lib/html'
 import CaseContentDisplay from './case-content-display'
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 type Difficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
 
@@ -30,6 +32,15 @@ export default function WorkArea({ meta, defaults, rightPane, attempts, userTagD
   const t = useTranslations('bestof')
   const router = useRouter()
   const [, startRefresh] = useTransition()
+  const [panelCollapsed, setPanelCollapsed] = useState(false)
+  const [hasHydrated, setHasHydrated] = useState(false)
+
+  useLayoutEffect(() => {
+    if (!hasHydrated) {
+      setPanelCollapsed(window.matchMedia('(max-width: 1024px)').matches)
+      setHasHydrated(true)
+    }
+  }, [hasHydrated])
 
   const { caseId, isAdmin, createdAt } = meta
   const prefill = defaults.prefill
@@ -121,54 +132,73 @@ export default function WorkArea({ meta, defaults, rightPane, attempts, userTagD
 
   return (
 		<div className='flex gap-4'>
-			<div className='w-[320px] shrink-0'>
-				<CaseInteractionPanel
-					config={{
-						isAdmin,
-						defaultTags: [],
-						createdAt,
-						caseId,
-						tags,
-						onTagsChange: setTags,
-						comments,
-						onCommentsChange: setComments,
-						difficulty: personalDifficulty,
-						onDifficultyChange: setPersonalDifficulty,
-						userTags: userTagData?.tags,
-						userTagIds: userTagData?.ids,
-						hideActions: true,
-						attempts: attemptItems,
-						onSelectAttempt: (selectedAttempt) => {
-							setAnalysis({
-								lvef: selectedAttempt.lvef ?? '',
-								kinetic: selectedAttempt.kinetic ?? '',
-								lgePresent: selectedAttempt.lgePresent ?? undefined,
-								lgeDetails: selectedAttempt.lgeDetails ?? '',
-								finalDx: selectedAttempt.finalDx ?? '',
-							});
-							setReport(selectedAttempt.report ?? '');
-							setLocked(!!selectedAttempt.validatedAt);
-							setAnalysisKey((key) => key + 1);
-							setReportKey((key) => key + 1);
-							setContentRevealKey((key) => key + 1);
-						},
-						showStartNewAttempt: true,
-						onStartNewAttempt: () => {
-							setLocked(false);
-							setAnalysis({
-								lvef: '',
-								kinetic: '',
-								lgePresent: undefined,
-								lgeDetails: '',
-								finalDx: '',
-							});
-							setReport('');
-							setAnalysisKey((key) => key + 1);
-							setReportKey((key) => key + 1);
-							setContentRevealKey((key) => key + 1);
-						},
-					}}
-				/>
+			<div className='shrink-0 flex'>
+				{panelCollapsed && (
+					<Button
+						variant='ghost'
+						size='icon'
+						onClick={() => setPanelCollapsed(false)}
+						title={t('caseView.showSidebar')}
+						className='h-8 w-8 self-start'
+					>
+						<PanelLeftOpen className='h-4 w-4' />
+					</Button>
+				)}
+				<div className={cn(
+					'transition-all duration-300 ease-in-out overflow-hidden',
+					panelCollapsed ? 'w-0' : 'w-[320px]'
+				)}>
+					<div className='w-[320px]'>
+						<CaseInteractionPanel
+							config={{
+								isAdmin,
+								defaultTags: [],
+								createdAt,
+								caseId,
+								tags,
+								onTagsChange: setTags,
+								comments,
+								onCommentsChange: setComments,
+								difficulty: personalDifficulty,
+								onDifficultyChange: setPersonalDifficulty,
+								userTags: userTagData?.tags,
+								userTagIds: userTagData?.ids,
+								hideActions: true,
+								attempts: attemptItems,
+								onSelectAttempt: (selectedAttempt) => {
+									setAnalysis({
+										lvef: selectedAttempt.lvef ?? '',
+										kinetic: selectedAttempt.kinetic ?? '',
+										lgePresent: selectedAttempt.lgePresent ?? undefined,
+										lgeDetails: selectedAttempt.lgeDetails ?? '',
+										finalDx: selectedAttempt.finalDx ?? '',
+									});
+									setReport(selectedAttempt.report ?? '');
+									setLocked(!!selectedAttempt.validatedAt);
+									setAnalysisKey((key) => key + 1);
+									setReportKey((key) => key + 1);
+									setContentRevealKey((key) => key + 1);
+								},
+								showStartNewAttempt: true,
+								onStartNewAttempt: () => {
+									setLocked(false);
+									setAnalysis({
+										lvef: '',
+										kinetic: '',
+										lgePresent: undefined,
+										lgeDetails: '',
+										finalDx: '',
+									});
+									setReport('');
+									setAnalysisKey((key) => key + 1);
+									setReportKey((key) => key + 1);
+									setContentRevealKey((key) => key + 1);
+								},
+								onCollapse: () => setPanelCollapsed(true),
+							}}
+						/>
+					</div>
+				</div>
 			</div>
 			<ResizablePanelGroup direction='horizontal' className='flex-1 gap-4'>
 				<ResizablePanel defaultSize={55} minSize={35}>
