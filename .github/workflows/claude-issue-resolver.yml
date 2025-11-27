@@ -1,0 +1,38 @@
+name: Claude Issue Auto-Resolver
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  resolve-issue:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Claude Code
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Une nouvelle issue GitHub a été ouverte :
+
+            Titre: ${{ github.event.issue.title }}
+
+            Description:
+            ${{ github.event.issue.body }}
+
+            Analyse cette issue et crée une pull request avec les changements nécessaires pour la résoudre.
+            Suis strictement les guidelines du projet définies dans CLAUDE.md.
+            Assure-toi que le code est typé correctement (pas de any), utilise les composants shadcn/ui, et respecte l'architecture feature-based.
+          claude_args: "--max-turns 10 --model claude-haiku-4-5-20251001"
