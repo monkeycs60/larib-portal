@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useRouter } from '@/app/i18n/navigation'
 import { useTranslations } from 'next-intl'
@@ -21,7 +21,7 @@ import {
   deleteAdminTagAction,
   deleteUserTagAction,
 } from '../actions'
-import { Loader2, Pencil, Plus, RefreshCcw, Settings, Trash2 } from 'lucide-react'
+import { Loader2, Pencil, Plus, Settings, Trash2 } from 'lucide-react'
 
 type Tag = {
 	id: string
@@ -45,10 +45,10 @@ const defaultForm: TagFormState = {
 	description: '',
 }
 
-export default function TagsManagerModal({ isAdmin, trigger, onClose, disableRouterRefresh }: { isAdmin: boolean; trigger?: ReactNode; onClose?: () => void; disableRouterRefresh?: boolean }) {
+export default function TagsManagerModal({ isAdmin, trigger, onClose, disableRouterRefresh, defaultOpen = false }: { isAdmin: boolean; trigger?: ReactNode; onClose?: () => void; disableRouterRefresh?: boolean; defaultOpen?: boolean }) {
 	const t = useTranslations('bestof')
 	const router = useRouter()
-	const [open, setOpen] = useState(false)
+	const [open, setOpen] = useState(defaultOpen)
 	const [tags, setTags] = useState<Tag[]>([])
 	const [form, setForm] = useState<TagFormState>(defaultForm)
 	const [deleteCandidate, setDeleteCandidate] = useState<Tag | null>(null)
@@ -181,6 +181,12 @@ export default function TagsManagerModal({ isAdmin, trigger, onClose, disableRou
 	const isLoading = listTags.isExecuting
 	const isSavingTag = form.id ? updateTag.isExecuting : ensureTag.isExecuting
 
+	useEffect(() => {
+		if (defaultOpen) {
+			void listTags.execute()
+		}
+	}, [])
+
 	async function handleOpen(next: boolean) {
 		setOpen(next)
 		if (next) {
@@ -192,10 +198,6 @@ export default function TagsManagerModal({ isAdmin, trigger, onClose, disableRou
 				onClose()
 			}
 		}
-	}
-
-	async function refreshData() {
-		await listTags.execute()
 	}
 
 	function onSubmitTagForm(event: React.FormEvent<HTMLFormElement>) {
@@ -243,18 +245,12 @@ export default function TagsManagerModal({ isAdmin, trigger, onClose, disableRou
 	return (
 		<>
 			<Dialog open={open} onOpenChange={(next) => void handleOpen(next)}>
-				<DialogTrigger asChild>{trigger ?? defaultTrigger}</DialogTrigger>
+				{trigger !== null && <DialogTrigger asChild>{trigger ?? defaultTrigger}</DialogTrigger>}
 				<DialogContent className="w-[720px] max-w-[95vw] max-h-[85vh] overflow-y-auto">
 					<DialogHeader>
 						<DialogTitle>{modalTitle}</DialogTitle>
 					</DialogHeader>
 					<div className="space-y-4">
-						<div className="flex items-center justify-between">
-							<div className="text-sm font-medium">{modalTitle}</div>
-							<Button type="button" variant="ghost" size="icon" aria-label={t('refresh') || 'Refresh'} onClick={() => void refreshData()}>
-								{isLoading ? <Loader2 className="size-4 animate-spin" /> : <RefreshCcw className="size-4" />}
-							</Button>
-						</div>
 						<div className="space-y-2 max-h-48 overflow-y-auto pr-1">
 							{isLoading ? (
 								<div className="flex h-24 items-center justify-center text-sm text-muted-foreground">
@@ -334,7 +330,7 @@ export default function TagsManagerModal({ isAdmin, trigger, onClose, disableRou
 					</p>
 					<AlertDialogFooter>
 						<AlertDialogCancel onClick={() => setDeleteCandidate(null)}>{t('cancel')}</AlertDialogCancel>
-						<AlertDialogAction onClick={() => void handleDeleteTag()} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+						<AlertDialogAction onClick={() => void handleDeleteTag()} className="bg-destructive text-white hover:bg-destructive/90">
 							{deleteTag.isExecuting ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
 							{t('delete')}
 						</AlertDialogAction>

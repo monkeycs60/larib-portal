@@ -18,6 +18,7 @@ import { Check, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useRouter } from '@/app/i18n/navigation'
 import { useTranslations } from 'next-intl'
+import TagsManagerModal from './tags-manager-modal'
 
 export type CaseDisplayTag = { id: string; name: string; color: string; description: string | null }
 
@@ -38,6 +39,7 @@ export default function CaseTagQuickPicker({ mode, caseId, assignedTags, onChang
 	const [selectedIds, setSelectedIds] = useState<string[]>(assignedTags.map((tag) => tag.id))
 	const [isRefreshing, startRefresh] = useTransition()
 	const [isApplying, startApplying] = useTransition()
+	const [showTagsManager, setShowTagsManager] = useState(false)
 	const previousSelectionRef = useRef<string[]>(assignedTags.map((tag) => tag.id))
 
 	useEffect(() => {
@@ -149,6 +151,7 @@ export default function CaseTagQuickPicker({ mode, caseId, assignedTags, onChang
 	const orderedTags = useMemo(() => [...tags].sort((a, b) => a.name.localeCompare(b.name)), [tags])
 
 	return (
+		<>
 		<Popover open={open} onOpenChange={(next) => void handleOpenChange(next)}>
 			<PopoverTrigger asChild>
 				<Button
@@ -167,7 +170,24 @@ export default function CaseTagQuickPicker({ mode, caseId, assignedTags, onChang
 					<CommandInput placeholder={t('tagSearchPlaceholder') || 'Search tags...'} autoFocus />
 					<CommandList>
 						{orderedTags.length === 0 && !isLoading ? (
-							<CommandEmpty>{t('noTagsFound') || 'No tags found.'}</CommandEmpty>
+							<CommandEmpty>
+								<div className="flex flex-col items-center gap-1 py-2">
+									<span>{t('noTagsFound')}</span>
+									<span className="text-muted-foreground">
+										{t('noTagsFoundAddHere')}{' '}
+										<button
+											type="button"
+											className="text-primary underline hover:no-underline cursor-pointer"
+											onClick={() => {
+												setOpen(false)
+												setShowTagsManager(true)
+											}}
+										>
+											{t('tagsManager')}
+										</button>
+									</span>
+								</div>
+							</CommandEmpty>
 						) : (
 							<CommandGroup>
 								{orderedTags.map((tag) => {
@@ -195,5 +215,18 @@ export default function CaseTagQuickPicker({ mode, caseId, assignedTags, onChang
 				</Command>
 			</PopoverContent>
 		</Popover>
+		{showTagsManager && (
+			<TagsManagerModal
+				isAdmin={mode === 'admin'}
+				trigger={null}
+				defaultOpen
+				onClose={() => {
+					setShowTagsManager(false)
+					router.refresh()
+				}}
+				disableRouterRefresh
+			/>
+		)}
+	</>
 	)
 }

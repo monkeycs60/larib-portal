@@ -355,7 +355,9 @@
       "hideTags": "Show fewer",
       "contentHiddenBeforeValidation": "You can access the result after submitting your case",
       "revealContent": "Reveal the result",
-      "clickToReveal": "Click to reveal"
+      "clickToReveal": "Click to reveal",
+      "showSidebar": "Show panel",
+      "hideSidebar": "Hide panel"
     },
     "assignTagsTab": "Assign",
     "manageTagsTab": "Manage",
@@ -379,6 +381,7 @@
     "quickAssignTags": "Quick assign tags",
     "tagSearchPlaceholder": "Search tags...",
     "noTagsFound": "No tags found.",
+    "noTagsFoundAddHere": "You can create one in the",
     "confirmDeleteTag": "Delete tag?",
     "confirmDeleteTagDescription": "This will remove the tag from all cases. This action cannot be undone.",
     "tagDeleted": "Tag deleted",

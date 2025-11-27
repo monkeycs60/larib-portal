@@ -353,7 +353,9 @@
       "hideTags": "Réduire la liste",
       "contentHiddenBeforeValidation": "Vous pourrez accéder au résultat après avoir soumis votre cas",
       "revealContent": "Découvrez le résultat",
-      "clickToReveal": "Cliquez pour afficher"
+      "clickToReveal": "Cliquez pour afficher",
+      "showSidebar": "Afficher le panneau",
+      "hideSidebar": "Masquer le panneau"
     },
     "assignTagsTab": "Assigner",
     "manageTagsTab": "Gérer",
@@ -377,6 +379,7 @@
     "quickAssignTags": "Assignation rapide",
     "tagSearchPlaceholder": "Rechercher un tag...",
     "noTagsFound": "Aucun tag trouvé.",
+    "noTagsFoundAddHere": "Vous pouvez en créer dans le",
     "confirmDeleteTag": "Supprimer le tag ?",
     "confirmDeleteTagDescription": "Le tag sera retiré de tous les cas. Cette action est irréversible.",
     "tagDeleted": "Tag supprimé",
