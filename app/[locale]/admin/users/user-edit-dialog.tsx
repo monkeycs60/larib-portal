@@ -21,6 +21,10 @@ import { useAction } from 'next-safe-action/hooks';
 import { COUNTRIES } from '@/lib/countries';
 import { toast } from 'sonner';
 import { InputDialog } from '@/components/ui/input-dialog';
+import { Check } from 'lucide-react';
+
+const AVAILABLE_APPLICATIONS = ['BESTOF_LARIB', 'CONGES'] as const;
+type AvailableApplication = (typeof AVAILABLE_APPLICATIONS)[number];
 
 const FormSchema = z.object({
 	id: z.string(),
@@ -88,8 +92,10 @@ export function UserEditDialog({
 		}
 	);
 
-	const apps = new Set(watch('applications'));
-	function toggleApp(app: UserFormValues['applications'][number]) {
+	const apps = new Set(watch('applications').filter((app): app is AvailableApplication =>
+		AVAILABLE_APPLICATIONS.includes(app as AvailableApplication)
+	));
+	function toggleApp(app: AvailableApplication) {
 		if (apps.has(app)) {
 			apps.delete(app);
 		} else {
@@ -224,25 +230,43 @@ export function UserEditDialog({
 					</div>
 
 					<div>
-						<div className='text-sm font-medium mb-2'>
-							{t('applications')}
+						<div className="flex items-center justify-between mb-3">
+							<div className="text-sm font-medium">{t('applications')}</div>
+							<div className="text-xs font-medium px-2 py-1 rounded-full bg-muted">
+								{apps.size} / {AVAILABLE_APPLICATIONS.length} {t('applicationsSelected')}
+							</div>
 						</div>
-						<div className='flex flex-wrap gap-2'>
-							{(['BESTOF_LARIB', 'CONGES', 'CARDIOLARIB'] as const).map(
-								(app) => (
+						<div className="grid grid-cols-2 gap-3">
+							{AVAILABLE_APPLICATIONS.map((app) => {
+								const isSelected = apps.has(app);
+								return (
 									<button
-										type='button'
+										type="button"
 										key={app}
 										onClick={() => toggleApp(app)}
-										className={
-											apps.has(app)
-												? 'px-2 py-1 rounded border bg-primary text-primary-foreground text-xs'
-												: 'px-2 py-1 rounded border text-xs'
-										}>
-										{t(`app_${app}`)}
+										className={`
+											relative flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left
+											${isSelected
+												? 'border-primary bg-primary/5 shadow-sm'
+												: 'border-muted hover:border-muted-foreground/50 hover:bg-muted/50'
+											}
+										`}
+									>
+										<div className={`
+											flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors
+											${isSelected
+												? 'border-primary bg-primary text-primary-foreground'
+												: 'border-muted-foreground/30'
+											}
+										`}>
+											{isSelected && <Check className="h-3 w-3" />}
+										</div>
+										<span className={`text-sm font-medium ${isSelected ? 'text-foreground' : 'text-muted-foreground'}`}>
+											{t(`app_${app}`)}
+										</span>
 									</button>
-								)
-							)}
+								);
+							})}
 						</div>
 					</div>
 

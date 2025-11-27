@@ -4,6 +4,16 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations } from 'next-intl'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
@@ -12,6 +22,10 @@ import { useAction } from 'next-safe-action/hooks'
 import { createUserInviteAction, createPositionAction } from './actions'
 import { toast } from 'sonner'
 import { InputDialog } from '@/components/ui/input-dialog'
+import { Check } from 'lucide-react'
+
+const AVAILABLE_APPLICATIONS = ['BESTOF_LARIB', 'CONGES'] as const
+type AvailableApplication = (typeof AVAILABLE_APPLICATIONS)[number]
 
 const AddUserSchema = z.object({
   email: z.string().email(),
@@ -21,7 +35,7 @@ const AddUserSchema = z.object({
   position: z.string().optional(),
   arrivalDate: z.string().min(1),
   departureDate: z.string().min(1),
-  applications: z.array(z.enum(["BESTOF_LARIB","CONGES","CARDIOLARIB"])),
+  applications: z.array(z.enum(["BESTOF_LARIB","CONGES"])),
   emailLanguage: z.enum(['en','fr'])
 })
 
@@ -31,6 +45,8 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
   const t = useTranslations('admin')
   const [open, setOpen] = useState(false)
   const [posList, setPosList] = useState(positions)
+  const [confirmNoAppsOpen, setConfirmNoAppsOpen] = useState(false)
+  const [pendingFormValues, setPendingFormValues] = useState<AddUserValues | null>(null)
   const { execute, isExecuting } = useAction(createUserInviteAction, {
     onSuccess() {
       toast.success(t('created'))
@@ -57,19 +73,36 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
   })
 
   const apps = new Set(watch('applications'))
-  function toggleApp(app: AddUserValues['applications'][number]) {
+  function toggleApp(app: AvailableApplication) {
     if (apps.has(app)) apps.delete(app); else apps.add(app)
     setValue('applications', Array.from(apps))
   }
 
-  const onSubmit = handleSubmit(async (values) => {
+  async function submitUser(values: AddUserValues) {
     await execute({
       ...values,
       locale: values.emailLanguage,
     })
     setOpen(false)
     reset()
+  }
+
+  const onSubmit = handleSubmit(async (values) => {
+    if (values.applications.length === 0) {
+      setPendingFormValues(values)
+      setConfirmNoAppsOpen(true)
+      return
+    }
+    await submitUser(values)
   })
+
+  async function handleConfirmNoApps() {
+    if (pendingFormValues) {
+      await submitUser(pendingFormValues)
+      setPendingFormValues(null)
+    }
+    setConfirmNoAppsOpen(false)
+  }
 
   const [addPosOpen, setAddPosOpen] = useState(false)
   const [newPosName, setNewPosName] = useState('')
@@ -163,22 +196,43 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
           </div>
 
           <div>
-            <div className="text-sm font-medium mb-2">{t('applications')}</div>
-            <div className="flex flex-wrap gap-2">
-              {(['BESTOF_LARIB','CONGES','CARDIOLARIB'] as const).map((app) => (
-                <button
-                  type="button"
-                  key={app}
-                  onClick={() => toggleApp(app)}
-                  className={
-                    apps.has(app)
-                      ? 'px-2 py-1 rounded border bg-primary text-primary-foreground text-xs'
-                      : 'px-2 py-1 rounded border text-xs'
-                  }
-                >
-                  {t(`app_${app}`)}
-                </button>
-              ))}
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-sm font-medium">{t('applications')}</div>
+              <div className="text-xs font-medium px-2 py-1 rounded-full bg-muted">
+                {apps.size} / {AVAILABLE_APPLICATIONS.length} {t('applicationsSelected')}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {AVAILABLE_APPLICATIONS.map((app) => {
+                const isSelected = apps.has(app)
+                return (
+                  <button
+                    type="button"
+                    key={app}
+                    onClick={() => toggleApp(app)}
+                    className={`
+                      relative flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left
+                      ${isSelected
+                        ? 'border-primary bg-primary/5 shadow-sm'
+                        : 'border-muted hover:border-muted-foreground/50 hover:bg-muted/50'
+                      }
+                    `}
+                  >
+                    <div className={`
+                      flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors
+                      ${isSelected
+                        ? 'border-primary bg-primary text-primary-foreground'
+                        : 'border-muted-foreground/30'
+                      }
+                    `}>
+                      {isSelected && <Check className="h-3 w-3" />}
+                    </div>
+                    <span className={`text-sm font-medium ${isSelected ? 'text-foreground' : 'text-muted-foreground'}`}>
+                      {t(`app_${app}`)}
+                    </span>
+                  </button>
+                )
+              })}
             </div>
           </div>
 
@@ -218,6 +272,25 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
           loading={creatingPos}
         />
       </DialogContent>
+
+      <AlertDialog open={confirmNoAppsOpen} onOpenChange={setConfirmNoAppsOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('confirmNoAppsTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('confirmNoAppsDesc')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPendingFormValues(null)}>
+              {t('cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmNoApps} disabled={isExecuting}>
+              {isExecuting ? t('creating') : t('confirmNoAppsConfirm')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   )
 }

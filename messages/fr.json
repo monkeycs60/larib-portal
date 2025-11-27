@@ -176,7 +176,11 @@
     "created": "Utilisateur créé",
     "deleted": "Utilisateur supprimé",
     "actionError": "Échec de l'action",
-    "positionCreated": "Poste créé"
+    "positionCreated": "Poste créé",
+    "applicationsSelected": "sélectionné(s)",
+    "confirmNoAppsTitle": "Aucune application sélectionnée",
+    "confirmNoAppsDesc": "Vous allez créer un utilisateur sans accès à aucune application. Êtes-vous sûr de vouloir continuer ?",
+    "confirmNoAppsConfirm": "Confirmer"
   },
   "upload": {
     "selectFile": "Choisir une image",

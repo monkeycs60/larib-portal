@@ -175,24 +175,24 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
                                 </DropdownMenuItem>
 									</DropdownMenuGroup>
 									<DropdownMenuSeparator />
-									{(user.applications ?? []).length > 0 && (
+									{(() => {
+									const availableApps = (user.applications ?? []).filter(
+										(app) => app !== 'CARDIOLARIB'
+									);
+									if (availableApps.length === 0) return null;
+									return (
 										<>
 											<DropdownMenuLabel className='text-xs text-gray-500'>
 												{t('applications')}
 											</DropdownMenuLabel>
-											{(user.applications ?? []).map((app) => {
+											{availableApps.map((app) => {
 												const slug =
 													app === 'BESTOF_LARIB'
 														? '/bestof-larib'
-														: app === 'CONGES'
-														? '/conges'
-														: '/cardiolarib';
+														: '/conges';
 												return (
 													<DropdownMenuItem key={app} asChild>
-														<Link
-															href={
-																slug
-															}>
+														<Link href={slug}>
 															{tAdmin(`app_${app}`)}
 														</Link>
 													</DropdownMenuItem>
@@ -200,7 +200,8 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
 											})}
 											<DropdownMenuSeparator />
 										</>
-									)}
+									);
+								})()}
 									<DropdownMenuItem
 										onSelect={handleLogout}
 										disabled={isLoggingOut}>
