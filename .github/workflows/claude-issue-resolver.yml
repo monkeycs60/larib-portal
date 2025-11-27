@@ -35,4 +35,5 @@ jobs:
             Analyse cette issue et crée une pull request avec les changements nécessaires pour la résoudre.
             Suis strictement les guidelines du projet définies dans CLAUDE.md.
             Assure-toi que le code est typé correctement (pas de any), utilise les composants shadcn/ui, et respecte l'architecture feature-based.
-          claude_args: "--max-turns 10 --model claude-haiku-4-5-20251001"
+          allowed_tools: "Bash(rm:*),Bash(git:*),Edit,Write,Read,Glob,Grep"
+          claude_args: "--max-turns 15 --model claude-haiku-4-5-20251001"
