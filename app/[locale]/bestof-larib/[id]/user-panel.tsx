@@ -252,6 +252,7 @@ export function AnalysisForm({ isAdmin, caseId, values, onChange, hideInlineSave
           aria-invalid={!!formState.errors.lvef}
           disabled={isAdmin}
           placeholder={t('caseView.required')}
+          autoComplete="off"
         />
       </div>
       <div className="grid grid-cols-[180px_1fr] items-center gap-2">
@@ -262,6 +263,7 @@ export function AnalysisForm({ isAdmin, caseId, values, onChange, hideInlineSave
           aria-invalid={!!formState.errors.kinetic}
           disabled={isAdmin}
           placeholder={t('caseView.required')}
+          autoComplete="off"
         />
       </div>
       <div className="grid grid-cols-[180px_1fr] items-center gap-2">
@@ -288,6 +290,7 @@ export function AnalysisForm({ isAdmin, caseId, values, onChange, hideInlineSave
             aria-invalid={!!formState.errors.lgeDetails}
             disabled={isAdmin}
             placeholder={t('caseView.analysis.lgeDetailsPlaceholder')}
+            autoComplete="off"
           />
         </div>
       )}
@@ -299,6 +302,7 @@ export function AnalysisForm({ isAdmin, caseId, values, onChange, hideInlineSave
           aria-invalid={!!formState.errors.finalDx}
           disabled={isAdmin}
           placeholder={t('caseView.required')}
+          autoComplete="off"
         />
       </div>
       <div className="text-xs text-muted-foreground">{t('caseView.requiredBeforeValidation')}</div>
