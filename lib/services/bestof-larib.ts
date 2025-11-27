@@ -70,6 +70,7 @@ export type ClinicalCaseWithDisplayTags = ClinicalCaseListItem & {
   attemptsCount?: number
   personalDifficulty?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | null
   userAttemptState?: UserAttemptState
+  firstCompletedAt?: Date | null
 }
 
 export type CaseListFilters = {
@@ -280,13 +281,26 @@ const fetchClinicalCases = async ({
       settings.map((setting) => [setting.caseId, setting.personalDifficulty]),
     )
 
-    const summaryByCase = attemptRows.reduce<Map<string, { validated: number; hasValidated: boolean; hasDraft: boolean }>>(
+    const summaryByCase = attemptRows.reduce<
+      Map<string, { validated: number; hasValidated: boolean; hasDraft: boolean; firstCompletedAt: Date | null }>
+    >(
       (accumulator, attempt) => {
-        const current = accumulator.get(attempt.caseId) ?? { validated: 0, hasValidated: false, hasDraft: false }
+        const current = accumulator.get(attempt.caseId) ?? {
+          validated: 0,
+          hasValidated: false,
+          hasDraft: false,
+          firstCompletedAt: null,
+        }
         const hasValidated = current.hasValidated || attempt.validatedAt !== null
         const hasDraft = current.hasDraft || attempt.validatedAt === null
         const validated = attempt.validatedAt !== null ? current.validated + 1 : current.validated
-        accumulator.set(attempt.caseId, { validated, hasValidated, hasDraft })
+        const firstCompletedAt =
+          attempt.validatedAt !== null
+            ? current.firstCompletedAt === null || attempt.validatedAt < current.firstCompletedAt
+              ? attempt.validatedAt
+              : current.firstCompletedAt
+            : current.firstCompletedAt
+        accumulator.set(attempt.caseId, { validated, hasValidated, hasDraft, firstCompletedAt })
         return accumulator
       },
       new Map(),
@@ -303,6 +317,7 @@ const fetchClinicalCases = async ({
         attemptsCount: summary?.validated ?? 0,
         personalDifficulty: difficultyByCase.get(entry.id) ?? null,
         userAttemptState: state,
+        firstCompletedAt: summary?.firstCompletedAt ?? null,
       }
     })
   }

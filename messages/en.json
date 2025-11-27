@@ -233,6 +233,7 @@
       "difficulty": "Difficulty",
       "status": "Status",
       "createdAt": "Created",
+      "firstCompletion": "First Completion",
       "attempts": "Attempts",
       "myDifficulty": "Level",
       "adminTags": "Admin Tags",

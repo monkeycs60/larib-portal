@@ -22,6 +22,7 @@ export type CasesTableTranslations = {
     disease: string;
     difficulty: string;
     createdAt: string;
+    firstCompletion: string;
     attempts: string;
     myDifficulty: string;
     adminTags: string;
@@ -126,9 +127,15 @@ export default function CasesTableFallback({
             <TableHead>
               <SortHeader field='difficulty' label={translations.table.difficulty} activeField={sortField} direction={sortDirection} />
             </TableHead>
-            <TableHead>
-              <SortHeader field='createdAt' label={translations.table.createdAt} activeField={sortField} direction={sortDirection} />
-            </TableHead>
+            {isUserView ? (
+              <TableHead>
+                <SortHeader field='createdAt' label={translations.table.firstCompletion} activeField={sortField} direction={sortDirection} />
+              </TableHead>
+            ) : (
+              <TableHead>
+                <SortHeader field='createdAt' label={translations.table.createdAt} activeField={sortField} direction={sortDirection} />
+              </TableHead>
+            )}
             {isUserView ? (
               <TableHead>
                 <SortHeader field='attempts' label={translations.table.attempts} activeField={sortField} direction={sortDirection} />
@@ -228,7 +235,13 @@ export default function CasesTableFallback({
                       ]}
                     </Badge>
                   </TableCell>
-                  <TableCell>{new Date(caseItem.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell>
+                    {isUserView
+                      ? caseItem.firstCompletedAt
+                        ? new Date(caseItem.firstCompletedAt).toLocaleDateString()
+                        : '-'
+                      : new Date(caseItem.createdAt).toLocaleDateString()}
+                  </TableCell>
                   {isUserView ? (
                     <TableCell>{typeof caseItem.attemptsCount === 'number' ? caseItem.attemptsCount : 0}</TableCell>
                   ) : null}

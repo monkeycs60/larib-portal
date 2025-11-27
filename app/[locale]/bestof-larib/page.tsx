@@ -139,6 +139,7 @@ async function BestofLaribPageContent({
       disease: t('table.disease'),
       difficulty: t('table.difficulty'),
       createdAt: t('table.createdAt'),
+      firstCompletion: t('table.firstCompletion'),
       attempts: t('table.attempts'),
       myDifficulty: t('table.myDifficulty'),
       adminTags: t('table.adminTags'),

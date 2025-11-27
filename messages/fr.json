@@ -231,6 +231,7 @@
       "difficulty": "Difficulté",
       "status": "Statut",
       "createdAt": "Créé le",
+      "firstCompletion": "Première complétion",
       "attempts": "Essais",
       "myDifficulty": "Niveau",
       "adminTags": "Tags admin",

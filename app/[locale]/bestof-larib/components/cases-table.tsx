@@ -117,9 +117,15 @@ export default async function CasesTable({
                 <SortHeader field='difficulty' label={translations.table.difficulty} activeField={sortField} direction={sortDirection} />
               </TableHead>
             ) : null}
-            <TableHead>
-              <SortHeader field='createdAt' label={translations.table.createdAt} activeField={sortField} direction={sortDirection} />
-            </TableHead>
+            {isUserView ? (
+              <TableHead>
+                <SortHeader field='createdAt' label={translations.table.firstCompletion} activeField={sortField} direction={sortDirection} />
+              </TableHead>
+            ) : (
+              <TableHead>
+                <SortHeader field='createdAt' label={translations.table.createdAt} activeField={sortField} direction={sortDirection} />
+              </TableHead>
+            )}
             {isUserView ? (
               <TableHead>
                 <SortHeader field='attempts' label={translations.table.attempts} activeField={sortField} direction={sortDirection} />
@@ -199,7 +205,13 @@ export default async function CasesTable({
                       </Badge>
                     </TableCell>
                   ) : null}
-                  <TableCell>{new Date(caseItem.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell>
+                    {isUserView
+                      ? caseItem.firstCompletedAt
+                        ? new Date(caseItem.firstCompletedAt).toLocaleDateString()
+                        : '-'
+                      : new Date(caseItem.createdAt).toLocaleDateString()}
+                  </TableCell>
                   {isUserView ? (
                     <TableCell>{typeof caseItem.attemptsCount === 'number' ? caseItem.attemptsCount : 0}</TableCell>
                   ) : null}
