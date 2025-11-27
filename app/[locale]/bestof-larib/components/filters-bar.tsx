@@ -335,40 +335,50 @@ export default function FiltersBar({
                     />
                 </div>
             ) : null}
-            <div className='min-w-52'>
-                <label className='block text-xs mb-1'>
-                    {t('filters.difficulty')}
-                </label>
-                <MultiSelect
-                    options={[
-                        { label: t('difficulty.beginner'), value: 'BEGINNER' },
-                        { label: t('difficulty.intermediate'), value: 'INTERMEDIATE' },
-                        { label: t('difficulty.advanced'), value: 'ADVANCED' },
-                    ]}
-                    defaultValue={difficulties}
-                    onValueChange={(vals) => { setDifficulties(vals); pushWith({ difficulty: vals }); }}
-                    placeholder={t('filters.any')}
-                    maxCount={3}
-                    responsive
-                />
-            </div>
+            {isAdmin ? (
+                <div className='min-w-52'>
+                    <label className='block text-xs mb-1'>
+                        {t('filters.difficulty')}
+                    </label>
+                    <MultiSelect
+                        options={[
+                            { label: t('difficulty.beginner'), value: 'BEGINNER' },
+                            { label: t('difficulty.intermediate'), value: 'INTERMEDIATE' },
+                            { label: t('difficulty.advanced'), value: 'ADVANCED' },
+                        ]}
+                        defaultValue={difficulties}
+                        onValueChange={(vals) => { setDifficulties(vals); pushWith({ difficulty: vals }); }}
+                        placeholder={t('filters.any')}
+                        maxCount={3}
+                        responsive
+                    />
+                </div>
+            ) : null}
 			{canUsePersonalDifficulty ? (
-				<div className='min-w-44'>
+				<div className='min-w-fit'>
 					<label className='block text-xs mb-1'>{t('filters.myDifficulty')}</label>
-					<SingleSelect
-						value={myDifficulty}
-						onChange={(value) => {
-							setMyDifficulty(value);
-							pushWith({ myDifficulty: value });
-						}}
-						options={[
-							{ value: '', label: t('filters.any') },
-							{ value: 'BEGINNER', label: t('difficulty.beginner') },
-							{ value: 'INTERMEDIATE', label: t('difficulty.intermediate') },
-							{ value: 'ADVANCED', label: t('difficulty.advanced') },
-						]}
-						placeholder={t('filters.any')}
-					/>
+					<div className='flex items-center gap-2 h-9 px-3 border rounded-md bg-background'>
+						{[
+							{ value: '', colorClass: 'bg-muted-foreground/30', label: t('filters.any') },
+							{ value: 'BEGINNER', colorClass: 'bg-emerald-500', label: t('difficulty.beginner') },
+							{ value: 'INTERMEDIATE', colorClass: 'bg-amber-500', label: t('difficulty.intermediate') },
+							{ value: 'ADVANCED', colorClass: 'bg-red-500', label: t('difficulty.advanced') },
+						].map((option) => (
+							<button
+								key={option.value || 'any'}
+								type='button'
+								onClick={() => {
+									setMyDifficulty(option.value);
+									pushWith({ myDifficulty: option.value });
+								}}
+								className={`h-4 w-4 rounded-full transition-all hover:scale-110 ${option.colorClass} ${
+									myDifficulty === option.value ? 'ring-2 ring-offset-2 ring-foreground' : ''
+								}`}
+								aria-label={option.label}
+								title={option.label}
+							/>
+						))}
+					</div>
 				</div>
 			) : null}
 			<div className='min-w-44'>
