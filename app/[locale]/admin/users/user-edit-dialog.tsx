@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations, useLocale } from 'next-intl';
+import { useRouter } from '@/app/i18n/navigation';
 import {
 	Dialog,
 	DialogContent,
@@ -48,13 +49,13 @@ export function UserEditDialog({
 }) {
 	const t = useTranslations('admin');
 	const locale = useLocale();
+	const router = useRouter();
 	const [open, setOpen] = useState(false);
 	const { execute: executeUpdate, isExecuting } = useAction(updateUserAction, {
 		onSuccess() {
 			toast.success(t('saved'));
 			setOpen(false);
-			// simple refresh to reflect changes
-			window.location.reload();
+			router.refresh();
 		},
 		onError({ error: { serverError, validationErrors } }) {
 			let msg: string | undefined;
