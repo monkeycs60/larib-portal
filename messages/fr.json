@@ -180,7 +180,15 @@
     "applicationsSelected": "sélectionné(s)",
     "confirmNoAppsTitle": "Aucune application sélectionnée",
     "confirmNoAppsDesc": "Vous allez créer un utilisateur sans accès à aucune application. Êtes-vous sûr de vouloir continuer ?",
-    "confirmNoAppsConfirm": "Confirmer"
+    "confirmNoAppsConfirm": "Confirmer",
+    "manage": "Gérer",
+    "managePositions": "Gérer les postes",
+    "newPosition": "Nouveau poste",
+    "newPositionPlaceholder": "Nom du poste",
+    "createPositionCta": "Créer le poste",
+    "close": "Fermer",
+    "deleteSelected": "Supprimer la sélection",
+    "positionsInUse": "Impossible de supprimer : utilisé par {count} utilisateur(s)"
   },
   "upload": {
     "selectFile": "Choisir une image",

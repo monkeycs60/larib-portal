@@ -2,7 +2,7 @@
 import { z } from "zod"
 import { revalidatePath } from "next/cache"
 import { deleteUserById, updateUser, createPlaceholderUser } from "@/lib/services/users"
-import { listPositions, ensurePosition } from '@/lib/services/positions'
+import { listPositions, ensurePosition, updatePosition, deletePositions } from '@/lib/services/positions'
 import { createInvitation } from '@/lib/services/invitations'
 import { sendWelcomeEmail } from '@/lib/services/email'
 import { adminOnlyAction } from "@/actions/safe-action"
@@ -152,5 +152,22 @@ export const createPositionAction = adminOnlyAction
   .inputSchema(z.object({ name: z.string().min(1) }))
   .action(async ({ parsedInput }) => {
     const pos = await ensurePosition(parsedInput.name)
+    revalidatePath('/admin/users')
     return pos
+  })
+
+export const updatePositionAction = adminOnlyAction
+  .inputSchema(z.object({ id: z.string().min(1), name: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    const updated = await updatePosition(parsedInput.id, parsedInput.name)
+    revalidatePath('/admin/users')
+    return updated
+  })
+
+export const deletePositionsAction = adminOnlyAction
+  .inputSchema(z.object({ ids: z.array(z.string().min(1)).min(1) }))
+  .action(async ({ parsedInput }) => {
+    await deletePositions(parsedInput.ids)
+    revalidatePath('/admin/users')
+    return { deleted: parsedInput.ids.length }
   })

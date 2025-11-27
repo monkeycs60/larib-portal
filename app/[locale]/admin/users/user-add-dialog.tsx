@@ -19,10 +19,10 @@ import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { useState } from 'react'
 import { useAction } from 'next-safe-action/hooks'
-import { createUserInviteAction, createPositionAction } from './actions'
+import { createUserInviteAction, createPositionAction, updatePositionAction, deletePositionsAction } from './actions'
 import { toast } from 'sonner'
-import { InputDialog } from '@/components/ui/input-dialog'
 import { Check } from 'lucide-react'
+import DeletableSelectManager from '@/app/[locale]/bestof-larib/components/deletable-select-manager'
 
 const AVAILABLE_APPLICATIONS = ['BESTOF_LARIB', 'CONGES'] as const
 type AvailableApplication = (typeof AVAILABLE_APPLICATIONS)[number]
@@ -63,9 +63,62 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
       toast.error(msg ? `${t('actionError')}: ${msg}` : t('actionError'))
     }
   })
+  const [managePositionsOpen, setManagePositionsOpen] = useState(false)
+  const [selectedPositionIds, setSelectedPositionIds] = useState<string[]>([])
+
   const { execute: execCreatePos, isExecuting: creatingPos } = useAction(createPositionAction, {
-    onSuccess(res) { setPosList((prev) => [...prev.filter(p => p.id !== res.data?.id), res.data!]) },
+    onSuccess(result) {
+      if (result.data) {
+        setPosList((prev) => [...prev.filter(position => position.id !== result.data!.id), result.data!].sort((a, b) => a.name.localeCompare(b.name)))
+        toast.success(t('positionCreated'))
+      }
+    },
+    onError() {
+      toast.error(t('actionError'))
+    }
   })
+
+  const { execute: execUpdatePos, isExecuting: updatingPos } = useAction(updatePositionAction, {
+    onSuccess(result) {
+      if (result.data) {
+        setPosList((prev) => prev.map(position => position.id === result.data!.id ? result.data! : position).sort((a, b) => a.name.localeCompare(b.name)))
+        toast.success(t('saved'))
+      }
+    },
+    onError() {
+      toast.error(t('actionError'))
+    }
+  })
+
+  const { execute: execDeletePos, isExecuting: deletingPos } = useAction(deletePositionsAction, {
+    onSuccess(result) {
+      if (result.data) {
+        setPosList((prev) => prev.filter(position => !selectedPositionIds.includes(position.id)))
+        setSelectedPositionIds([])
+        toast.success(t('deleted'))
+      }
+    },
+    onError({ error }) {
+      if (error.serverError?.includes('POSITIONS_IN_USE')) {
+        const count = error.serverError.split(':')[1]
+        toast.error(t('positionsInUse', { count }))
+      } else {
+        toast.error(t('actionError'))
+      }
+    }
+  })
+
+  async function handleCreatePosition(name: string) {
+    await execCreatePos({ name })
+  }
+
+  async function handleUpdatePosition(id: string, name: string) {
+    await execUpdatePos({ id, name })
+  }
+
+  async function handleDeletePositions(ids: string[]) {
+    await execDeletePos({ ids })
+  }
 
   const { register, handleSubmit, setValue, watch, reset } = useForm<AddUserValues>({
     resolver: zodResolver(AddUserSchema),
@@ -102,18 +155,6 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
       setPendingFormValues(null)
     }
     setConfirmNoAppsOpen(false)
-  }
-
-  const [addPosOpen, setAddPosOpen] = useState(false)
-  const [newPosName, setNewPosName] = useState('')
-  async function confirmAddPosition() {
-    const name = newPosName.trim()
-    if (!name) return
-    const res = await execCreatePos({ name })
-    const created = res?.data
-    if (created) setValue('position', created.name)
-    setAddPosOpen(false)
-    setNewPosName('')
   }
 
   // Email preview values
@@ -167,14 +208,14 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
             <div>
               <div className="flex items-center justify-between">
                 <label className="block text-sm mb-1">{t('position')}</label>
-                <button type="button" className="text-xs text-blue-600" onClick={() => { setAddPosOpen(true); setNewPosName('') }} disabled={creatingPos}>
-                  {t('addNewPosition')}
+                <button type="button" className="text-xs text-blue-600" onClick={() => setManagePositionsOpen(true)}>
+                  {t('manage')}
                 </button>
               </div>
               <Select {...register('position')}>
                 <option value="">{t('selectPlaceholder')}</option>
-                {posList.map((p) => (
-                  <option key={p.id} value={p.name}>{p.name}</option>
+                {posList.map((position) => (
+                  <option key={position.id} value={position.name}>{position.name}</option>
                 ))}
               </Select>
             </div>
@@ -258,20 +299,43 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
             </Button>
           </DialogFooter>
         </form>
-        <InputDialog
-          open={addPosOpen}
-          onOpenChange={setAddPosOpen}
-          title={t('addNewPosition')}
-          label={t('addNewPositionPrompt')}
-          placeholder={t('addNewPositionPrompt')}
-          confirmText={t('create')}
-          cancelText={t('cancel')}
-          value={newPosName}
-          onValueChange={setNewPosName}
-          onConfirm={confirmAddPosition}
-          loading={creatingPos}
-        />
       </DialogContent>
+
+      <Dialog open={managePositionsOpen} onOpenChange={setManagePositionsOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t('managePositions')}</DialogTitle>
+          </DialogHeader>
+          <DeletableSelectManager
+            options={posList}
+            onDelete={handleDeletePositions}
+            onCreate={handleCreatePosition}
+            onUpdate={handleUpdatePosition}
+            disabled={deletingPos || creatingPos || updatingPos}
+            deleting={deletingPos}
+            creating={creatingPos}
+            updating={updatingPos}
+            createLabel={t('newPosition')}
+            createPlaceholder={t('newPositionPlaceholder')}
+            createButtonLabel={t('createPositionCta')}
+            selectedIds={selectedPositionIds}
+            onSelectedIdsChange={setSelectedPositionIds}
+          />
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setManagePositionsOpen(false)}>
+              {t('close')}
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => handleDeletePositions(selectedPositionIds)}
+              disabled={selectedPositionIds.length === 0 || deletingPos}
+            >
+              {deletingPos ? t('deleting') : t('deleteSelected')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={confirmNoAppsOpen} onOpenChange={setConfirmNoAppsOpen}>
         <AlertDialogContent>

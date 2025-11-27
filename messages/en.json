@@ -182,7 +182,15 @@
     "applicationsSelected": "selected",
     "confirmNoAppsTitle": "No applications selected",
     "confirmNoAppsDesc": "You are about to create a user without access to any application. Are you sure you want to proceed?",
-    "confirmNoAppsConfirm": "Confirm"
+    "confirmNoAppsConfirm": "Confirm",
+    "manage": "Manage",
+    "managePositions": "Manage Positions",
+    "newPosition": "New position",
+    "newPositionPlaceholder": "Position name",
+    "createPositionCta": "Create position",
+    "close": "Close",
+    "deleteSelected": "Delete Selected",
+    "positionsInUse": "Cannot delete: used by {count} user(s)"
   },
   "upload": {
     "selectFile": "Select image",
