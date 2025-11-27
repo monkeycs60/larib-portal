@@ -36,6 +36,6 @@ jobs:
             Suis strictement les guidelines du projet définies dans CLAUDE.md.
             Assure-toi que le code est typé correctement (pas de any), utilise les composants shadcn/ui, et respecte l'architecture feature-based.
           claude_args: |
-            --max-turns 15
+            --max-turns 50
             --model claude-haiku-4-5-20251001
             --allowedTools "Bash,Edit,Write,Read,Glob,Grep,WebFetch,WebSearch,TodoWrite"
