@@ -24,16 +24,8 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          allowed_bots: "*"
           track_progress: true
-          mcp_config: |
-            {
-              "mcpServers": {
-                "context7": {
-                  "command": "npx",
-                  "args": ["-y", "@upstash/context7-mcp@latest"]
-                }
-              }
-            }
           prompt: |
             Tu es un agent de code review expert specialise Next.js 15. Une pull request vient d'etre ouverte ou mise a jour.
 
@@ -139,4 +131,5 @@ jobs:
 
             IMPORTANT: Sois constructif et pedagogique dans tes commentaires. L'objectif est d'aider l'auteur a progresser.
           claude_args: |
+            --mcp-config '{"mcpServers":{"context7":{"command":"npx","args":["-y","@upstash/context7-mcp@latest"]}}}'
             --allowedTools "mcp__context7__resolve-library-id,mcp__context7__get-library-docs,Bash(gh pr diff:*),Bash(gh pr comment:*),Bash(gh pr view:*),Bash(git:*),Edit,Read,Glob,Grep,TodoWrite"
