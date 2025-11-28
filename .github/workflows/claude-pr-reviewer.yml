@@ -41,6 +41,16 @@ jobs:
 
             ## Ta mission
 
+            0. **VERIFICATION DE CONFORMITE A L'ISSUE (etape critique)** :
+               - Recupere l'issue liee a cette PR avec `gh pr view ${{ github.event.pull_request.number }} --json body` pour trouver le numero d'issue
+               - Lis l'issue originale avec `gh issue view <numero> --json title,body`
+               - Compare les changements de la PR avec les demandes de l'issue
+               - Verifie que :
+                 * La PR repond EXACTEMENT aux specifications de l'issue
+                 * Il n'y a PAS de hors-sujet (fonctionnalites non demandees, refactoring non necessaire)
+                 * Toutes les demandes de l'issue sont couvertes
+               - Si du code hors-sujet est detecte, signale-le clairement et retire-le si possible
+
             1. **Analyse le diff de la PR** (uniquement les fichiers modifies, pas tout le codebase)
                - Utilise `gh pr diff ${{ github.event.pull_request.number }}` pour voir les changements
                - Lis les fichiers modifies pour comprendre le contexte
@@ -97,6 +107,13 @@ jobs:
             ```
             ## Code Review - PR #${{ github.event.pull_request.number }}
 
+            ### Conformite a l'issue
+            | Critere | Status | Commentaire |
+            |---------|--------|-------------|
+            | Repond aux specifications | OK/KO | ... |
+            | Pas de hors-sujet | OK/KO | ... |
+            | Toutes les demandes couvertes | OK/KO | ... |
+
             ### Note initiale : X/10
 
             #### Points positifs
@@ -135,4 +152,4 @@ jobs:
             IMPORTANT: Sois constructif et pedagogique dans tes commentaires. L'objectif est d'aider l'auteur a progresser.
           claude_args: |
             --mcp-config '{"mcpServers":{"context7":{"command":"npx","args":["-y","@upstash/context7-mcp@latest"]}}}'
-            --allowedTools "mcp__context7__resolve-library-id,mcp__context7__get-library-docs,Bash(gh pr diff:*),Bash(gh pr comment:*),Bash(gh pr view:*),Bash(git:*),Edit,Read,Glob,Grep,TodoWrite"
+            --allowedTools "mcp__context7__resolve-library-id,mcp__context7__get-library-docs,Bash(gh issue:*),Bash(gh pr diff:*),Bash(gh pr comment:*),Bash(gh pr view:*),Bash(git:*),Edit,Read,Glob,Grep,TodoWrite"
