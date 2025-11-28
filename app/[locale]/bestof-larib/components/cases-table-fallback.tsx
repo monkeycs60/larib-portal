@@ -6,6 +6,7 @@ import { Link } from '@/app/i18n/navigation';
 import { Eye, Pencil, PlusCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBestofCasesCache } from '@/lib/stores/bestof-cases-cache';
+import { formatRelativeTime } from '@/lib/utils';
 import CaseDifficultyCell from './case-difficulty-cell';
 import CaseTagCell from './case-tag-cell';
 import StartNewAttemptLink from './start-new-attempt-link';
@@ -45,6 +46,15 @@ export type CasesTableTranslations = {
     view: string;
     edit: string;
     startNewAttempt: string;
+  };
+  relativeTime: {
+    justNow: string;
+    minutesAgo: string;
+    hoursAgo: string;
+    daysAgo: string;
+    weeksAgo: string;
+    monthsAgo: string;
+    yearsAgo: string;
   };
   empty: string;
 };
@@ -124,18 +134,19 @@ export default function CasesTableFallback({
                 <SortHeader field='diseaseTag' label={translations.table.disease} activeField={sortField} direction={sortDirection} />
               </TableHead>
             ) : null}
+            {isAdmin ? (
+              <TableHead>
+                <SortHeader field='difficulty' label={translations.table.difficulty} activeField={sortField} direction={sortDirection} />
+              </TableHead>
+            ) : null}
             <TableHead>
-              <SortHeader field='difficulty' label={translations.table.difficulty} activeField={sortField} direction={sortDirection} />
+              <SortHeader field='createdAt' label={translations.table.createdAt} activeField={sortField} direction={sortDirection} />
             </TableHead>
             {isUserView ? (
               <TableHead>
-                <SortHeader field='createdAt' label={translations.table.firstCompletion} activeField={sortField} direction={sortDirection} />
+                <SortHeader field='firstCompletedAt' label={translations.table.firstCompletion} activeField={sortField} direction={sortDirection} />
               </TableHead>
-            ) : (
-              <TableHead>
-                <SortHeader field='createdAt' label={translations.table.createdAt} activeField={sortField} direction={sortDirection} />
-              </TableHead>
-            )}
+            ) : null}
             {isUserView ? (
               <TableHead>
                 <SortHeader field='attempts' label={translations.table.attempts} activeField={sortField} direction={sortDirection} />
@@ -215,33 +226,38 @@ export default function CasesTableFallback({
                       )}
                     </TableCell>
                   ) : null}
+                  {isAdmin ? (
+                    <TableCell>
+                      <Badge
+                        variant='outline'
+                        className={
+                          caseItem.difficulty === 'BEGINNER'
+                            ? 'border-green-500 text-green-700'
+                            : caseItem.difficulty === 'INTERMEDIATE'
+                            ? 'border-amber-500 text-amber-700'
+                            : 'border-red-500 text-red-700'
+                        }
+                      >
+                        {translations.difficulty[
+                          caseItem.difficulty === 'BEGINNER'
+                            ? 'beginner'
+                            : caseItem.difficulty === 'INTERMEDIATE'
+                            ? 'intermediate'
+                            : 'advanced'
+                        ]}
+                      </Badge>
+                    </TableCell>
+                  ) : null}
                   <TableCell>
-                    <Badge
-                      variant='outline'
-                      className={
-                        caseItem.difficulty === 'BEGINNER'
-                          ? 'border-green-500 text-green-700'
-                          : caseItem.difficulty === 'INTERMEDIATE'
-                          ? 'border-amber-500 text-amber-700'
-                          : 'border-red-500 text-red-700'
-                      }
-                    >
-                      {translations.difficulty[
-                        caseItem.difficulty === 'BEGINNER'
-                          ? 'beginner'
-                          : caseItem.difficulty === 'INTERMEDIATE'
-                          ? 'intermediate'
-                          : 'advanced'
-                      ]}
-                    </Badge>
+                    {formatRelativeTime(caseItem.createdAt, translations.relativeTime)}
                   </TableCell>
-                  <TableCell>
-                    {isUserView
-                      ? caseItem.firstCompletedAt
-                        ? new Date(caseItem.firstCompletedAt).toLocaleDateString()
-                        : '-'
-                      : new Date(caseItem.createdAt).toLocaleDateString()}
-                  </TableCell>
+                  {isUserView ? (
+                    <TableCell>
+                      {caseItem.firstCompletedAt
+                        ? formatRelativeTime(caseItem.firstCompletedAt, translations.relativeTime)
+                        : '-'}
+                    </TableCell>
+                  ) : null}
                   {isUserView ? (
                     <TableCell>{typeof caseItem.attemptsCount === 'number' ? caseItem.attemptsCount : 0}</TableCell>
                   ) : null}

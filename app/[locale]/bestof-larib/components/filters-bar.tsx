@@ -53,6 +53,9 @@ export default function FiltersBar({
 	const [dateFrom, setDateFrom] = useState(qp.get('dateFrom') ?? '');
 	const [dateTo, setDateTo] = useState(qp.get('dateTo') ?? '');
 	const [datePreset, setDatePreset] = useState(qp.get('datePreset') ?? '');
+	const [firstCompletionFrom, setFirstCompletionFrom] = useState(qp.get('firstCompletionFrom') ?? '');
+	const [firstCompletionTo, setFirstCompletionTo] = useState(qp.get('firstCompletionTo') ?? '');
+	const [firstCompletionPreset, setFirstCompletionPreset] = useState(qp.get('firstCompletionPreset') ?? '');
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const overlayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const setOverlayLoading = useBestofLoadingStore((s) => s.setLoading);
@@ -69,6 +72,9 @@ export default function FiltersBar({
 		setDateFrom('');
 		setDateTo('');
 		setDatePreset('');
+		setFirstCompletionFrom('');
+		setFirstCompletionTo('');
+		setFirstCompletionPreset('');
 		const current = new URLSearchParams(
 			typeof window !== 'undefined' ? window.location.search : ''
 		);
@@ -85,11 +91,9 @@ export default function FiltersBar({
         const current = new URLSearchParams(
             typeof window !== 'undefined' ? window.location.search : ''
         );
-        // show overlay while navigating
         setOverlayLoading(true);
         if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current);
         overlayTimerRef.current = setTimeout(() => setOverlayLoading(false), 1500);
-        // remove existing filters
         [
             'q',
             'status',
@@ -102,8 +106,10 @@ export default function FiltersBar({
             'dateFrom',
             'dateTo',
             'datePreset',
+            'firstCompletionFrom',
+            'firstCompletionTo',
+            'firstCompletionPreset',
         ].forEach((k) => current.delete(k));
-        // re-add from state merged with partial
         const merged = {
             q: q.trim(),
             status,
@@ -116,6 +122,9 @@ export default function FiltersBar({
             dateFrom,
             dateTo,
             datePreset,
+            firstCompletionFrom,
+            firstCompletionTo,
+            firstCompletionPreset,
             ...partial,
         };
         if (merged.q) current.set('q', merged.q);
@@ -144,6 +153,9 @@ export default function FiltersBar({
         if (merged.dateFrom) current.set('dateFrom', merged.dateFrom);
         if (merged.dateTo) current.set('dateTo', merged.dateTo);
         if (merged.datePreset) current.set('datePreset', merged.datePreset);
+        if (merged.firstCompletionFrom) current.set('firstCompletionFrom', merged.firstCompletionFrom);
+        if (merged.firstCompletionTo) current.set('firstCompletionTo', merged.firstCompletionTo);
+        if (merged.firstCompletionPreset) current.set('firstCompletionPreset', merged.firstCompletionPreset);
         router.push(`${pathname}?${current.toString()}`);
     }
 
@@ -243,6 +255,96 @@ export default function FiltersBar({
 		setDateFrom(from);
 		setDateTo(to);
 		pushWith({ datePreset: preset, dateFrom: from, dateTo: to });
+	}
+
+	function applyFirstCompletionPreset(preset: string) {
+		const now = new Date();
+		const startOfDay = (d: Date) => {
+			const c = new Date(d);
+			c.setHours(0, 0, 0, 0);
+			return c;
+		};
+		const endOfDay = (d: Date) => {
+			const c = new Date(d);
+			c.setHours(23, 59, 59, 999);
+			return c;
+		};
+		const startOfWeek = (d: Date) => {
+			const c = new Date(d);
+			const day = c.getDay() || 7;
+			c.setDate(c.getDate() - (day - 1));
+			return startOfDay(c);
+		};
+		const endOfWeek = (d: Date) => {
+			const c = startOfWeek(d);
+			c.setDate(c.getDate() + 6);
+			return endOfDay(c);
+		};
+		const startOfMonth = (d: Date) =>
+			new Date(d.getFullYear(), d.getMonth(), 1);
+		const endOfMonth = (d: Date) =>
+			endOfDay(new Date(d.getFullYear(), d.getMonth() + 1, 0));
+
+		let from = '';
+		let to = '';
+		switch (preset) {
+			case 'today':
+				from = formatYYYYMMDD(now);
+				to = formatYYYYMMDD(now);
+				break;
+			case 'yesterday': {
+				const y = new Date(now);
+				y.setDate(now.getDate() - 1);
+				from = formatYYYYMMDD(y);
+				to = formatYYYYMMDD(y);
+				break;
+			}
+			case 'last7': {
+				const s = new Date(now);
+				s.setDate(now.getDate() - 6);
+				from = formatYYYYMMDD(s);
+				to = formatYYYYMMDD(now);
+				break;
+			}
+			case 'last30': {
+				const s = new Date(now);
+				s.setDate(now.getDate() - 29);
+				from = formatYYYYMMDD(s);
+				to = formatYYYYMMDD(now);
+				break;
+			}
+			case 'thisWeek':
+				from = formatYYYYMMDD(startOfWeek(now));
+				to = formatYYYYMMDD(endOfWeek(now));
+				break;
+			case 'lastWeek': {
+				const lastWeekRef = new Date(now);
+				lastWeekRef.setDate(now.getDate() - 7);
+				from = formatYYYYMMDD(startOfWeek(lastWeekRef));
+				to = formatYYYYMMDD(endOfWeek(lastWeekRef));
+				break;
+			}
+			case 'thisMonth':
+				from = formatYYYYMMDD(startOfMonth(now));
+				to = formatYYYYMMDD(endOfMonth(now));
+				break;
+			case 'lastMonth': {
+				const ref = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+				from = formatYYYYMMDD(startOfMonth(ref));
+				to = formatYYYYMMDD(endOfMonth(ref));
+				break;
+			}
+			case '':
+				from = '';
+				to = '';
+				break;
+			default:
+				from = firstCompletionFrom;
+				to = firstCompletionTo;
+		}
+		setFirstCompletionFrom(from);
+		setFirstCompletionTo(to);
+		pushWith({ firstCompletionPreset: preset, firstCompletionFrom: from, firstCompletionTo: to });
 	}
 
 	return (
@@ -383,7 +485,7 @@ export default function FiltersBar({
 			) : null}
 			<div className='min-w-44'>
 				<label className='block text-xs mb-1'>
-					{t('filters.dateRange')}
+					{t('filters.createdAtRange')}
 				</label>
 				<SingleSelect
 					value={datePreset}
@@ -440,6 +542,71 @@ export default function FiltersBar({
 							}}
 						/>
 					</div>
+				</>
+			) : null}
+			{!isAdmin ? (
+				<>
+					<div className='min-w-44'>
+						<label className='block text-xs mb-1'>
+							{t('filters.firstCompletionRange')}
+						</label>
+						<SingleSelect
+							value={firstCompletionPreset}
+							onChange={(value) => {
+								setFirstCompletionPreset(value);
+								applyFirstCompletionPreset(value);
+							}}
+							options={[
+								{ value: '', label: t('filters.any') },
+								{ value: 'today', label: t('filters.today') },
+								{ value: 'yesterday', label: t('filters.yesterday') },
+								{ value: 'thisWeek', label: t('filters.thisWeek') },
+								{ value: 'lastWeek', label: t('filters.lastWeek') },
+								{ value: 'thisMonth', label: t('filters.thisMonth') },
+								{ value: 'lastMonth', label: t('filters.lastMonth') },
+								{ value: 'last7', label: t('filters.last7') },
+								{ value: 'last30', label: t('filters.last30') },
+								{ value: 'custom', label: t('filters.custom') },
+							]}
+							placeholder={t('filters.any')}
+						/>
+					</div>
+					{firstCompletionPreset === 'custom' ? (
+						<>
+							<div className='min-w-44'>
+								<label className='block text-xs mb-1'>
+									{t('filters.dateFrom')}
+								</label>
+								<Input
+									type='date'
+									value={firstCompletionFrom}
+									onChange={(e) => {
+										setFirstCompletionFrom(e.target.value);
+										pushWith({
+											firstCompletionFrom: e.target.value,
+											firstCompletionPreset: 'custom',
+										});
+									}}
+								/>
+							</div>
+							<div className='min-w-44'>
+								<label className='block text-xs mb-1'>
+									{t('filters.dateTo')}
+								</label>
+								<Input
+									type='date'
+									value={firstCompletionTo}
+									onChange={(e) => {
+										setFirstCompletionTo(e.target.value);
+										pushWith({
+											firstCompletionTo: e.target.value,
+											firstCompletionPreset: 'custom',
+										});
+									}}
+								/>
+							</div>
+						</>
+					) : null}
 				</>
 			) : null}
 			<div className='ml-auto flex gap-2'>

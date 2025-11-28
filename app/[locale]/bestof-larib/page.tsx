@@ -78,6 +78,15 @@ async function BestofLaribPageContent({
             return d;
           })()
         : undefined,
+    firstCompletedFrom: typeof sp?.firstCompletionFrom === 'string' && sp.firstCompletionFrom ? new Date(sp.firstCompletionFrom) : undefined,
+    firstCompletedTo:
+      typeof sp?.firstCompletionTo === 'string' && sp.firstCompletionTo
+        ? (() => {
+            const d = new Date(sp.firstCompletionTo);
+            d.setHours(23, 59, 59, 999);
+            return d;
+          })()
+        : undefined,
     adminTagIds: asArray(sp?.adminTagId),
     userTagIds: asArray(sp?.userTagId),
     myDifficulty:
@@ -162,6 +171,15 @@ async function BestofLaribPageContent({
       view: t('view'),
       edit: t('edit'),
       startNewAttempt: t('caseView.startNewAttempt'),
+    },
+    relativeTime: {
+      justNow: t('relativeTime.justNow'),
+      minutesAgo: t('relativeTime.minutesAgo'),
+      hoursAgo: t('relativeTime.hoursAgo'),
+      daysAgo: t('relativeTime.daysAgo'),
+      weeksAgo: t('relativeTime.weeksAgo'),
+      monthsAgo: t('relativeTime.monthsAgo'),
+      yearsAgo: t('relativeTime.yearsAgo'),
     },
     empty: t('empty'),
   };

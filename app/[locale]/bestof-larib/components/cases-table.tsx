@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Eye, Pencil, PlusCircle } from 'lucide-react';
+import { formatRelativeTime } from '@/lib/utils';
 import TableOverlay from './table-overlay';
 import DeleteCaseButton from './delete-case-button';
 import CreateCaseDialog from './create-case-dialog';
@@ -117,15 +118,14 @@ export default async function CasesTable({
                 <SortHeader field='difficulty' label={translations.table.difficulty} activeField={sortField} direction={sortDirection} />
               </TableHead>
             ) : null}
+            <TableHead>
+              <SortHeader field='createdAt' label={translations.table.createdAt} activeField={sortField} direction={sortDirection} />
+            </TableHead>
             {isUserView ? (
               <TableHead>
-                <SortHeader field='createdAt' label={translations.table.firstCompletion} activeField={sortField} direction={sortDirection} />
+                <SortHeader field='firstCompletedAt' label={translations.table.firstCompletion} activeField={sortField} direction={sortDirection} />
               </TableHead>
-            ) : (
-              <TableHead>
-                <SortHeader field='createdAt' label={translations.table.createdAt} activeField={sortField} direction={sortDirection} />
-              </TableHead>
-            )}
+            ) : null}
             {isUserView ? (
               <TableHead>
                 <SortHeader field='attempts' label={translations.table.attempts} activeField={sortField} direction={sortDirection} />
@@ -206,12 +206,15 @@ export default async function CasesTable({
                     </TableCell>
                   ) : null}
                   <TableCell>
-                    {isUserView
-                      ? caseItem.firstCompletedAt
-                        ? new Date(caseItem.firstCompletedAt).toLocaleDateString()
-                        : '-'
-                      : new Date(caseItem.createdAt).toLocaleDateString()}
+                    {formatRelativeTime(caseItem.createdAt, translations.relativeTime)}
                   </TableCell>
+                  {isUserView ? (
+                    <TableCell>
+                      {caseItem.firstCompletedAt
+                        ? formatRelativeTime(caseItem.firstCompletedAt, translations.relativeTime)
+                        : '-'}
+                    </TableCell>
+                  ) : null}
                   {isUserView ? (
                     <TableCell>{typeof caseItem.attemptsCount === 'number' ? caseItem.attemptsCount : 0}</TableCell>
                   ) : null}

@@ -81,6 +81,8 @@ export type CaseListFilters = {
   difficulties?: Array<'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'>
   createdFrom?: Date
   createdTo?: Date
+  firstCompletedFrom?: Date
+  firstCompletedTo?: Date
   adminTagIds?: string[]
   userTagIds?: string[]
   myDifficulty?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
@@ -106,6 +108,8 @@ export type SerializedCaseFilters = {
   difficulties?: Array<'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'>
   createdFrom?: string | null
   createdTo?: string | null
+  firstCompletedFrom?: string | null
+  firstCompletedTo?: string | null
   adminTagIds?: string[]
   userTagIds?: string[]
   myDifficulty?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
@@ -120,6 +124,8 @@ export const serializeCaseFilters = (filters: CaseListFilters | undefined): Seri
   difficulties: filters?.difficulties ? [...filters.difficulties].sort() : undefined,
   createdFrom: filters?.createdFrom ? filters.createdFrom.toISOString() : undefined,
   createdTo: filters?.createdTo ? filters.createdTo.toISOString() : undefined,
+  firstCompletedFrom: filters?.firstCompletedFrom ? filters.firstCompletedFrom.toISOString() : undefined,
+  firstCompletedTo: filters?.firstCompletedTo ? filters.firstCompletedTo.toISOString() : undefined,
   adminTagIds: filters?.adminTagIds ? [...filters.adminTagIds].sort() : undefined,
   userTagIds: filters?.userTagIds ? [...filters.userTagIds].sort() : undefined,
   myDifficulty: filters?.myDifficulty,
@@ -134,6 +140,8 @@ export const deserializeCaseFilters = (filters: SerializedCaseFilters): CaseList
   difficulties: filters.difficulties,
   createdFrom: filters.createdFrom ? new Date(filters.createdFrom) : undefined,
   createdTo: filters.createdTo ? new Date(filters.createdTo) : undefined,
+  firstCompletedFrom: filters.firstCompletedFrom ? new Date(filters.firstCompletedFrom) : undefined,
+  firstCompletedTo: filters.firstCompletedTo ? new Date(filters.firstCompletedTo) : undefined,
   adminTagIds: filters.adminTagIds,
   userTagIds: filters.userTagIds,
   myDifficulty: filters.myDifficulty,
@@ -328,6 +336,16 @@ const fetchClinicalCases = async ({
       if (filters.userProgress === 'COMPLETED') return state.hasValidatedAttempt
       if (filters.userProgress === 'IN_PROGRESS') return state.hasDraftAttempt && !state.hasValidatedAttempt
       return !state.hasDraftAttempt && !state.hasValidatedAttempt
+    })
+  }
+
+  if (userId && (filters?.firstCompletedFrom || filters?.firstCompletedTo)) {
+    base = base.filter((entry) => {
+      const firstCompleted = entry.firstCompletedAt
+      if (!firstCompleted) return false
+      if (filters.firstCompletedFrom && firstCompleted < filters.firstCompletedFrom) return false
+      if (filters.firstCompletedTo && firstCompleted > filters.firstCompletedTo) return false
+      return true
     })
   }
 
