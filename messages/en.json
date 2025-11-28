@@ -107,7 +107,17 @@
     "adminSectionTitle": "Administration",
     "appDesc_BESTOF_LARIB": "Clinical cases and learning content from Best of Larib.",
     "appDesc_CONGES": "Manage your leave requests and absences.",
-    "appDesc_CARDIOLARIB": "Resources and tools dedicated to CardioLarib."
+    "appDesc_CARDIOLARIB": "Resources and tools dedicated to CardioLarib.",
+    "greetings": [
+      "Welcome",
+      "Great to see you again",
+      "Welcome back",
+      "Nice to have you back",
+      "Hello",
+      "Have an excellent day",
+      "Ready for new discoveries",
+      "Happy to assist you"
+    ]
   },
   "metadata": {
     "title": "Larib Portal",
