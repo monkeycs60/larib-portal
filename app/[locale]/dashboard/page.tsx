@@ -4,8 +4,28 @@ import { getTranslations } from 'next-intl/server'
 import { formatUserName } from '@/lib/format-user-name'
 import { getRandomGreeting } from '@/lib/random-greeting'
 import * as motion from "framer-motion/client"
-import { ArrowRight, Mail, Briefcase, MapPin, Phone, Shield } from 'lucide-react'
+import { ArrowRight, Mail, Briefcase, MapPin, Phone, LucideIcon } from 'lucide-react'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+
+interface UserInfoFieldProps {
+  icon: LucideIcon
+  label: string
+  value: string
+}
+
+function UserInfoField({ icon: Icon, label, value }: UserInfoFieldProps) {
+  return (
+    <div className="flex items-center gap-3 text-sm">
+      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-background">
+        <Icon className="w-4 h-4 text-muted-foreground" />
+      </div>
+      <div>
+        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className="text-foreground">{value}</p>
+      </div>
+    </div>
+  )
+}
 
 export default async function DashboardPage({
   params
@@ -155,48 +175,29 @@ export default async function DashboardPage({
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="flex items-center gap-3 text-sm">
-                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-background">
-                          <Mail className="w-4 h-4 text-muted-foreground" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">{t('userInfo.email')}</p>
-                          <p className="text-foreground">{session.user.email}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3 text-sm">
-                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-background">
-                          <Briefcase className="w-4 h-4 text-muted-foreground" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">{t('userInfo.position')}</p>
-                          <p className="text-foreground">{session.user.position ?? t('userInfo.notSpecified')}</p>
-                        </div>
-                      </div>
-
+                      <UserInfoField
+                        icon={Mail}
+                        label={t('userInfo.email')}
+                        value={session.user.email}
+                      />
+                      <UserInfoField
+                        icon={Briefcase}
+                        label={t('userInfo.position')}
+                        value={session.user.position ?? t('userInfo.notSpecified')}
+                      />
                       {session.user.country && (
-                        <div className="flex items-center gap-3 text-sm">
-                          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-background">
-                            <MapPin className="w-4 h-4 text-muted-foreground" />
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">{t('userInfo.country')}</p>
-                            <p className="text-foreground">{session.user.country}</p>
-                          </div>
-                        </div>
+                        <UserInfoField
+                          icon={MapPin}
+                          label={t('userInfo.country')}
+                          value={session.user.country}
+                        />
                       )}
-
                       {session.user.phoneNumber && (
-                        <div className="flex items-center gap-3 text-sm">
-                          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-background">
-                            <Phone className="w-4 h-4 text-muted-foreground" />
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">{t('userInfo.phone')}</p>
-                            <p className="text-foreground">{session.user.phoneNumber}</p>
-                          </div>
-                        </div>
+                        <UserInfoField
+                          icon={Phone}
+                          label={t('userInfo.phone')}
+                          value={session.user.phoneNumber}
+                        />
                       )}
                     </div>
                   </div>
