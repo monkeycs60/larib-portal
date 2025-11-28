@@ -4,7 +4,8 @@ import { getTranslations } from 'next-intl/server'
 import { formatUserName } from '@/lib/format-user-name'
 import { getRandomGreeting } from '@/lib/random-greeting'
 import * as motion from "framer-motion/client"
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Mail, Briefcase, MapPin, Phone, Shield } from 'lucide-react'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 
 export default async function DashboardPage({
   params
@@ -67,6 +68,19 @@ export default async function DashboardPage({
   const seed = `${session.user.id}-${new Date().toDateString()}`
   const randomGreeting = getRandomGreeting(greetings, seed)
 
+  function getUserInitials(): string {
+    const firstInitial = session.user.firstName?.charAt(0) ?? ''
+    const lastInitial = session.user.lastName?.charAt(0) ?? ''
+    if (firstInitial || lastInitial) {
+      return `${firstInitial}${lastInitial}`.toUpperCase()
+    }
+    return session.user.email.charAt(0).toUpperCase()
+  }
+
+  function getRoleLabel(): string {
+    return session.user.role === 'ADMIN' ? t('userInfo.roleAdmin') : t('userInfo.roleUser')
+  }
+
   const container = {
     hidden: { opacity: 0 },
     show: {
@@ -105,6 +119,92 @@ export default async function DashboardPage({
 
       <main className="mx-auto max-w-7xl px-8 pb-32">
         <div className="space-y-24">
+          {/* User Profile Info */}
+          <section>
+            <div className="flex items-center gap-4 mb-12">
+              <h2 className="text-lg font-medium tracking-wide text-foreground">
+                {t('userInfoSectionTitle')}
+              </h2>
+              <div className="h-px flex-1 bg-border/60" />
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <div className="relative overflow-hidden rounded-[2rem] bg-secondary dark:bg-card p-8 md:p-10">
+                <div className="flex flex-col md:flex-row gap-8 items-start">
+                  <Avatar className="w-20 h-20 md:w-24 md:h-24 ring-4 ring-background shadow-lg">
+                    {session.user.profilePhoto && (
+                      <AvatarImage src={session.user.profilePhoto} alt={userName} />
+                    )}
+                    <AvatarFallback className="text-2xl md:text-3xl font-medium bg-primary text-primary-foreground">
+                      {getUserInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+
+                  <div className="flex-1 space-y-6">
+                    <div>
+                      <h3 className="text-2xl font-serif font-medium text-foreground mb-1">
+                        {userName}
+                      </h3>
+                      <p className="text-muted-foreground text-sm">
+                        {getRoleLabel()}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-background">
+                          <Mail className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">{t('userInfo.email')}</p>
+                          <p className="text-foreground">{session.user.email}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-background">
+                          <Briefcase className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">{t('userInfo.position')}</p>
+                          <p className="text-foreground">{session.user.position ?? t('userInfo.notSpecified')}</p>
+                        </div>
+                      </div>
+
+                      {session.user.country && (
+                        <div className="flex items-center gap-3 text-sm">
+                          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-background">
+                            <MapPin className="w-4 h-4 text-muted-foreground" />
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">{t('userInfo.country')}</p>
+                            <p className="text-foreground">{session.user.country}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {session.user.phoneNumber && (
+                        <div className="flex items-center gap-3 text-sm">
+                          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-background">
+                            <Phone className="w-4 h-4 text-muted-foreground" />
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">{t('userInfo.phone')}</p>
+                            <p className="text-foreground">{session.user.phoneNumber}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </section>
+
           {/* Applications */}
           <section>
             <div className="flex items-center gap-4 mb-12">
