@@ -102,12 +102,18 @@
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome to your dashboard",
-    "appsSectionTitle": "Access applications",
+    "subtitle": "Explore your applications and access your work tools",
+    "greeting": "Great to see you again",
+    "appsSectionTitle": "Your applications",
+    "appsSectionDescription": "Quickly access all your work tools and professional resources",
     "openApp": "Open",
-    "adminSectionTitle": "Administration",
-    "appDesc_BESTOF_LARIB": "Clinical cases and learning content from Best of Larib.",
-    "appDesc_CONGES": "Manage your leave requests and absences.",
-    "appDesc_CARDIOLARIB": "Resources and tools dedicated to CardioLarib."
+    "adminSectionTitle": "Administration tools",
+    "adminSectionDescription": "Manage users and platform settings",
+    "appDesc_BESTOF_LARIB": "Enhance your clinical skills with practical cases from Best of Larib. Access a comprehensive library of educational content and detailed analyses.",
+    "appDesc_CONGES": "Plan and manage your leave with ease. Check your balance, submit requests and track team absences in real-time.",
+    "appDesc_CARDIOLARIB": "Access all specialized CardioLarib resources and tools to optimize your daily practice.",
+    "quickStats": "Quick overview",
+    "recentActivity": "Recent activity"
   },
   "metadata": {
     "title": "Larib Portal",

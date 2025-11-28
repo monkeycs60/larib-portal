@@ -100,12 +100,18 @@
   "dashboard": {
     "title": "Tableau de bord",
     "welcome": "Bienvenue sur votre tableau de bord",
-    "appsSectionTitle": "Accéder aux applications",
+    "subtitle": "Explorez vos applications et accédez à vos outils de travail",
+    "greeting": "Ravi de vous revoir",
+    "appsSectionTitle": "Vos applications",
+    "appsSectionDescription": "Accédez rapidement à tous vos outils de travail et ressources professionnelles",
     "openApp": "Accéder",
-    "adminSectionTitle": "Administration",
-    "appDesc_BESTOF_LARIB": "Cas cliniques et contenus pédagogiques Best of Larib.",
-    "appDesc_CONGES": "Gérez vos congés et demandes d'absences.",
-    "appDesc_CARDIOLARIB": "Ressources et outils dédiés à CardioLarib."
+    "adminSectionTitle": "Outils d'administration",
+    "adminSectionDescription": "Gérez les utilisateurs et les paramètres de la plateforme",
+    "appDesc_BESTOF_LARIB": "Perfectionnez vos compétences cliniques avec des cas pratiques issus du Best of Larib. Accédez à une bibliothèque complète de contenus pédagogiques et d'analyses détaillées.",
+    "appDesc_CONGES": "Planifiez et gérez vos congés en toute simplicité. Consultez votre solde, soumettez vos demandes et suivez les absences de l'équipe en temps réel.",
+    "appDesc_CARDIOLARIB": "Accédez à l'ensemble des ressources et outils spécialisés CardioLarib pour optimiser votre pratique quotidienne.",
+    "quickStats": "Aperçu rapide",
+    "recentActivity": "Activité récente"
   },
   "metadata": {
     "title": "Larib Portal",

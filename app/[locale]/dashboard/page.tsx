@@ -79,8 +79,8 @@ export default async function DashboardPage({
 
   return (
     <div className="min-h-screen bg-background selection:bg-primary/10">
-      {/* Hero Section - Compact & Clean */}
-      <div className="relative pt-16 pb-10 px-8">
+      {/* Hero Section - Enhanced & Personalized */}
+      <div className="relative pt-16 pb-12 px-8">
         <div className="relative mx-auto max-w-7xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -88,11 +88,17 @@ export default async function DashboardPage({
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="max-w-4xl"
           >
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5">
+              <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+              <span className="text-sm font-medium text-primary">
+                {t('greeting')}
+              </span>
+            </div>
             <h1 className="text-5xl md:text-6xl font-serif font-medium tracking-tight text-foreground mb-4 leading-[1.1]">
-              {t('title')}
+              {t('welcome')}, <span className="text-primary">{userName}</span>
             </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground font-light tracking-wide">
-              {t('welcome')}, <span className="text-foreground font-normal">{userName}</span>.
+            <p className="text-xl md:text-2xl text-muted-foreground font-light tracking-wide max-w-2xl">
+              {t('subtitle')}
             </p>
           </motion.div>
         </div>
@@ -102,11 +108,16 @@ export default async function DashboardPage({
         <div className="space-y-24">
           {/* Applications */}
           <section>
-            <div className="flex items-center gap-4 mb-12">
-              <h2 className="text-lg font-medium tracking-wide text-foreground">
-                {t('appsSectionTitle')}
-              </h2>
-              <div className="h-px flex-1 bg-border/60" />
+            <div className="mb-12">
+              <div className="flex items-center gap-4 mb-3">
+                <h2 className="text-2xl font-serif font-medium text-foreground">
+                  {t('appsSectionTitle')}
+                </h2>
+                <div className="h-px flex-1 bg-border/60" />
+              </div>
+              <p className="text-base text-muted-foreground max-w-3xl">
+                {t('appsSectionDescription')}
+              </p>
             </div>
             
             <motion.div 
@@ -127,20 +138,23 @@ export default async function DashboardPage({
                       
                       <div className="p-10 h-full flex flex-col">
                         <div className="mb-6">
-                          <div className="w-14 h-14 mb-6 text-primary transition-transform duration-500 group-hover:scale-110">
-                            {getAppIcon(app)}
+                          <div className="w-16 h-16 mb-6 rounded-2xl bg-primary/10 flex items-center justify-center text-primary transition-all duration-500 group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground">
+                            <div className="w-9 h-9">
+                              {getAppIcon(app)}
+                            </div>
                           </div>
-                          <h3 className="text-2xl font-serif font-medium text-foreground mb-2 group-hover:text-primary transition-colors duration-300">
+                          <h3 className="text-2xl font-serif font-medium text-foreground mb-3 group-hover:text-primary transition-colors duration-300">
                             {adminT(`app_${app}`)}
                           </h3>
-                          <p className="text-base text-muted-foreground leading-relaxed max-w-md">
+                          <p className="text-base text-muted-foreground leading-relaxed">
                             {t(`appDesc_${app}`)}
                           </p>
                         </div>
-                        
+
                         <div className="mt-auto pt-8">
-                          <span className="inline-flex items-center text-sm font-medium uppercase tracking-wider text-primary">
+                          <span className="inline-flex items-center gap-2 text-sm font-medium uppercase tracking-wider text-primary group-hover:gap-3 transition-all">
                             {t('openApp')}
+                            <ArrowRight className="w-4 h-4" />
                           </span>
                         </div>
                       </div>
@@ -154,11 +168,16 @@ export default async function DashboardPage({
           {/* Admin-only section */}
           {session.user.role === 'ADMIN' && (
             <section>
-               <div className="flex items-center gap-4 mb-12">
-                <h2 className="text-lg font-medium tracking-wide text-foreground">
-                  {t('adminSectionTitle')}
-                </h2>
-                <div className="h-px flex-1 bg-border/60" />
+              <div className="mb-12">
+                <div className="flex items-center gap-4 mb-3">
+                  <h2 className="text-2xl font-serif font-medium text-foreground">
+                    {t('adminSectionTitle')}
+                  </h2>
+                  <div className="h-px flex-1 bg-border/60" />
+                </div>
+                <p className="text-base text-muted-foreground max-w-3xl">
+                  {t('adminSectionDescription')}
+                </p>
               </div>
               
               <motion.div
@@ -178,25 +197,28 @@ export default async function DashboardPage({
 
                       <div className="p-10 h-full flex flex-col">
                         <div className="mb-6">
-                          <div className="w-14 h-14 mb-6 text-primary transition-transform duration-500 group-hover:scale-110">
-                            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                              <circle cx="18" cy="16" r="6" stroke="currentColor" strokeWidth="2" fill="none"/>
-                              <path d="M6 38c0-6.627 5.373-12 12-12s12 5.373 12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>
-                              <circle cx="34" cy="18" r="5" stroke="currentColor" strokeWidth="2" fill="none"/>
-                              <path d="M42 38c0-5.523-4.477-10-10-10-1.5 0-2.9.33-4.17.92" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>
-                            </svg>
+                          <div className="w-16 h-16 mb-6 rounded-2xl bg-primary/10 flex items-center justify-center text-primary transition-all duration-500 group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground">
+                            <div className="w-9 h-9">
+                              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                                <circle cx="18" cy="16" r="6" stroke="currentColor" strokeWidth="2" fill="none"/>
+                                <path d="M6 38c0-6.627 5.373-12 12-12s12 5.373 12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>
+                                <circle cx="34" cy="18" r="5" stroke="currentColor" strokeWidth="2" fill="none"/>
+                                <path d="M42 38c0-5.523-4.477-10-10-10-1.5 0-2.9.33-4.17.92" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>
+                              </svg>
+                            </div>
                           </div>
-                          <h3 className="text-2xl font-serif font-medium text-foreground mb-2 group-hover:text-primary transition-colors duration-300">
+                          <h3 className="text-2xl font-serif font-medium text-foreground mb-3 group-hover:text-primary transition-colors duration-300">
                             {adminT('usersNav')}
                           </h3>
-                          <p className="text-base text-muted-foreground leading-relaxed max-w-md">
+                          <p className="text-base text-muted-foreground leading-relaxed">
                             {adminT('usersSubtitle')}
                           </p>
                         </div>
 
                         <div className="mt-auto pt-8">
-                          <span className="inline-flex items-center text-sm font-medium uppercase tracking-wider text-primary">
+                          <span className="inline-flex items-center gap-2 text-sm font-medium uppercase tracking-wider text-primary group-hover:gap-3 transition-all">
                             {t('openApp')}
+                            <ArrowRight className="w-4 h-4" />
                           </span>
                         </div>
                       </div>
