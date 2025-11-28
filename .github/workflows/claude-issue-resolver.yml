@@ -23,7 +23,7 @@ jobs:
       - name: Run Claude Code
         uses: anthropics/claude-code-action@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
             Une nouvelle issue GitHub a été ouverte :
 
@@ -36,6 +36,4 @@ jobs:
             Suis strictement les guidelines du projet définies dans CLAUDE.md.
             Assure-toi que le code est typé correctement (pas de any), utilise les composants shadcn/ui, et respecte l'architecture feature-based.
           claude_args: |
-            --max-turns 50
-            --model claude-haiku-4-5-20251001
             --allowedTools "Bash,Edit,Write,Read,Glob,Grep,WebFetch,WebSearch,TodoWrite"

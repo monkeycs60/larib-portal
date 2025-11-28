@@ -1,0 +1,142 @@
+name: Claude PR Reviewer
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review-pr:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Claude Code Review
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          track_progress: true
+          mcp_config: |
+            {
+              "mcpServers": {
+                "context7": {
+                  "command": "npx",
+                  "args": ["-y", "@upstash/context7-mcp@latest"]
+                }
+              }
+            }
+          prompt: |
+            Tu es un agent de code review expert specialise Next.js 15. Une pull request vient d'etre ouverte ou mise a jour.
+
+            PR #${{ github.event.pull_request.number }}
+            Titre: ${{ github.event.pull_request.title }}
+            Auteur: ${{ github.event.pull_request.user.login }}
+
+            Description:
+            ${{ github.event.pull_request.body }}
+
+            ## Ta mission
+
+            1. **Analyse le diff de la PR** (uniquement les fichiers modifies, pas tout le codebase)
+               - Utilise `gh pr diff ${{ github.event.pull_request.number }}` pour voir les changements
+               - Lis les fichiers modifies pour comprendre le contexte
+
+            2. **Evalue la qualite du code** selon ces criteres (en te basant sur CLAUDE.md) :
+               - Typage TypeScript (pas de `any`, pas de `as any`, pas de ts-ignore)
+               - Utilisation correcte des composants shadcn/ui
+               - Architecture feature-based respectee
+               - Pas de useEffect (utiliser server components ou event handlers)
+               - Pas de patterns OOP (pas de classes)
+               - Nommage explicite (pas d'abbreviations dans les map/filter/reduce)
+               - Pas de commentaires inutiles
+               - Props <= 5 par composant
+               - Composants < 350 lignes
+               - Internationalisation avec next-intl
+               - Server actions avec next-safe-action pour les mutations
+
+            3. **Identifie les opportunites de refactoring** :
+               - Extraction de custom hooks reutilisables
+               - Creation de fonctions utilitaires
+               - Separation de composants trop complexes
+               - Simplification de la logique
+
+            4. **PERFORMANCE NEXT.JS (section critique)** :
+               IMPORTANT: Utilise le MCP context7 pour consulter la documentation officielle Next.js avant d'evaluer.
+               - Appelle `mcp__context7__resolve-library-id` avec "nextjs" pour obtenir l'ID
+               - Puis `mcp__context7__get-library-docs` avec le topic pertinent (ex: "performance", "caching", "server components")
+
+               Verifie ces points de performance Next.js :
+               - **Server vs Client Components** : Les composants sont-ils correctement separes ? Les "use client" sont-ils minimises ?
+               - **Data Fetching** : Utilisation de Server Components pour le fetch ? Pas de fetch cote client inutile ?
+               - **Caching** : Utilisation correcte de `unstable_cache`, `revalidatePath`, `revalidateTag` ?
+               - **Images** : Utilisation de `next/image` avec width/height ou fill ? Lazy loading ?
+               - **Fonts** : Utilisation de `next/font` pour les polices ?
+               - **Dynamic Imports** : `next/dynamic` pour le code splitting des composants lourds ?
+               - **Metadata** : Export de metadata statique plutot que generateMetadata quand possible ?
+               - **Loading UI** : Presence de loading.tsx et Suspense pour le streaming ?
+               - **Parallel Routes** : Utilisation de routes paralleles pour le chargement concurrent ?
+               - **Route Handlers** : Les API routes utilisent-elles le bon runtime (edge vs nodejs) ?
+               - **Bundle Size** : Imports granulaires (pas d'import * from) ? Tree-shaking possible ?
+
+            5. **Donne une note initiale /10** a la PR basee sur :
+               - Respect des guidelines CLAUDE.md (3 pts)
+               - Qualite du code et typage (2 pts)
+               - Maintenabilite et refactoring (2 pts)
+               - Performance Next.js (3 pts) << IMPORTANT
+
+            6. **Si des ameliorations sont necessaires** :
+               - Applique les corrections directement sur la branche
+               - Chaque modification doit etre justifiee
+
+            7. **Redige un commentaire de review** au format suivant :
+
+            ```
+            ## Code Review - PR #${{ github.event.pull_request.number }}
+
+            ### Note initiale : X/10
+
+            #### Points positifs
+            - ...
+
+            #### Points a ameliorer (avant intervention)
+            - ...
+
+            #### Performance Next.js
+            | Critere | Status | Commentaire |
+            |---------|--------|-------------|
+            | Server/Client Components | OK/KO | ... |
+            | Data Fetching | OK/KO | ... |
+            | Images optimisees | OK/KO | ... |
+            | Bundle Size | OK/KO | ... |
+            | ... | ... | ... |
+
+            #### Modifications effectuees
+            - ...
+
+            #### Justifications des changements
+            - ...
+
+            ### Note finale apres review : Y/10
+
+            ---
+            Review automatique par Claude (avec verification Next.js via Context7)
+            ```
+
+            8. **Poste ce commentaire** sur la PR avec `gh pr comment ${{ github.event.pull_request.number }} --body "..."`
+
+            9. **Si tu as fait des modifications**, commit et push sur la branche de la PR
+
+            10. **Note finale de la PR** : Y/10 + commentaire de review et explication des améliorations apportées.
+
+            IMPORTANT: Sois constructif et pedagogique dans tes commentaires. L'objectif est d'aider l'auteur a progresser.
+          claude_args: |
+            --allowedTools "mcp__context7__resolve-library-id,mcp__context7__get-library-docs,Bash(gh pr diff:*),Bash(gh pr comment:*),Bash(gh pr view:*),Bash(git:*),Edit,Read,Glob,Grep,TodoWrite"
