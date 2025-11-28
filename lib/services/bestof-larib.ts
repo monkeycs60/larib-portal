@@ -98,6 +98,7 @@ export type CaseListSortField =
   | 'diseaseTag'
   | 'attempts'
   | 'personalDifficulty'
+  | 'firstCompletedAt'
 export type CaseListSort = { field?: CaseListSortField; direction?: 'asc' | 'desc' }
 
 export type SerializedCaseFilters = {
@@ -358,6 +359,13 @@ const fetchClinicalCases = async ({
     base.sort(
       (a, b) => (order[a.personalDifficulty ?? 'BEGINNER'] - order[b.personalDifficulty ?? 'BEGINNER']) * direction,
     )
+  } else if (sort?.field === 'firstCompletedAt') {
+    const direction = sort.direction === 'asc' ? 1 : -1
+    base.sort((a, b) => {
+      const aTime = a.firstCompletedAt?.getTime() ?? 0
+      const bTime = b.firstCompletedAt?.getTime() ?? 0
+      return (aTime - bTime) * direction
+    })
   } else if (sort?.field === 'name') {
     const direction = sort.direction === 'desc' ? -1 : 1
     base.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }) * direction)

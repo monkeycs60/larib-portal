@@ -166,7 +166,7 @@ export default function FiltersBar({
 		return `${y}-${m}-${dd}`;
 	}
 
-	function applyPreset(preset: string) {
+	function computeDateRangeFromPreset(preset: string, fallbackFrom: string, fallbackTo: string): { from: string; to: string } {
 		const now = new Date();
 		const startOfDay = (d: Date) => {
 			const c = new Date(d);
@@ -183,7 +183,7 @@ export default function FiltersBar({
 			const day = c.getDay() || 7;
 			c.setDate(c.getDate() - (day - 1));
 			return startOfDay(c);
-		}; // Monday
+		};
 		const endOfWeek = (d: Date) => {
 			const c = startOfWeek(d);
 			c.setDate(c.getDate() + 6);
@@ -194,154 +194,53 @@ export default function FiltersBar({
 		const endOfMonth = (d: Date) =>
 			endOfDay(new Date(d.getFullYear(), d.getMonth() + 1, 0));
 
-		let from = '';
-		let to = '';
 		switch (preset) {
 			case 'today':
-				from = formatYYYYMMDD(now);
-				to = formatYYYYMMDD(now);
-				break;
+				return { from: formatYYYYMMDD(now), to: formatYYYYMMDD(now) };
 			case 'yesterday': {
-				const y = new Date(now);
-				y.setDate(now.getDate() - 1);
-				from = formatYYYYMMDD(y);
-				to = formatYYYYMMDD(y);
-				break;
+				const yesterday = new Date(now);
+				yesterday.setDate(now.getDate() - 1);
+				return { from: formatYYYYMMDD(yesterday), to: formatYYYYMMDD(yesterday) };
 			}
 			case 'last7': {
-				const s = new Date(now);
-				s.setDate(now.getDate() - 6);
-				from = formatYYYYMMDD(s);
-				to = formatYYYYMMDD(now);
-				break;
+				const startDate = new Date(now);
+				startDate.setDate(now.getDate() - 6);
+				return { from: formatYYYYMMDD(startDate), to: formatYYYYMMDD(now) };
 			}
 			case 'last30': {
-				const s = new Date(now);
-				s.setDate(now.getDate() - 29);
-				from = formatYYYYMMDD(s);
-				to = formatYYYYMMDD(now);
-				break;
+				const startDate = new Date(now);
+				startDate.setDate(now.getDate() - 29);
+				return { from: formatYYYYMMDD(startDate), to: formatYYYYMMDD(now) };
 			}
 			case 'thisWeek':
-				from = formatYYYYMMDD(startOfWeek(now));
-				to = formatYYYYMMDD(endOfWeek(now));
-				break;
+				return { from: formatYYYYMMDD(startOfWeek(now)), to: formatYYYYMMDD(endOfWeek(now)) };
 			case 'lastWeek': {
 				const lastWeekRef = new Date(now);
 				lastWeekRef.setDate(now.getDate() - 7);
-				from = formatYYYYMMDD(startOfWeek(lastWeekRef));
-				to = formatYYYYMMDD(endOfWeek(lastWeekRef));
-				break;
+				return { from: formatYYYYMMDD(startOfWeek(lastWeekRef)), to: formatYYYYMMDD(endOfWeek(lastWeekRef)) };
 			}
 			case 'thisMonth':
-				from = formatYYYYMMDD(startOfMonth(now));
-				to = formatYYYYMMDD(endOfMonth(now));
-				break;
+				return { from: formatYYYYMMDD(startOfMonth(now)), to: formatYYYYMMDD(endOfMonth(now)) };
 			case 'lastMonth': {
 				const ref = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-				from = formatYYYYMMDD(startOfMonth(ref));
-				to = formatYYYYMMDD(endOfMonth(ref));
-				break;
+				return { from: formatYYYYMMDD(startOfMonth(ref)), to: formatYYYYMMDD(endOfMonth(ref)) };
 			}
 			case '':
-				from = '';
-				to = '';
-				break;
+				return { from: '', to: '' };
 			default:
-				// custom: leave as-is
-				from = dateFrom;
-				to = dateTo;
+				return { from: fallbackFrom, to: fallbackTo };
 		}
+	}
+
+	function applyPreset(preset: string) {
+		const { from, to } = computeDateRangeFromPreset(preset, dateFrom, dateTo);
 		setDateFrom(from);
 		setDateTo(to);
 		pushWith({ datePreset: preset, dateFrom: from, dateTo: to });
 	}
 
 	function applyFirstCompletionPreset(preset: string) {
-		const now = new Date();
-		const startOfDay = (d: Date) => {
-			const c = new Date(d);
-			c.setHours(0, 0, 0, 0);
-			return c;
-		};
-		const endOfDay = (d: Date) => {
-			const c = new Date(d);
-			c.setHours(23, 59, 59, 999);
-			return c;
-		};
-		const startOfWeek = (d: Date) => {
-			const c = new Date(d);
-			const day = c.getDay() || 7;
-			c.setDate(c.getDate() - (day - 1));
-			return startOfDay(c);
-		};
-		const endOfWeek = (d: Date) => {
-			const c = startOfWeek(d);
-			c.setDate(c.getDate() + 6);
-			return endOfDay(c);
-		};
-		const startOfMonth = (d: Date) =>
-			new Date(d.getFullYear(), d.getMonth(), 1);
-		const endOfMonth = (d: Date) =>
-			endOfDay(new Date(d.getFullYear(), d.getMonth() + 1, 0));
-
-		let from = '';
-		let to = '';
-		switch (preset) {
-			case 'today':
-				from = formatYYYYMMDD(now);
-				to = formatYYYYMMDD(now);
-				break;
-			case 'yesterday': {
-				const y = new Date(now);
-				y.setDate(now.getDate() - 1);
-				from = formatYYYYMMDD(y);
-				to = formatYYYYMMDD(y);
-				break;
-			}
-			case 'last7': {
-				const s = new Date(now);
-				s.setDate(now.getDate() - 6);
-				from = formatYYYYMMDD(s);
-				to = formatYYYYMMDD(now);
-				break;
-			}
-			case 'last30': {
-				const s = new Date(now);
-				s.setDate(now.getDate() - 29);
-				from = formatYYYYMMDD(s);
-				to = formatYYYYMMDD(now);
-				break;
-			}
-			case 'thisWeek':
-				from = formatYYYYMMDD(startOfWeek(now));
-				to = formatYYYYMMDD(endOfWeek(now));
-				break;
-			case 'lastWeek': {
-				const lastWeekRef = new Date(now);
-				lastWeekRef.setDate(now.getDate() - 7);
-				from = formatYYYYMMDD(startOfWeek(lastWeekRef));
-				to = formatYYYYMMDD(endOfWeek(lastWeekRef));
-				break;
-			}
-			case 'thisMonth':
-				from = formatYYYYMMDD(startOfMonth(now));
-				to = formatYYYYMMDD(endOfMonth(now));
-				break;
-			case 'lastMonth': {
-				const ref = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-				from = formatYYYYMMDD(startOfMonth(ref));
-				to = formatYYYYMMDD(endOfMonth(ref));
-				break;
-			}
-			case '':
-				from = '';
-				to = '';
-				break;
-			default:
-				from = firstCompletionFrom;
-				to = firstCompletionTo;
-		}
+		const { from, to } = computeDateRangeFromPreset(preset, firstCompletionFrom, firstCompletionTo);
 		setFirstCompletionFrom(from);
 		setFirstCompletionTo(to);
 		pushWith({ firstCompletionPreset: preset, firstCompletionFrom: from, firstCompletionTo: to });
