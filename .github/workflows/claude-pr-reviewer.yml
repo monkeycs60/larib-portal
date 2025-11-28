@@ -15,6 +15,9 @@ jobs:
       id-token: write
 
     steps:
+      - name: Wait to avoid installation conflict
+        run: sleep 60
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
