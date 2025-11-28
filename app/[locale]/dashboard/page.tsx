@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server'
 import { formatUserName } from '@/lib/format-user-name'
 import * as motion from "framer-motion/client"
 import { ArrowRight } from 'lucide-react'
+import { WelcomeDetails } from './welcome-details'
 
 export default async function DashboardPage({
   params
@@ -91,9 +92,10 @@ export default async function DashboardPage({
             <h1 className="text-5xl md:text-6xl font-serif font-medium tracking-tight text-foreground mb-4 leading-[1.1]">
               {t('title')}
             </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground font-light tracking-wide">
+            <p className="text-xl md:text-2xl text-muted-foreground font-light tracking-wide mb-6">
               {t('welcome')}, <span className="text-foreground font-normal">{userName}</span>.
             </p>
+            <WelcomeDetails locale={locale} />
           </motion.div>
         </div>
       </div>

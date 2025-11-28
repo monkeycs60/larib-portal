@@ -107,7 +107,17 @@
     "adminSectionTitle": "Administration",
     "appDesc_BESTOF_LARIB": "Clinical cases and learning content from Best of Larib.",
     "appDesc_CONGES": "Manage your leave requests and absences.",
-    "appDesc_CARDIOLARIB": "Resources and tools dedicated to CardioLarib."
+    "appDesc_CARDIOLARIB": "Resources and tools dedicated to CardioLarib.",
+    "welcomeMessages": [
+      "Ready to make a difference today?",
+      "A new day, new opportunities.",
+      "Keep up the great work!",
+      "Let's stay focused on our goals.",
+      "Every day is a chance to improve.",
+      "Your commitment makes all the difference.",
+      "Together, we are stronger.",
+      "Excellence is a journey, not a destination."
+    ]
   },
   "metadata": {
     "title": "Larib Portal",
