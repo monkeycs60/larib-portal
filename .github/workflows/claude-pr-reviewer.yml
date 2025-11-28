@@ -151,5 +151,6 @@ jobs:
 
             IMPORTANT: Sois constructif et pedagogique dans tes commentaires. L'objectif est d'aider l'auteur a progresser.
           claude_args: |
+            --model claude-opus-4-5-20251101
             --mcp-config '{"mcpServers":{"context7":{"command":"npx","args":["-y","@upstash/context7-mcp@latest"]}}}'
             --allowedTools "mcp__context7__resolve-library-id,mcp__context7__get-library-docs,Bash(gh issue:*),Bash(gh pr diff:*),Bash(gh pr comment:*),Bash(gh pr view:*),Bash(git:*),Edit,Read,Glob,Grep,TodoWrite"
