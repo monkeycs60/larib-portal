@@ -2,6 +2,7 @@ import { requireAuth } from '@/lib/auth-guard'
 import { Link } from '@/app/i18n/navigation'
 import { getTranslations } from 'next-intl/server'
 import { formatUserName } from '@/lib/format-user-name'
+import { generatePersonalizedGreeting } from '@/lib/services/greeting-generator'
 import * as motion from "framer-motion/client"
 import { ArrowRight } from 'lucide-react'
 
@@ -62,6 +63,8 @@ export default async function DashboardPage({
     email: session.user.email
   })
 
+  const personalizedGreeting = generatePersonalizedGreeting(userName, locale)
+
   const container = {
     hidden: { opacity: 0 },
     show: {
@@ -92,7 +95,7 @@ export default async function DashboardPage({
               {t('title')}
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground font-light tracking-wide">
-              {t('welcome')}, <span className="text-foreground font-normal">{userName}</span>.
+              {personalizedGreeting}.
             </p>
           </motion.div>
         </div>
