@@ -64,7 +64,8 @@ export default async function DashboardPage({
   })
 
   const greetings = t.raw('greetings') as string[]
-  const randomGreeting = getRandomGreeting(greetings)
+  const seed = `${session.user.id}-${new Date().toDateString()}`
+  const randomGreeting = getRandomGreeting(greetings, seed)
 
   const container = {
     hidden: { opacity: 0 },

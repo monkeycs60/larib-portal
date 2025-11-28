@@ -1,4 +1,8 @@
-export function getRandomGreeting(greetings: string[]): string {
-  const randomIndex = Math.floor(Math.random() * greetings.length)
-  return greetings[randomIndex]
+export function getRandomGreeting(greetings: string[], seed: string): string {
+  const hash = seed.split('').reduce((acc, char) => {
+    return ((acc << 5) - acc) + char.charCodeAt(0)
+  }, 0)
+
+  const index = Math.abs(hash) % greetings.length
+  return greetings[index]
 }
