@@ -172,16 +172,8 @@ async function BestofLaribPageContent({
       edit: t('edit'),
       startNewAttempt: t('caseView.startNewAttempt'),
     },
-    relativeTime: {
-      justNow: t('relativeTime.justNow'),
-      minutesAgo: t('relativeTime.minutesAgo'),
-      hoursAgo: t('relativeTime.hoursAgo'),
-      daysAgo: t('relativeTime.daysAgo'),
-      weeksAgo: t('relativeTime.weeksAgo'),
-      monthsAgo: t('relativeTime.monthsAgo'),
-      yearsAgo: t('relativeTime.yearsAgo'),
-    },
     empty: t('empty'),
+    t,
   };
 
   return (

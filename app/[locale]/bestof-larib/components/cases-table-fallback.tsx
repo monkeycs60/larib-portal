@@ -47,16 +47,8 @@ export type CasesTableTranslations = {
     edit: string;
     startNewAttempt: string;
   };
-  relativeTime: {
-    justNow: string;
-    minutesAgo: string;
-    hoursAgo: string;
-    daysAgo: string;
-    weeksAgo: string;
-    monthsAgo: string;
-    yearsAgo: string;
-  };
   empty: string;
+  t: (key: string, values?: Record<string, number>) => string;
 };
 
 type AdminTag = { id: string; name: string; color: string; description: string | null };
@@ -249,12 +241,12 @@ export default function CasesTableFallback({
                     </TableCell>
                   ) : null}
                   <TableCell>
-                    {formatRelativeTime(caseItem.createdAt, translations.relativeTime)}
+                    {formatRelativeTime(caseItem.createdAt, translations.t)}
                   </TableCell>
                   {isUserView ? (
                     <TableCell>
                       {caseItem.firstCompletedAt
-                        ? formatRelativeTime(caseItem.firstCompletedAt, translations.relativeTime)
+                        ? formatRelativeTime(caseItem.firstCompletedAt, translations.t)
                         : '-'}
                     </TableCell>
                   ) : null}

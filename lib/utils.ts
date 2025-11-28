@@ -5,19 +5,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-type RelativeTimeTranslations = {
-  justNow: string;
-  minutesAgo: string;
-  hoursAgo: string;
-  daysAgo: string;
-  weeksAgo: string;
-  monthsAgo: string;
-  yearsAgo: string;
-};
+type RelativeTimeFormatter = (key: string, values?: Record<string, number>) => string;
 
 export function formatRelativeTime(
   date: Date | string,
-  translations: RelativeTimeTranslations
+  t: RelativeTimeFormatter
 ): string {
   const now = new Date();
   const targetDate = typeof date === 'string' ? new Date(date) : date;
@@ -30,22 +22,22 @@ export function formatRelativeTime(
   const diffYears = Math.floor(diffDays / 365);
 
   if (diffMinutes < 1) {
-    return translations.justNow;
+    return t('relativeTime.justNow');
   }
   if (diffMinutes < 60) {
-    return translations.minutesAgo.replace('{count}', String(diffMinutes));
+    return t('relativeTime.minutesAgo', { count: diffMinutes });
   }
   if (diffHours < 24) {
-    return translations.hoursAgo.replace('{count}', String(diffHours));
+    return t('relativeTime.hoursAgo', { count: diffHours });
   }
   if (diffDays < 7) {
-    return translations.daysAgo.replace('{count}', String(diffDays));
+    return t('relativeTime.daysAgo', { count: diffDays });
   }
   if (diffWeeks < 4) {
-    return translations.weeksAgo.replace('{count}', String(diffWeeks));
+    return t('relativeTime.weeksAgo', { count: diffWeeks });
   }
   if (diffMonths < 12) {
-    return translations.monthsAgo.replace('{count}', String(diffMonths));
+    return t('relativeTime.monthsAgo', { count: diffMonths });
   }
-  return translations.yearsAgo.replace('{count}', String(diffYears));
+  return t('relativeTime.yearsAgo', { count: diffYears });
 }

@@ -206,12 +206,12 @@ export default async function CasesTable({
                     </TableCell>
                   ) : null}
                   <TableCell>
-                    {formatRelativeTime(caseItem.createdAt, translations.relativeTime)}
+                    {formatRelativeTime(caseItem.createdAt, translations.t)}
                   </TableCell>
                   {isUserView ? (
                     <TableCell>
                       {caseItem.firstCompletedAt
-                        ? formatRelativeTime(caseItem.firstCompletedAt, translations.relativeTime)
+                        ? formatRelativeTime(caseItem.firstCompletedAt, translations.t)
                         : '-'}
                     </TableCell>
                   ) : null}
