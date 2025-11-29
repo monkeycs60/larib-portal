@@ -1,5 +1,6 @@
 import { PrismaClient } from '../app/generated/prisma';
 import { hash } from 'bcryptjs';
+import { randomUUID } from 'crypto';
 
 const prisma = new PrismaClient();
 
@@ -14,12 +15,14 @@ async function main() {
   const adminPassword = await hash('ristifou', 10);
   const adminUser = await prisma.user.create({
     data: {
+      id: randomUUID(),
       name: 'Test Admin',
       email: 'test-admin@larib-portal.test',
       emailVerified: true,
       role: 'admin',
       accounts: {
         create: {
+          id: randomUUID(),
           providerId: 'credential',
           accountId: 'test-admin@larib-portal.test',
           password: adminPassword,
@@ -34,12 +37,14 @@ async function main() {
   const userPassword = await hash('ristifou', 10);
   const regularUser = await prisma.user.create({
     data: {
+      id: randomUUID(),
       name: 'Test User',
       email: 'test-user@larib-portal.test',
       emailVerified: true,
       role: 'user',
       accounts: {
         create: {
+          id: randomUUID(),
           providerId: 'credential',
           accountId: 'test-user@larib-portal.test',
           password: userPassword,
@@ -59,6 +64,7 @@ async function main() {
   for (let i = 0; i < 5; i++) {
     await prisma.clinicalCase.create({
       data: {
+        id: randomUUID(),
         name: `Test Case ${i + 1}`,
         examType: examTypes[i % examTypes.length],
         difficulty: difficulties[i % difficulties.length],
