@@ -32,6 +32,7 @@ async function main() {
 			email: 'test-admin@larib-portal.test',
 			emailVerified: true,
 			role: 'ADMIN',
+			applications: ['BESTOF_LARIB', 'CONGES'],
 			accounts: {
 				create: {
 					id: randomUUID(),
@@ -54,6 +55,7 @@ async function main() {
 			email: 'test-user@larib-portal.test',
 			emailVerified: true,
 			role: 'USER',
+			applications: ['BESTOF_LARIB', 'CONGES'],
 			accounts: {
 				create: {
 					id: randomUUID(),
