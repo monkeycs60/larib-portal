@@ -242,12 +242,12 @@ export default function CasesTableFallback({
                     </TableCell>
                   ) : null}
                   <TableCell>
-                    {formatRelativeTime(caseItem.createdAt, translations.t)}
+                    {formatRelativeTime(caseItem.createdAt, (key: string, values?: Record<string, number>) => t(key, values))}
                   </TableCell>
                   {isUserView ? (
                     <TableCell>
                       {caseItem.firstCompletedAt
-                        ? formatRelativeTime(caseItem.firstCompletedAt, translations.t)
+                        ? formatRelativeTime(caseItem.firstCompletedAt, (key: string, values?: Record<string, number>) => t(key, values))
                         : '-'}
                     </TableCell>
                   ) : null}

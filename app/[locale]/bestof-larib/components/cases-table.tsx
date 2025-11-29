@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Eye, Pencil, PlusCircle } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 import { formatRelativeTime } from '@/lib/utils';
 import TableOverlay from './table-overlay';
 import DeleteCaseButton from './delete-case-button';
@@ -91,6 +92,7 @@ export default async function CasesTable({
 }) {
   const cases = await casesPromise;
   const isUserView = Boolean(userId) && !isAdmin;
+  const t = await getTranslations('bestof');
 
   return (
     <div className='relative rounded-md border'>
@@ -206,12 +208,12 @@ export default async function CasesTable({
                     </TableCell>
                   ) : null}
                   <TableCell>
-                    {formatRelativeTime(caseItem.createdAt, translations.t)}
+                    {formatRelativeTime(caseItem.createdAt, (key: string, values?: Record<string, number>) => t(key, values))}
                   </TableCell>
                   {isUserView ? (
                     <TableCell>
                       {caseItem.firstCompletedAt
-                        ? formatRelativeTime(caseItem.firstCompletedAt, translations.t)
+                        ? formatRelativeTime(caseItem.firstCompletedAt, (key: string, values?: Record<string, number>) => t(key, values))
                         : '-'}
                     </TableCell>
                   ) : null}

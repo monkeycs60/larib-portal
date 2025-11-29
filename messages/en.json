@@ -242,7 +242,7 @@
       "disease": "Diagnosis",
       "difficulty": "Difficulty",
       "status": "Status",
-      "createdAt": "Created",
+      "createdAt": "Created at",
       "firstCompletion": "First Completion",
       "attempts": "Attempts",
       "myDifficulty": "Level",
