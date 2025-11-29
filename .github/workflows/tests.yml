@@ -18,20 +18,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: larib_portal_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SHADOW_DATABASE_URL: ${{ secrets.SHADOW_DATABASE_URL }}
 
     steps:
       - name: Checkout code
@@ -59,14 +48,10 @@ jobs:
           R2_PUBLIC_BASE_URL: ${{ secrets.R2_PUBLIC_BASE_URL }}
           R2_S3_ENDPOINT: ${{ secrets.R2_S3_ENDPOINT }}
           GOOGLE_GEMINI_API_KEY: ${{ secrets.GOOGLE_GEMINI_API_KEY }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          SHADOW_DATABASE_URL: ${{ secrets.SHADOW_DATABASE_URL }}
-          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
-          BETTER_AUTH_URL: ${{ secrets.BETTER_AUTH_URL }}
         run: |
           cat > .env.test << EOF
-          DATABASE_URL=postgresql://postgres:postgres@localhost:5432/larib_portal_test
-          SHADOW_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/larib_portal_shadow
+          DATABASE_URL=${DATABASE_URL}
+          SHADOW_DATABASE_URL=${SHADOW_DATABASE_URL}
           GOOGLE_CLIENT_ID=test
           GOOGLE_CLIENT_SECRET=test
           GOOGLE_GEMINI_API_KEY=${GOOGLE_GEMINI_API_KEY:-test}
@@ -88,8 +73,6 @@ jobs:
 
       - name: Run database migrations
         run: npx prisma migrate deploy
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/larib_portal_test
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
@@ -97,7 +80,6 @@ jobs:
       - name: Run test setup and E2E tests
         run: npm run test:setup
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/larib_portal_test
           CI: true
 
       - name: Upload test results
