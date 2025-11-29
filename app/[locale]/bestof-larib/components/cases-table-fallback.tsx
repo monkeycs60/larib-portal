@@ -6,6 +6,7 @@ import { Link } from '@/app/i18n/navigation';
 import { Eye, Pencil, PlusCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBestofCasesCache } from '@/lib/stores/bestof-cases-cache';
+import { useTranslations } from 'next-intl';
 import { formatRelativeTime } from '@/lib/utils';
 import CaseDifficultyCell from './case-difficulty-cell';
 import CaseTagCell from './case-tag-cell';
@@ -48,7 +49,6 @@ export type CasesTableTranslations = {
     startNewAttempt: string;
   };
   empty: string;
-  t: (key: string, values?: Record<string, number>) => string;
 };
 
 type AdminTag = { id: string; name: string; color: string; description: string | null };
@@ -76,6 +76,7 @@ export default function CasesTableFallback({
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
 }) {
+  const t = useTranslations();
   const cachedCases = useBestofCasesCache((state) => state.entries.get(cacheKeyString));
   const isUserView = Boolean(userId) && !isAdmin;
 

@@ -173,7 +173,6 @@ async function BestofLaribPageContent({
       startNewAttempt: t('caseView.startNewAttempt'),
     },
     empty: t('empty'),
-    t,
   };
 
   return (
