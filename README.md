@@ -109,7 +109,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 │   └── e2e/                    # Playwright E2E tests
 └── types/                      # TypeScript type definitions
 ```
-
+ 
 ## 🧪 Development Scripts
 
 ```bash
