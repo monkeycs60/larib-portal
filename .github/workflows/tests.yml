@@ -47,26 +47,38 @@ jobs:
         run: npm ci
 
       - name: Setup test environment
+        env:
+          UPLOADTHING_TOKEN: ${{ secrets.UPLOADTHING_TOKEN }}
+          BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM: ${{ secrets.RESEND_FROM }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          R2_PUBLIC_BASE_URL: ${{ secrets.R2_PUBLIC_BASE_URL }}
+          R2_S3_ENDPOINT: ${{ secrets.R2_S3_ENDPOINT }}
+          GOOGLE_GEMINI_API_KEY: ${{ secrets.GOOGLE_GEMINI_API_KEY }}
         run: |
           cat > .env.test << EOF
           DATABASE_URL=postgresql://postgres:postgres@localhost:5432/larib_portal_test
           SHADOW_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/larib_portal_shadow
           GOOGLE_CLIENT_ID=test
           GOOGLE_CLIENT_SECRET=test
-          GOOGLE_GEMINI_API_KEY=test
+          GOOGLE_GEMINI_API_KEY=${GOOGLE_GEMINI_API_KEY:-test}
           NEXT_PUBLIC_APP_URL=http://localhost:3000
           BETTER_AUTH_URL=http://localhost:3000
           BETTER_AUTH_SECRET=test_secret_for_ci_only_minimum_32_chars_long
-          UPLOADTHING_TOKEN=test
-          BRAVE_API_KEY=test
-          RESEND_API_KEY=test
-          RESEND_FROM=test@example.com
-          R2_ACCOUNT_ID=test
-          R2_ACCESS_KEY_ID=test
-          R2_SECRET_ACCESS_KEY=test
-          R2_BUCKET_NAME=test
-          R2_PUBLIC_BASE_URL=https://test.example.com
-          R2_S3_ENDPOINT=https://test.example.com
+          UPLOADTHING_TOKEN=${UPLOADTHING_TOKEN:-test}
+          BRAVE_API_KEY=${BRAVE_API_KEY:-test}
+          RESEND_API_KEY=${RESEND_API_KEY:-test}
+          RESEND_FROM=${RESEND_FROM:-test@example.com}
+          R2_ACCOUNT_ID=${R2_ACCOUNT_ID:-test}
+          R2_ACCESS_KEY_ID=${R2_ACCESS_KEY_ID:-test}
+          R2_SECRET_ACCESS_KEY=${R2_SECRET_ACCESS_KEY:-test}
+          R2_BUCKET_NAME=${R2_BUCKET_NAME:-test}
+          R2_PUBLIC_BASE_URL=${R2_PUBLIC_BASE_URL:-https://test.example.com}
+          R2_S3_ENDPOINT=${R2_S3_ENDPOINT:-https://test.example.com}
           R2_REGION=auto
           EOF
 
