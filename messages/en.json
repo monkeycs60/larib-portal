@@ -108,6 +108,17 @@
     "appDesc_BESTOF_LARIB": "Clinical cases and learning content from Best of Larib.",
     "appDesc_CONGES": "Manage your leave requests and absences.",
     "appDesc_CARDIOLARIB": "Resources and tools dedicated to CardioLarib.",
+    "userInfoSectionTitle": "Your profile",
+    "userInfo": {
+      "email": "Email",
+      "position": "Position",
+      "country": "Country",
+      "phone": "Phone",
+      "role": "Role",
+      "roleAdmin": "Administrator",
+      "roleUser": "User",
+      "notSpecified": "Not specified"
+    },
     "greetings": [
       "Welcome",
       "Great to see you again",
