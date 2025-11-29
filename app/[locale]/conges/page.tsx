@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import { getTranslations } from 'next-intl/server'
 import { startOfMonth } from 'date-fns'
-import { getTypedSession } from '@/lib/auth-helpers'
+import { requireAuth } from '@/lib/auth-guard'
 import { redirect } from 'next/navigation'
 import {
   getLeaveCalendarData,
@@ -52,11 +52,7 @@ const statusBadgeVariant: Record<'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLE
 export default async function CongesPage({ params, searchParams }: PageParams) {
   const { locale } = await params
   const sp = await searchParams
-  const session = await getTypedSession()
-
-  if (!session) {
-    redirect(applicationLink(locale, '/login'))
-  }
+  const session = await requireAuth()
 
   const applications = (session.user.applications ?? []) as Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'>
   const canAccess = session.user.role === 'ADMIN' || applications.includes('CONGES')

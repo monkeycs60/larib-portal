@@ -3,6 +3,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Eye, Pencil, PlusCircle } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
+import { formatRelativeTime } from '@/lib/utils';
 import TableOverlay from './table-overlay';
 import DeleteCaseButton from './delete-case-button';
 import CreateCaseDialog from './create-case-dialog';
@@ -64,7 +66,7 @@ function renderStatusBadge({
 type AdminTag = { id: string; name: string; color: string; description: string | null };
 
 export default async function CasesTable({
-  casesPromise,
+  cases,
   isAdmin,
   userId,
   examTypes,
@@ -76,7 +78,7 @@ export default async function CasesTable({
   cacheKey,
   cacheKeyString,
 }: {
-  casesPromise: Promise<ClinicalCaseWithDisplayTags[]>;
+  cases: ClinicalCaseWithDisplayTags[];
   isAdmin: boolean;
   userId: string | null;
   examTypes: ExamType[];
@@ -88,8 +90,8 @@ export default async function CasesTable({
   cacheKey: BestofCacheKey;
   cacheKeyString: string;
 }) {
-  const cases = await casesPromise;
   const isUserView = Boolean(userId) && !isAdmin;
+  const t = await getTranslations('bestof');
 
   return (
     <div className='relative rounded-md border'>
@@ -117,15 +119,14 @@ export default async function CasesTable({
                 <SortHeader field='difficulty' label={translations.table.difficulty} activeField={sortField} direction={sortDirection} />
               </TableHead>
             ) : null}
+            <TableHead>
+              <SortHeader field='createdAt' label={translations.table.createdAt} activeField={sortField} direction={sortDirection} />
+            </TableHead>
             {isUserView ? (
               <TableHead>
-                <SortHeader field='createdAt' label={translations.table.firstCompletion} activeField={sortField} direction={sortDirection} />
+                <SortHeader field='firstCompletedAt' label={translations.table.firstCompletion} activeField={sortField} direction={sortDirection} />
               </TableHead>
-            ) : (
-              <TableHead>
-                <SortHeader field='createdAt' label={translations.table.createdAt} activeField={sortField} direction={sortDirection} />
-              </TableHead>
-            )}
+            ) : null}
             {isUserView ? (
               <TableHead>
                 <SortHeader field='attempts' label={translations.table.attempts} activeField={sortField} direction={sortDirection} />
@@ -206,12 +207,15 @@ export default async function CasesTable({
                     </TableCell>
                   ) : null}
                   <TableCell>
-                    {isUserView
-                      ? caseItem.firstCompletedAt
-                        ? new Date(caseItem.firstCompletedAt).toLocaleDateString()
-                        : '-'
-                      : new Date(caseItem.createdAt).toLocaleDateString()}
+                    {formatRelativeTime(caseItem.createdAt, (key: string, values?: Record<string, number>) => t(key, values))}
                   </TableCell>
+                  {isUserView ? (
+                    <TableCell>
+                      {caseItem.firstCompletedAt
+                        ? formatRelativeTime(caseItem.firstCompletedAt, (key: string, values?: Record<string, number>) => t(key, values))
+                        : '-'}
+                    </TableCell>
+                  ) : null}
                   {isUserView ? (
                     <TableCell>{typeof caseItem.attemptsCount === 'number' ? caseItem.attemptsCount : 0}</TableCell>
                   ) : null}

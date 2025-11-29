@@ -283,7 +283,7 @@ export default function BestofStatsFilters({
       </div>
 
       <div>
-        <label className='block text-xs mb-1'>{tFilters('dateRange')}</label>
+        <label className='block text-xs mb-1'>{tFilters('createdAtRange')}</label>
         <Select
           value={datePreset}
           onChange={(e) => {

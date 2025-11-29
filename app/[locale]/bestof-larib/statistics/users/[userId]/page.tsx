@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { getTypedSession } from '@/lib/auth-helpers';
+import { requireAuth } from '@/lib/auth-guard';
 import { redirect, notFound } from 'next/navigation';
 import { applicationLink } from '@/lib/application-link';
 import { Link } from '@/app/i18n/navigation';
@@ -16,9 +16,9 @@ async function UserProfilePageContent({
 }: {
   params: Promise<{ locale: string; userId: string }>;
 }) {
-  const t = await getTranslations('bestof.statistics.userProfile');
-  const session = await getTypedSession();
   const { locale, userId } = await params;
+  const t = await getTranslations({ locale, namespace: 'bestof.statistics.userProfile' });
+  const session = await requireAuth();
 
   if (!session || session.user.role !== 'ADMIN') {
     redirect(applicationLink(locale, '/bestof-larib'));
