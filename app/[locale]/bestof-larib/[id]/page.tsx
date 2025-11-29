@@ -1,7 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { getCaseById } from '@/lib/services/bestof-larib';
 import { Badge } from '@/components/ui/badge';
-import { getTypedSession } from '@/lib/auth-helpers';
+import { requireAuth } from '@/lib/auth-guard';
 import WorkArea, { PrefillState } from './work-area';
 import type { CaseAttemptSummary } from '@/lib/services/bestof-larib-attempts';
 import { getUserCaseState, listUserCaseAttempts } from '@/lib/services/bestof-larib-attempts';
@@ -16,9 +16,9 @@ async function CaseViewPageContent({
 	params: Promise<{ locale: string; id: string }>;
 	searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-	const t = await getTranslations('bestof');
+	const { locale, id } = await params;
+	const t = await getTranslations({ locale, namespace: 'bestof' });
 	const sp = await searchParams;
-	const { id } = await params;
 	const shouldStartNewAttempt = (() => {
 		const raw = sp?.newAttempt;
 		if (!raw) return false;
@@ -27,7 +27,7 @@ async function CaseViewPageContent({
 	})();
 	const [c, session] = await Promise.all([
 		getCaseById(id),
-		getTypedSession(),
+		requireAuth(),
 	]);
 	if (!c) return <div className='p-6'>{t('notFound')}</div>;
 

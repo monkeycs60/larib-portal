@@ -9,7 +9,7 @@ import {
   type CaseListSortField,
 } from '@/lib/services/bestof-larib';
 import { listAdminTags, listUserTags } from '@/lib/services/bestof-larib-tags';
-import { getTypedSession } from '@/lib/auth-helpers';
+import { requireAuth } from '@/lib/auth-guard';
 import { Link } from '@/app/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { ChartBar } from 'lucide-react';
@@ -28,8 +28,9 @@ export default async function BestofLaribPage({
   params: Promise<{ locale: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const t = await getTranslations('bestof');
-  const session = await getTypedSession();
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'bestof' });
+  const session = await requireAuth();
   const sp = await searchParams;
 
   const asArray = (value: string | string[] | undefined): string[] | undefined => {
@@ -101,7 +102,6 @@ export default async function BestofLaribPage({
     typeof sp?.dir === 'string' && (sp.dir === 'asc' || sp.dir === 'desc') ? sp.dir : undefined;
 
   const serializedFilters = serializeCaseFilters(filters);
-  const { locale } = await params;
   const cacheKey: BestofCacheKey = {
     locale,
     userId: session?.user?.id ?? null,
@@ -188,7 +188,7 @@ export default async function BestofLaribPage({
               <Link href='/bestof-larib/statistics'>
                 <Button variant='outline'>
                   <ChartBar className='size-4 mr-2' />
-                  Statistics
+                  {t('statistics.title')}
                 </Button>
               </Link>
               <CreateCaseDialog examTypes={examTypes} diseaseTags={diseaseTags} isAdmin={isAdmin} adminTags={adminTagsForDialog} />
