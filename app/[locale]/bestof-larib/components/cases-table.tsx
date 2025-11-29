@@ -66,7 +66,7 @@ function renderStatusBadge({
 type AdminTag = { id: string; name: string; color: string; description: string | null };
 
 export default async function CasesTable({
-  casesPromise,
+  cases,
   isAdmin,
   userId,
   examTypes,
@@ -78,7 +78,7 @@ export default async function CasesTable({
   cacheKey,
   cacheKeyString,
 }: {
-  casesPromise: Promise<ClinicalCaseWithDisplayTags[]>;
+  cases: ClinicalCaseWithDisplayTags[];
   isAdmin: boolean;
   userId: string | null;
   examTypes: ExamType[];
@@ -90,7 +90,6 @@ export default async function CasesTable({
   cacheKey: BestofCacheKey;
   cacheKeyString: string;
 }) {
-  const cases = await casesPromise;
   const isUserView = Boolean(userId) && !isAdmin;
   const t = await getTranslations('bestof');
 

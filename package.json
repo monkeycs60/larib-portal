@@ -12,6 +12,7 @@
 		"test:e2e:ui": "playwright test --ui",
 		"test:seed": "tsx prisma/seed.test.ts",
 		"test:setup": "npm run test:seed && playwright test",
+		"test:setup ui": "npm run test:seed && playwright test --ui",
 		"test:check-passwords": "tsx scripts/check-test-passwords.ts"
 	},
 	"dependencies": {

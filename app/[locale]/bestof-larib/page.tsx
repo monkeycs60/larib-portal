@@ -21,7 +21,7 @@ import TagsManagerModal from './components/tags-manager-modal';
 import type { BestofCacheKey } from '@/lib/bestof-cache-key';
 import { serialiseBestofCacheKey } from '@/lib/bestof-cache-key';
 
-async function BestofLaribPageContent({
+export default async function BestofLaribPage({
   params,
   searchParams,
 }: {
@@ -100,18 +100,6 @@ async function BestofLaribPageContent({
   const sortDirection =
     typeof sp?.dir === 'string' && (sp.dir === 'asc' || sp.dir === 'desc') ? sp.dir : undefined;
 
-  const casesPromise = listClinicalCasesWithDisplayTags(
-    session?.user?.id,
-    filters,
-    {
-      field: sortField,
-      direction: sortDirection,
-    },
-    {
-      includeContent: isAdmin,
-    }
-  );
-
   const serializedFilters = serializeCaseFilters(filters);
   const { locale } = await params;
   const cacheKey: BestofCacheKey = {
@@ -123,7 +111,18 @@ async function BestofLaribPageContent({
   };
   const cacheKeyString = serialiseBestofCacheKey(cacheKey);
 
-  const [examTypes, diseaseTags, adminTagsForFilter, adminTagsForDialog, userTagsList] = await Promise.all([
+  const [cases, examTypes, diseaseTags, adminTagsForFilter, adminTagsForDialog, userTagsList] = await Promise.all([
+    listClinicalCasesWithDisplayTags(
+      session?.user?.id,
+      filters,
+      {
+        field: sortField,
+        direction: sortDirection,
+      },
+      {
+        includeContent: isAdmin,
+      }
+    ),
     listExamTypes(),
     listDiseaseTags(),
     isAdmin
@@ -209,46 +208,19 @@ async function BestofLaribPageContent({
         }}
       />
 
-      <Suspense
-        fallback={
-          <CasesTableFallback
-            cacheKeyString={cacheKeyString}
-            isAdmin={isAdmin}
-            userId={session?.user?.id ?? null}
-            columnCount={columnCount}
-            translations={translations}
-            examTypes={examTypes}
-            diseaseTags={diseaseTags}
-            adminTags={adminTagsForDialog}
-            sortField={sortField}
-            sortDirection={sortDirection}
-          />
-        }
-      >
-        <CasesTable
-          casesPromise={casesPromise}
-          isAdmin={isAdmin}
-          userId={session?.user?.id ?? null}
-          examTypes={examTypes}
-          diseaseTags={diseaseTags}
-          adminTags={adminTagsForDialog}
-          sortField={sortField}
-          sortDirection={sortDirection}
-          translations={translations}
-          cacheKey={cacheKey}
-          cacheKeyString={cacheKeyString}
-        />
-      </Suspense>
+      <CasesTable
+        cases={cases}
+        isAdmin={isAdmin}
+        userId={session?.user?.id ?? null}
+        examTypes={examTypes}
+        diseaseTags={diseaseTags}
+        adminTags={adminTagsForDialog}
+        sortField={sortField}
+        sortDirection={sortDirection}
+        translations={translations}
+        cacheKey={cacheKey}
+        cacheKeyString={cacheKeyString}
+      />
     </div>
   );
-}
-
-export default async function BestofLaribPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ locale: string }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  return <BestofLaribPageContent params={params} searchParams={searchParams} />;
 }

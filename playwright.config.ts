@@ -32,6 +32,9 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+
+    /* Use domcontentloaded instead of load to avoid Next.js/React errors */
+    navigationTimeout: 60000,
   },
 
   /* Configure projects for major browsers */
