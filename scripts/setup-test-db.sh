@@ -21,6 +21,9 @@ if [ -z "$DATABASE_URL" ]; then
   exit 1
 fi
 
+echo "🔧 Generating Prisma Client..."
+npx prisma generate --schema=./prisma/schema.prisma
+
 echo "📦 Running Prisma migrations on test database..."
 npx prisma migrate deploy --schema=./prisma/schema.prisma
 
