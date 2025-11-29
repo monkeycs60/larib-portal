@@ -24,9 +24,12 @@ fi
 echo "📦 Running Prisma migrations on test database..."
 npx prisma migrate deploy --schema=./prisma/schema.prisma
 
-echo "🌱 Seeding test database (optional)..."
-# Uncomment if you have a seed script for tests
-# npx prisma db seed
+echo "🌱 Seeding test database with test users..."
+npx tsx prisma/seed.test.ts
 
 echo "✅ Test database setup complete!"
 echo "Database URL: $DATABASE_URL"
+echo ""
+echo "Test credentials created:"
+echo "  Admin: test-admin@larib-portal.test / ristifou"
+echo "  User:  test-user@larib-portal.test / ristifou"

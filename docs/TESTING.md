@@ -15,28 +15,36 @@ This project uses Playwright for E2E testing to ensure UI correctness and preven
 
 ### Setup Instructions
 
-1. **Create test database**:
-   ```bash
-   createdb larib_portal_test
-   ```
-
-2. **Configure environment**:
+1. **Configure environment**:
    ```bash
    cp .env.test.example .env.test
-   # Edit .env.test with your test database credentials
+   # Edit .env.test with your Neon test database URL
    ```
 
-3. **Run migrations**:
+   The example already includes the Neon test DB URL, just update `BETTER_AUTH_SECRET` if needed.
+
+2. **Run setup script**:
    ```bash
    chmod +x scripts/setup-test-db.sh
    ./scripts/setup-test-db.sh
    ```
 
+   This will:
+   - Run Prisma migrations on the test database
+   - Seed test users (admin + regular user)
+   - Create sample clinical cases
+
+3. **Test users created**:
+   - **Admin**: `test-admin@larib-portal.test` / `ristifou`
+   - **User**: `test-user@larib-portal.test` / `ristifou`
+
 ### Test Data Management
 
-- **Seed data**: Create test fixtures in `prisma/seed.test.ts` (optional)
+- **Seed script**: `prisma/seed.test.ts` creates test users and sample data
+- **Why seed users?**: Bypasses email verification flow needed for real users
+- **Test isolation**: Users are created with test-only email domains
+- **Re-seeding**: Run `./scripts/setup-test-db.sh` to reset test data
 - **Clean between runs**: Tests should be idempotent or clean up after themselves
-- **Isolation**: Each test should work independently
 
 ## Running Tests
 

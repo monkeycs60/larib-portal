@@ -1,12 +1,13 @@
 import { test, expect } from '@playwright/test';
 
+// Test users created by prisma/seed.test.ts
 const ADMIN_USER = {
-  email: 'toupin.solenn@gmail.com',
+  email: 'test-admin@larib-portal.test',
   password: 'ristifou',
 };
 
 const REGULAR_USER = {
-  email: 'clement.serizay@gmail.com',
+  email: 'test-user@larib-portal.test',
   password: 'ristifou',
 };
 
