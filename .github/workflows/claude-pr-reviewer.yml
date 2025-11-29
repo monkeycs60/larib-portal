@@ -55,7 +55,24 @@ jobs:
                - Utilise `gh pr diff ${{ github.event.pull_request.number }}` pour voir les changements
                - Lis les fichiers modifies pour comprendre le contexte
 
-            2. **Evalue la qualite du code** selon ces criteres (en te basant sur CLAUDE.md) :
+            2. **VERIFICATION DES TESTS (etape critique - prioritaire)** :
+               - Lis les fichiers de test modifies/ajoutes
+               - Verifie que :
+                 * Des tests ont ete ajoutes/modifies pour toute nouvelle fonctionnalite
+                 * Les tests valident REELLEMENT le comportement (pas juste des assertions faibles)
+                 * Les tests passent (verifie les resultats CI ou lance `npm run test:setup` si necessaire)
+                 * Aucun test existant n'a ete supprime ou affaibli sans justification
+                 * Les edge cases sont couverts
+                 * Les assertions sont precises (pas de `.toBeVisible()` partout sans verifier le contenu)
+               - **DETECTE LES TRICKS** :
+                 * Tests qui passent toujours (ex: `expect(true).toBe(true)`)
+                 * Assertions commentees ou supprimees
+                 * Timeouts augmentes sans raison
+                 * Tests skip/only laisses par erreur
+                 * Mocks qui cachent les vrais problemes
+               - Si problemes detectes : REFUSE la PR et demande corrections
+
+            3. **Evalue la qualite du code** selon ces criteres (en te basant sur CLAUDE.md) :
                - Typage TypeScript (pas de `any`, pas de `as any`, pas de ts-ignore)
                - Utilisation correcte des composants shadcn/ui
                - Architecture feature-based respectee
@@ -68,13 +85,13 @@ jobs:
                - Internationalisation avec next-intl
                - Server actions avec next-safe-action pour les mutations
 
-            3. **Identifie les opportunites de refactoring** :
+            4. **Identifie les opportunites de refactoring** :
                - Extraction de custom hooks reutilisables
                - Creation de fonctions utilitaires
                - Separation de composants trop complexes
                - Simplification de la logique
 
-            4. **PERFORMANCE NEXT.JS (section critique)** :
+            5. **PERFORMANCE NEXT.JS (section critique)** :
                IMPORTANT: Utilise le MCP context7 pour consulter la documentation officielle Next.js avant d'evaluer.
                - Appelle `mcp__context7__resolve-library-id` avec "nextjs" pour obtenir l'ID
                - Puis `mcp__context7__get-library-docs` avec le topic pertinent (ex: "performance", "caching", "server components")
@@ -92,17 +109,18 @@ jobs:
                - **Route Handlers** : Les API routes utilisent-elles le bon runtime (edge vs nodejs) ?
                - **Bundle Size** : Imports granulaires (pas d'import * from) ? Tree-shaking possible ?
 
-            5. **Donne une note initiale /10** a la PR basee sur :
-               - Respect des guidelines CLAUDE.md (3 pts)
+            6. **Donne une note initiale /10** a la PR basee sur :
+               - TESTS: Qualite et couverture (3 pts) << CRITIQUE
+               - Respect des guidelines CLAUDE.md (2 pts)
                - Qualite du code et typage (2 pts)
-               - Maintenabilite et refactoring (2 pts)
-               - Performance Next.js (3 pts) << IMPORTANT
+               - Maintenabilite et refactoring (1 pt)
+               - Performance Next.js (2 pts)
 
-            6. **Si des ameliorations sont necessaires** :
+            7. **Si des ameliorations sont necessaires** :
                - Applique les corrections directement sur la branche
                - Chaque modification doit etre justifiee
 
-            7. **Redige un commentaire de review** au format suivant :
+            8. **Redige un commentaire de review** au format suivant :
 
             ```
             ## Code Review - PR #${{ github.event.pull_request.number }}
@@ -115,6 +133,15 @@ jobs:
             | Toutes les demandes couvertes | OK/KO | ... |
 
             ### Note initiale : X/10
+
+            #### Tests (3/10 points)
+            | Critere | Status | Commentaire |
+            |---------|--------|-------------|
+            | Tests ajoutes/modifies | OK/KO | ... |
+            | Tests valident le comportement | OK/KO | ... |
+            | Tous les tests passent | OK/KO | ... |
+            | Edge cases couverts | OK/KO | ... |
+            | Pas de tricks detectes | OK/KO | ... |
 
             #### Points positifs
             - ...
@@ -140,14 +167,14 @@ jobs:
             ### Note finale apres review : Y/10
 
             ---
-            Review automatique par Claude (avec verification Next.js via Context7)
+            Review automatique par Claude (avec verification tests + Next.js via Context7)
             ```
 
-            8. **Poste ce commentaire** sur la PR avec `gh pr comment ${{ github.event.pull_request.number }} --body "..."`
+            9. **Poste ce commentaire** sur la PR avec `gh pr comment ${{ github.event.pull_request.number }} --body "..."`
 
-            9. **Si tu as fait des modifications**, commit et push sur la branche de la PR
+            10. **Si tu as fait des modifications**, commit et push sur la branche de la PR
 
-            10. **Note finale de la PR** : Y/10 + commentaire de review et explication des améliorations apportées.
+            11. **Note finale de la PR** : Y/10 + commentaire de review et explication des améliorations apportées.
 
             IMPORTANT: Sois constructif et pedagogique dans tes commentaires. L'objectif est d'aider l'auteur a progresser.
           claude_args: |

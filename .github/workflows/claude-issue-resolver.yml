@@ -32,9 +32,41 @@ jobs:
             Description:
             ${{ github.event.issue.body }}
 
-            Analyse cette issue et crée une pull request avec les changements nécessaires pour la résoudre.
-            Suis strictement les guidelines du projet définies dans CLAUDE.md.
-            Assure-toi que le code est typé correctement (pas de any), utilise les composants shadcn/ui, et respecte l'architecture feature-based.
+            ## Ta mission
+
+            1. **Analyse l'issue** et comprends exactement ce qui est demandé
+
+            2. **AVANT d'implémenter** :
+               - Lis les tests existants liés à la fonctionnalité à modifier
+               - Identifie quels tests doivent être ajoutés ou modifiés
+
+            3. **Implémente la solution** :
+               - Suis strictement les guidelines de CLAUDE.md
+               - Code typé (pas de any, pas de ts-ignore)
+               - Utilise shadcn/ui et respecte l'architecture
+
+            4. **TESTS (CRITIQUE - tu seras vérifié par le PR reviewer)** :
+               - **Ajoute ou modifie les tests** pour couvrir tes changements
+               - Les tests doivent **réellement valider** le comportement (pas juste passer)
+               - Couvre les cas normaux ET les edge cases
+               - **INTERDIT** : affaiblir les assertions, supprimer des tests, ou tricher pour faire passer les tests
+               - **INTERDIT** : modifier les tests existants qui ne sont pas liés à tes changements
+
+            5. **Exécute les tests** :
+               - Lance `npm run test:setup` pour seed la DB et lancer les tests
+               - Vérifie que TOUS les tests passent
+               - Si des tests échouent, corrige le code (pas les tests !)
+
+            6. **Crée la PR** avec :
+               - Un titre clair
+               - Une description qui liste les changements ET les tests ajoutés/modifiés
+               - Mentionne l'issue : "Fixes #${{ github.event.issue.number }}"
+
+            IMPORTANT: Le PR reviewer vérifiera que :
+            - Les tests existent et sont pertinents
+            - Les tests passent tous
+            - Tu n'as pas triché pour faire passer les tests
+            - Les edge cases sont couverts
           claude_args: |
             --model claude-opus-4-5-20251101
             --allowedTools "Bash,Edit,Write,Read,Glob,Grep,WebFetch,WebSearch,TodoWrite"
