@@ -55,7 +55,24 @@ jobs:
                - Utilise `gh pr diff ${{ github.event.pull_request.number }}` pour voir les changements
                - Lis les fichiers modifies pour comprendre le contexte
 
-            2. **Evalue la qualite du code** selon ces criteres (en te basant sur CLAUDE.md) :
+            2. **VERIFICATION DES TESTS (etape critique - prioritaire)** :
+               - Lis les fichiers de test modifies/ajoutes
+               - Verifie que :
+                 * Des tests ont ete ajoutes/modifies pour toute nouvelle fonctionnalite
+                 * Les tests valident REELLEMENT le comportement (pas juste des assertions faibles)
+                 * Les tests passent (verifie les resultats CI ou lance `npm run test:setup` si necessaire)
+                 * Aucun test existant n'a ete supprime ou affaibli sans justification
+                 * Les edge cases sont couverts
+                 * Les assertions sont precises (pas de `.toBeVisible()` partout sans verifier le contenu)
+               - **DETECTE LES TRICKS** :
+                 * Tests qui passent toujours (ex: `expect(true).toBe(true)`)
+                 * Assertions commentees ou supprimees
+                 * Timeouts augmentes sans raison
+                 * Tests skip/only laisses par erreur
+                 * Mocks qui cachent les vrais problemes
+               - Si problemes detectes : REFUSE la PR et demande corrections
+
+            3. **Evalue la qualite du code** selon ces criteres (en te basant sur CLAUDE.md) :
                - Typage TypeScript (pas de `any`, pas de `as any`, pas de ts-ignore)
                - Utilisation correcte des composants shadcn/ui
                - Architecture feature-based respectee
@@ -68,13 +85,13 @@ jobs:
                - Internationalisation avec next-intl
                - Server actions avec next-safe-action pour les mutations
 
-            3. **Identifie les opportunites de refactoring** :
+            4. **Identifie les opportunites de refactoring** :
                - Extraction de custom hooks reutilisables
                - Creation de fonctions utilitaires
                - Separation de composants trop complexes
                - Simplification de la logique
 
-            4. **PERFORMANCE NEXT.JS (section critique)** :
+            5. **PERFORMANCE NEXT.JS (section critique)** :
                IMPORTANT: Utilise le MCP context7 pour consulter la documentation officielle Next.js avant d'evaluer.
                - Appelle `mcp__context7__resolve-library-id` avec "nextjs" pour obtenir l'ID
                - Puis `mcp__context7__get-library-docs` avec le topic pertinent (ex: "performance", "caching", "server components")
@@ -126,6 +143,15 @@ jobs:
             | Toutes les demandes couvertes | OK/KO | ... |
 
             ### Note initiale : X/10
+
+            #### Tests (3/10 points)
+            | Critere | Status | Commentaire |
+            |---------|--------|-------------|
+            | Tests ajoutes/modifies | OK/KO | ... |
+            | Tests valident le comportement | OK/KO | ... |
+            | Tous les tests passent | OK/KO | ... |
+            | Edge cases couverts | OK/KO | ... |
+            | Pas de tricks detectes | OK/KO | ... |
 
             #### Points positifs
             - ...

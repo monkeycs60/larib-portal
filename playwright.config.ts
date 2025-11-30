@@ -4,9 +4,11 @@ import { defineConfig, devices } from '@playwright/test';
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
  */
-// import dotenv from 'dotenv';
-// import path from 'path';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load test environment variables
+dotenv.config({ path: path.resolve(__dirname, '.env.test') });
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -30,6 +32,9 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+
+    /* Use domcontentloaded instead of load to avoid Next.js/React errors */
+    navigationTimeout: 60000,
   },
 
   /* Configure projects for major browsers */
@@ -75,5 +80,10 @@ export default defineConfig({
     command: 'npm run dev',
     port: 3000,
     reuseExistingServer: !process.env.CI,
+    env: {
+      DATABASE_URL: process.env.DATABASE_URL,
+      BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+      BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
+    },
   },
 });

@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { getTypedSession } from '@/lib/auth-helpers';
+import { requireAuth } from '@/lib/auth-guard';
 import { redirect } from 'next/navigation';
 import {
   getUserStatistics,
@@ -26,9 +26,9 @@ async function BestofStatisticsPageContent({
   params: Promise<{ locale: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const t = await getTranslations('bestof.statistics');
-  const session = await getTypedSession();
   const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'bestof.statistics' });
+  const session = await requireAuth();
 
   if (!session || session.user.role !== 'ADMIN') {
     redirect(applicationLink(locale, '/bestof-larib'));

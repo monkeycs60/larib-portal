@@ -15,10 +15,14 @@
 
 -  **Component library**: Use shadcn/ui components exclusively
 -  **Generic components**: Create reusable components in `@/components/ui/` when shadcn equivalent doesn't exist
--  **Authentication**: use `const session = await getTypedSession();` (see lib/auth-helpers.ts) to check auth and redirect if needed ; check user auth in actions with `authenticatedAction` (see actions/safe-action.ts)
+-  **Authentication**:
+   -  Protected pages: use `const session = await requireAuth();` (from `lib/auth-guard.ts`) to enforce authentication and auto-redirect to login
+   -  Optional auth: use `const session = await getTypedSession();` (from `lib/auth-helpers.ts`) when auth is optional
+   -  Server actions: check user auth with `authenticatedAction` (see `actions/safe-action.ts`)
 -  **Internationalization**: Implement `next-intl` for French/English translations
    -  Client components: `useTranslations` hook
-   -  Server components: `getTranslations` function
+   -  Server components: **ALWAYS** pass locale explicitly: `const t = await getTranslations({ locale, namespace: 'bestof' });`
+   -  Extract locale from params first: `const { locale } = await params;`
 -  **Error handling**: Translate all Zod/API errors in both languages
 -  **Self-explanatory code**: Avoid unnecessary comments
 -  **User feedback (Sonner)**: For mutations (server actions) that change data, trigger a `sonner` toast on success and on error when it improves UX. Use `next-intl` for toast messages.
@@ -56,11 +60,32 @@
 
 ## Testing & Debugging
 
-### UI Testing & Analysis
+### Testing Requirements
+
+-  **Add tests** for any new functionality or bug fix
+-  **Run tests** before committing: `npm run test:setup`
+-  **Never weaken tests** to make them pass - fix the code instead
+-  **Cover edge cases** in addition to happy path scenarios
+
+### Running Tests
+
+```bash
+npm run test:setup                                     # Seed DB + run all tests
+npm run test:e2e                                       # Run tests only (no seed)
+npm run test:e2e tests/e2e/bestof-larib-complete.spec.ts  # Specific file
+npm run test:e2e:ui                                    # UI mode with seed
+```
+
+### UI Testing
 
 -  **Playwright MCP**: Primary tool for testing and debugging UI
--  **Screenshots**: Take screenshots as feedback to identify and correct issues
--  **E2E testing**: Use Playwright for comprehensive testing
+-  **Screenshots**: Take screenshots to identify and correct issues
+-  **Test structure**: Tests in `tests/e2e/` organized by feature
+-  **Test data**: Seed files in `prisma/seed.test.ts`
+
+### CI/CD
+
+Tests run automatically on push/PR via `.github/workflows/tests.yml`
 
 ## Quality Assurance
 

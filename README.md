@@ -109,7 +109,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 │   └── e2e/                    # Playwright E2E tests
 └── types/                      # TypeScript type definitions
 ```
-
+ 
 ## 🧪 Development Scripts
 
 ```bash
@@ -159,7 +159,7 @@ This template integrates seamlessly with **Claude Code** for an enhanced develop
 - **Type-safe server actions** with next-safe-action
 - **Internationalization** for all user-facing text
 - **Authentication checks** with `getTypedSession()`
-
+ 
 ### Code Organization
 
 - **Feature-based architecture** - Group by business domain
