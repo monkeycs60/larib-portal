@@ -18,6 +18,8 @@ async function main() {
 
 	// Clean existing data (delete in correct order due to foreign keys)
 	console.log('🧹 Cleaning existing data...');
+	await prisma.caseAttempt.deleteMany();
+	await prisma.userCaseSettings.deleteMany();
 	await prisma.clinicalCase.deleteMany();
 	await prisma.examType.deleteMany();
 	await prisma.account.deleteMany();
@@ -91,9 +93,12 @@ async function main() {
 	// Create test cases for bestof-larib
 	console.log('📦 Creating test clinical cases...');
 	const difficulties = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'] as const;
+	const statuses = ['PUBLISHED', 'DRAFT'] as const;
 
-	for (let i = 0; i < 5; i++) {
-		await prisma.clinicalCase.create({
+	const createdCases: Array<{ id: string; name: string }> = [];
+
+	for (let i = 0; i < 6; i++) {
+		const caseData = await prisma.clinicalCase.create({
 			data: {
 				id: randomUUID(),
 				name: `Test Case ${i + 1}`,
@@ -103,20 +108,68 @@ async function main() {
 					},
 				},
 				difficulty: difficulties[i % difficulties.length],
-				status: 'PUBLISHED',
+				status: statuses[i < 4 ? 0 : 1],
 				createdBy: {
 					connect: {
 						id: adminUser.id,
 					},
 				},
-				createdAt: new Date(
-					Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000
-				), // Random date in last 30 days
+				createdAt: new Date(Date.now() - (6 - i) * 24 * 60 * 60 * 1000),
 			},
 		});
+		createdCases.push({ id: caseData.id, name: `Test Case ${i + 1}` });
 	}
 
-	console.log('✅ Created 5 test clinical cases');
+	console.log('✅ Created 6 test clinical cases');
+
+	console.log('📦 Creating user attempts and settings for sorting tests...');
+
+	await prisma.caseAttempt.create({
+		data: {
+			id: randomUUID(),
+			userId: regularUser.id,
+			caseId: createdCases[0].id,
+			validatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+		},
+	});
+
+	await prisma.caseAttempt.create({
+		data: {
+			id: randomUUID(),
+			userId: regularUser.id,
+			caseId: createdCases[1].id,
+			validatedAt: null,
+		},
+	});
+
+	await prisma.userCaseSettings.create({
+		data: {
+			id: randomUUID(),
+			userId: regularUser.id,
+			caseId: createdCases[0].id,
+			personalDifficulty: 'ADVANCED',
+		},
+	});
+
+	await prisma.userCaseSettings.create({
+		data: {
+			id: randomUUID(),
+			userId: regularUser.id,
+			caseId: createdCases[1].id,
+			personalDifficulty: 'BEGINNER',
+		},
+	});
+
+	await prisma.userCaseSettings.create({
+		data: {
+			id: randomUUID(),
+			userId: regularUser.id,
+			caseId: createdCases[2].id,
+			personalDifficulty: 'INTERMEDIATE',
+		},
+	});
+
+	console.log('✅ Created user attempts and settings');
 
 	console.log('✨ Test database seeded successfully!');
 	console.log('');
