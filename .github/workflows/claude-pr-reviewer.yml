@@ -109,12 +109,22 @@ jobs:
                - **Route Handlers** : Les API routes utilisent-elles le bon runtime (edge vs nodejs) ?
                - **Bundle Size** : Imports granulaires (pas d'import * from) ? Tree-shaking possible ?
 
+            5. **TESTS E2E AVEC PLAYWRIGHT** :
+               IMPORTANT: Lance les tests Playwright pour verifier qu'il n'y a pas d'erreurs d'UI ou d'i18n.
+               - Utilise `npx playwright test --reporter=list` pour lancer tous les tests
+               - Si des tests echouent, lis le rapport d'erreur et corrige le code
+               - Verifie particulierement :
+                 * Pas de clés de traduction non resolues (ex: {count})
+                 * Dates et formats d'affichage corrects
+                 * Textes traduits dans les deux langues
+               - Les tests DOIVENT PASSER avant de continuer
+
             6. **Donne une note initiale /10** a la PR basee sur :
-               - TESTS: Qualite et couverture (3 pts) << CRITIQUE
                - Respect des guidelines CLAUDE.md (2 pts)
                - Qualite du code et typage (2 pts)
-               - Maintenabilite et refactoring (1 pt)
+               - Maintenabilite et refactoring (2 pts)
                - Performance Next.js (2 pts)
+               - Tests E2E passent (2 pts) << IMPORTANT
 
             7. **Si des ameliorations sont necessaires** :
                - Applique les corrections directement sur la branche
@@ -158,6 +168,11 @@ jobs:
             | Bundle Size | OK/KO | ... |
             | ... | ... | ... |
 
+            #### Tests E2E
+            - Tests executes : X/Y passed
+            - Erreurs detectees : ...
+            - Corrections apportees : ...
+
             #### Modifications effectuees
             - ...
 
@@ -167,17 +182,15 @@ jobs:
             ### Note finale apres review : Y/10
 
             ---
-            Review automatique par Claude (avec verification tests + Next.js via Context7)
+            Review automatique par Claude (avec verification Next.js via Context7 et tests E2E)
             ```
 
             9. **Poste ce commentaire** sur la PR avec `gh pr comment ${{ github.event.pull_request.number }} --body "..."`
 
             10. **Si tu as fait des modifications**, commit et push sur la branche de la PR
 
-            11. **Note finale de la PR** : Y/10 + commentaire de review et explication des améliorations apportées.
-
             IMPORTANT: Sois constructif et pedagogique dans tes commentaires. L'objectif est d'aider l'auteur a progresser.
           claude_args: |
             --model claude-opus-4-5-20251101
-            --mcp-config '{"mcpServers":{"context7":{"command":"npx","args":["-y","@upstash/context7-mcp@latest"]}}}'
-            --allowedTools "mcp__context7__resolve-library-id,mcp__context7__get-library-docs,Bash(gh issue:*),Bash(gh pr diff:*),Bash(gh pr comment:*),Bash(gh pr view:*),Bash(git:*),Edit,Read,Glob,Grep,TodoWrite"
+            --mcp-config '{"mcpServers":{"context7":{"command":"npx","args":["-y","@upstash/context7-mcp@latest"]},"playwright":{"command":"npx","args":["-y","@executeautomation/playwright-mcp-server"]}}}'
+            --allowedTools "mcp__context7__resolve-library-id,mcp__context7__get-library-docs,mcp__playwright__*,Bash(gh issue:*),Bash(gh pr diff:*),Bash(gh pr comment:*),Bash(gh pr view:*),Bash(git:*),Bash(npx playwright:*),Edit,Read,Glob,Grep,TodoWrite"
