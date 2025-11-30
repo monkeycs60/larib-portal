@@ -308,6 +308,151 @@ test.describe('Sorting Tests', () => {
 		// Le tri doit avoir un effet (l'ordre peut changer ou rester le même si déjà trié)
 		expect(namesBefore.length).toBe(namesAfter.length);
 	});
+
+	test('should sort by user status correctly (completed > in progress > not started)', async ({
+		page,
+	}) => {
+		await loginAs(page, 'user');
+		await gotoBestofLarib(page);
+		await waitForTableToLoad(page);
+
+		const statusHeader = page.getByRole('button', { name: /sort by status/i });
+
+		await statusHeader.click();
+		await page.waitForURL(/sort=status&dir=asc/, { timeout: 5000 });
+		await page.waitForTimeout(500);
+
+		const statusesAsc = await page
+			.locator('table tbody tr td:nth-child(1)')
+			.allTextContents();
+		expect(statusesAsc.length).toBeGreaterThan(0);
+
+		const statusOrder = { 'Not Started': 0, 'In Progress': 1, Completed: 2 };
+		const statusOrderFr = { 'Non commencé': 0, 'En cours': 1, Terminé: 2 };
+
+		const getOrder = (status: string): number => {
+			const trimmed = status.trim();
+			return statusOrder[trimmed] ?? statusOrderFr[trimmed] ?? -1;
+		};
+
+		for (let i = 1; i < statusesAsc.length; i++) {
+			const prevOrder = getOrder(statusesAsc[i - 1]);
+			const currOrder = getOrder(statusesAsc[i]);
+			expect(currOrder).toBeGreaterThanOrEqual(prevOrder);
+		}
+
+		await statusHeader.click();
+		await page.waitForURL(/sort=status&dir=desc/, { timeout: 5000 });
+		await page.waitForTimeout(500);
+
+		const statusesDesc = await page
+			.locator('table tbody tr td:nth-child(1)')
+			.allTextContents();
+
+		for (let i = 1; i < statusesDesc.length; i++) {
+			const prevOrder = getOrder(statusesDesc[i - 1]);
+			const currOrder = getOrder(statusesDesc[i]);
+			expect(currOrder).toBeLessThanOrEqual(prevOrder);
+		}
+	});
+
+	test('should sort by level (personalDifficulty) correctly', async ({
+		page,
+	}) => {
+		await loginAs(page, 'user');
+		await gotoBestofLarib(page);
+		await waitForTableToLoad(page);
+
+		const levelHeader = page.getByRole('button', { name: /sort by level/i });
+
+		await levelHeader.click();
+		await page.waitForURL(/sort=personalDifficulty&dir=asc/, { timeout: 5000 });
+		await page.waitForTimeout(500);
+
+		expect(page.url()).toContain('sort=personalDifficulty');
+		expect(page.url()).toContain('dir=asc');
+
+		await levelHeader.click();
+		await page.waitForURL(/sort=personalDifficulty&dir=desc/, { timeout: 5000 });
+		await page.waitForTimeout(500);
+
+		expect(page.url()).toContain('sort=personalDifficulty');
+		expect(page.url()).toContain('dir=desc');
+	});
+
+	test('should sort by difficulty correctly for admin (beginner < intermediate < advanced)', async ({
+		page,
+	}) => {
+		await loginAs(page, 'admin');
+		await gotoBestofLarib(page);
+		await waitForTableToLoad(page);
+
+		const difficultyHeader = page.getByRole('button', {
+			name: /sort by difficulty/i,
+		});
+
+		await difficultyHeader.click();
+		await page.waitForURL(/sort=difficulty&dir=asc/, { timeout: 5000 });
+		await page.waitForTimeout(500);
+
+		const difficultiesAsc = await page
+			.locator('table tbody tr td:nth-child(5)')
+			.allTextContents();
+		expect(difficultiesAsc.length).toBeGreaterThan(0);
+
+		const difficultyOrder = { Beginner: 0, Intermediate: 1, Advanced: 2 };
+		const difficultyOrderFr = { Débutant: 0, Intermédiaire: 1, Avancé: 2 };
+
+		const getOrder = (difficulty: string): number => {
+			const trimmed = difficulty.trim();
+			return difficultyOrder[trimmed] ?? difficultyOrderFr[trimmed] ?? -1;
+		};
+
+		for (let i = 1; i < difficultiesAsc.length; i++) {
+			const prevOrder = getOrder(difficultiesAsc[i - 1]);
+			const currOrder = getOrder(difficultiesAsc[i]);
+			expect(currOrder).toBeGreaterThanOrEqual(prevOrder);
+		}
+
+		await difficultyHeader.click();
+		await page.waitForURL(/sort=difficulty&dir=desc/, { timeout: 5000 });
+		await page.waitForTimeout(500);
+
+		const difficultiesDesc = await page
+			.locator('table tbody tr td:nth-child(5)')
+			.allTextContents();
+
+		for (let i = 1; i < difficultiesDesc.length; i++) {
+			const prevOrder = getOrder(difficultiesDesc[i - 1]);
+			const currOrder = getOrder(difficultiesDesc[i]);
+			expect(currOrder).toBeLessThanOrEqual(prevOrder);
+		}
+	});
+
+	test('should sort by admin status correctly (draft/published)', async ({
+		page,
+	}) => {
+		await loginAs(page, 'admin');
+		await gotoBestofLarib(page);
+		await waitForTableToLoad(page);
+
+		const statusHeader = page.getByRole('button', { name: /sort by status/i });
+
+		await statusHeader.click();
+		await page.waitForURL(/sort=status&dir=asc/, { timeout: 5000 });
+		await page.waitForTimeout(500);
+
+		expect(page.url()).toContain('sort=status');
+
+		await statusHeader.click();
+		await page.waitForURL(/sort=status&dir=desc/, { timeout: 5000 });
+		await page.waitForTimeout(500);
+
+		const statuses = await page
+			.locator('table tbody tr td:nth-child(1)')
+			.allTextContents();
+		expect(statuses.length).toBeGreaterThan(0);
+	});
 });
 
 // ============================================

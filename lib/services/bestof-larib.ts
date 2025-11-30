@@ -350,25 +350,35 @@ const fetchClinicalCases = async ({
     })
   }
 
+  const sortDirection = sort?.direction === 'asc' ? 1 : -1
   if (sort?.field === 'attempts') {
-    const direction = sort.direction === 'asc' ? 1 : -1
-    base.sort((a, b) => ((a.attemptsCount ?? 0) - (b.attemptsCount ?? 0)) * direction)
+    base.sort((a, b) => ((a.attemptsCount ?? 0) - (b.attemptsCount ?? 0)) * sortDirection)
   } else if (sort?.field === 'personalDifficulty') {
     const order = { BEGINNER: 0, INTERMEDIATE: 1, ADVANCED: 2 } as const
-    const direction = sort.direction === 'asc' ? 1 : -1
-    base.sort(
-      (a, b) => (order[a.personalDifficulty ?? 'BEGINNER'] - order[b.personalDifficulty ?? 'BEGINNER']) * direction,
-    )
+    base.sort((a, b) => {
+      const aVal = a.personalDifficulty ? order[a.personalDifficulty] : -1
+      const bVal = b.personalDifficulty ? order[b.personalDifficulty] : -1
+      return (aVal - bVal) * sortDirection
+    })
   } else if (sort?.field === 'firstCompletedAt') {
-    const direction = sort.direction === 'asc' ? 1 : -1
     base.sort((a, b) => {
       const aTime = a.firstCompletedAt?.getTime() ?? 0
       const bTime = b.firstCompletedAt?.getTime() ?? 0
-      return (aTime - bTime) * direction
+      return (aTime - bTime) * sortDirection
     })
   } else if (sort?.field === 'name') {
-    const direction = sort.direction === 'desc' ? -1 : 1
-    base.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }) * direction)
+    const nameDirection = sort.direction === 'desc' ? -1 : 1
+    base.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }) * nameDirection)
+  } else if (sort?.field === 'status' && userId) {
+    const getUserProgress = (state: UserAttemptState | undefined): number => {
+      if (state?.hasValidatedAttempt) return 2
+      if (state?.hasDraftAttempt) return 1
+      return 0
+    }
+    base.sort((a, b) => (getUserProgress(a.userAttemptState) - getUserProgress(b.userAttemptState)) * sortDirection)
+  } else if (sort?.field === 'difficulty') {
+    const order = { BEGINNER: 0, INTERMEDIATE: 1, ADVANCED: 2 } as const
+    base.sort((a, b) => (order[a.difficulty] - order[b.difficulty]) * sortDirection)
   }
 
   return base
