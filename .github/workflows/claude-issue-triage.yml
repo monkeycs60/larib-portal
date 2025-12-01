@@ -9,10 +9,13 @@ on:
 jobs:
   triage-issue:
     runs-on: ubuntu-latest
-    # Ne pas exécuter si c'est un bot qui commente OU si l'issue a déjà le label ready-to-dev
+    # PO intervient UNIQUEMENT sur les ISSUES (pas les PRs) et AVANT que le dev ne commence
+    # - Sur nouvelle issue : si pas encore ready-to-dev
+    # - Sur commentaire : si c'est une vraie issue (pas une PR), pas un bot, et en attente de clarification
     if: |
       (github.event_name == 'issues' && !contains(github.event.issue.labels.*.name, 'ready-to-dev')) ||
       (github.event_name == 'issue_comment' &&
+       !github.event.issue.pull_request &&
        github.event.comment.user.type != 'Bot' &&
        !contains(github.event.issue.labels.*.name, 'ready-to-dev') &&
        contains(github.event.issue.labels.*.name, 'needs-clarification'))
