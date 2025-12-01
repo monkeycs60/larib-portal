@@ -5,6 +5,7 @@ import { formatUserName } from '@/lib/format-user-name'
 import { getRandomGreeting } from '@/lib/random-greeting'
 import * as motion from "framer-motion/client"
 import { ArrowRight } from 'lucide-react'
+import { ClickMeButton } from './click-me-button'
 
 export default async function DashboardPage({
   params
@@ -99,6 +100,9 @@ export default async function DashboardPage({
             <p className="text-xl md:text-2xl text-muted-foreground font-light tracking-wide">
               {randomGreeting}, <span className="text-foreground font-normal">{userName}</span>.
             </p>
+            <div className="mt-6">
+              <ClickMeButton />
+            </div>
           </motion.div>
         </div>
       </div>
