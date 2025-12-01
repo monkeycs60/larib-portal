@@ -1,0 +1,133 @@
+name: Claude PR Feedback Handler
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+jobs:
+  handle-feedback:
+    runs-on: ubuntu-latest
+    # Ne s'exécute que si :
+    # - C'est un commentaire sur une PR (pas une issue)
+    # - Le commentaire vient d'un humain (pas d'un bot)
+    if: |
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request && github.event.comment.user.type != 'Bot') ||
+      (github.event_name == 'pull_request_review_comment' && github.event.comment.user.type != 'Bot')
+
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get PR branch
+        id: pr-info
+        run: |
+          if [ "${{ github.event_name }}" == "issue_comment" ]; then
+            PR_NUMBER="${{ github.event.issue.number }}"
+          else
+            PR_NUMBER="${{ github.event.pull_request.number }}"
+          fi
+          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+
+          # Get the PR branch name
+          PR_BRANCH=$(gh pr view $PR_NUMBER --json headRefName -q '.headRefName')
+          echo "pr_branch=$PR_BRANCH" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout PR branch
+        run: |
+          git fetch origin ${{ steps.pr-info.outputs.pr_branch }}
+          git checkout ${{ steps.pr-info.outputs.pr_branch }}
+
+      - name: Run Claude Feedback Agent
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            Tu es un agent de développement qui doit appliquer le feedback donné par un humain sur une Pull Request.
+
+            ## Contexte
+
+            **PR #${{ steps.pr-info.outputs.pr_number }}**
+            **Branche:** ${{ steps.pr-info.outputs.pr_branch }}
+
+            **Feedback reçu de ${{ github.event.comment.user.login }} :**
+            ```
+            ${{ github.event.comment.body }}
+            ```
+
+            ## Ta mission
+
+            ### 1. Comprends le feedback
+            - Lis le commentaire attentivement
+            - Si c'est un commentaire de review sur une ligne spécifique, identifie le fichier et la ligne concernée
+            - Comprends exactement ce qui est demandé
+
+            ### 2. Analyse le contexte
+            - Utilise `gh pr diff ${{ steps.pr-info.outputs.pr_number }}` pour voir les changements de la PR
+            - Lis les fichiers concernés par le feedback
+            - Comprends l'architecture et le code existant
+
+            ### 3. Applique les modifications demandées
+            - Implémente les changements demandés dans le feedback
+            - Suis strictement les guidelines de CLAUDE.md
+            - Code typé (pas de any, pas de ts-ignore)
+
+            ### 4. Vérifie les tests
+            - Lance `npm run test:setup` pour vérifier que les tests passent
+            - Si des tests échouent à cause de tes modifications, corrige-les
+            - Ajoute des tests si le feedback l'exige
+
+            ### 5. Commit et push
+            - Commit tes changements avec un message clair référençant le feedback
+            - Format du commit : "fix(pr-feedback): [description du changement]"
+            - Push sur la branche de la PR
+
+            ### 6. Réponds au commentaire
+            - Utilise `gh pr comment ${{ steps.pr-info.outputs.pr_number }} --body "..."` pour confirmer les modifications
+            - Format de la réponse :
+
+            ```
+            ## ✅ Feedback appliqué
+
+            ### Modifications effectuées
+            - [Liste des changements]
+
+            ### Fichiers modifiés
+            - `path/to/file.tsx`
+
+            ### Tests
+            - [X] Tests existants passent
+            - [X] Nouveaux tests ajoutés (si applicable)
+
+            ---
+            *Feedback de @${{ github.event.comment.user.login }} traité.*
+            ```
+
+            ## Cas particuliers
+
+            **Si le feedback n'est pas clair :**
+            - Réponds avec une demande de clarification
+            - N'applique pas de modifications
+
+            **Si le feedback est impossible à implémenter :**
+            - Explique pourquoi
+            - Propose une alternative si possible
+
+            **Si le feedback contredit les guidelines (CLAUDE.md) :**
+            - Signale le conflit
+            - Demande confirmation avant d'appliquer
+
+          claude_args: |
+            --model claude-opus-4-5-20251101
+            --allowedTools "Bash(gh pr:*),Bash(git:*),Bash(npm run:*),Bash(npx:*),Edit,Write,Read,Glob,Grep,TodoWrite"

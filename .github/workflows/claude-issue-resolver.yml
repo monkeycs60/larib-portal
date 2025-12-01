@@ -2,11 +2,13 @@ name: Claude Issue Auto-Resolver
 
 on:
   issues:
-    types: [opened]
+    types: [labeled]
 
 jobs:
   resolve-issue:
     runs-on: ubuntu-latest
+    # Ne s'exécute que si le label "ready-to-dev" vient d'être ajouté
+    if: github.event.label.name == 'ready-to-dev'
 
     permissions:
       contents: write
