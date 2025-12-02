@@ -140,9 +140,31 @@ jobs:
                - Performance Next.js (2 pts)
                - Tests E2E passent (2 pts) << IMPORTANT
 
-            7. **Si des ameliorations sont necessaires** :
-               - Applique les corrections directement sur la branche
-               - Chaque modification doit etre justifiee
+            7. **CORRIGE SYSTEMATIQUEMENT TOUTES LES FAIBLESSES DETECTEES** :
+               **IMPORTANT : Tu dois corriger TOUS les problemes que tu identifies, meme mineurs. Ne te contente pas de les signaler.**
+
+               Pour chaque probleme detecte (type any, mauvais nommage, commentaires inutiles, props > 5, composants > 350 lignes, etc.) :
+               - **Applique la correction immediatement** sur la branche de la PR
+               - Justifie chaque modification dans ton commentaire
+               - Ne laisse AUCUN probleme non resolu
+
+               Categories de corrections a appliquer systematiquement :
+               - **TypeScript** : Remplace tous les `any` par des types stricts, retire les `as any` et `ts-ignore`
+               - **Nommage** : Renomme les variables/fonctions avec des noms explicites (pas d'abbreviations dans map/filter/reduce)
+               - **Commentaires** : Supprime les commentaires inutiles qui expliquent le code
+               - **Props** : Refactorise les composants avec > 5 props en passant un objet ou en splitant le composant
+               - **Taille** : Splitte les composants/pages > 350 lignes en sous-composants
+               - **Architecture** : Deplace le code mal place (fetching dans client component → server component, logique metier dans composant → service layer)
+               - **Performance** : Ajoute `next/image` pour les images, utilise server components par defaut
+               - **i18n** : Ajoute les traductions manquantes, corrige les cles non resolues
+               - **Tests** : Renforce les assertions faibles, ajoute les edge cases manquants
+
+               **Workflow de correction :**
+               1. Liste TOUS les problemes detectes
+               2. Pour CHAQUE probleme : applique la correction avec Edit/Write
+               3. Verifie que les tests passent apres corrections : `npm run test:setup`
+               4. Si tests echouent : corrige jusqu'a ce qu'ils passent
+               5. Commit les corrections sur la branche de la PR
 
             8. **Redige un commentaire de review** au format suivant :
 
@@ -192,8 +214,16 @@ jobs:
             #### Points positifs
             - ...
 
-            #### Points a ameliorer (avant intervention)
-            - ...
+            #### Problemes detectes et corriges
+            **IMPORTANT : Liste TOUS les problemes detectes avec leurs corrections appliquees.**
+
+            | Fichier | Probleme | Correction appliquee | Commit |
+            |---------|----------|---------------------|---------|
+            | path/to/file.ts:42 | Type `any` utilise | Remplace par type strict `User` | abc1234 |
+            | path/to/component.tsx:15 | Variable `c` peu explicite | Renomme en `currentCase` | abc1234 |
+            | path/to/page.tsx | Composant 420 lignes | Splitte en 3 sous-composants | abc1234 |
+
+            **Si aucun probleme detecte :** Indique "✅ Aucun probleme detecte - Code conforme aux standards"
 
             #### Performance Next.js
             | Critere | Status | Commentaire |
@@ -209,13 +239,22 @@ jobs:
             - Erreurs detectees : ...
             - Corrections apportees : ...
 
-            #### Modifications effectuees
-            - ...
+            #### Recapitulatif des corrections
+            **Total de problemes corriges :** X problemes dans Y fichiers
+
+            **Commits de correction crees :**
+            - `abc1234` - fix: replace any types with strict types (3 fichiers)
+            - `def5678` - refactor: split large components and improve naming (2 fichiers)
 
             #### Justifications des changements
-            - ...
+            Pour chaque correction majeure, explique le raisonnement :
+            - **TypeScript strict** : Améliore la maintenabilité et évite les bugs runtime
+            - **Split composants** : Respecte la limite de 350 lignes et améliore la lisibilité
+            - **Nommage explicite** : Facilite la compréhension du code sans commentaires
 
             ### Note finale apres review : Y/10
+
+            **Amelioration :** +X points grace aux corrections appliquees
 
             ---
             Review automatique par Claude (avec verification Next.js via Context7 et tests E2E)
@@ -223,7 +262,10 @@ jobs:
 
             9. **Poste ce commentaire** sur la PR avec `gh pr comment ${{ github.event.pull_request.number }} --body "..."`
 
-            10. **Si tu as fait des modifications**, commit et push sur la branche de la PR
+            10. **Apres avoir applique TOUTES les corrections**, commit et push sur la branche de la PR :
+                - Groupe les corrections par theme (types, nommage, refactoring, etc.)
+                - Cree un commit separe pour chaque theme avec un message descriptif
+                - Push tous les commits sur la branche de la PR
 
             IMPORTANT: Sois constructif et pedagogique dans tes commentaires. L'objectif est d'aider l'auteur a progresser.
           claude_args: |
