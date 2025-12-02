@@ -5,6 +5,7 @@ import {
   getUserStatistics,
   getGlobalStatistics,
   getUserCompletionTrends,
+  getDatabaseStatistics,
   listAllUsersWithAttempts,
   type StatsFilters,
 } from '@/lib/services/bestof-larib-stats';
@@ -18,6 +19,7 @@ import BestofStatsFilters from '../components/bestof-stats-filters';
 import BestofStatsOverview from '../components/bestof-stats-overview';
 import BestofStatsUserTable from '../components/bestof-stats-user-table';
 import BestofStatsCharts from '../components/bestof-stats-charts';
+import BestofStatsDatabaseCharts from '../components/bestof-stats-database-charts';
 
 async function BestofStatisticsPageContent({
   params,
@@ -68,10 +70,11 @@ async function BestofStatisticsPageContent({
         : undefined,
   };
 
-  const [globalStats, userStats, userTrendData, users, examTypes, diseaseTags, adminTags] = await Promise.all([
+  const [globalStats, userStats, userTrendData, databaseStats, users, examTypes, diseaseTags, adminTags] = await Promise.all([
     getGlobalStatistics(filters),
     getUserStatistics(filters),
     getUserCompletionTrends(filters, 'week'),
+    getDatabaseStatistics(),
     listAllUsersWithAttempts(),
     listExamTypes(),
     listDiseaseTags(),
@@ -116,15 +119,33 @@ async function BestofStatisticsPageContent({
     advanced: t('table.advanced'),
   };
 
+  const databaseChartsTranslations = {
+    casesByExamType: t('database.casesByExamType'),
+    casesByDifficulty: t('database.casesByDifficulty'),
+    casesByStatus: t('database.casesByStatus'),
+    casesByDiagnosis: t('database.casesByDiagnosis'),
+    totalCases: t('database.totalCases'),
+    totalExamTypes: t('database.totalExamTypes'),
+    totalDiagnoses: t('database.totalDiagnoses'),
+    totalAdminTags: t('database.totalAdminTags'),
+    noData: t('database.noData'),
+    cases: t('database.cases'),
+    beginner: t('table.beginner'),
+    intermediate: t('table.intermediate'),
+    advanced: t('table.advanced'),
+    draft: t('database.draft'),
+    published: t('database.published'),
+  };
+
   return (
-    <div className='space-y-6 py-6 px-8 mx-auto'>
+    <div className='space-y-8 py-6 px-8 mx-auto max-w-screen-2xl'>
       <div className='flex items-center justify-between'>
         <div>
           <div className='flex items-center gap-3 mb-2'>
             <Link href='/bestof-larib'>
               <Button variant='ghost' size='sm'>
                 <ArrowLeft className='size-4 mr-2' />
-                Back
+                {t('back')}
               </Button>
             </Link>
           </div>
@@ -133,26 +154,41 @@ async function BestofStatisticsPageContent({
         </div>
       </div>
 
-      <BestofStatsFilters
-        data={{
-          users,
-          examTypes,
-          diseaseTags,
-          adminTags,
-        }}
-      />
+      <section className='space-y-4'>
+        <div className='flex items-center gap-2'>
+          <h2 className='text-lg font-semibold'>{t('sections.database')}</h2>
+        </div>
+        <BestofStatsDatabaseCharts stats={databaseStats} translations={databaseChartsTranslations} />
+      </section>
 
-      <BestofStatsOverview stats={globalStats} translations={overviewTranslations} />
+      <hr className='border-border' />
 
-      <div className='space-y-4'>
-        <h2 className='text-xl font-semibold'>User Statistics</h2>
-        <BestofStatsUserTable userStats={userStats} translations={tableTranslations} />
-      </div>
+      <section className='space-y-4'>
+        <div className='flex items-center gap-2'>
+          <h2 className='text-lg font-semibold'>{t('sections.userActivity')}</h2>
+        </div>
 
-      <div className='space-y-4'>
-        <h2 className='text-xl font-semibold'>Charts</h2>
-        <BestofStatsCharts userStats={userStats} userTrendData={userTrendData} translations={chartsTranslations} />
-      </div>
+        <BestofStatsFilters
+          data={{
+            users,
+            examTypes,
+            diseaseTags,
+            adminTags,
+          }}
+        />
+
+        <BestofStatsOverview stats={globalStats} translations={overviewTranslations} />
+
+        <div className='space-y-4'>
+          <h3 className='text-base font-medium text-muted-foreground'>{t('sections.userStats')}</h3>
+          <BestofStatsUserTable userStats={userStats} translations={tableTranslations} />
+        </div>
+
+        <div className='space-y-4'>
+          <h3 className='text-base font-medium text-muted-foreground'>{t('sections.charts')}</h3>
+          <BestofStatsCharts userStats={userStats} userTrendData={userTrendData} translations={chartsTranslations} />
+        </div>
+      </section>
     </div>
   );
 }

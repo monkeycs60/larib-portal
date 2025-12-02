@@ -437,11 +437,32 @@
     "statistics": {
       "title": "Statistiques",
       "subtitle": "Suivez la progression et les taux de complétion des utilisateurs.",
+      "back": "Retour",
+      "sections": {
+        "database": "Aperçu de la base de données",
+        "userActivity": "Activité des utilisateurs",
+        "userStats": "Statistiques utilisateurs",
+        "charts": "Graphiques d'activité"
+      },
       "overview": {
         "totalCases": "Total de cas complétés",
         "activeUsers": "Utilisateurs actifs",
         "avgPerUser": "Moyenne par utilisateur",
         "mostPracticed": "Cas le plus pratiqué"
+      },
+      "database": {
+        "casesByExamType": "Cas par type d'examen",
+        "casesByDifficulty": "Cas par difficulté",
+        "casesByStatus": "Cas par statut",
+        "casesByDiagnosis": "Top diagnostics",
+        "totalCases": "Total des cas",
+        "totalExamTypes": "Types d'examen",
+        "totalDiagnoses": "Diagnostics",
+        "totalAdminTags": "Tags admin",
+        "noData": "Aucune donnée disponible",
+        "cases": "cas",
+        "draft": "Brouillon",
+        "published": "Publié"
       },
       "table": {
         "user": "Utilisateur",

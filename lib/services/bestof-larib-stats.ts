@@ -780,3 +780,134 @@ export const getUserExamTypeStats = async (userId: string): Promise<UserExamType
     };
   });
 };
+
+export type DatabaseStatistics = {
+  casesByExamType: Array<{ name: string; value: number; color: string }>;
+  casesByDifficulty: Array<{ name: string; value: number; color: string }>;
+  casesByStatus: Array<{ name: string; value: number; color: string }>;
+  casesByDiagnosis: Array<{ name: string; value: number; color: string }>;
+  totalCases: number;
+  totalExamTypes: number;
+  totalDiagnoses: number;
+  totalAdminTags: number;
+};
+
+const CHART_COLORS = [
+  'hsl(221, 83%, 53%)',
+  'hsl(262, 83%, 58%)',
+  'hsl(142, 76%, 36%)',
+  'hsl(38, 92%, 50%)',
+  'hsl(0, 84%, 60%)',
+  'hsl(199, 89%, 48%)',
+  'hsl(280, 65%, 60%)',
+  'hsl(25, 95%, 53%)',
+  'hsl(173, 58%, 39%)',
+  'hsl(340, 82%, 52%)',
+];
+
+const DIFFICULTY_COLORS = {
+  BEGINNER: 'hsl(142, 76%, 36%)',
+  INTERMEDIATE: 'hsl(38, 92%, 50%)',
+  ADVANCED: 'hsl(0, 84%, 60%)',
+};
+
+const STATUS_COLORS = {
+  DRAFT: 'hsl(240, 5%, 64%)',
+  PUBLISHED: 'hsl(142, 76%, 36%)',
+};
+
+const fetchDatabaseStatisticsData = async (): Promise<DatabaseStatistics> => {
+  const [
+    casesByExamType,
+    casesByDifficulty,
+    casesByStatus,
+    casesByDiagnosis,
+    totalCases,
+    totalExamTypes,
+    totalDiagnoses,
+    totalAdminTags,
+  ] = await Promise.all([
+    prisma.clinicalCase.groupBy({
+      by: ['examTypeId'],
+      _count: { id: true },
+    }).then(async (groups) => {
+      const examTypes = await prisma.examType.findMany({
+        select: { id: true, name: true },
+      });
+      const examTypeMap = new Map(examTypes.map((examType) => [examType.id, examType.name]));
+      return groups
+        .filter((group) => group.examTypeId !== null)
+        .map((group, index) => ({
+          name: examTypeMap.get(group.examTypeId!) || 'Unknown',
+          value: group._count.id,
+          color: CHART_COLORS[index % CHART_COLORS.length],
+        }))
+        .sort((first, second) => second.value - first.value);
+    }),
+    prisma.clinicalCase.groupBy({
+      by: ['difficulty'],
+      _count: { id: true },
+    }).then((groups) =>
+      groups.map((group) => ({
+        name: group.difficulty,
+        value: group._count.id,
+        color: DIFFICULTY_COLORS[group.difficulty],
+      }))
+    ),
+    prisma.clinicalCase.groupBy({
+      by: ['status'],
+      _count: { id: true },
+    }).then((groups) =>
+      groups.map((group) => ({
+        name: group.status,
+        value: group._count.id,
+        color: STATUS_COLORS[group.status],
+      }))
+    ),
+    prisma.clinicalCase.groupBy({
+      by: ['diseaseTagId'],
+      _count: { id: true },
+    }).then(async (groups) => {
+      const diseaseTags = await prisma.diseaseTag.findMany({
+        select: { id: true, name: true },
+      });
+      const diseaseTagMap = new Map(diseaseTags.map((tag) => [tag.id, tag.name]));
+      return groups
+        .filter((group) => group.diseaseTagId !== null)
+        .map((group, index) => ({
+          name: diseaseTagMap.get(group.diseaseTagId!) || 'Unknown',
+          value: group._count.id,
+          color: CHART_COLORS[index % CHART_COLORS.length],
+        }))
+        .sort((first, second) => second.value - first.value)
+        .slice(0, 10);
+    }),
+    prisma.clinicalCase.count(),
+    prisma.examType.count(),
+    prisma.diseaseTag.count(),
+    prisma.adminTag.count(),
+  ]);
+
+  return {
+    casesByExamType,
+    casesByDifficulty,
+    casesByStatus,
+    casesByDiagnosis,
+    totalCases,
+    totalExamTypes,
+    totalDiagnoses,
+    totalAdminTags,
+  };
+};
+
+const cachedDatabaseStatistics = cache(async () => {
+  return unstable_cache(
+    () => fetchDatabaseStatisticsData(),
+    ['bestof:stats:database:v1'],
+    { tags: [STATS_TAG, CASES_TAG] },
+  )();
+});
+
+export const getDatabaseStatistics = async (): Promise<DatabaseStatistics> => {
+  return cachedDatabaseStatistics();
+};
