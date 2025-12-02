@@ -41,15 +41,29 @@ jobs:
 
             ## Ta mission
 
-            0. **VERIFICATION DE CONFORMITE A L'ISSUE (etape critique)** :
-               - Recupere l'issue liee a cette PR avec `gh pr view ${{ github.event.pull_request.number }} --json body` pour trouver le numero d'issue
-               - Lis l'issue originale avec `gh issue view <numero> --json title,body`
-               - Compare les changements de la PR avec les demandes de l'issue
-               - Verifie que :
-                 * La PR repond EXACTEMENT aux specifications de l'issue
-                 * Il n'y a PAS de hors-sujet (fonctionnalites non demandees, refactoring non necessaire)
-                 * Toutes les demandes de l'issue sont couvertes
-               - Si du code hors-sujet est detecte, signale-le clairement et retire-le si possible
+            0. **VERIFICATION DE CONFORMITE A L'ISSUE (etape critique - PRIORITAIRE)** :
+               - Recupere l'issue liee avec `gh pr view ${{ github.event.pull_request.number }} --json body` pour trouver le numero d'issue
+               - Lis l'issue originale avec `gh issue view <numero> --json title,body,comments`
+               - **ÉTAPE CRITIQUE : Récupère la checklist du PO**
+                 * Cherche dans les commentaires de l'issue le dernier message du bot "claude[bot]"
+                 * Identifie la section "✅ Checklist de validation pour le développeur"
+                 * C'est la SOURCE DE VÉRITÉ pour valider les deliverables
+
+               - **Vérifie les FICHIERS MODIFIÉS vs FICHIERS ATTENDUS** :
+                 * Liste les fichiers modifiés dans la PR avec `gh pr diff ${{ github.event.pull_request.number }} --name-only`
+                 * Compare avec les fichiers mentionnés par le PO dans la section "Fichiers impactés"
+                 * Si un fichier attendu n'est PAS modifié → 🚨 SCOPE MISMATCH
+                 * Si un fichier modifié n'était PAS mentionné → ⚠️ Vérifier si c'est justifié
+
+               - **Vérifie les DELIVERABLES de la checklist PO** :
+                 * Pour chaque item de la checklist, vérifie s'il est présent dans le code
+                 * Exemple : "8 nouvelles phrases dans messages/fr.json" → Compte les nouvelles phrases dans le diff
+                 * Exemple : "Fonction calculateTotal créée" → Vérifie que la fonction existe
+
+               - **Détecte les HORS-SUJET** :
+                 * Si du code hors-sujet est détecté (refactoring non demandé, features bonus), signale-le
+                 * Si des tests ont été ajoutés alors que l'issue ne demandait que du contenu → ⚠️ Warning (acceptable mais signaler)
+                 * Si du code a été modifié mais l'issue demandait juste des tests → 🚨 SCOPE MISMATCH
 
             1. **Analyse le diff de la PR** (uniquement les fichiers modifies, pas tout le codebase)
                - Utilise `gh pr diff ${{ github.event.pull_request.number }}` pour voir les changements
@@ -135,8 +149,30 @@ jobs:
             ```
             ## Code Review - PR #${{ github.event.pull_request.number }}
 
-            ### Conformite a l'issue
-            | Critere | Status | Commentaire |
+            ### 🎯 Conformité à l'issue (SECTION CRITIQUE)
+
+            #### Fichiers attendus vs fichiers modifiés
+            | Fichier attendu (selon PO) | Modifié dans PR ? | Commentaire |
+            |-----------------------------|-------------------|-------------|
+            | path/to/file1.tsx           | ✅ OUI / ❌ NON   | ...         |
+            | path/to/file2.ts            | ✅ OUI / ❌ NON   | ...         |
+
+            | Fichier modifié (PR) | Attendu ? | Justification |
+            |----------------------|-----------|---------------|
+            | path/to/file3.tsx    | ❌ NON    | Hors-sujet ou justifié ? |
+
+            #### Checklist PO validée
+            - [ ] Deliverable 1 : [Présent ✅ / Absent ❌]
+            - [ ] Deliverable 2 : [Présent ✅ / Absent ❌]
+
+            **🚨 SCOPE MISMATCH DÉTECTÉ ?**
+            - [ ] NON - La PR correspond exactement à l'issue ✅
+            - [ ] OUI - Problèmes détectés : [description]
+
+            **Si SCOPE MISMATCH détecté : ARRÊTE LA REVIEW et demande des corrections.**
+
+            #### Autres critères
+            | Critère | Status | Commentaire |
             |---------|--------|-------------|
             | Repond aux specifications | OK/KO | ... |
             | Pas de hors-sujet | OK/KO | ... |

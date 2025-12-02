@@ -67,6 +67,55 @@
 -  **Never weaken tests** to make them pass - fix the code instead
 -  **Cover edge cases** in addition to happy path scenarios
 
+### Writing E2E Tests
+
+**Philosophy: Quality over quantity**
+- Write **1-2 comprehensive test flows** rather than 10 isolated micro-tests
+- Each test should cover a **complete user journey**, not just one assertion
+
+**Example of GOOD test structure:**
+```typescript
+test('complete dashboard workflow', async ({ page }) => {
+  // 1. Navigate and verify page loads with critical elements
+  await page.goto('/dashboard');
+  await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'New Project' })).toBeVisible();
+
+  // 2. Perform action
+  await page.getByRole('button', { name: 'New Project' }).click();
+
+  // 3. Verify results
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await expect(page.getByLabel('Project name')).toBeVisible();
+});
+```
+
+**Example of BAD test structure (AVOID):**
+```typescript
+// Too granular - should be grouped
+test('dashboard title is visible', async ({ page }) => {
+  await page.goto('/dashboard');
+  await expect(page.getByRole('heading')).toBeVisible();
+});
+
+test('new project button is visible', async ({ page }) => {
+  await page.goto('/dashboard');
+  await expect(page.getByRole('button', { name: 'New Project' })).toBeVisible();
+});
+
+test('can click new project button', async ({ page }) => {
+  await page.goto('/dashboard');
+  await page.getByRole('button', { name: 'New Project' }).click();
+});
+// ... 7 more similar tests
+```
+
+**Guidelines:**
+- Group related assertions in the same test (e.g., verify 3-4 elements in one test, not 3-4 separate tests)
+- Test both locales (FR/EN) in the SAME test using a loop or conditional, not 2 separate tests
+- Avoid testing trivial variations separately (e.g., different button labels can be tested together)
+- Focus on user flows, not individual DOM queries
+
 ### Running Tests
 
 ```bash

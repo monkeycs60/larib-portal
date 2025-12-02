@@ -88,9 +88,10 @@ jobs:
             1. Résume ce que tu as compris de la demande
             2. Liste les fichiers qui seront impactés
             3. Propose une approche technique succincte
-            4. Ajoute le label `ready-to-dev` avec : `gh issue edit ${{ github.event.issue.number }} --add-label "ready-to-dev"`
-            5. Retire le label `needs-clarification` s'il existe : `gh issue edit ${{ github.event.issue.number }} --remove-label "needs-clarification"`
-            6. Poste un commentaire au format :
+            4. **AJOUTE UNE CHECKLIST DE VALIDATION**
+            5. Ajoute le label `ready-to-dev` avec : `gh issue edit ${{ github.event.issue.number }} --add-label "ready-to-dev"`
+            6. Retire le label `needs-clarification` s'il existe : `gh issue edit ${{ github.event.issue.number }} --remove-label "needs-clarification"`
+            7. Poste un commentaire au format :
 
             ```
             ## ✅ Issue prête pour le développement
@@ -104,6 +105,19 @@ jobs:
 
             ### Approche technique
             [Description succincte de l'implémentation]
+
+            ### ✅ Checklist de validation pour le développeur
+            **Tu devras valider TOUS ces points avant de créer la PR :**
+            - [ ] [Deliverable 1 concret et mesurable]
+            - [ ] [Deliverable 2 concret et mesurable]
+            - [ ] Tests ajoutés/modifiés (si applicable)
+            - [ ] Tous les tests passent (`npm run test:setup`)
+
+            **Exemple pour une issue demandant d'ajouter du contenu :**
+            - [ ] 8 nouvelles phrases ajoutées dans `messages/fr.json` (array `dashboard.greetings`)
+            - [ ] 8 traductions correspondantes dans `messages/en.json` (array `dashboard.greetings`)
+            - [ ] Le système de sélection aléatoire fonctionne avec les nouvelles phrases
+            - [ ] Tests existants passent toujours
 
             ---
             🚀 *L'agent développeur va maintenant prendre le relai.*

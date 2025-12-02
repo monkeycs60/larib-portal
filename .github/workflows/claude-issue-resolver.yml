@@ -36,39 +36,66 @@ jobs:
 
             ## Ta mission
 
-            1. **Analyse l'issue** et comprends exactement ce qui est demandé
+            **ÉTAPE 0 : Lis le dernier commentaire du PO**
+            - Utilise `gh issue view ${{ github.event.issue.number }} --json comments --jq '.comments[-1].body'` pour récupérer le dernier commentaire
+            - Identifie la **checklist de validation** fournie par le PO dans la section "✅ Checklist de validation pour le développeur"
+            - C'est ta feuille de route : chaque case doit être cochée avant de créer la PR
 
-            2. **AVANT d'implémenter** :
-               - Lis les tests existants liés à la fonctionnalité à modifier
-               - Identifie quels tests doivent être ajoutés ou modifiés
+            **ÉTAPE 1 : Analyse l'issue et récupère les deliverables**
+            - Lis ATTENTIVEMENT ce qui est demandé dans l'issue originale
+            - Identifie les **deliverables concrets** (fichiers à modifier, contenu à ajouter, fonctionnalités à implémenter)
+            - Si le PO a fourni une checklist, c'est LA SOURCE DE VÉRITÉ
 
-            3. **Implémente la solution** :
-               - Suis strictement les guidelines de CLAUDE.md
-               - Code typé (pas de any, pas de ts-ignore)
-               - Utilise shadcn/ui et respecte l'architecture
+            **ÉTAPE 2 : Implémente les deliverables demandés**
+            - Suis strictement les guidelines de CLAUDE.md
+            - Code typé (pas de any, pas de ts-ignore)
+            - Utilise shadcn/ui et respecte l'architecture
+            - **FOCUS sur ce qui est demandé** : ne pas faire de refactoring, ne pas ajouter de features bonus
 
-            4. **TESTS (CRITIQUE - tu seras vérifié par le PR reviewer)** :
-               - **Ajoute ou modifie les tests** pour couvrir tes changements
-               - Les tests doivent **réellement valider** le comportement (pas juste passer)
-               - Couvre les cas normaux ET les edge cases
-               - **INTERDIT** : affaiblir les assertions, supprimer des tests, ou tricher pour faire passer les tests
-               - **INTERDIT** : modifier les tests existants qui ne sont pas liés à tes changements
+            **ÉTAPE 3 : Tests (seulement si applicable)**
 
-            5. **Exécute les tests** :
-               - Lance `npm run test:setup` pour seed la DB et lancer les tests
-               - Vérifie que TOUS les tests passent
-               - Si des tests échouent, corrige le code (pas les tests !)
+            ⚠️ **IMPORTANT : Ne crée des tests QUE si :**
+            - Tu as modifié du code (pas juste du contenu/traductions)
+            - Tu as ajouté une nouvelle fonctionnalité
+            - Tu as corrigé un bug
 
-            6. **Crée la PR** avec :
-               - Un titre clair
-               - Une description qui liste les changements ET les tests ajoutés/modifiés
-               - Mentionne l'issue : "Fixes #${{ github.event.issue.number }}"
+            **Si tu dois ajouter des tests E2E avec Playwright :**
+            - **Privilégie UN ou DEUX tests de parcours complets** plutôt que 10 tests unitaires isolés
+            - Exemple : Au lieu de 10 tests séparés (display title, display button, click button, etc.), crée UN test qui :
+              1. Charge la page
+              2. Vérifie les éléments critiques (titre + bouton + contenu)
+              3. Effectue une action (clic)
+              4. Vérifie le résultat
+            - Groupe les vérifications connexes dans un même test
+            - Ne multiplie pas les tests pour des variations triviales (locale FR/EN peut être testée dans le MÊME test avec un switch)
+            - Les tests doivent **réellement valider** le comportement (pas juste passer)
+            - Couvre les cas normaux ET les edge cases
+            - **INTERDIT** : affaiblir les assertions, supprimer des tests, ou tricher pour faire passer les tests
+
+            **ÉTAPE 4 : Exécute les tests**
+            - Lance `npm run test:setup` pour seed la DB et lancer les tests
+            - Vérifie que TOUS les tests passent
+            - Si des tests échouent, corrige le code (pas les tests !)
+
+            **ÉTAPE 5 : Auto-vérification avant PR**
+            Avant de créer la PR, vérifie LA CHECKLIST DU PO :
+            - [ ] Chaque deliverable de la checklist est présent ?
+            - [ ] Les fichiers mentionnés par le PO ont été modifiés ?
+            - [ ] Rien de superflu n'a été ajouté (pas de refactoring non demandé) ?
+            - [ ] Les tests passent tous ?
+
+            **ÉTAPE 6 : Crée la PR**
+            - Un titre clair (reprend le titre de l'issue)
+            - Une description qui :
+              * Liste les changements effectués (avec ✅ pour chaque item de la checklist PO)
+              * Indique les tests ajoutés/modifiés (si applicable)
+              * Mentionne l'issue : "Fixes #${{ github.event.issue.number }}"
 
             IMPORTANT: Le PR reviewer vérifiera que :
-            - Les tests existent et sont pertinents
+            - Tu as respecté la checklist du PO
+            - Les tests existent et sont pertinents (si applicable)
             - Les tests passent tous
             - Tu n'as pas triché pour faire passer les tests
-            - Les edge cases sont couverts
           claude_args: |
             --model claude-opus-4-5-20251101
             --allowedTools "Bash,Edit,Write,Read,Glob,Grep,WebFetch,WebSearch,TodoWrite"
