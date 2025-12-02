@@ -7,7 +7,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart';
-import { Pie, PieChart, Cell, ResponsiveContainer, Legend } from 'recharts';
+import { Pie, PieChart, Cell, Legend } from 'recharts';
 import type { DatabaseStatistics } from '@/lib/services/bestof-larib-stats';
 
 type DatabaseChartsProps = {
