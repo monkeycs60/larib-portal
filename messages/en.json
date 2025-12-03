@@ -436,6 +436,9 @@
       "monthsAgo": "{count}mo ago",
       "yearsAgo": "{count}y ago"
     },
+    "myStatistics": {
+      "title": "My Statistics"
+    },
     "statistics": {
       "title": "Statistics",
       "subtitle": "Track user progress and completion rates.",
@@ -530,6 +533,27 @@
         },
         "examTypeStats": {
           "title": "Stats by Exam Type"
+        }
+      },
+      "myStats": {
+        "title": "My Statistics",
+        "back": "Back to Cases",
+        "position": "Position",
+        "enrolledSince": "Enrolled since",
+        "lastActivity": "Last activity",
+        "stats": {
+          "totalCompleted": "Total completed"
+        },
+        "examTypePieChart": {
+          "title": "Completed Cases by Exam Type",
+          "noData": "No exam type data available"
+        },
+        "examTypeStats": {
+          "title": "Stats by Exam Type"
+        },
+        "completionTrend": {
+          "title": "Case Completion Trend",
+          "noData": "No completion data available"
         }
       }
     }

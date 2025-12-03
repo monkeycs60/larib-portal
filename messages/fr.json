@@ -434,6 +434,9 @@
       "monthsAgo": "il y a {count}mois",
       "yearsAgo": "il y a {count}an(s)"
     },
+    "myStatistics": {
+      "title": "Mes Statistiques"
+    },
     "statistics": {
       "title": "Statistiques",
       "subtitle": "Suivez la progression et les taux de complétion des utilisateurs.",
@@ -528,6 +531,27 @@
         },
         "examTypeStats": {
           "title": "Statistiques par type d'examen"
+        }
+      },
+      "myStats": {
+        "title": "Mes Statistiques",
+        "back": "Retour aux cas",
+        "position": "Poste",
+        "enrolledSince": "Inscrit depuis",
+        "lastActivity": "Dernière activité",
+        "stats": {
+          "totalCompleted": "Total complété"
+        },
+        "examTypePieChart": {
+          "title": "Cas complétés par type d'examen",
+          "noData": "Aucune donnée disponible pour les types d'examen"
+        },
+        "examTypeStats": {
+          "title": "Statistiques par type d'examen"
+        },
+        "completionTrend": {
+          "title": "Tendance de complétion des cas",
+          "noData": "Aucune donnée de complétion disponible"
         }
       }
     }
