@@ -508,6 +508,7 @@ export default function CreateCaseDialog({
 					}
 				}
 				if (next && !clinicalCase) {
+					setSelectedAdminTags([]);
 					if (isAdmin) {
 						void execListAdminTags();
 					}
