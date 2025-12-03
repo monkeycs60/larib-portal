@@ -119,7 +119,7 @@ async function UserProfilePageContent({
         </div>
         <h1 className='text-xl font-semibold mb-1'>{displayName}</h1>
         <div className='flex items-center gap-3 text-xs text-muted-foreground'>
-          {user.position && <span>{user.position}</span>}
+          <span>{t('position')}: {user.position || '—'}</span>
           <span>•</span>
           <span>{t('enrolledSince')}: {new Date(user.createdAt).toLocaleDateString()}</span>
           {lastActivity && (
