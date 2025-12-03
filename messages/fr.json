@@ -440,9 +440,11 @@
       "back": "Retour",
       "sections": {
         "database": "Aperçu de la base de données",
+        "userOverview": "Aperçu global des utilisateurs",
         "userActivity": "Activité des utilisateurs",
         "userStats": "Statistiques utilisateurs",
-        "charts": "Graphiques d'activité"
+        "charts": "Graphiques d'activité",
+        "completionTrend": "Évolution de la complétion dans le temps"
       },
       "overview": {
         "totalCases": "Total de cas complétés",
@@ -462,7 +464,14 @@
         "noData": "Aucune donnée disponible",
         "cases": "cas",
         "draft": "Brouillon",
-        "published": "Publié"
+        "published": "Publié",
+        "completed": "complétés"
+      },
+      "userOverview": {
+        "totalActiveUsers": "Nombre total de users actifs",
+        "usersLast30Days": "Nombre total de users qui se sont connectés le mois derniers (30 derniers jours)",
+        "usersByPosition": "Graphique camembert avec le nombre et % de users par position",
+        "noData": "Aucune donnée disponible"
       },
       "table": {
         "user": "Utilisateur",

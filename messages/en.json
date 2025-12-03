@@ -442,9 +442,11 @@
       "back": "Back",
       "sections": {
         "database": "Database Overview",
+        "userOverview": "Global Users Overview",
         "userActivity": "User Activity",
         "userStats": "User Statistics",
-        "charts": "Activity Charts"
+        "charts": "Activity Charts",
+        "completionTrend": "Completion Trend Over Time"
       },
       "overview": {
         "totalCases": "Total cases completed",
@@ -464,7 +466,14 @@
         "noData": "No data available",
         "cases": "cases",
         "draft": "Draft",
-        "published": "Published"
+        "published": "Published",
+        "completed": "completed"
+      },
+      "userOverview": {
+        "totalActiveUsers": "Total active users",
+        "usersLast30Days": "Users connected in the last 30 days",
+        "usersByPosition": "Users by Position",
+        "noData": "No data available"
       },
       "table": {
         "user": "User",

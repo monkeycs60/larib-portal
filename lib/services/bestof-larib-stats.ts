@@ -787,9 +787,16 @@ export type DatabaseStatistics = {
   casesByStatus: Array<{ name: string; value: number; color: string }>;
   casesByDiagnosis: Array<{ name: string; value: number; color: string }>;
   totalCases: number;
+  totalCompletedCases: number;
   totalExamTypes: number;
   totalDiagnoses: number;
   totalAdminTags: number;
+};
+
+export type UserOverviewStatistics = {
+  totalActiveUsers: number;
+  usersLast30Days: number;
+  usersByPosition: Array<{ name: string; value: number; color: string }>;
 };
 
 const CHART_COLORS = [
@@ -823,6 +830,7 @@ const fetchDatabaseStatisticsData = async (): Promise<DatabaseStatistics> => {
     casesByStatus,
     casesByDiagnosis,
     totalCases,
+    totalCompletedCases,
     totalExamTypes,
     totalDiagnoses,
     totalAdminTags,
@@ -883,6 +891,11 @@ const fetchDatabaseStatisticsData = async (): Promise<DatabaseStatistics> => {
         .slice(0, 10);
     }),
     prisma.clinicalCase.count(),
+    prisma.caseAttempt.findMany({
+      where: { validatedAt: { not: null } },
+      select: { caseId: true },
+      distinct: ['caseId'],
+    }).then((attempts) => attempts.length),
     prisma.examType.count(),
     prisma.diseaseTag.count(),
     prisma.adminTag.count(),
@@ -894,6 +907,7 @@ const fetchDatabaseStatisticsData = async (): Promise<DatabaseStatistics> => {
     casesByStatus,
     casesByDiagnosis,
     totalCases,
+    totalCompletedCases,
     totalExamTypes,
     totalDiagnoses,
     totalAdminTags,
@@ -910,4 +924,70 @@ const cachedDatabaseStatistics = cache(async () => {
 
 export const getDatabaseStatistics = async (): Promise<DatabaseStatistics> => {
   return cachedDatabaseStatistics();
+};
+
+const fetchUserOverviewStatisticsData = async (): Promise<UserOverviewStatistics> => {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const [allUsers, usersLast30Days, usersByPositionData] = await Promise.all([
+    prisma.user.findMany({
+      where: {
+        CaseAttempt: {
+          some: {
+            validatedAt: { not: null },
+          },
+        },
+      },
+      select: { id: true },
+    }),
+    prisma.user.findMany({
+      where: {
+        CaseAttempt: {
+          some: {
+            validatedAt: {
+              gte: thirtyDaysAgo,
+              not: null,
+            },
+          },
+        },
+      },
+      select: { id: true },
+    }),
+    prisma.user.groupBy({
+      by: ['position'],
+      where: {
+        CaseAttempt: {
+          some: {
+            validatedAt: { not: null },
+          },
+        },
+      },
+      _count: { id: true },
+    }),
+  ]);
+
+  const usersByPosition = usersByPositionData.map((group, index) => ({
+    name: group.position || 'No position',
+    value: group._count.id,
+    color: CHART_COLORS[index % CHART_COLORS.length],
+  })).sort((a, b) => b.value - a.value);
+
+  return {
+    totalActiveUsers: allUsers.length,
+    usersLast30Days: usersLast30Days.length,
+    usersByPosition,
+  };
+};
+
+const cachedUserOverviewStatistics = cache(async () => {
+  return unstable_cache(
+    () => fetchUserOverviewStatisticsData(),
+    ['bestof:stats:user-overview:v1'],
+    { tags: [STATS_TAG, CASES_TAG] },
+  )();
+});
+
+export const getUserOverviewStatistics = async (): Promise<UserOverviewStatistics> => {
+  return cachedUserOverviewStatistics();
 };

@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   ChartContainer,
   ChartTooltip,
@@ -8,27 +8,15 @@ import {
   type ChartConfig,
 } from '@/components/ui/chart';
 import { Pie, PieChart, Cell, Legend } from 'recharts';
-import type { DatabaseStatistics } from '@/lib/services/bestof-larib-stats';
+import type { UserOverviewStatistics } from '@/lib/services/bestof-larib-stats';
 
-type DatabaseChartsProps = {
-  stats: DatabaseStatistics;
+type UserOverviewProps = {
+  stats: UserOverviewStatistics;
   translations: {
-    casesByExamType: string;
-    casesByDifficulty: string;
-    casesByStatus: string;
-    casesByDiagnosis: string;
-    totalCases: string;
-    totalExamTypes: string;
-    totalDiagnoses: string;
-    totalAdminTags: string;
+    totalActiveUsers: string;
+    usersLast30Days: string;
+    usersByPosition: string;
     noData: string;
-    cases: string;
-    beginner: string;
-    intermediate: string;
-    advanced: string;
-    draft: string;
-    published: string;
-    completed: string;
   };
 };
 
@@ -38,14 +26,12 @@ type PieChartData = {
   color: string;
 };
 
-function StatsPieChart({
+function UsersPieChart({
   title,
-  description,
   data,
   noDataMessage,
 }: {
   title: string;
-  description: string;
   data: PieChartData[];
   noDataMessage: string;
 }) {
@@ -126,67 +112,37 @@ function StatsPieChart({
   );
 }
 
-function DatabaseSummaryCard({
-  title,
-  value,
-}: {
-  title: string;
-  value: number;
-}) {
-  return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-xs font-medium text-muted-foreground">{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-      </CardContent>
-    </Card>
-  );
-}
-
-export default function BestofStatsDatabaseCharts({ stats, translations }: DatabaseChartsProps) {
-  const difficultyData = stats.casesByDifficulty.map((item) => ({
-    ...item,
-    name:
-      item.name === 'BEGINNER'
-        ? translations.beginner
-        : item.name === 'INTERMEDIATE'
-          ? translations.intermediate
-          : translations.advanced,
-  }));
-
+export default function BestofStatsUserOverview({ stats, translations }: UserOverviewProps) {
   return (
     <div className="space-y-6">
-      <div className="w-full md:w-64">
-        <Card className="bg-blue-50">
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">{translations.totalCases}</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              {translations.totalActiveUsers}
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-1">
-            <div className="text-4xl font-bold">{stats.totalCases}</div>
-            <div className="text-sm text-muted-foreground">{stats.totalCompletedCases} {translations.completed}</div>
+          <CardContent>
+            <div className="text-3xl font-bold">{stats.totalActiveUsers}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              {translations.usersLast30Days}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{stats.usersLast30Days}</div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <StatsPieChart
-          title={translations.casesByExamType}
-          description={`${stats.casesByExamType.reduce((sum, item) => sum + item.value, 0)} ${translations.cases}`}
-          data={stats.casesByExamType}
-          noDataMessage={translations.noData}
-        />
-        <StatsPieChart
-          title={translations.casesByDiagnosis}
-          description={`${stats.casesByDiagnosis.reduce((sum, item) => sum + item.value, 0)} ${translations.cases}`}
-          data={stats.casesByDiagnosis}
-          noDataMessage={translations.noData}
-        />
-        <StatsPieChart
-          title={translations.casesByDifficulty}
-          description={`${stats.casesByDifficulty.reduce((sum, item) => sum + item.value, 0)} ${translations.cases}`}
-          data={difficultyData}
+      <div>
+        <UsersPieChart
+          title={translations.usersByPosition}
+          data={stats.usersByPosition}
           noDataMessage={translations.noData}
         />
       </div>

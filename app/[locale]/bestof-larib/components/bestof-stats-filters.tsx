@@ -58,7 +58,7 @@ export default function BestofStatsFilters({
     setDateFrom('');
     setDateTo('');
     setDatePreset('');
-    router.push(pathname);
+    router.replace(pathname, { scroll: false });
   }
 
   function pushWith(partial: Partial<Record<string, string | string[]>>) {
@@ -103,7 +103,7 @@ export default function BestofStatsFilters({
     if (merged.dateFrom) current.set('dateFrom', merged.dateFrom);
     if (merged.dateTo) current.set('dateTo', merged.dateTo);
     if (merged.datePreset) current.set('datePreset', merged.datePreset);
-    router.push(`${pathname}?${current.toString()}`);
+    router.replace(`${pathname}?${current.toString()}`, { scroll: false });
   }
 
   function formatYYYYMMDD(d: Date) {
