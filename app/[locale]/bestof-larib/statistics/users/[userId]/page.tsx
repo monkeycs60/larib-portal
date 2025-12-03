@@ -46,10 +46,13 @@ async function UserProfilePageContent({
     },
   });
 
-  const lastSession = await prisma.session.findFirst({
-    where: { userId },
-    orderBy: { createdAt: 'desc' },
-    select: { createdAt: true },
+  const lastActivity = await prisma.caseAttempt.findFirst({
+    where: {
+      userId,
+      validatedAt: { not: null }
+    },
+    orderBy: { validatedAt: 'desc' },
+    select: { validatedAt: true },
   });
 
   if (!user) {
@@ -119,10 +122,10 @@ async function UserProfilePageContent({
           {user.position && <span>{user.position}</span>}
           <span>•</span>
           <span>{t('enrolledSince')}: {new Date(user.createdAt).toLocaleDateString()}</span>
-          {lastSession && (
+          {lastActivity && (
             <>
               <span>•</span>
-              <span>{t('lastConnection')}: {new Date(lastSession.createdAt).toLocaleDateString()}</span>
+              <span>{t('lastActivity')}: {new Date(lastActivity.validatedAt).toLocaleDateString()}</span>
             </>
           )}
         </div>

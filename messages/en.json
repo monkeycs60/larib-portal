@@ -510,7 +510,7 @@
         "backToStatistics": "Back to statistics",
         "position": "Position",
         "enrolledSince": "Enrolled since",
-        "lastConnection": "Last connection",
+        "lastActivity": "Last activity",
         "stats": {
           "totalCompleted": "Total completed",
           "beginner": "Beginner",

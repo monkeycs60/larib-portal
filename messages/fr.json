@@ -508,7 +508,7 @@
         "backToStatistics": "Retour aux statistiques",
         "position": "Poste",
         "enrolledSince": "Inscrit depuis",
-        "lastConnection": "Dernière connexion",
+        "lastActivity": "Dernière activité",
         "stats": {
           "totalCompleted": "Total complété",
           "beginner": "Débutant",
