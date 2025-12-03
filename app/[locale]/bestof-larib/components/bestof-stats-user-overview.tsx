@@ -47,12 +47,12 @@ function UsersPieChart({
 
   return (
     <Card className="flex flex-col">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base font-medium">{title}</CardTitle>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 pb-6">
+      <CardContent className="flex-1 pb-4">
         {hasData ? (
-          <ChartContainer config={chartConfig} className="mx-auto aspect-square h-[280px] w-full">
+          <ChartContainer config={chartConfig} className="mx-auto aspect-square h-[200px] w-full">
             <PieChart>
               <ChartTooltip
                 content={
@@ -74,8 +74,8 @@ function UsersPieChart({
                 nameKey="name"
                 cx="50%"
                 cy="45%"
-                innerRadius={45}
-                outerRadius={85}
+                innerRadius={35}
+                outerRadius={65}
                 paddingAngle={2}
                 strokeWidth={2}
                 stroke="hsl(var(--background))"
@@ -92,18 +92,18 @@ function UsersPieChart({
                 verticalAlign="bottom"
                 align="center"
                 wrapperStyle={{
-                  fontSize: '12px',
-                  paddingTop: '12px',
-                  lineHeight: '1.6'
+                  fontSize: '11px',
+                  paddingTop: '8px',
+                  lineHeight: '1.4'
                 }}
                 iconType="circle"
-                iconSize={8}
-                formatter={(value) => <span className="text-foreground text-xs font-medium">{value}</span>}
+                iconSize={6}
+                formatter={(value) => <span className="text-foreground text-xs">{value}</span>}
               />
             </PieChart>
           </ChartContainer>
         ) : (
-          <div className="h-[280px] flex items-center justify-center text-muted-foreground text-sm">
+          <div className="h-[200px] flex items-center justify-center text-muted-foreground text-sm">
             {noDataMessage}
           </div>
         )}
@@ -114,38 +114,34 @@ function UsersPieChart({
 
 export default function BestofStatsUserOverview({ stats, translations }: UserOverviewProps) {
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              {translations.totalActiveUsers}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{stats.totalActiveUsers}</div>
-          </CardContent>
-        </Card>
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-xs font-medium text-muted-foreground">
+            {translations.totalActiveUsers}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{stats.totalActiveUsers}</div>
+        </CardContent>
+      </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              {translations.usersLast30Days}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{stats.usersLast30Days}</div>
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-xs font-medium text-muted-foreground">
+            {translations.usersLast30Days}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{stats.usersLast30Days}</div>
+        </CardContent>
+      </Card>
 
-      <div>
-        <UsersPieChart
-          title={translations.usersByPosition}
-          data={stats.usersByPosition}
-          noDataMessage={translations.noData}
-        />
-      </div>
+      <UsersPieChart
+        title={translations.usersByPosition}
+        data={stats.usersByPosition}
+        noDataMessage={translations.noData}
+      />
     </div>
   );
 }

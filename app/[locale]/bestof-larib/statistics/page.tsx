@@ -205,8 +205,8 @@ async function BestofStatisticsPageContent({
           </Card>
         </div>
 
-        <div className='space-y-4'>
-          <h3 className='text-base font-medium text-muted-foreground'>{t('sections.userStats')}</h3>
+        <div className='space-y-4 mt-6 mb-10'>
+          <h3 className='text-lg font-semibold'>{t('sections.userStats')}</h3>
           <BestofStatsUserTable userStats={userStats} translations={tableTranslations} />
         </div>
       </section>
