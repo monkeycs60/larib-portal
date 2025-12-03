@@ -25,6 +25,18 @@ export default function UserCaseHistory({ caseHistory }: UserCaseHistoryProps) {
     );
   };
 
+  const getLevelIndicator = (level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | null) => {
+    if (!level) return <span className='text-muted-foreground text-xs'>—</span>;
+
+    const variants = {
+      BEGINNER: 'bg-green-500',
+      INTERMEDIATE: 'bg-yellow-500',
+      ADVANCED: 'bg-red-500',
+    };
+
+    return <div className={`size-2.5 rounded-full ${variants[level]}`} />;
+  };
+
   const attemptCountsByCaseId = caseHistory.reduce<Record<string, number>>((acc, item) => {
     acc[item.caseId] = (acc[item.caseId] || 0) + 1;
     return acc;
@@ -60,6 +72,7 @@ export default function UserCaseHistory({ caseHistory }: UserCaseHistoryProps) {
             <TableHead>Case Name</TableHead>
             <TableHead>Exam Type</TableHead>
             <TableHead>Difficulty</TableHead>
+            <TableHead>Level</TableHead>
             <TableHead>Submitted Date</TableHead>
             <TableHead className='text-right'>Actions</TableHead>
           </TableRow>
@@ -86,6 +99,11 @@ export default function UserCaseHistory({ caseHistory }: UserCaseHistoryProps) {
                   <span className='text-sm'>{item.examType || '—'}</span>
                 </TableCell>
                 <TableCell>{getDifficultyBadge(item.difficulty)}</TableCell>
+                <TableCell>
+                  <div className='flex items-center justify-center'>
+                    {getLevelIndicator(item.personalDifficulty)}
+                  </div>
+                </TableCell>
                 <TableCell>
                   <span className='text-sm'>{new Date(item.submittedAt).toLocaleDateString()}</span>
                 </TableCell>

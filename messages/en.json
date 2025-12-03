@@ -508,11 +508,22 @@
       "noCasesCompleted": "No cases completed yet",
       "userProfile": {
         "backToStatistics": "Back to statistics",
+        "position": "Position",
+        "enrolledSince": "Enrolled since",
+        "lastConnection": "Last connection",
         "stats": {
           "totalCompleted": "Total completed",
           "beginner": "Beginner",
           "intermediate": "Intermediate",
           "advanced": "Advanced"
+        },
+        "examTypePieChart": {
+          "title": "Completed Cases by Exam Type",
+          "noData": "No exam type data available"
+        },
+        "completionTrend": {
+          "title": "Case Completion Trend",
+          "noData": "No completion data available"
         },
         "caseHistory": {
           "title": "Case History"

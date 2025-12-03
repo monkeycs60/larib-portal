@@ -1,5 +1,6 @@
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
+import { startServer } from "@react-grab/claude-code/server";
 
 const withNextIntl = createNextIntlPlugin('./app/i18n/request.ts');
 
@@ -28,6 +29,10 @@ if (r2Account && r2Bucket) {
   if (r2Region && r2Region !== 'auto') {
     remotePatterns.push({ protocol: 'https', hostname: `${r2Bucket}.${r2Account}.${r2Region}.r2.cloudflarestorage.com`, pathname: `/**` })
   }
+}
+
+if (process.env.NODE_ENV === "development") {
+  startServer();
 }
 
 const nextConfig: NextConfig = {

@@ -649,6 +649,7 @@ export type UserCaseHistoryItem = {
   examType: string | null;
   examTypeId: string | null;
   difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+  personalDifficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | null;
   submittedAt: Date;
   attemptId: string;
 };
@@ -662,6 +663,7 @@ const fetchUserCaseHistoryData = async (userId: string, filters?: Omit<StatsFilt
       id: true,
       caseId: true,
       validatedAt: true,
+      userId: true,
       c: {
         select: {
           id: true,
@@ -671,6 +673,12 @@ const fetchUserCaseHistoryData = async (userId: string, filters?: Omit<StatsFilt
             select: {
               id: true,
               name: true,
+            },
+          },
+          UserCaseSettings: {
+            where: { userId },
+            select: {
+              personalDifficulty: true,
             },
           },
         },
@@ -687,6 +695,7 @@ const fetchUserCaseHistoryData = async (userId: string, filters?: Omit<StatsFilt
       examType: attempt.c.examType?.name || null,
       examTypeId: attempt.c.examType?.id || null,
       difficulty: attempt.c.difficulty,
+      personalDifficulty: attempt.c.UserCaseSettings[0]?.personalDifficulty || null,
       submittedAt: attempt.validatedAt as Date,
       attemptId: attempt.id,
     }));
@@ -696,7 +705,7 @@ const cachedUserCaseHistory = cache(async (userId: string, filtersJson: string) 
   const filters = JSON.parse(filtersJson) as Omit<StatsFilters, 'userIds'> | undefined;
   return unstable_cache(
     () => fetchUserCaseHistoryData(userId, filters),
-    ['bestof:stats:user-history:v2', userId, filtersJson],
+    ['bestof:stats:user-history:v3', userId, filtersJson],
     { tags: [STATS_TAG, CASES_TAG] },
   )();
 });
