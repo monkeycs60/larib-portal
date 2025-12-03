@@ -122,7 +122,7 @@ async function UserProfilePageContent({
           <span>{t('position')}: {user.position || '—'}</span>
           <span>•</span>
           <span>{t('enrolledSince')}: {new Date(user.createdAt).toLocaleDateString()}</span>
-          {lastActivity && (
+          {lastActivity && lastActivity.validatedAt && (
             <>
               <span>•</span>
               <span>{t('lastActivity')}: {new Date(lastActivity.validatedAt).toLocaleDateString()}</span>
@@ -194,7 +194,7 @@ async function UserProfilePageContent({
 
       <section className='space-y-3'>
         <h2 className='text-base font-semibold'>{t('caseHistory.title')}</h2>
-        <UserCaseHistory caseHistory={caseHistory} />
+        <UserCaseHistory caseHistory={caseHistory} userId={userId} />
       </section>
     </div>
   );

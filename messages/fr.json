@@ -553,6 +553,14 @@
           "title": "Tendance de complétion des cas",
           "noData": "Aucune donnée de complétion disponible"
         }
+      },
+      "attemptReview": {
+        "back": "Retour",
+        "user": "Utilisateur",
+        "attempt": "Tentative",
+        "submittedOn": "Soumis le",
+        "previous": "Précédent",
+        "next": "Suivant"
       }
     }
   },

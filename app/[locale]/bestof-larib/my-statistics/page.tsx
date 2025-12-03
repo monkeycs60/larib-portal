@@ -122,7 +122,7 @@ async function MyStatisticsPageContent({
           <span>{t('position')}: {user.position || '—'}</span>
           <span>•</span>
           <span>{t('enrolledSince')}: {new Date(user.createdAt).toLocaleDateString()}</span>
-          {lastActivity && (
+          {lastActivity && lastActivity.validatedAt && (
             <>
               <span>•</span>
               <span>{t('lastActivity')}: {new Date(lastActivity.validatedAt).toLocaleDateString()}</span>

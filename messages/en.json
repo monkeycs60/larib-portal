@@ -555,6 +555,14 @@
           "title": "Case Completion Trend",
           "noData": "No completion data available"
         }
+      },
+      "attemptReview": {
+        "back": "Back",
+        "user": "User",
+        "attempt": "Attempt",
+        "submittedOn": "Submitted on",
+        "previous": "Previous",
+        "next": "Next"
       }
     }
   },

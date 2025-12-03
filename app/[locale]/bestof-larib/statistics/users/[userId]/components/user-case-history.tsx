@@ -7,9 +7,10 @@ import type { UserCaseHistoryItem } from '@/lib/services/bestof-larib-stats';
 
 type UserCaseHistoryProps = {
   caseHistory: UserCaseHistoryItem[];
+  userId: string;
 };
 
-export default function UserCaseHistory({ caseHistory }: UserCaseHistoryProps) {
+export default function UserCaseHistory({ caseHistory, userId }: UserCaseHistoryProps) {
   const getDifficultyBadge = (difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED') => {
     const variants = {
       BEGINNER: { variant: 'outline' as const, label: 'Beginner', color: 'text-green-600' },
@@ -108,7 +109,7 @@ export default function UserCaseHistory({ caseHistory }: UserCaseHistoryProps) {
                   <span className='text-sm'>{new Date(item.submittedAt).toLocaleDateString()}</span>
                 </TableCell>
                 <TableCell className='text-right'>
-                  <Link href={`/bestof-larib/cases/${item.caseId}`}>
+                  <Link href={`/bestof-larib/statistics/users/${userId}/attempts/${item.attemptId}`}>
                     <Button variant='ghost' size='sm'>
                       <Eye className='size-4 mr-2' />
                       View
