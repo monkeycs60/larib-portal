@@ -95,46 +95,63 @@ const buildAttemptWhereClause = ({ filters }: BuildWhereClauseParams) => {
 const fetchUserStatisticsData = async (filters?: StatsFilters) => {
   const where = buildAttemptWhereClause({ filters });
 
-  const attempts = await prisma.caseAttempt.findMany({
-    where,
-    select: {
-      id: true,
-      userId: true,
-      caseId: true,
-      validatedAt: true,
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          firstName: true,
-          lastName: true,
-          position: true,
+  const [attempts, allBestofUsers] = await Promise.all([
+    prisma.caseAttempt.findMany({
+      where,
+      select: {
+        id: true,
+        userId: true,
+        caseId: true,
+        validatedAt: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            position: true,
+          },
         },
-      },
-      c: {
-        select: {
-          id: true,
-          name: true,
-          difficulty: true,
-          examType: {
-            select: { id: true, name: true },
-          },
-          diseaseTag: {
-            select: { id: true, name: true },
-          },
-          adminTags: {
-            include: {
-              tag: {
-                select: { id: true, name: true, color: true },
+        c: {
+          select: {
+            id: true,
+            name: true,
+            difficulty: true,
+            examType: {
+              select: { id: true, name: true },
+            },
+            diseaseTag: {
+              select: { id: true, name: true },
+            },
+            adminTags: {
+              include: {
+                tag: {
+                  select: { id: true, name: true, color: true },
+                },
               },
             },
           },
         },
       },
-    },
-    orderBy: { validatedAt: 'desc' },
-  });
+      orderBy: { validatedAt: 'desc' },
+    }),
+    prisma.user.findMany({
+      where: {
+        applications: {
+          has: 'BESTOF_LARIB',
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        position: true,
+      },
+    }),
+  ]);
 
   type UserTracking = {
     uniqueCases: Set<string>;
@@ -255,6 +272,35 @@ const fetchUserStatisticsData = async (filters?: StatsFilters) => {
 
     if (attempt.validatedAt < (tracking.firstCompletedAt || new Date())) {
       tracking.firstCompletedAt = attempt.validatedAt;
+    }
+  }
+
+  for (const bestofUser of allBestofUsers) {
+    if (!userMap.has(bestofUser.id)) {
+      const displayName = bestofUser.firstName
+        ? `${bestofUser.firstName} ${bestofUser.lastName || ''}`.trim()
+        : bestofUser.name || bestofUser.email;
+
+      userMap.set(bestofUser.id, {
+        uniqueCases: new Set(),
+        totalAttempts: 0,
+        uniqueCasesByDifficulty: {
+          beginner: { cases: new Set(), attempts: 0 },
+          intermediate: { cases: new Set(), attempts: 0 },
+          advanced: { cases: new Set(), attempts: 0 },
+        },
+        uniqueCasesByExamType: new Map(),
+        uniqueCasesByDisease: new Map(),
+        uniqueCasesByAdminTag: new Map(),
+        user: {
+          id: bestofUser.id,
+          name: displayName,
+          email: bestofUser.email,
+          position: bestofUser.position,
+        },
+        lastCompletedAt: null,
+        firstCompletedAt: null,
+      });
     }
   }
 
