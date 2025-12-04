@@ -79,7 +79,6 @@ export default function BestofStatsUserTable({ userStats, translations }: StatsU
             <TableHead className='text-right'>{translations.advanced}</TableHead>
             <TableHead>{translations.lastActivity}</TableHead>
             <TableHead className='text-right'>{translations.daysSince}</TableHead>
-            <TableHead className='text-right'>{translations.regularity}</TableHead>
             <TableHead>{translations.activity.veryActive}</TableHead>
             <TableHead className='text-right'>{translations.viewProfile}</TableHead>
           </TableRow>
@@ -116,11 +115,6 @@ export default function BestofStatsUserTable({ userStats, translations }: StatsU
                 ) : (
                   <span className='text-sm text-muted-foreground'>—</span>
                 )}
-              </TableCell>
-              <TableCell className='text-right'>
-                <span className='text-sm'>
-                  {userStat.regularityPerWeek} {translations.perWeek}
-                </span>
               </TableCell>
               <TableCell>{getActivityBadge(userStat.daysSinceLastActivity)}</TableCell>
               <TableCell className='text-right'>

@@ -706,3 +706,122 @@ test.describe('Navigation & Header Buttons Tests', () => {
 		await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
 	});
 });
+
+// ============================================
+// 9️⃣ TESTS DE STATISTIQUES ADMIN
+// ============================================
+
+test.describe('Admin Statistics Tests', () => {
+	test('should display database overview section with pie charts', async ({
+		page,
+	}) => {
+		await loginAs(page, 'admin');
+		await page.goto('/en/bestof-larib/statistics', { timeout: 60000 });
+
+		// Wait for page to load
+		await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
+
+		// Check for the database overview section
+		await expect(
+			page.getByRole('heading', { name: /database overview/i })
+		).toBeVisible({ timeout: 10000 });
+
+		// Check for summary cards
+		await expect(page.getByText(/total cases/i).first()).toBeVisible();
+		await expect(page.getByText(/exam types/i).first()).toBeVisible();
+		await expect(page.getByText(/diagnoses/i).first()).toBeVisible();
+		await expect(page.getByText(/admin tags/i).first()).toBeVisible();
+	});
+
+	test('should display pie charts for database statistics', async ({
+		page,
+	}) => {
+		await loginAs(page, 'admin');
+		await page.goto('/en/bestof-larib/statistics', { timeout: 60000 });
+
+		await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
+
+		// Check for pie chart titles
+		await expect(page.getByText(/cases by exam type/i)).toBeVisible({ timeout: 10000 });
+		await expect(page.getByText(/cases by difficulty/i)).toBeVisible();
+		await expect(page.getByText(/cases by status/i)).toBeVisible();
+		await expect(page.getByText(/top diagnoses/i)).toBeVisible();
+	});
+
+	test('should display user activity section with table', async ({
+		page,
+	}) => {
+		await loginAs(page, 'admin');
+		await page.goto('/en/bestof-larib/statistics', { timeout: 60000 });
+
+		await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
+
+		// Check for the user activity section
+		await expect(
+			page.getByRole('heading', { name: /user activity/i })
+		).toBeVisible({ timeout: 10000 });
+
+		// Check for user statistics heading
+		await expect(page.getByText(/user statistics/i)).toBeVisible();
+	});
+
+	test('should display activity charts section', async ({ page }) => {
+		await loginAs(page, 'admin');
+		await page.goto('/en/bestof-larib/statistics', { timeout: 60000 });
+
+		await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
+
+		// Check for charts section
+		await expect(page.getByText(/activity charts/i)).toBeVisible({ timeout: 10000 });
+
+		// Check for individual chart titles
+		await expect(page.getByText(/top users/i)).toBeVisible();
+		await expect(page.getByText(/distribution by difficulty/i)).toBeVisible();
+		await expect(page.getByText(/completion over time/i)).toBeVisible();
+	});
+
+	test('should have back button that navigates to bestof-larib', async ({
+		page,
+	}) => {
+		await loginAs(page, 'admin');
+		await page.goto('/en/bestof-larib/statistics', { timeout: 60000 });
+
+		await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
+
+		// Find and click the back button
+		const backButton = page.getByRole('link', { name: /back/i }).first();
+		await expect(backButton).toBeVisible({ timeout: 10000 });
+		await backButton.click();
+
+		// Verify navigation back to bestof-larib
+		await page.waitForURL(/\/en\/bestof-larib$/, { timeout: 10000 });
+	});
+
+	test('should display statistics page in French when locale is fr', async ({
+		page,
+	}) => {
+		await loginAs(page, 'admin');
+		await page.goto('/fr/bestof-larib/statistics', { timeout: 60000 });
+
+		await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
+
+		// Check for French translations
+		await expect(
+			page.getByRole('heading', { name: /statistiques/i })
+		).toBeVisible({ timeout: 10000 });
+		await expect(page.getByText(/aperçu de la base de données/i)).toBeVisible();
+		await expect(page.getByText(/activité des utilisateurs/i)).toBeVisible();
+	});
+
+	test('should display filters in user activity section', async ({
+		page,
+	}) => {
+		await loginAs(page, 'admin');
+		await page.goto('/en/bestof-larib/statistics', { timeout: 60000 });
+
+		await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
+
+		// Check for filter elements in the user activity section
+		await expect(page.getByRole('button', { name: /reset/i })).toBeVisible({ timeout: 10000 });
+	});
+});

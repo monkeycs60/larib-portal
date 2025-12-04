@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter, usePathname } from '@/app/i18n/navigation';
 import { Input } from '@/components/ui/input';
@@ -8,23 +8,20 @@ import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
 import { MultiSelect } from '@/components/ui/multiselect';
 
-type UserOption = { id: string; name: string; email: string };
 type ExamType = { id: string; name: string };
 type DiseaseTag = { id: string; name: string };
 type SimpleTag = { id: string; name: string };
 
-export default function BestofStatsFilters({
+export default function UserProfileFilters({
   data,
 }: {
   data: {
-    users: UserOption[];
     examTypes: ExamType[];
     diseaseTags: DiseaseTag[];
     adminTags: SimpleTag[];
   };
 }) {
-  const { users, examTypes, diseaseTags, adminTags } = data;
-  const t = useTranslations('bestof.statistics');
+  const { examTypes, diseaseTags, adminTags } = data;
   const tFilters = useTranslations('bestof.filters');
   const tDifficulty = useTranslations('bestof.difficulty');
   const router = useRouter();
@@ -40,7 +37,6 @@ export default function BestofStatsFilters({
     return single ? [single] : [];
   };
 
-  const [userIds, setUserIds] = useState<string[]>(qpArray('userId'));
   const [examTypeIds, setExamTypeIds] = useState<string[]>(qpArray('examTypeId'));
   const [diseaseTagIds, setDiseaseTagIds] = useState<string[]>(qpArray('diseaseTagId'));
   const [difficulties, setDifficulties] = useState<string[]>(qpArray('difficulty'));
@@ -50,7 +46,6 @@ export default function BestofStatsFilters({
   const [datePreset, setDatePreset] = useState(qp.get('datePreset') ?? '');
 
   function resetFilters() {
-    setUserIds([]);
     setExamTypeIds([]);
     setDiseaseTagIds([]);
     setDifficulties([]);
@@ -64,12 +59,11 @@ export default function BestofStatsFilters({
   function pushWith(partial: Partial<Record<string, string | string[]>>) {
     const current = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
 
-    ['userId', 'examTypeId', 'diseaseTagId', 'difficulty', 'adminTagId', 'dateFrom', 'dateTo', 'datePreset'].forEach(
+    ['examTypeId', 'diseaseTagId', 'difficulty', 'adminTagId', 'dateFrom', 'dateTo', 'datePreset'].forEach(
       (k) => current.delete(k),
     );
 
     const merged = {
-      userId: userIds,
       examTypeId: examTypeIds,
       diseaseTagId: diseaseTagIds,
       difficulty: difficulties,
@@ -80,10 +74,6 @@ export default function BestofStatsFilters({
       ...partial,
     };
 
-    if (merged.userId) {
-      const v = merged.userId;
-      (Array.isArray(v) ? v : [v]).forEach((val) => current.append('userId', val));
-    }
     if (merged.examTypeId) {
       const v = merged.examTypeId;
       (Array.isArray(v) ? v : [v]).forEach((val) => current.append('examTypeId', val));
@@ -202,23 +192,8 @@ export default function BestofStatsFilters({
   }
 
   return (
-    <div className='flex flex-wrap items-end gap-3'>
-      <div className='min-w-64'>
-        <label className='block text-xs mb-1'>{t('filters.selectUser')}</label>
-        <MultiSelect
-          options={users.map((user) => ({ label: user.name, value: user.id }))}
-          defaultValue={userIds}
-          onValueChange={(vals) => {
-            setUserIds(vals);
-            pushWith({ userId: vals });
-          }}
-          placeholder={t('filters.allUsers')}
-          maxCount={3}
-          responsive
-        />
-      </div>
-
-      <div className='min-w-52'>
+    <div className='flex flex-wrap items-end gap-2'>
+      <div className='min-w-44'>
         <label className='block text-xs mb-1'>{tFilters('exam')}</label>
         <MultiSelect
           options={examTypes.map((ex) => ({ label: ex.name, value: ex.id }))}
@@ -233,7 +208,7 @@ export default function BestofStatsFilters({
         />
       </div>
 
-      <div className='min-w-52'>
+      <div className='min-w-44'>
         <label className='block text-xs mb-1'>{tFilters('disease')}</label>
         <MultiSelect
           options={diseaseTags.map((d) => ({ label: d.name, value: d.id }))}
@@ -248,7 +223,7 @@ export default function BestofStatsFilters({
         />
       </div>
 
-      <div className='min-w-52'>
+      <div className='min-w-44'>
         <label className='block text-xs mb-1'>{tFilters('difficulty')}</label>
         <MultiSelect
           options={[
@@ -267,7 +242,7 @@ export default function BestofStatsFilters({
         />
       </div>
 
-      <div className='min-w-52'>
+      <div className='min-w-44'>
         <label className='block text-xs mb-1'>{tFilters('adminTag')}</label>
         <MultiSelect
           options={adminTags.map((tag) => ({ label: tag.name, value: tag.id }))}
@@ -277,7 +252,7 @@ export default function BestofStatsFilters({
             pushWith({ adminTagId: vals });
           }}
           placeholder={tFilters('any')}
-          maxCount={3}
+          maxCount={2}
           responsive
         />
       </div>
@@ -338,8 +313,8 @@ export default function BestofStatsFilters({
         </>
       ) : null}
 
-      <div className='ml-auto flex gap-2'>
-        <Button variant='outline' onClick={resetFilters}>
+      <div className='ml-auto'>
+        <Button variant='outline' size='sm' onClick={resetFilters}>
           {tFilters('reset')}
         </Button>
       </div>

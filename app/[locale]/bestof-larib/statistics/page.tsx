@@ -5,6 +5,8 @@ import {
   getUserStatistics,
   getGlobalStatistics,
   getUserCompletionTrends,
+  getDatabaseStatistics,
+  getUserOverviewStatistics,
   listAllUsersWithAttempts,
   type StatsFilters,
 } from '@/lib/services/bestof-larib-stats';
@@ -13,11 +15,13 @@ import { listAdminTags } from '@/lib/services/bestof-larib-tags';
 import { applicationLink } from '@/lib/application-link';
 import { Link } from '@/app/i18n/navigation';
 import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
 import BestofStatsFilters from '../components/bestof-stats-filters';
-import BestofStatsOverview from '../components/bestof-stats-overview';
 import BestofStatsUserTable from '../components/bestof-stats-user-table';
-import BestofStatsCharts from '../components/bestof-stats-charts';
+import BestofStatsDatabaseCharts from '../components/bestof-stats-database-charts';
+import BestofStatsUserOverview from '../components/bestof-stats-user-overview';
+import BestofStatsCompletionTrend from '../components/bestof-stats-completion-trend';
 
 async function BestofStatisticsPageContent({
   params,
@@ -68,22 +72,17 @@ async function BestofStatisticsPageContent({
         : undefined,
   };
 
-  const [globalStats, userStats, userTrendData, users, examTypes, diseaseTags, adminTags] = await Promise.all([
+  const [globalStats, userStats, userTrendData, databaseStats, userOverviewStats, users, examTypes, diseaseTags, adminTags] = await Promise.all([
     getGlobalStatistics(filters),
     getUserStatistics(filters),
     getUserCompletionTrends(filters, 'week'),
+    getDatabaseStatistics(),
+    getUserOverviewStatistics(),
     listAllUsersWithAttempts(),
     listExamTypes(),
     listDiseaseTags(),
     listAdminTags().then((rows) => rows.map((row) => ({ id: row.id, name: row.name }))),
   ]);
-
-  const overviewTranslations = {
-    totalCases: t('overview.totalCases'),
-    activeUsers: t('overview.activeUsers'),
-    avgPerUser: t('overview.avgPerUser'),
-    mostPracticed: t('overview.mostPracticed'),
-  };
 
   const tableTranslations = {
     user: t('table.user'),
@@ -116,15 +115,41 @@ async function BestofStatisticsPageContent({
     advanced: t('table.advanced'),
   };
 
+  const databaseChartsTranslations = {
+    casesByExamType: t('database.casesByExamType'),
+    casesByDifficulty: t('database.casesByDifficulty'),
+    casesByStatus: t('database.casesByStatus'),
+    casesByDiagnosis: t('database.casesByDiagnosis'),
+    totalCases: t('database.totalCases'),
+    totalExamTypes: t('database.totalExamTypes'),
+    totalDiagnoses: t('database.totalDiagnoses'),
+    totalAdminTags: t('database.totalAdminTags'),
+    noData: t('database.noData'),
+    cases: t('database.cases'),
+    beginner: t('table.beginner'),
+    intermediate: t('table.intermediate'),
+    advanced: t('table.advanced'),
+    draft: t('database.draft'),
+    published: t('database.published'),
+    completed: t('database.completed'),
+  };
+
+  const userOverviewTranslations = {
+    totalActiveUsers: t('userOverview.totalActiveUsers'),
+    usersLast30Days: t('userOverview.usersLast30Days'),
+    usersByPosition: t('userOverview.usersByPosition'),
+    noData: t('database.noData'),
+  };
+
   return (
-    <div className='space-y-6 py-6 px-8 mx-auto'>
+    <div className='space-y-8 py-6 px-8 mx-auto max-w-screen-2xl'>
       <div className='flex items-center justify-between'>
         <div>
           <div className='flex items-center gap-3 mb-2'>
             <Link href='/bestof-larib'>
               <Button variant='ghost' size='sm'>
                 <ArrowLeft className='size-4 mr-2' />
-                Back
+                {t('back')}
               </Button>
             </Link>
           </div>
@@ -133,26 +158,58 @@ async function BestofStatisticsPageContent({
         </div>
       </div>
 
-      <BestofStatsFilters
-        data={{
-          users,
-          examTypes,
-          diseaseTags,
-          adminTags,
-        }}
-      />
+      <section className='space-y-4'>
+        <div className='flex items-center gap-2'>
+          <h2 className='text-lg font-semibold'>{t('sections.database')}</h2>
+        </div>
+        <BestofStatsDatabaseCharts stats={databaseStats} translations={databaseChartsTranslations} />
+      </section>
 
-      <BestofStatsOverview stats={globalStats} translations={overviewTranslations} />
+      <hr className='border-border' />
 
-      <div className='space-y-4'>
-        <h2 className='text-xl font-semibold'>User Statistics</h2>
-        <BestofStatsUserTable userStats={userStats} translations={tableTranslations} />
-      </div>
+      <section className='space-y-4'>
+        <div className='flex items-center gap-2'>
+          <h2 className='text-lg font-semibold'>{t('sections.userOverview')}</h2>
+        </div>
+        <BestofStatsUserOverview stats={userOverviewStats} translations={userOverviewTranslations} />
+      </section>
 
-      <div className='space-y-4'>
-        <h2 className='text-xl font-semibold'>Charts</h2>
-        <BestofStatsCharts userStats={userStats} userTrendData={userTrendData} translations={chartsTranslations} />
-      </div>
+      <hr className='border-border' />
+
+      <section className='space-y-4'>
+        <div className='flex items-center gap-2'>
+          <h2 className='text-lg font-semibold'>{t('sections.userActivity')}</h2>
+        </div>
+
+        <BestofStatsFilters
+          data={{
+            users,
+            examTypes,
+            diseaseTags,
+            adminTags,
+          }}
+        />
+
+        <div className='space-y-4'>
+          <h3 className='text-base font-medium text-muted-foreground'>{t('sections.completionTrend')}</h3>
+          <Card>
+            <CardHeader>
+              <CardTitle>{chartsTranslations.overTime}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <BestofStatsCompletionTrend
+                userTrendData={userTrendData}
+                translations={{ noData: t('database.noData') }}
+              />
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className='space-y-4 mt-6 mb-10'>
+          <h3 className='text-lg font-semibold'>{t('sections.userStats')}</h3>
+          <BestofStatsUserTable userStats={userStats} translations={tableTranslations} />
+        </div>
+      </section>
     </div>
   );
 }

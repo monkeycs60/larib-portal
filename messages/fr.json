@@ -434,14 +434,47 @@
       "monthsAgo": "il y a {count}mois",
       "yearsAgo": "il y a {count}an(s)"
     },
+    "myStatistics": {
+      "title": "Mes Statistiques"
+    },
     "statistics": {
       "title": "Statistiques",
       "subtitle": "Suivez la progression et les taux de complétion des utilisateurs.",
+      "back": "Retour",
+      "sections": {
+        "database": "Aperçu de la base de données",
+        "userOverview": "Aperçu global des utilisateurs",
+        "userActivity": "Activité des utilisateurs",
+        "userStats": "Statistiques utilisateurs",
+        "charts": "Graphiques d'activité",
+        "completionTrend": "Évolution de la complétion dans le temps"
+      },
       "overview": {
         "totalCases": "Total de cas complétés",
         "activeUsers": "Utilisateurs actifs",
         "avgPerUser": "Moyenne par utilisateur",
         "mostPracticed": "Cas le plus pratiqué"
+      },
+      "database": {
+        "casesByExamType": "Cas par type d'examen",
+        "casesByDifficulty": "Cas par difficulté",
+        "casesByStatus": "Cas par statut",
+        "casesByDiagnosis": "Top diagnostics",
+        "totalCases": "Total des cas",
+        "totalExamTypes": "Types d'examen",
+        "totalDiagnoses": "Diagnostics",
+        "totalAdminTags": "Tags admin",
+        "noData": "Aucune donnée disponible",
+        "cases": "cas",
+        "draft": "Brouillon",
+        "published": "Publié",
+        "completed": "complétés"
+      },
+      "userOverview": {
+        "totalActiveUsers": "Nombre total de users actifs",
+        "usersLast30Days": "Nombre total de users qui se sont connectés le mois derniers (30 derniers jours)",
+        "usersByPosition": "Graphique camembert avec le nombre et % de users par position",
+        "noData": "Aucune donnée disponible"
       },
       "table": {
         "user": "Utilisateur",
@@ -476,11 +509,22 @@
       "noCasesCompleted": "Aucun cas complété pour le moment",
       "userProfile": {
         "backToStatistics": "Retour aux statistiques",
+        "position": "Poste",
+        "enrolledSince": "Inscrit depuis",
+        "lastActivity": "Dernière activité",
         "stats": {
           "totalCompleted": "Total complété",
           "beginner": "Débutant",
           "intermediate": "Intermédiaire",
           "advanced": "Avancé"
+        },
+        "examTypePieChart": {
+          "title": "Cas complétés par type d'examen",
+          "noData": "Aucune donnée disponible pour les types d'examen"
+        },
+        "completionTrend": {
+          "title": "Tendance de complétion des cas",
+          "noData": "Aucune donnée de complétion disponible"
         },
         "caseHistory": {
           "title": "Historique des cas"
@@ -488,6 +532,35 @@
         "examTypeStats": {
           "title": "Statistiques par type d'examen"
         }
+      },
+      "myStats": {
+        "title": "Mes Statistiques",
+        "back": "Retour aux cas",
+        "position": "Poste",
+        "enrolledSince": "Inscrit depuis",
+        "lastActivity": "Dernière activité",
+        "stats": {
+          "totalCompleted": "Total complété"
+        },
+        "examTypePieChart": {
+          "title": "Cas complétés par type d'examen",
+          "noData": "Aucune donnée disponible pour les types d'examen"
+        },
+        "examTypeStats": {
+          "title": "Statistiques par type d'examen"
+        },
+        "completionTrend": {
+          "title": "Tendance de complétion des cas",
+          "noData": "Aucune donnée de complétion disponible"
+        }
+      },
+      "attemptReview": {
+        "back": "Retour",
+        "user": "Utilisateur",
+        "attempt": "Tentative",
+        "submittedOn": "Soumis le",
+        "previous": "Précédent",
+        "next": "Suivant"
       }
     }
   },

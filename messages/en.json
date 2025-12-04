@@ -436,14 +436,47 @@
       "monthsAgo": "{count}mo ago",
       "yearsAgo": "{count}y ago"
     },
+    "myStatistics": {
+      "title": "My Statistics"
+    },
     "statistics": {
       "title": "Statistics",
       "subtitle": "Track user progress and completion rates.",
+      "back": "Back",
+      "sections": {
+        "database": "Database Overview",
+        "userOverview": "Global Users Overview",
+        "userActivity": "User Activity",
+        "userStats": "User Statistics",
+        "charts": "Activity Charts",
+        "completionTrend": "Completion Trend Over Time"
+      },
       "overview": {
         "totalCases": "Total cases completed",
         "activeUsers": "Active users",
         "avgPerUser": "Average per user",
         "mostPracticed": "Most practiced case"
+      },
+      "database": {
+        "casesByExamType": "Cases by Exam Type",
+        "casesByDifficulty": "Cases by Difficulty",
+        "casesByStatus": "Cases by Status",
+        "casesByDiagnosis": "Top Diagnoses",
+        "totalCases": "Total Cases",
+        "totalExamTypes": "Exam Types",
+        "totalDiagnoses": "Diagnoses",
+        "totalAdminTags": "Admin Tags",
+        "noData": "No data available",
+        "cases": "cases",
+        "draft": "Draft",
+        "published": "Published",
+        "completed": "completed"
+      },
+      "userOverview": {
+        "totalActiveUsers": "Total active users",
+        "usersLast30Days": "Users connected in the last 30 days",
+        "usersByPosition": "Users by Position",
+        "noData": "No data available"
       },
       "table": {
         "user": "User",
@@ -478,11 +511,22 @@
       "noCasesCompleted": "No cases completed yet",
       "userProfile": {
         "backToStatistics": "Back to statistics",
+        "position": "Position",
+        "enrolledSince": "Enrolled since",
+        "lastActivity": "Last activity",
         "stats": {
           "totalCompleted": "Total completed",
           "beginner": "Beginner",
           "intermediate": "Intermediate",
           "advanced": "Advanced"
+        },
+        "examTypePieChart": {
+          "title": "Completed Cases by Exam Type",
+          "noData": "No exam type data available"
+        },
+        "completionTrend": {
+          "title": "Case Completion Trend",
+          "noData": "No completion data available"
         },
         "caseHistory": {
           "title": "Case History"
@@ -490,6 +534,35 @@
         "examTypeStats": {
           "title": "Stats by Exam Type"
         }
+      },
+      "myStats": {
+        "title": "My Statistics",
+        "back": "Back to Cases",
+        "position": "Position",
+        "enrolledSince": "Enrolled since",
+        "lastActivity": "Last activity",
+        "stats": {
+          "totalCompleted": "Total completed"
+        },
+        "examTypePieChart": {
+          "title": "Completed Cases by Exam Type",
+          "noData": "No exam type data available"
+        },
+        "examTypeStats": {
+          "title": "Stats by Exam Type"
+        },
+        "completionTrend": {
+          "title": "Case Completion Trend",
+          "noData": "No completion data available"
+        }
+      },
+      "attemptReview": {
+        "back": "Back",
+        "user": "User",
+        "attempt": "Attempt",
+        "submittedOn": "Submitted on",
+        "previous": "Previous",
+        "next": "Next"
       }
     }
   },

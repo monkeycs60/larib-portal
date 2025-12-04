@@ -649,6 +649,7 @@ export type UserCaseHistoryItem = {
   examType: string | null;
   examTypeId: string | null;
   difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+  personalDifficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | null;
   submittedAt: Date;
   attemptId: string;
 };
@@ -662,6 +663,7 @@ const fetchUserCaseHistoryData = async (userId: string, filters?: Omit<StatsFilt
       id: true,
       caseId: true,
       validatedAt: true,
+      userId: true,
       c: {
         select: {
           id: true,
@@ -671,6 +673,12 @@ const fetchUserCaseHistoryData = async (userId: string, filters?: Omit<StatsFilt
             select: {
               id: true,
               name: true,
+            },
+          },
+          UserCaseSettings: {
+            where: { userId },
+            select: {
+              personalDifficulty: true,
             },
           },
         },
@@ -687,6 +695,7 @@ const fetchUserCaseHistoryData = async (userId: string, filters?: Omit<StatsFilt
       examType: attempt.c.examType?.name || null,
       examTypeId: attempt.c.examType?.id || null,
       difficulty: attempt.c.difficulty,
+      personalDifficulty: attempt.c.UserCaseSettings[0]?.personalDifficulty || null,
       submittedAt: attempt.validatedAt as Date,
       attemptId: attempt.id,
     }));
@@ -696,7 +705,7 @@ const cachedUserCaseHistory = cache(async (userId: string, filtersJson: string) 
   const filters = JSON.parse(filtersJson) as Omit<StatsFilters, 'userIds'> | undefined;
   return unstable_cache(
     () => fetchUserCaseHistoryData(userId, filters),
-    ['bestof:stats:user-history:v2', userId, filtersJson],
+    ['bestof:stats:user-history:v3', userId, filtersJson],
     { tags: [STATS_TAG, CASES_TAG] },
   )();
 });
@@ -779,4 +788,215 @@ export const getUserExamTypeStats = async (userId: string): Promise<UserExamType
       percentage,
     };
   });
+};
+
+export type DatabaseStatistics = {
+  casesByExamType: Array<{ name: string; value: number; color: string }>;
+  casesByDifficulty: Array<{ name: string; value: number; color: string }>;
+  casesByStatus: Array<{ name: string; value: number; color: string }>;
+  casesByDiagnosis: Array<{ name: string; value: number; color: string }>;
+  totalCases: number;
+  totalCompletedCases: number;
+  totalExamTypes: number;
+  totalDiagnoses: number;
+  totalAdminTags: number;
+};
+
+export type UserOverviewStatistics = {
+  totalActiveUsers: number;
+  usersLast30Days: number;
+  usersByPosition: Array<{ name: string; value: number; color: string }>;
+};
+
+const CHART_COLORS = [
+  'hsl(221, 83%, 53%)',
+  'hsl(262, 83%, 58%)',
+  'hsl(142, 76%, 36%)',
+  'hsl(38, 92%, 50%)',
+  'hsl(0, 84%, 60%)',
+  'hsl(199, 89%, 48%)',
+  'hsl(280, 65%, 60%)',
+  'hsl(25, 95%, 53%)',
+  'hsl(173, 58%, 39%)',
+  'hsl(340, 82%, 52%)',
+];
+
+const DIFFICULTY_COLORS = {
+  BEGINNER: 'hsl(142, 76%, 36%)',
+  INTERMEDIATE: 'hsl(38, 92%, 50%)',
+  ADVANCED: 'hsl(0, 84%, 60%)',
+};
+
+const STATUS_COLORS = {
+  DRAFT: 'hsl(240, 5%, 64%)',
+  PUBLISHED: 'hsl(142, 76%, 36%)',
+};
+
+const fetchDatabaseStatisticsData = async (): Promise<DatabaseStatistics> => {
+  const [
+    casesByExamType,
+    casesByDifficulty,
+    casesByStatus,
+    casesByDiagnosis,
+    totalCases,
+    totalCompletedCases,
+    totalExamTypes,
+    totalDiagnoses,
+    totalAdminTags,
+  ] = await Promise.all([
+    prisma.clinicalCase.groupBy({
+      by: ['examTypeId'],
+      _count: { id: true },
+    }).then(async (groups) => {
+      const examTypes = await prisma.examType.findMany({
+        select: { id: true, name: true },
+      });
+      const examTypeMap = new Map(examTypes.map((examType) => [examType.id, examType.name]));
+      return groups
+        .filter((group) => group.examTypeId !== null)
+        .map((group, index) => ({
+          name: examTypeMap.get(group.examTypeId!) || 'Unknown',
+          value: group._count.id,
+          color: CHART_COLORS[index % CHART_COLORS.length],
+        }))
+        .sort((first, second) => second.value - first.value);
+    }),
+    prisma.clinicalCase.groupBy({
+      by: ['difficulty'],
+      _count: { id: true },
+    }).then((groups) =>
+      groups.map((group) => ({
+        name: group.difficulty,
+        value: group._count.id,
+        color: DIFFICULTY_COLORS[group.difficulty],
+      }))
+    ),
+    prisma.clinicalCase.groupBy({
+      by: ['status'],
+      _count: { id: true },
+    }).then((groups) =>
+      groups.map((group) => ({
+        name: group.status,
+        value: group._count.id,
+        color: STATUS_COLORS[group.status],
+      }))
+    ),
+    prisma.clinicalCase.groupBy({
+      by: ['diseaseTagId'],
+      _count: { id: true },
+    }).then(async (groups) => {
+      const diseaseTags = await prisma.diseaseTag.findMany({
+        select: { id: true, name: true },
+      });
+      const diseaseTagMap = new Map(diseaseTags.map((tag) => [tag.id, tag.name]));
+      return groups
+        .filter((group) => group.diseaseTagId !== null)
+        .map((group, index) => ({
+          name: diseaseTagMap.get(group.diseaseTagId!) || 'Unknown',
+          value: group._count.id,
+          color: CHART_COLORS[index % CHART_COLORS.length],
+        }))
+        .sort((first, second) => second.value - first.value)
+        .slice(0, 10);
+    }),
+    prisma.clinicalCase.count(),
+    prisma.caseAttempt.findMany({
+      where: { validatedAt: { not: null } },
+      select: { caseId: true },
+      distinct: ['caseId'],
+    }).then((attempts) => attempts.length),
+    prisma.examType.count(),
+    prisma.diseaseTag.count(),
+    prisma.adminTag.count(),
+  ]);
+
+  return {
+    casesByExamType,
+    casesByDifficulty,
+    casesByStatus,
+    casesByDiagnosis,
+    totalCases,
+    totalCompletedCases,
+    totalExamTypes,
+    totalDiagnoses,
+    totalAdminTags,
+  };
+};
+
+const cachedDatabaseStatistics = cache(async () => {
+  return unstable_cache(
+    () => fetchDatabaseStatisticsData(),
+    ['bestof:stats:database:v1'],
+    { tags: [STATS_TAG, CASES_TAG] },
+  )();
+});
+
+export const getDatabaseStatistics = async (): Promise<DatabaseStatistics> => {
+  return cachedDatabaseStatistics();
+};
+
+const fetchUserOverviewStatisticsData = async (): Promise<UserOverviewStatistics> => {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const [allUsers, usersLast30Days, usersByPositionData] = await Promise.all([
+    prisma.user.findMany({
+      where: {
+        CaseAttempt: {
+          some: {
+            validatedAt: { not: null },
+          },
+        },
+      },
+      select: { id: true },
+    }),
+    prisma.user.findMany({
+      where: {
+        CaseAttempt: {
+          some: {
+            validatedAt: {
+              gte: thirtyDaysAgo,
+              not: null,
+            },
+          },
+        },
+      },
+      select: { id: true },
+    }),
+    prisma.user.groupBy({
+      by: ['position'],
+      where: {
+        CaseAttempt: {
+          some: {
+            validatedAt: { not: null },
+          },
+        },
+      },
+      _count: { id: true },
+    }),
+  ]);
+
+  const usersByPosition = usersByPositionData.map((group, index) => ({
+    name: group.position || 'No position',
+    value: group._count.id,
+    color: CHART_COLORS[index % CHART_COLORS.length],
+  })).sort((a, b) => b.value - a.value);
+
+  return {
+    totalActiveUsers: allUsers.length,
+    usersLast30Days: usersLast30Days.length,
+    usersByPosition,
+  };
+};
+
+const cachedUserOverviewStatistics = cache(async () => {
+  return unstable_cache(
+    () => fetchUserOverviewStatisticsData(),
+    ['bestof:stats:user-overview:v1'],
+    { tags: [STATS_TAG, CASES_TAG] },
+  )();
+});
+
+export const getUserOverviewStatistics = async (): Promise<UserOverviewStatistics> => {
+  return cachedUserOverviewStatistics();
 };

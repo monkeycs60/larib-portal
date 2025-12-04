@@ -6,32 +6,33 @@ import { Link } from '@/app/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { getUserStatistics, getUserCaseHistory, getUserExamTypeStats, getUserCompletionTrends, type StatsFilters } from '@/lib/services/bestof-larib-stats';
+import { getUserStatistics, getUserExamTypeStats, getUserCompletionTrends, type StatsFilters } from '@/lib/services/bestof-larib-stats';
 import { listExamTypes, listDiseaseTags } from '@/lib/services/bestof-larib';
 import { listAdminTags } from '@/lib/services/bestof-larib-tags';
 import { prisma } from '@/lib/prisma';
 import { CheckCircle2 } from 'lucide-react';
-import UserCaseHistory from './components/user-case-history';
-import UserExamTypeWidget from './components/user-exam-type-widget';
-import UserExamTypePieChart from './components/user-exam-type-pie-chart';
-import BestofStatsCompletionTrend from '../../../components/bestof-stats-completion-trend';
-import UserProfileFilters from './components/user-profile-filters';
+import UserExamTypeWidget from '../statistics/users/[userId]/components/user-exam-type-widget';
+import UserExamTypePieChart from '../statistics/users/[userId]/components/user-exam-type-pie-chart';
+import BestofStatsCompletionTrend from '../components/bestof-stats-completion-trend';
+import UserProfileFilters from '../statistics/users/[userId]/components/user-profile-filters';
 
-async function UserProfilePageContent({
+async function MyStatisticsPageContent({
   params,
   searchParams,
 }: {
-  params: Promise<{ locale: string; userId: string }>;
+  params: Promise<{ locale: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { locale, userId } = await params;
+  const { locale } = await params;
   const sp = await searchParams;
-  const t = await getTranslations({ locale, namespace: 'bestof.statistics.userProfile' });
+  const t = await getTranslations({ locale, namespace: 'bestof.statistics.myStats' });
   const session = await requireAuth();
 
-  if (!session || session.user.role !== 'ADMIN') {
-    redirect(applicationLink(locale, '/bestof-larib'));
+  if (!session) {
+    redirect(applicationLink(locale, '/auth/login'));
   }
+
+  const userId = session.user.id;
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -94,9 +95,8 @@ async function UserProfilePageContent({
         : undefined,
   };
 
-  const [userStats, caseHistory, examTypeStats, completionTrend, examTypes, diseaseTags, adminTags] = await Promise.all([
+  const [userStats, examTypeStats, completionTrend, examTypes, diseaseTags, adminTags] = await Promise.all([
     getUserStatistics({ userIds: [userId], ...filters }),
-    getUserCaseHistory(userId, filters),
     getUserExamTypeStats(userId),
     getUserCompletionTrends({ userIds: [userId], ...filters }, 'week'),
     listExamTypes(),
@@ -110,14 +110,14 @@ async function UserProfilePageContent({
     <div className='space-y-6 py-6 px-8 mx-auto max-w-screen-2xl'>
       <div>
         <div className='flex items-center gap-2 mb-2'>
-          <Link href='/bestof-larib/statistics'>
+          <Link href='/bestof-larib'>
             <Button variant='ghost' size='sm'>
               <ArrowLeft className='size-4 mr-2' />
-              {t('backToStatistics')}
+              {t('back')}
             </Button>
           </Link>
         </div>
-        <h1 className='text-xl font-semibold mb-1'>{displayName}</h1>
+        <h1 className='text-xl font-semibold mb-1'>{t('title')}</h1>
         <div className='flex items-center gap-3 text-xs text-muted-foreground'>
           <span>{t('position')}: {user.position || '—'}</span>
           <span>•</span>
@@ -191,21 +191,16 @@ async function UserProfilePageContent({
           </CardContent>
         </Card>
       </section>
-
-      <section className='space-y-3'>
-        <h2 className='text-base font-semibold'>{t('caseHistory.title')}</h2>
-        <UserCaseHistory caseHistory={caseHistory} userId={userId} />
-      </section>
     </div>
   );
 }
 
-export default async function UserProfilePage({
+export default async function MyStatisticsPage({
   params,
   searchParams,
 }: {
-  params: Promise<{ locale: string; userId: string }>;
+  params: Promise<{ locale: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  return <UserProfilePageContent params={params} searchParams={searchParams} />;
+  return <MyStatisticsPageContent params={params} searchParams={searchParams} />;
 }

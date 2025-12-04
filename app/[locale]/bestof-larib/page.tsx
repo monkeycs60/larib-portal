@@ -224,7 +224,14 @@ export default async function BestofLaribPage({
 								adminTags={adminTagsForDialog}
 							/>
 						</>
-					) : null}
+					) : (
+						<Link href='/bestof-larib/my-statistics'>
+							<Button variant='outline'>
+								<ChartBar className='size-4 mr-2' />
+								{t('myStatistics.title')}
+							</Button>
+						</Link>
+					)}
 				</div>
 			</div>
 

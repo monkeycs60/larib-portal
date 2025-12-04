@@ -7,9 +7,10 @@ import type { UserCaseHistoryItem } from '@/lib/services/bestof-larib-stats';
 
 type UserCaseHistoryProps = {
   caseHistory: UserCaseHistoryItem[];
+  userId: string;
 };
 
-export default function UserCaseHistory({ caseHistory }: UserCaseHistoryProps) {
+export default function UserCaseHistory({ caseHistory, userId }: UserCaseHistoryProps) {
   const getDifficultyBadge = (difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED') => {
     const variants = {
       BEGINNER: { variant: 'outline' as const, label: 'Beginner', color: 'text-green-600' },
@@ -23,6 +24,18 @@ export default function UserCaseHistory({ caseHistory }: UserCaseHistoryProps) {
         {config.label}
       </Badge>
     );
+  };
+
+  const getLevelIndicator = (level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | null) => {
+    if (!level) return <span className='text-muted-foreground text-xs'>—</span>;
+
+    const variants = {
+      BEGINNER: 'bg-green-500',
+      INTERMEDIATE: 'bg-yellow-500',
+      ADVANCED: 'bg-red-500',
+    };
+
+    return <div className={`size-2.5 rounded-full ${variants[level]}`} />;
   };
 
   const attemptCountsByCaseId = caseHistory.reduce<Record<string, number>>((acc, item) => {
@@ -60,6 +73,7 @@ export default function UserCaseHistory({ caseHistory }: UserCaseHistoryProps) {
             <TableHead>Case Name</TableHead>
             <TableHead>Exam Type</TableHead>
             <TableHead>Difficulty</TableHead>
+            <TableHead>Level</TableHead>
             <TableHead>Submitted Date</TableHead>
             <TableHead className='text-right'>Actions</TableHead>
           </TableRow>
@@ -87,10 +101,15 @@ export default function UserCaseHistory({ caseHistory }: UserCaseHistoryProps) {
                 </TableCell>
                 <TableCell>{getDifficultyBadge(item.difficulty)}</TableCell>
                 <TableCell>
+                  <div className='flex items-center justify-center'>
+                    {getLevelIndicator(item.personalDifficulty)}
+                  </div>
+                </TableCell>
+                <TableCell>
                   <span className='text-sm'>{new Date(item.submittedAt).toLocaleDateString()}</span>
                 </TableCell>
                 <TableCell className='text-right'>
-                  <Link href={`/bestof-larib/cases/${item.caseId}`}>
+                  <Link href={`/bestof-larib/statistics/users/${userId}/attempts/${item.attemptId}`}>
                     <Button variant='ghost' size='sm'>
                       <Eye className='size-4 mr-2' />
                       View
