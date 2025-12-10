@@ -96,11 +96,12 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
     currentRemaining: t('request.currentRemaining'),
     afterRequest: t('request.afterRequest'),
     excludedDays: t('request.excludedDays'),
-    weekends: t('request.weekends'),
+    weekendDays: t('request.weekendDays'),
     holidays: t('request.holidays'),
     holiday: t('request.holiday'),
     day: t('request.day'),
     days: t('request.days'),
+    holidayLegend: t('request.holidayLegend'),
   }
 
   const userLeaveContext = {

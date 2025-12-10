@@ -25,5 +25,6 @@ export function formatUserName(user: User): string {
     return user.name.trim()
   }
 
-  return user.email
+  const emailUsername = user.email.split('@')[0]
+  return emailUsername
 }

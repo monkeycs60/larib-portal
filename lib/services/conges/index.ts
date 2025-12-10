@@ -46,6 +46,7 @@ export type CalendarAbsentee = {
   userId: string
   firstName: string | null
   lastName: string | null
+  email: string
   role: 'ADMIN' | 'USER'
 }
 
@@ -105,6 +106,7 @@ export type PendingLeaveRequestAdmin = {
   userId: string
   firstName: string | null
   lastName: string | null
+  email: string
   role: 'ADMIN' | 'USER'
   startDate: string
   endDate: string
@@ -161,6 +163,7 @@ export async function getLeaveCalendarData(month: Date): Promise<{
           id: true,
           firstName: true,
           lastName: true,
+          email: true,
           role: true,
           position: true,
         },
@@ -178,6 +181,7 @@ export async function getLeaveCalendarData(month: Date): Promise<{
         userId: leave.userId,
         firstName: leave.user.firstName,
         lastName: leave.user.lastName,
+        email: leave.user.email,
         role: leave.user.role as 'ADMIN' | 'USER',
       }))
 
@@ -335,6 +339,7 @@ export async function getAdminLeaveDashboard(): Promise<AdminDashboardSummary> {
             id: true,
             firstName: true,
             lastName: true,
+            email: true,
             role: true,
           },
         },
@@ -417,6 +422,7 @@ export async function getAdminLeaveDashboard(): Promise<AdminDashboardSummary> {
       userId: request.userId,
       firstName: request.user.firstName,
       lastName: request.user.lastName,
+      email: request.user.email,
       role: request.user.role as 'ADMIN' | 'USER',
       startDate: request.startDate.toISOString(),
       endDate: request.endDate.toISOString(),

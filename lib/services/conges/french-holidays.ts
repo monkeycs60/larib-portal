@@ -62,13 +62,20 @@ export function getHolidaysForRange(
     })
 }
 
+function formatDateKey(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 export function isHoliday(date: Date, allHolidays: Record<string, string>): boolean {
-  const dateStr = date.toISOString().split('T')[0]
+  const dateStr = formatDateKey(date)
   return dateStr in allHolidays
 }
 
 export function getHolidayName(date: Date, allHolidays: Record<string, string>): string | null {
-  const dateStr = date.toISOString().split('T')[0]
+  const dateStr = formatDateKey(date)
   return allHolidays[dateStr] ?? null
 }
 

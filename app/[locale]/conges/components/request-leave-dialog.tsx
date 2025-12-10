@@ -50,11 +50,12 @@ type RequestLeaveDialogProps = {
     currentRemaining: string
     afterRequest: string
     excludedDays: string
-    weekends: string
+    weekendDays: string
     holidays: string
     holiday: string
     day: string
     days: string
+    holidayLegend: string
   }
   defaultMonthIso: string
   userContext: {
@@ -261,7 +262,7 @@ export function RequestLeaveDialog({
       <DialogTrigger asChild>
         <Button>{translations.trigger}</Button>
       </DialogTrigger>
-      <DialogContent className='sm:max-w-4xl max-h-[90vh] overflow-y-auto'>
+      <DialogContent className='sm:max-w-5xl max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>{translations.title}</DialogTitle>
           <DialogDescription>{translations.description}</DialogDescription>
@@ -305,15 +306,16 @@ export function RequestLeaveDialog({
               holiday: 'holiday-day',
             }}
             classNames={{
-              months: 'flex flex-col sm:flex-row gap-4 w-full',
-              month: 'flex-1',
+              root: 'w-full relative',
+              months: 'flex flex-col sm:flex-row gap-8 w-full justify-center',
+              month: 'flex-1 max-w-sm',
               month_caption: 'flex justify-center pt-1 relative items-center mb-4',
               caption_label: 'text-sm font-medium',
-              nav: 'flex items-center gap-1',
+              nav: 'absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-2 pointer-events-none',
               button_previous:
-                'absolute left-1 h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md border border-input hover:bg-accent',
+                'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md border border-input hover:bg-accent pointer-events-auto',
               button_next:
-                'absolute right-1 h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md border border-input hover:bg-accent',
+                'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md border border-input hover:bg-accent pointer-events-auto',
               month_grid: 'w-full border-collapse',
               weekdays: 'flex',
               weekday: 'text-muted-foreground rounded-md w-full font-normal text-[0.8rem] flex-1 text-center',
@@ -324,9 +326,9 @@ export function RequestLeaveDialog({
               selected:
                 'bg-amber-500 text-white hover:bg-amber-600 hover:text-white focus:bg-amber-500 focus:text-white rounded-md',
               range_start:
-                'bg-amber-500 text-white hover:bg-amber-600 hover:text-white rounded-l-md rounded-r-none',
+                'day-range-start bg-amber-500 text-white hover:bg-amber-600 rounded-l-md',
               range_end:
-                'bg-amber-500 text-white hover:bg-amber-600 hover:text-white rounded-r-md rounded-l-none',
+                'day-range-end bg-amber-500 text-white hover:bg-amber-600 rounded-r-md',
               range_middle:
                 'bg-amber-100 dark:bg-amber-900/30 text-amber-900 dark:text-amber-100 rounded-none',
               today: 'ring-1 ring-primary rounded-md font-semibold',
@@ -356,9 +358,29 @@ export function RequestLeaveDialog({
               width: 6px;
               height: 6px;
               border-radius: 50%;
-              background-color: rgb(249 115 22);
+              background-color: rgb(220 38 38);
+              box-shadow: 0 0 0 1px white;
+            }
+            .day-range-start.day-range-end {
+              border-radius: 0.375rem !important;
+            }
+            .day-range-start:not(.day-range-end) {
+              border-top-right-radius: 0 !important;
+              border-bottom-right-radius: 0 !important;
+            }
+            .day-range-end:not(.day-range-start) {
+              border-top-left-radius: 0 !important;
+              border-bottom-left-radius: 0 !important;
             }
           `}</style>
+
+          <div className='flex items-center gap-2 text-xs text-muted-foreground'>
+            <span
+              className='inline-block h-2 w-2 rounded-full'
+              style={{ backgroundColor: 'rgb(220 38 38)', boxShadow: '0 0 0 1px white' }}
+            />
+            {translations.holidayLegend}
+          </div>
 
           {leaveCalculation && (
             <div className='space-y-3'>
@@ -412,7 +434,7 @@ export function RequestLeaveDialog({
                   <div className='flex flex-wrap gap-2'>
                     {leaveCalculation.weekendsExcluded > 0 && (
                       <Badge variant='secondary'>
-                        {leaveCalculation.weekendsExcluded} {translations.weekends}
+                        {leaveCalculation.weekendsExcluded} {translations.weekendDays}
                       </Badge>
                     )}
                     {leaveCalculation.holidaysExcluded.map((holiday) => (

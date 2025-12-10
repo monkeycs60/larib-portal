@@ -584,11 +584,12 @@
       "currentRemaining": "Solde actuel",
       "afterRequest": "Solde après",
       "excludedDays": "Jours non décomptés :",
-      "weekends": "week-ends",
+      "weekendDays": "jours de week-end",
       "holidays": "jours fériés",
       "holiday": "férié",
       "day": "jour",
-      "days": "jours"
+      "days": "jours",
+      "holidayLegend": "Jour férié"
     },
     "errors": {
       "overlap": "Vous avez déjà une demande sur cette période.",

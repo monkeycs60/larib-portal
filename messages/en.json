@@ -586,11 +586,12 @@
       "currentRemaining": "Current balance",
       "afterRequest": "After request",
       "excludedDays": "Days not counted:",
-      "weekends": "weekends",
+      "weekendDays": "weekend days",
       "holidays": "public holidays",
       "holiday": "holiday",
       "day": "day",
-      "days": "days"
+      "days": "days",
+      "holidayLegend": "Public holiday"
     },
     "errors": {
       "overlap": "You already have a request covering that period.",

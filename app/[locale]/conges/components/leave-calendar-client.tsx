@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import type { CalendarDay } from '@/lib/services/conges'
+import { formatUserName } from '@/lib/format-user-name'
 
 type LeaveCalendarNavigation = {
   baseHref: string
@@ -148,7 +149,7 @@ export function LeaveCalendarClient({ content }: LeaveCalendarProps) {
                     <p className='text-xs text-muted-foreground'>{translations('calendar.empty')}</p>
                   ) : (
                     displayAbsentees.map((person) => {
-                      const name = [person.firstName, person.lastName].filter(Boolean).join(' ').trim() || '—'
+                      const name = formatUserName({ firstName: person.firstName, lastName: person.lastName, email: person.email })
                       return (
                         <Badge key={`${dateKey}-${person.userId}`} variant='secondary' className='block text-[10px] font-medium'>
                           {name}

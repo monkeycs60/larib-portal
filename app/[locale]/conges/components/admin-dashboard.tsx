@@ -27,6 +27,7 @@ import { Label } from '@/components/ui/label'
 import { Minus, Pencil, Plus } from 'lucide-react'
 import { updateLeaveAllocationAction, updateLeaveStatusAction } from '../actions'
 import type { AdminUserRow, PendingLeaveRequestAdmin } from '@/lib/services/conges'
+import { formatUserName } from '@/lib/format-user-name'
 
 type AdminDashboardProps = {
   data: {
@@ -304,7 +305,7 @@ export function AdminDashboard({ data }: AdminDashboardProps) {
           ) : (
             <div className='space-y-4'>
               {data.pendingRequests.map((request) => {
-                const displayName = [request.firstName, request.lastName].filter(Boolean).join(' ').trim() || '—'
+                const displayName = formatUserName({ firstName: request.firstName, lastName: request.lastName, email: request.email })
                 const isActing = activeStatusRequest === request.id && savingStatus
                 const template = request.totalDays === 1 ? data.pendingLabels.daySingular : data.pendingLabels.dayPlural
                 const daysLabel = template.replace('{count}', request.totalDays.toString())
@@ -386,7 +387,7 @@ export function AdminDashboard({ data }: AdminDashboardProps) {
             </TableHeader>
             <TableBody>
               {data.rows.map((row) => {
-                const displayName = [row.firstName, row.lastName].filter(Boolean).join(' ').trim() || row.email
+                const displayName = formatUserName({ firstName: row.firstName, lastName: row.lastName, email: row.email })
                 const allocationValue = allocations[row.userId] ?? row.totalAllocationDays
                 const isSaving = savingAllocation && activeAllocationUser === row.userId
                 const hasDeparted = row.daysUntilDeparture != null && row.daysUntilDeparture < 0
