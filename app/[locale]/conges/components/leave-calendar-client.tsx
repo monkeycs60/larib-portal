@@ -6,6 +6,8 @@ import { addDays, addMonths, endOfMonth, endOfWeek, format, isSameMonth, startOf
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { MultiSelect } from '@/components/ui/multiselect'
 import type { CalendarDay } from '@/lib/services/conges'
 import { formatUserName } from '@/lib/format-user-name'
 
@@ -38,12 +40,46 @@ function monthLabel(date: Date, locale: string): string {
   return capitalise(formatter.format(date), locale)
 }
 
+const USER_COLORS = [
+  'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+  'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+  'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+  'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200',
+  'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+  'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200',
+  'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200',
+  'bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200',
+  'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200',
+  'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
+  'bg-lime-100 text-lime-800 dark:bg-lime-900 dark:text-lime-200',
+  'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
+  'bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-200',
+  'bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900 dark:text-fuchsia-200',
+  'bg-sky-100 text-sky-800 dark:bg-sky-900 dark:text-sky-200',
+]
+
+function hashUserId(userId: string): number {
+  let hash = 0
+  for (let charIndex = 0; charIndex < userId.length; charIndex++) {
+    const char = userId.charCodeAt(charIndex)
+    hash = ((hash << 5) - hash) + char
+    hash = hash & hash
+  }
+  return Math.abs(hash)
+}
+
+function getUserColor(userId: string): string {
+  const index = hashUserId(userId) % USER_COLORS.length
+  return USER_COLORS[index]
+}
+
 export function LeaveCalendarClient({ content }: LeaveCalendarProps) {
   const translations = useTranslations('conges')
   const locale = useLocale()
 
   const initialMonth = useMemo(() => startOfMonth(new Date(content.activeMonthIso)), [content.activeMonthIso])
   const [activeMonth, setActiveMonth] = useState(initialMonth)
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([])
 
   const availableMonthSet = useMemo(() => new Set(content.availableMonths), [content.availableMonths])
   const absenteesByDate = useMemo(() => {
@@ -53,6 +89,34 @@ export function LeaveCalendarClient({ content }: LeaveCalendarProps) {
     }
     return entries
   }, [content.calendarDays])
+
+  const allUsers = useMemo(() => {
+    const userMap = new Map<string, { userId: string; firstName: string | null; lastName: string | null; email: string }>()
+    for (const day of content.calendarDays) {
+      for (const absentee of day.absentees) {
+        if (!userMap.has(absentee.userId)) {
+          userMap.set(absentee.userId, {
+            userId: absentee.userId,
+            firstName: absentee.firstName,
+            lastName: absentee.lastName,
+            email: absentee.email,
+          })
+        }
+      }
+    }
+    return Array.from(userMap.values()).sort((userA, userB) => {
+      const nameA = formatUserName(userA)
+      const nameB = formatUserName(userB)
+      return nameA.localeCompare(nameB, locale)
+    })
+  }, [content.calendarDays, locale])
+
+  const userSelectOptions = useMemo(() => {
+    return allUsers.map((user) => ({
+      value: user.userId,
+      label: formatUserName(user),
+    }))
+  }, [allUsers])
 
   const todayKey = formatKey(new Date())
   const weekdayLabels = translations.raw('calendar.weekdays') as string[]
@@ -69,12 +133,17 @@ export function LeaveCalendarClient({ content }: LeaveCalendarProps) {
     const days: Array<{ date: Date; absentees: CalendarDay['absentees'] }> = []
     for (let cursor = rangeStart; cursor <= rangeEnd; cursor = addDays(cursor, 1)) {
       const date = new Date(cursor)
-      const absentees = absenteesByDate.get(formatKey(date)) ?? []
+      let absentees = absenteesByDate.get(formatKey(date)) ?? []
+
+      if (selectedUserIds.length > 0) {
+        absentees = absentees.filter((person) => selectedUserIds.includes(person.userId))
+      }
+
       days.push({ date, absentees })
     }
 
     return days
-  }, [absenteesByDate, activeMonth])
+  }, [absenteesByDate, activeMonth, selectedUserIds])
 
   function updateUrl(monthKey: string) {
     const currentUrl = new URL(window.location.href)
@@ -103,17 +172,28 @@ export function LeaveCalendarClient({ content }: LeaveCalendarProps) {
 
   return (
     <Card>
-      <CardHeader className='flex flex-row items-center justify-between space-y-0'>
-        <div>
+      <CardHeader className='flex flex-col gap-4 space-y-0'>
+        <div className='flex flex-row items-center justify-between'>
           <CardTitle className='text-lg'>{calendarTitle}</CardTitle>
+          <div className='flex items-center gap-2'>
+            <Button variant='outline' size='sm' onClick={() => handleNavigate('previous')}>
+              &larr;
+            </Button>
+            <Button variant='outline' size='sm' onClick={() => handleNavigate('next')}>
+              &rarr;
+            </Button>
+          </div>
         </div>
-        <div className='flex items-center gap-2'>
-          <Button variant='outline' size='sm' onClick={() => handleNavigate('previous')}>
-            &larr;
-          </Button>
-          <Button variant='outline' size='sm' onClick={() => handleNavigate('next')}>
-            &rarr;
-          </Button>
+        <div className='w-full max-w-sm'>
+          <MultiSelect
+            options={userSelectOptions}
+            defaultValue={selectedUserIds}
+            onValueChange={setSelectedUserIds}
+            placeholder={translations('calendar.filterPlaceholder')}
+            searchable
+            hideSelectAll={false}
+            maxCount={2}
+          />
         </div>
       </CardHeader>
       <CardContent className='space-y-4'>
@@ -131,7 +211,8 @@ export function LeaveCalendarClient({ content }: LeaveCalendarProps) {
             const isToday = dateKey === todayKey
             const dayNumber = date.getDate()
             const displayAbsentees = absentees.slice(0, 3)
-            const overflow = absentees.length - displayAbsentees.length
+            const overflowAbsentees = absentees.slice(3)
+            const overflow = overflowAbsentees.length
 
             return (
               <div
@@ -150,17 +231,43 @@ export function LeaveCalendarClient({ content }: LeaveCalendarProps) {
                   ) : (
                     displayAbsentees.map((person) => {
                       const name = formatUserName({ firstName: person.firstName, lastName: person.lastName, email: person.email })
+                      const colorClass = getUserColor(person.userId)
                       return (
-                        <Badge key={`${dateKey}-${person.userId}`} variant='secondary' className='block text-[10px] font-medium'>
+                        <Badge
+                          key={`${dateKey}-${person.userId}`}
+                          variant='secondary'
+                          className={`block text-[10px] font-medium ${colorClass}`}
+                        >
                           {name}
                         </Badge>
                       )
                     })
                   )}
                   {overflow > 0 ? (
-                    <Badge variant='outline' className='text-[10px]'>
-                      {translations('calendar.more', { count: overflow })}
-                    </Badge>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Badge variant='outline' className='cursor-pointer text-[10px] hover:bg-accent'>
+                          {translations('calendar.more', { count: overflow })}
+                        </Badge>
+                      </PopoverTrigger>
+                      <PopoverContent className='w-auto p-2' align='start'>
+                        <div className='space-y-1'>
+                          {overflowAbsentees.map((person) => {
+                            const name = formatUserName({ firstName: person.firstName, lastName: person.lastName, email: person.email })
+                            const colorClass = getUserColor(person.userId)
+                            return (
+                              <Badge
+                                key={`${dateKey}-overflow-${person.userId}`}
+                                variant='secondary'
+                                className={`block text-xs font-medium ${colorClass}`}
+                              >
+                                {name}
+                              </Badge>
+                            )
+                          })}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
                   ) : null}
                 </div>
               </div>

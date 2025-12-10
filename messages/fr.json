@@ -615,6 +615,7 @@
       "title": "Calendrier – {month} {year}",
       "empty": "—",
       "more": "+{count}",
+      "filterPlaceholder": "Filtrer par collaborateur...",
       "weekdays": [
         "Lun",
         "Mar",

@@ -617,6 +617,7 @@
       "title": "Calendar – {month} {year}",
       "empty": "—",
       "more": "+{count}",
+      "filterPlaceholder": "Filter by team member...",
       "weekdays": [
         "Mon",
         "Tue",
