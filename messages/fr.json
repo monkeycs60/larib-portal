@@ -615,7 +615,9 @@
       "title": "Calendrier – {month} {year}",
       "empty": "—",
       "more": "+{count}",
-      "filterPlaceholder": "Filtrer par collaborateur...",
+      "filterPlaceholder": "Filtrer par collaborateur",
+      "clearFilter": "Effacer le filtre",
+      "noUsers": "Aucun collaborateur",
       "weekdays": [
         "Lun",
         "Mar",

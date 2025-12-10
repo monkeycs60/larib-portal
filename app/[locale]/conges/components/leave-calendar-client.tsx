@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { addDays, addMonths, endOfMonth, endOfWeek, format, isSameMonth, startOfMonth, startOfWeek, subMonths } from 'date-fns'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -172,27 +173,36 @@ export function LeaveCalendarClient({ content }: LeaveCalendarProps) {
 
   return (
     <Card>
-      <CardHeader className='flex flex-col gap-4 space-y-0'>
-        <div className='flex flex-row items-center justify-between'>
-          <CardTitle className='text-lg'>{calendarTitle}</CardTitle>
-          <div className='flex items-center gap-2'>
-            <Button variant='outline' size='sm' onClick={() => handleNavigate('previous')}>
-              &larr;
+      <CardHeader className='flex flex-col gap-4 space-y-0 pb-6'>
+        <div className='flex flex-row items-center gap-4'>
+          <CardTitle className='min-w-[220px] text-lg'>{calendarTitle}</CardTitle>
+          <div className='flex items-center gap-1'>
+            <Button
+              variant='outline'
+              size='icon'
+              onClick={() => handleNavigate('previous')}
+              className='h-8 w-8 rounded-full border-muted-foreground/25 hover:border-primary hover:bg-primary/10 hover:text-primary'
+            >
+              <ChevronLeft className='h-4 w-4' />
             </Button>
-            <Button variant='outline' size='sm' onClick={() => handleNavigate('next')}>
-              &rarr;
+            <Button
+              variant='outline'
+              size='icon'
+              onClick={() => handleNavigate('next')}
+              className='h-8 w-8 rounded-full border-muted-foreground/25 hover:border-primary hover:bg-primary/10 hover:text-primary'
+            >
+              <ChevronRight className='h-4 w-4' />
             </Button>
           </div>
         </div>
-        <div className='w-full max-w-sm'>
+        <div className='min-w-52'>
           <MultiSelect
             options={userSelectOptions}
             defaultValue={selectedUserIds}
             onValueChange={setSelectedUserIds}
             placeholder={translations('calendar.filterPlaceholder')}
-            searchable
-            hideSelectAll={false}
-            maxCount={2}
+            maxCount={3}
+            responsive
           />
         </div>
       </CardHeader>
