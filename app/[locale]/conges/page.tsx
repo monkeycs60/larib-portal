@@ -8,6 +8,7 @@ import {
   getUserLeaveDashboard,
   getAdminLeaveDashboard,
   countLeaveDays,
+  fetchFrenchHolidays,
 } from '@/lib/services/conges'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -64,11 +65,12 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
   const monthParam = typeof sp?.month === 'string' ? sp.month : null
   const activeMonth = parseMonth(monthParam)
 
-  const [t, userDashboard, calendarData, adminDashboard] = await Promise.all([
+  const [t, userDashboard, calendarData, adminDashboard, frenchHolidays] = await Promise.all([
     getTranslations({ locale, namespace: 'conges' }),
     getUserLeaveDashboard(session.user.id),
     getLeaveCalendarData(activeMonth),
     session.user.role === 'ADMIN' ? getAdminLeaveDashboard() : Promise.resolve(null),
+    fetchFrenchHolidays(),
   ])
 
   const requestTrigger = session.user.role === 'ADMIN' ? t('request.triggerAdmin') : t('request.trigger')
@@ -89,6 +91,24 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
     missingRange: t('errors.missingRange'),
     insufficientDays: t('errors.insufficientDays'),
     pastDate: t('errors.pastDate'),
+    outsideContract: t('errors.outsideContract'),
+    requestedDays: t('request.requestedDays'),
+    currentRemaining: t('request.currentRemaining'),
+    afterRequest: t('request.afterRequest'),
+    excludedDays: t('request.excludedDays'),
+    weekends: t('request.weekends'),
+    holidays: t('request.holidays'),
+    holiday: t('request.holiday'),
+    day: t('request.day'),
+    days: t('request.days'),
+  }
+
+  const userLeaveContext = {
+    remainingDays: userDashboard.summary.balanceAfterPending,
+    arrivalDate: userDashboard.summary.arrivalDate,
+    departureDate: userDashboard.summary.departureDate,
+    locale,
+    frenchHolidays,
   }
 
   const statusLabels = {
@@ -353,7 +373,7 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
             <h1 className='text-2xl font-semibold'>{t('title')}</h1>
             <p className='text-sm text-muted-foreground'>{t('subtitle')}</p>
           </div>
-          <RequestLeaveDialog translations={requestTranslations} defaultMonthIso={activeMonth.toISOString()} />
+          <RequestLeaveDialog translations={requestTranslations} defaultMonthIso={activeMonth.toISOString()} userContext={userLeaveContext} />
         </div>
       </header>
 

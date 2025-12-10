@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { Prisma } from '@/app/generated/prisma'
+import { LeaveRequestStatus } from '@/app/generated/prisma'
 import {
   addMonths,
   differenceInCalendarDays,
@@ -12,8 +12,13 @@ import {
   startOfMonth,
   subMonths,
 } from 'date-fns'
-
-type LeaveRequestStatus = Prisma.LeaveRequestStatus
+export {
+  fetchFrenchHolidays,
+  countWorkingDays,
+  getExcludedDaysInfo,
+  getHolidayDatesForCalendar,
+  getHolidayName,
+} from './french-holidays'
 
 export type LeaveHistoryEntry = {
   id: string

@@ -581,14 +581,24 @@
       "submit": "Send request",
       "cancel": "Cancel",
       "success": "Leave request sent",
-      "missingRange": "Select a start and end date before submitting"
+      "missingRange": "Select a start and end date before submitting",
+      "requestedDays": "Requested days",
+      "currentRemaining": "Current balance",
+      "afterRequest": "After request",
+      "excludedDays": "Days not counted:",
+      "weekends": "weekends",
+      "holidays": "public holidays",
+      "holiday": "holiday",
+      "day": "day",
+      "days": "days"
     },
     "errors": {
       "overlap": "You already have a request covering that period.",
       "invalidRange": "The end date must be after the start date.",
       "missingRange": "Please choose a start and end date.",
       "pastDate": "The start date must be today or later.",
-      "insufficientDays": "You do not have enough remaining days for this leave."
+      "insufficientDays": "You do not have enough remaining days for this leave.",
+      "outsideContract": "The selected dates are outside your contract period."
     },
     "summary": {
       "totalAllocation": "Allocated days",
