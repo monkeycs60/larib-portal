@@ -596,10 +596,16 @@ test.describe('Permission & Authorization Tests', () => {
 			page.getByRole('button', { name: /create case/i })
 		).not.toBeVisible();
 
-		// Vérifier que "Statistics" n'est PAS visible
+		// Vérifier que le lien admin "Statistics" (pas "My Statistics") n'est PAS visible
+		// Les utilisateurs réguliers voient "My Statistics" au lieu de "Statistics"
 		await expect(
-			page.getByRole('link', { name: /statistics/i })
+			page.getByRole('link', { name: /^statistics$/i })
 		).not.toBeVisible();
+
+		// Vérifier que "My Statistics" EST visible pour les utilisateurs réguliers
+		await expect(
+			page.getByRole('link', { name: /my statistics/i })
+		).toBeVisible();
 	});
 
 	test('should show admin actions for admin users', async ({ page }) => {
@@ -726,11 +732,11 @@ test.describe('Admin Statistics Tests', () => {
 			page.getByRole('heading', { name: /database overview/i })
 		).toBeVisible({ timeout: 10000 });
 
-		// Check for summary cards
+		// Check for total cases card and pie charts
 		await expect(page.getByText(/total cases/i).first()).toBeVisible();
-		await expect(page.getByText(/exam types/i).first()).toBeVisible();
-		await expect(page.getByText(/diagnoses/i).first()).toBeVisible();
-		await expect(page.getByText(/admin tags/i).first()).toBeVisible();
+		await expect(page.getByText(/cases by exam type/i).first()).toBeVisible();
+		await expect(page.getByText(/top diagnoses/i).first()).toBeVisible();
+		await expect(page.getByText(/cases by difficulty/i).first()).toBeVisible();
 	});
 
 	test('should display pie charts for database statistics', async ({
@@ -741,10 +747,9 @@ test.describe('Admin Statistics Tests', () => {
 
 		await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
 
-		// Check for pie chart titles
+		// Check for pie chart titles (cases by status was removed from the UI)
 		await expect(page.getByText(/cases by exam type/i)).toBeVisible({ timeout: 10000 });
 		await expect(page.getByText(/cases by difficulty/i)).toBeVisible();
-		await expect(page.getByText(/cases by status/i)).toBeVisible();
 		await expect(page.getByText(/top diagnoses/i)).toBeVisible();
 	});
 
@@ -765,18 +770,23 @@ test.describe('Admin Statistics Tests', () => {
 		await expect(page.getByText(/user statistics/i)).toBeVisible();
 	});
 
-	test('should display activity charts section', async ({ page }) => {
+	test('should display user activity section with completion trend', async ({ page }) => {
 		await loginAs(page, 'admin');
 		await page.goto('/en/bestof-larib/statistics', { timeout: 60000 });
 
 		await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
 
-		// Check for charts section
-		await expect(page.getByText(/activity charts/i)).toBeVisible({ timeout: 10000 });
+		// Check for user activity section heading
+		await expect(
+			page.getByRole('heading', { name: /user activity/i })
+		).toBeVisible({ timeout: 10000 });
 
-		// Check for individual chart titles
-		await expect(page.getByText(/top users/i)).toBeVisible();
-		await expect(page.getByText(/distribution by difficulty/i)).toBeVisible();
+		// Check for completion trend section
+		await expect(
+			page.getByRole('heading', { name: /completion trend over time/i })
+		).toBeVisible();
+
+		// Check for completion over time chart
 		await expect(page.getByText(/completion over time/i)).toBeVisible();
 	});
 
@@ -805,9 +815,9 @@ test.describe('Admin Statistics Tests', () => {
 
 		await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
 
-		// Check for French translations
+		// Check for French translations - use exact match to avoid matching "Statistiques utilisateurs"
 		await expect(
-			page.getByRole('heading', { name: /statistiques/i })
+			page.getByRole('heading', { name: 'Statistiques', exact: true })
 		).toBeVisible({ timeout: 10000 });
 		await expect(page.getByText(/aperçu de la base de données/i)).toBeVisible();
 		await expect(page.getByText(/activité des utilisateurs/i)).toBeVisible();
