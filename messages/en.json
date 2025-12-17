@@ -200,7 +200,18 @@
 		"createPositionCta": "Create position",
 		"close": "Close",
 		"deleteSelected": "Delete Selected",
-		"positionsInUse": "Cannot delete: used by {count} user(s)"
+		"positionsInUse": "Cannot delete: used by {count} user(s)",
+		"onboardingStatus": "Status",
+		"statusActive": "Active",
+		"statusInvitationSent": "Invitation sent",
+		"statusInvitationExpired": "Invitation expired",
+		"statusLegend": "Status legend",
+		"statusActiveDesc": "User has set their password",
+		"statusInvitationSentDesc": "Awaiting password setup",
+		"statusInvitationExpiredDesc": "Invitation link has expired",
+		"resendInvitation": "Resend invitation",
+		"resending": "Sending...",
+		"invitationResent": "Invitation resent"
 	},
 	"upload": {
 		"selectFile": "Select image",

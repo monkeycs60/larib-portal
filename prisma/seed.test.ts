@@ -22,6 +22,7 @@ async function main() {
 	await prisma.userCaseSettings.deleteMany();
 	await prisma.clinicalCase.deleteMany();
 	await prisma.examType.deleteMany();
+	await prisma.verification.deleteMany();
 	await prisma.account.deleteMany();
 	await prisma.user.deleteMany();
 
@@ -70,6 +71,74 @@ async function main() {
 	});
 
 	console.log('✅ Created regular user:', regularUser.email);
+
+	// Create a placeholder user (invitation sent, no password yet)
+	const placeholderUser = await prisma.user.create({
+		data: {
+			id: randomUUID(),
+			name: null,
+			firstName: 'Placeholder',
+			lastName: 'User',
+			email: 'placeholder@larib-portal.test',
+			emailVerified: false,
+			role: 'USER',
+			applications: ['BESTOF_LARIB'],
+		},
+	});
+
+	// Create invitation for placeholder user (valid for 7 days)
+	await prisma.verification.create({
+		data: {
+			id: randomUUID(),
+			identifier: `INVITE:${placeholderUser.email}`,
+			value: JSON.stringify({
+				email: placeholderUser.email,
+				locale: 'en',
+				firstName: 'Placeholder',
+				lastName: 'User',
+				role: 'USER',
+				applications: ['BESTOF_LARIB'],
+				token: 'test-invitation-token',
+			}),
+			expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+		},
+	});
+
+	console.log('✅ Created placeholder user with pending invitation:', placeholderUser.email);
+
+	// Create a placeholder user with expired invitation
+	const expiredPlaceholderUser = await prisma.user.create({
+		data: {
+			id: randomUUID(),
+			name: null,
+			firstName: 'Expired',
+			lastName: 'Invitation',
+			email: 'expired@larib-portal.test',
+			emailVerified: false,
+			role: 'USER',
+			applications: ['BESTOF_LARIB'],
+		},
+	});
+
+	// Create expired invitation
+	await prisma.verification.create({
+		data: {
+			id: randomUUID(),
+			identifier: `INVITE:${expiredPlaceholderUser.email}`,
+			value: JSON.stringify({
+				email: expiredPlaceholderUser.email,
+				locale: 'en',
+				firstName: 'Expired',
+				lastName: 'Invitation',
+				role: 'USER',
+				applications: ['BESTOF_LARIB'],
+				token: 'expired-invitation-token',
+			}),
+			expiresAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // Expired 1 day ago
+		},
+	});
+
+	console.log('✅ Created placeholder user with expired invitation:', expiredPlaceholderUser.email);
 
 	// Create exam types first (using upsert to handle duplicates)
 	console.log('📦 Creating exam types...');

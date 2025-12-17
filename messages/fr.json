@@ -198,7 +198,18 @@
 		"createPositionCta": "Créer le poste",
 		"close": "Fermer",
 		"deleteSelected": "Supprimer la sélection",
-		"positionsInUse": "Impossible de supprimer : utilisé par {count} utilisateur(s)"
+		"positionsInUse": "Impossible de supprimer : utilisé par {count} utilisateur(s)",
+		"onboardingStatus": "Statut",
+		"statusActive": "Actif",
+		"statusInvitationSent": "Invitation envoyée",
+		"statusInvitationExpired": "Invitation expirée",
+		"statusLegend": "Légende des statuts",
+		"statusActiveDesc": "Mot de passe défini",
+		"statusInvitationSentDesc": "En attente du mot de passe",
+		"statusInvitationExpiredDesc": "Lien d'invitation expiré",
+		"resendInvitation": "Renvoyer l'invitation",
+		"resending": "Envoi...",
+		"invitationResent": "Invitation renvoyée"
 	},
 	"upload": {
 		"selectFile": "Choisir une image",
