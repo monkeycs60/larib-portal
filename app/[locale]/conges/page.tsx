@@ -15,7 +15,8 @@ import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { RequestLeaveDialog } from './components/request-leave-dialog'
 import { LeaveCalendar } from './components/leave-calendar'
-import { AdminDashboard } from './components/admin-dashboard'
+import { PendingRequestsSection } from './components/pending-requests-section'
+import { TeamLeaveOverviewSection } from './components/team-leave-overview-section'
 import { CalendarSkeleton } from './components/calendar-skeleton'
 import { applicationLink } from '@/lib/application-link'
 
@@ -119,13 +120,34 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
     CANCELLED: t('history.status.cancelled'),
   } as const
 
-  const adminData = adminDashboard
+  const pendingRequestsData = adminDashboard
+    ? {
+        pendingRequests: adminDashboard.pendingRequests,
+        labels: {
+          title: t('admin.pending.title', { count: adminDashboard.pendingRequestsCount }),
+          empty: t('admin.pending.empty'),
+          approve: t('admin.pending.approve'),
+          reject: t('admin.pending.reject'),
+          created: t('admin.pending.created'),
+          period: t('admin.pending.period'),
+          reason: t('admin.pending.reason'),
+          daySingular: t.raw('admin.pending.daySingular') as string,
+          dayPlural: t.raw('admin.pending.dayPlural') as string,
+          subtitle: t('admin.pending.subtitle', { days: adminDashboard.pendingDaysTotal }),
+        },
+        toasts: {
+          statusApproved: t('admin.toasts.statusApproved'),
+          statusRejected: t('admin.toasts.statusRejected'),
+          statusError: t('admin.toasts.statusError'),
+        },
+      }
+    : null
+
+  const teamLeaveOverviewData = adminDashboard
     ? {
         rows: adminDashboard.rows,
-        pendingRequests: adminDashboard.pendingRequests,
-        summaryTitle: t('admin.legendTitle'),
-        summarySubtitle: t('admin.legendSubtitle'),
         tableTitle: t('admin.tableTitle'),
+        summarySubtitle: t('admin.legendSubtitle'),
         tableLabels: {
           user: t('admin.table.user'),
           role: t('admin.table.role'),
@@ -142,16 +164,6 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
           edit: t('admin.table.edit'),
           departed: t('admin.table.departed'),
         },
-        allocationModal: {
-          title: t('admin.allocationModal.title'),
-          description: t('admin.allocationModal.description'),
-          current: t('admin.allocationModal.current'),
-          decrease: t('admin.allocationModal.decrease'),
-          increase: t('admin.allocationModal.increase'),
-          inputLabel: t('admin.allocationModal.inputLabel'),
-          cancel: t('admin.allocationModal.cancel'),
-          confirm: t('admin.allocationModal.confirm'),
-        },
         statusLabels: {
           ADMIN: t('admin.roles.admin'),
           USER: t('admin.roles.user'),
@@ -163,24 +175,19 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
           GOOD: t('admin.legend.good'),
           UNALLOCATED: t('admin.legend.unallocated'),
         },
-        pendingLabels: {
-          title: t('admin.pending.title', { count: adminDashboard.pendingRequestsCount }),
-          empty: t('admin.pending.empty'),
-          approve: t('admin.pending.approve'),
-          reject: t('admin.pending.reject'),
-          created: t('admin.pending.created'),
-          period: t('admin.pending.period'),
-          reason: t('admin.pending.reason'),
-          daySingular: t.raw('admin.pending.daySingular') as string,
-          dayPlural: t.raw('admin.pending.dayPlural') as string,
-          subtitle: t('admin.pending.subtitle', { days: adminDashboard.pendingDaysTotal }),
+        allocationModal: {
+          title: t('admin.allocationModal.title'),
+          description: t('admin.allocationModal.description'),
+          current: t('admin.allocationModal.current'),
+          decrease: t('admin.allocationModal.decrease'),
+          increase: t('admin.allocationModal.increase'),
+          inputLabel: t('admin.allocationModal.inputLabel'),
+          cancel: t('admin.allocationModal.cancel'),
+          confirm: t('admin.allocationModal.confirm'),
         },
         toasts: {
           allocationSaved: t('admin.toasts.allocationSaved'),
           allocationInvalid: t('admin.toasts.allocationInvalid'),
-          statusApproved: t('admin.toasts.statusApproved'),
-          statusRejected: t('admin.toasts.statusRejected'),
-          statusError: t('admin.toasts.statusError'),
         },
       }
     : null
@@ -358,10 +365,31 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
     </section>
   )
 
-  const adminSection = adminData ? (
+  const pendingRequestsSection = pendingRequestsData ? (
     <section className='px-6'>
       <Suspense fallback={<div className='text-sm text-muted-foreground'>{t('admin.loading')}</div>}>
-        <AdminDashboard data={adminData} />
+        <PendingRequestsSection
+          pendingRequests={pendingRequestsData.pendingRequests}
+          labels={pendingRequestsData.labels}
+          toasts={pendingRequestsData.toasts}
+        />
+      </Suspense>
+    </section>
+  ) : null
+
+  const teamLeaveOverviewSection = teamLeaveOverviewData ? (
+    <section className='px-6'>
+      <Suspense fallback={<div className='text-sm text-muted-foreground'>{t('admin.loading')}</div>}>
+        <TeamLeaveOverviewSection
+          rows={teamLeaveOverviewData.rows}
+          tableTitle={teamLeaveOverviewData.tableTitle}
+          summarySubtitle={teamLeaveOverviewData.summarySubtitle}
+          tableLabels={teamLeaveOverviewData.tableLabels}
+          statusLabels={teamLeaveOverviewData.statusLabels}
+          legendLabels={teamLeaveOverviewData.legendLabels}
+          allocationModal={teamLeaveOverviewData.allocationModal}
+          toasts={teamLeaveOverviewData.toasts}
+        />
       </Suspense>
     </section>
   ) : null
@@ -384,8 +412,9 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
 
       {isAdmin ? (
         <>
-          {adminSection}
+          {pendingRequestsSection}
           {calendarSection}
+          {teamLeaveOverviewSection}
         </>
       ) : (
         <>
