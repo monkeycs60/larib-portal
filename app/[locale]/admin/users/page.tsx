@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server"
 import { getTypedSession } from "@/lib/auth-helpers"
 import { redirect, notFound } from "next/navigation"
-import { listUsers } from "@/lib/services/users"
+import { listUsersWithAccountStatus } from "@/lib/services/users"
 import { listPositions } from "@/lib/services/positions"
 import { UserTable, type UserRow } from "./user-table"
 
@@ -18,7 +18,7 @@ export default async function AdminUsersPage({
   if (session.user.role !== 'ADMIN') notFound()
 
   const t = await getTranslations({ locale, namespace: 'admin' })
-  const users = await listUsers()
+  const users = await listUsersWithAccountStatus()
   const positions = await listPositions()
 
   return (

@@ -150,6 +150,15 @@
 		"create": "Create",
 		"name": "Name",
 		"email": "Email",
+		"status": "Status",
+		"status_ACTIVE": "Active",
+		"status_PENDING": "Pending",
+		"status_INACTIVE": "Inactive",
+		"statusFilter_ALL": "All",
+		"statusFilter_ACTIVE": "Active",
+		"statusFilter_PENDING": "Pending",
+		"statusFilter_INACTIVE": "Inactive",
+		"departureDateChangeWarning": "Changing the departure date will send an email notification to the user.",
 		"role": "Role",
 		"roleAdmin": "Admin",
 		"roleUser": "User",
@@ -710,5 +719,11 @@
 				"statusError": "Could not update request status"
 			}
 		}
+	},
+	"accessExpired": {
+		"title": "Access Expired",
+		"description": "Your access to the portal has expired. You can no longer access the applications.",
+		"expiredOn": "Your access expired on {date}.",
+		"contactAdmin": "Please contact an administrator if you believe this is an error or if you need to extend your access."
 	}
 }

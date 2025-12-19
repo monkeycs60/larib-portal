@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl"
 import { UserEditDialog, type UserFormValues } from "./user-edit-dialog"
 import { AddUserDialog } from './user-add-dialog'
 import { deleteUserAction } from "./actions"
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { useAction } from 'next-safe-action/hooks'
 import {
   AlertDialog,
@@ -19,15 +19,35 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { toast } from 'sonner'
+import { computeUserStatus, type UserStatus } from '@/lib/services/users'
+import { Badge } from '@/components/ui/badge'
 
 export type UserRow = UserFormValues & {
   name?: string | null
   createdAt?: string
+  hasPassword?: boolean
+}
+
+type StatusFilter = 'ALL' | UserStatus
+
+function StatusBadge({ status }: { status: UserStatus }) {
+  const t = useTranslations('admin')
+  const variants: Record<UserStatus, { className: string }> = {
+    ACTIVE: { className: 'bg-green-100 text-green-800 hover:bg-green-100' },
+    PENDING: { className: 'bg-orange-100 text-orange-800 hover:bg-orange-100' },
+    INACTIVE: { className: 'bg-red-100 text-red-800 hover:bg-red-100' },
+  }
+  return (
+    <Badge variant="outline" className={variants[status].className}>
+      {t(`status_${status}`)}
+    </Badge>
+  )
 }
 
 export function UserTable({ users, positions, locale }: { users: UserRow[]; positions: Array<{ id: string; name: string }>; locale: string }) {
   const t = useTranslations('admin')
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL')
   const { execute: executeDelete } = useAction(deleteUserAction, {
     onSuccess() {
       toast.success(t('deleted'))
@@ -45,9 +65,44 @@ export function UserTable({ users, positions, locale }: { users: UserRow[]; posi
     setDeleting(null)
   }
 
+  const usersWithStatus = useMemo(() => {
+    return users.map((user) => {
+      const departureDate = user.departureDate
+        ? new Date(user.departureDate as unknown as string)
+        : null
+      const status = computeUserStatus({ departureDate }, user.hasPassword ?? false)
+      return { ...user, status }
+    })
+  }, [users])
+
+  const filteredUsers = useMemo(() => {
+    if (statusFilter === 'ALL') return usersWithStatus
+    return usersWithStatus.filter((user) => user.status === statusFilter)
+  }, [usersWithStatus, statusFilter])
+
+  const statusCounts = useMemo(() => {
+    const counts = { ALL: usersWithStatus.length, PENDING: 0, ACTIVE: 0, INACTIVE: 0 }
+    usersWithStatus.forEach((user) => {
+      counts[user.status]++
+    })
+    return counts
+  }, [usersWithStatus])
+
   return (
     <div className="bg-white rounded-md border">
-      <div className="flex items-center justify-end p-3">
+      <div className="flex items-center justify-between p-3">
+        <div className="flex gap-2">
+          {(['ALL', 'ACTIVE', 'PENDING', 'INACTIVE'] as const).map((filter) => (
+            <Button
+              key={filter}
+              variant={statusFilter === filter ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setStatusFilter(filter)}
+            >
+              {t(`statusFilter_${filter}`)} ({statusCounts[filter]})
+            </Button>
+          ))}
+        </div>
         <AddUserDialog positions={positions} locale={locale} />
       </div>
       <Table>
@@ -55,6 +110,7 @@ export function UserTable({ users, positions, locale }: { users: UserRow[]; posi
           <TableRow>
             <TableHead>{t('name')}</TableHead>
             <TableHead>{t('email')}</TableHead>
+            <TableHead>{t('status')}</TableHead>
             <TableHead>{t('role')}</TableHead>
             <TableHead>{t('phone')}</TableHead>
             <TableHead>{t('country')}</TableHead>
@@ -65,30 +121,33 @@ export function UserTable({ users, positions, locale }: { users: UserRow[]; posi
           </TableRow>
         </TableHeader>
         <TableBody>
-          {users.map((u) => (
-            <TableRow key={u.id}>
+          {filteredUsers.map((user) => (
+            <TableRow key={user.id}>
               <TableCell>
                 <div className="flex items-center gap-2">
                   <div className="size-8 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white flex items-center justify-center">
-                    {(u.firstName?.[0] || u.name?.[0] || u.email[0]).toUpperCase()}
+                    {(user.firstName?.[0] || user.name?.[0] || user.email[0]).toUpperCase()}
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-medium">{[u.firstName, u.lastName].filter(Boolean).join(' ') || u.name || '—'}</span>
-                    <span className="text-xs text-muted-foreground">{u.position || '—'}</span>
+                    <span className="font-medium">{[user.firstName, user.lastName].filter(Boolean).join(' ') || user.name || '—'}</span>
+                    <span className="text-xs text-muted-foreground">{user.position || '—'}</span>
                   </div>
                 </div>
               </TableCell>
-              <TableCell>{u.email}</TableCell>
-              <TableCell>{u.role}</TableCell>
-              <TableCell>{u.phoneNumber || '—'}</TableCell>
-              <TableCell>{u.country || '—'}</TableCell>
-              <TableCell>{u.language || '—'}</TableCell>
-              <TableCell>{u.position || '—'}</TableCell>
+              <TableCell>{user.email}</TableCell>
+              <TableCell>
+                <StatusBadge status={user.status} />
+              </TableCell>
+              <TableCell>{user.role}</TableCell>
+              <TableCell>{user.phoneNumber || '—'}</TableCell>
+              <TableCell>{user.country || '—'}</TableCell>
+              <TableCell>{user.language || '—'}</TableCell>
+              <TableCell>{user.position || '—'}</TableCell>
               <TableCell>
                 <div className="flex flex-wrap gap-1">
-                  {u.applications?.map((a) => (
-                    <span key={a} className="px-2 py-0.5 rounded border text-xs">
-                      {t(`app_${a}`)}
+                  {user.applications?.map((application) => (
+                    <span key={application} className="px-2 py-0.5 rounded border text-xs">
+                      {t(`app_${application}`)}
                     </span>
                   ))}
                 </div>
@@ -97,19 +156,19 @@ export function UserTable({ users, positions, locale }: { users: UserRow[]; posi
                 <UserEditDialog
                   positions={positions}
                   initial={{
-                    id: u.id,
-                    email: u.email,
-                    role: u.role as 'ADMIN' | 'USER',
-                    firstName: u.firstName ?? undefined,
-                    lastName: u.lastName ?? undefined,
-                    phoneNumber: u.phoneNumber ?? undefined,
-                    country: u.country ?? undefined,
-                    birthDate: u.birthDate ? new Date(u.birthDate as unknown as string).toISOString().slice(0,10) : undefined,
-                    language: (u.language as 'EN' | 'FR' | undefined) ?? undefined,
-                    position: u.position ?? undefined,
-                    arrivalDate: u.arrivalDate ? new Date(u.arrivalDate as unknown as string).toISOString().slice(0,10) : undefined,
-                    departureDate: u.departureDate ? new Date(u.departureDate as unknown as string).toISOString().slice(0,10) : undefined,
-                    applications: (u.applications ?? []) as UserFormValues['applications'],
+                    id: user.id,
+                    email: user.email,
+                    role: user.role as 'ADMIN' | 'USER',
+                    firstName: user.firstName ?? undefined,
+                    lastName: user.lastName ?? undefined,
+                    phoneNumber: user.phoneNumber ?? undefined,
+                    country: user.country ?? undefined,
+                    birthDate: user.birthDate ? new Date(user.birthDate as unknown as string).toISOString().slice(0,10) : undefined,
+                    language: (user.language as 'EN' | 'FR' | undefined) ?? undefined,
+                    position: user.position ?? undefined,
+                    arrivalDate: user.arrivalDate ? new Date(user.arrivalDate as unknown as string).toISOString().slice(0,10) : undefined,
+                    departureDate: user.departureDate ? new Date(user.departureDate as unknown as string).toISOString().slice(0,10) : undefined,
+                    applications: (user.applications ?? []) as UserFormValues['applications'],
                   }}
                 />
                 <AlertDialog>
@@ -117,9 +176,9 @@ export function UserTable({ users, positions, locale }: { users: UserRow[]; posi
                     <Button
                       variant="destructive"
                       size="sm"
-                      disabled={deleting === u.id}
+                      disabled={deleting === user.id}
                     >
-                      {deleting === u.id ? t('deleting') : t('delete')}
+                      {deleting === user.id ? t('deleting') : t('delete')}
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
@@ -129,7 +188,7 @@ export function UserTable({ users, positions, locale }: { users: UserRow[]; posi
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => handleDelete(u.id)}>
+                      <AlertDialogAction onClick={() => handleDelete(user.id)}>
                         {t('delete')}
                       </AlertDialogAction>
                     </AlertDialogFooter>

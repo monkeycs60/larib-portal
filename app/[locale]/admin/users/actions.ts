@@ -1,10 +1,10 @@
 "use server"
 import { z } from "zod"
 import { revalidatePath } from "next/cache"
-import { deleteUserById, updateUser, createPlaceholderUser } from "@/lib/services/users"
+import { deleteUserById, updateUser, createPlaceholderUser, getUserDepartureDate } from "@/lib/services/users"
 import { listPositions, ensurePosition, updatePosition, deletePositions } from '@/lib/services/positions'
 import { createInvitation } from '@/lib/services/invitations'
-import { sendWelcomeEmail } from '@/lib/services/email'
+import { sendWelcomeEmail, sendAccessExtendedEmail } from '@/lib/services/email'
 import { adminOnlyAction } from "@/actions/safe-action"
 import { Prisma } from "@/app/generated/prisma"
 
@@ -34,6 +34,8 @@ export const updateUserAction = adminOnlyAction
     const departureDate = parsedInput.departureDate ? new Date(parsedInput.departureDate) : null
     const language = parsedInput.language ?? (parsedInput.locale === 'fr' ? 'FR' : 'EN')
 
+    const oldDepartureDate = await getUserDepartureDate(parsedInput.id)
+
     const updated = await updateUser({
       id: parsedInput.id,
       email: parsedInput.email,
@@ -49,6 +51,21 @@ export const updateUserAction = adminOnlyAction
       departureDate,
       applications: parsedInput.applications,
     })
+
+    if (departureDate) {
+      const departureDateChanged = !oldDepartureDate || oldDepartureDate.getTime() !== departureDate.getTime()
+      if (departureDateChanged) {
+        const locale = language === 'FR' ? 'fr' : 'en'
+        await sendAccessExtendedEmail({
+          to: parsedInput.email,
+          locale,
+          firstName: parsedInput.firstName,
+          lastName: parsedInput.lastName,
+          newDepartureDate: departureDate,
+        })
+      }
+    }
+
     revalidatePath('/admin/users')
     return updated
   })

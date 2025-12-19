@@ -148,6 +148,15 @@
 		"create": "Créer",
 		"name": "Nom",
 		"email": "E-mail",
+		"status": "Statut",
+		"status_ACTIVE": "Actif",
+		"status_PENDING": "En attente",
+		"status_INACTIVE": "Inactif",
+		"statusFilter_ALL": "Tous",
+		"statusFilter_ACTIVE": "Actif",
+		"statusFilter_PENDING": "En attente",
+		"statusFilter_INACTIVE": "Inactif",
+		"departureDateChangeWarning": "La modification de la date de départ enverra une notification par e-mail à l'utilisateur.",
 		"role": "Rôle",
 		"roleAdmin": "Administrateur",
 		"roleUser": "Utilisateur",
@@ -708,5 +717,11 @@
 				"statusError": "Impossible de mettre à jour le statut"
 			}
 		}
+	},
+	"accessExpired": {
+		"title": "Accès expiré",
+		"description": "Votre accès au portail a expiré. Vous ne pouvez plus accéder aux applications.",
+		"expiredOn": "Votre accès a expiré le {date}.",
+		"contactAdmin": "Veuillez contacter un administrateur si vous pensez qu'il s'agit d'une erreur ou si vous avez besoin de prolonger votre accès."
 	}
 }

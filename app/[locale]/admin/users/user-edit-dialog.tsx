@@ -19,7 +19,7 @@ import { updateUserAction, createPositionAction, updatePositionAction, deletePos
 import { useAction } from 'next-safe-action/hooks';
 import { COUNTRIES } from '@/lib/countries';
 import { toast } from 'sonner';
-import { Check } from 'lucide-react';
+import { Check, AlertTriangle } from 'lucide-react';
 import DeletableSelectManager from '@/app/[locale]/bestof-larib/components/deletable-select-manager';
 
 const AVAILABLE_APPLICATIONS = ['BESTOF_LARIB', 'CONGES'] as const;
@@ -258,6 +258,13 @@ export function UserEditDialog({
 							<Input type='date' {...register('departureDate')} />
 						</div>
 					</div>
+
+					{watch('departureDate') !== initial.departureDate && (
+						<div className="flex items-start gap-2 p-3 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-sm">
+							<AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+							<p>{t('departureDateChangeWarning')}</p>
+						</div>
+					)}
 
 					<div>
 						<div className="flex items-center justify-between mb-3">

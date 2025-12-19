@@ -129,3 +129,65 @@ export async function sendResetPasswordEmail(params: ResetPasswordEmailParams): 
   return { id: json.id ?? '' }
 }
 
+type AccessExtendedEmailParams = {
+  to: string
+  locale: 'en' | 'fr'
+  firstName?: string | null
+  lastName?: string | null
+  newDepartureDate: Date
+}
+
+function renderAccessExtendedEmail({ locale, firstName, lastName, newDepartureDate }: AccessExtendedEmailParams) {
+  const fullName = [firstName, lastName].filter(Boolean).join(' ') || undefined
+  const subject = locale === 'fr'
+    ? 'Votre accès au portail a été prolongé'
+    : 'Your portal access has been extended'
+
+  const greeting = locale === 'fr' ? 'Bonjour' : 'Dear'
+  const nameLine = fullName ? ` ${fullName}` : ''
+  const intro = locale === 'fr'
+    ? 'Bonne nouvelle ! Votre accès au portail Cardio Larib a été prolongé.'
+    : 'Good news! Your access to the Cardio Larib portal has been extended.'
+  const newDateText = locale === 'fr'
+    ? 'Votre nouvel accès est valide jusqu\'au'
+    : 'Your access is now valid until'
+  const formattedDate = newDepartureDate.toISOString().slice(0, 10)
+
+  const text = `${greeting}${nameLine},\n\n${intro}\n\n${newDateText} ${formattedDate}.`
+
+  const html = `
+    <div style="font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;">
+      <p>${greeting}${nameLine},</p>
+      <p>${intro}</p>
+      <p>${newDateText} <strong>${formattedDate}</strong>.</p>
+    </div>
+  `
+  return { subject, text, html }
+}
+
+export async function sendAccessExtendedEmail(params: AccessExtendedEmailParams): Promise<{ id: string } | { error: string }> {
+  const { subject, text, html } = renderAccessExtendedEmail(params)
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) return { error: 'RESEND_API_KEY missing' }
+  const from = process.env.RESEND_FROM || 'noreply@your-domain.com'
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from,
+      to: [params.to],
+      subject,
+      text,
+      html,
+    }),
+  })
+  if (!res.ok) {
+    return { error: `RESEND_REQUEST_FAILED_${res.status}` }
+  }
+  const json = await res.json() as { id?: string }
+  return { id: json.id ?? '' }
+}
+
