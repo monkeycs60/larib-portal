@@ -56,9 +56,6 @@ export function UserTable({ users, positions, locale }: { users: UserRow[]; posi
             <TableHead>{t('name')}</TableHead>
             <TableHead>{t('email')}</TableHead>
             <TableHead>{t('role')}</TableHead>
-            <TableHead>{t('phone')}</TableHead>
-            <TableHead>{t('country')}</TableHead>
-            <TableHead>{t('language')}</TableHead>
             <TableHead>{t('position')}</TableHead>
             <TableHead>{t('applications')}</TableHead>
             <TableHead className="text-right">{t('actions')}</TableHead>
@@ -80,9 +77,6 @@ export function UserTable({ users, positions, locale }: { users: UserRow[]; posi
               </TableCell>
               <TableCell>{u.email}</TableCell>
               <TableCell>{u.role}</TableCell>
-              <TableCell>{u.phoneNumber || '—'}</TableCell>
-              <TableCell>{u.country || '—'}</TableCell>
-              <TableCell>{u.language || '—'}</TableCell>
               <TableCell>{u.position || '—'}</TableCell>
               <TableCell>
                 <div className="flex flex-wrap gap-1">
