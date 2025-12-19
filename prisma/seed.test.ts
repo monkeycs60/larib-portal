@@ -18,6 +18,7 @@ async function main() {
 
 	// Clean existing data (delete in correct order due to foreign keys)
 	console.log('🧹 Cleaning existing data...');
+	await prisma.leaveRequest.deleteMany();
 	await prisma.caseAttempt.deleteMany();
 	await prisma.userCaseSettings.deleteMany();
 	await prisma.clinicalCase.deleteMany();
@@ -55,10 +56,14 @@ async function main() {
 		data: {
 			id: randomUUID(),
 			name: 'Test User',
+			firstName: 'Test',
+			lastName: 'User',
 			email: 'test-user@larib-portal.test',
 			emailVerified: true,
 			role: 'USER',
 			applications: ['BESTOF_LARIB', 'CONGES'],
+			congesTotalDays: 30,
+			position: 'Developer',
 			accounts: {
 				create: {
 					id: randomUUID(),
@@ -139,6 +144,30 @@ async function main() {
 	});
 
 	console.log('✅ Created placeholder user with expired invitation:', expiredPlaceholderUser.email);
+
+	// Create a user without CONGES access for filtering tests
+	const noCongesPassword = await ctx.password.hash('ristifou');
+	const userWithoutConges = await prisma.user.create({
+		data: {
+			id: randomUUID(),
+			name: 'No Conges User',
+			email: 'no-conges@larib-portal.test',
+			emailVerified: true,
+			role: 'USER',
+			applications: ['BESTOF_LARIB'],
+			congesTotalDays: 25,
+			accounts: {
+				create: {
+					id: randomUUID(),
+					providerId: 'credential',
+					accountId: 'no-conges@larib-portal.test',
+					password: noCongesPassword,
+				},
+			},
+		},
+	});
+
+	console.log('✅ Created user without CONGES access:', userWithoutConges.email);
 
 	// Create exam types first (using upsert to handle duplicates)
 	console.log('📦 Creating exam types...');
@@ -240,11 +269,56 @@ async function main() {
 
 	console.log('✅ Created user attempts and settings');
 
+	// Create leave requests for conges filtering tests
+	console.log('📦 Creating leave requests for conges tests...');
+
+	// Create an approved leave for the regular user (with CONGES access)
+	const today = new Date();
+	const leaveStartDate = new Date(today);
+	leaveStartDate.setDate(today.getDate() - 2);
+	const leaveEndDate = new Date(today);
+	leaveEndDate.setDate(today.getDate() + 3);
+
+	await prisma.leaveRequest.create({
+		data: {
+			id: randomUUID(),
+			userId: regularUser.id,
+			startDate: leaveStartDate,
+			endDate: leaveEndDate,
+			reason: 'Vacation',
+			status: 'APPROVED',
+			approverId: adminUser.id,
+			decisionAt: new Date(),
+		},
+	});
+
+	// Create a leave for the user WITHOUT CONGES access (should be filtered out in admin view)
+	const noCongesLeaveStart = new Date(today);
+	noCongesLeaveStart.setDate(today.getDate() - 1);
+	const noCongesLeaveEnd = new Date(today);
+	noCongesLeaveEnd.setDate(today.getDate() + 2);
+
+	await prisma.leaveRequest.create({
+		data: {
+			id: randomUUID(),
+			userId: userWithoutConges.id,
+			startDate: noCongesLeaveStart,
+			endDate: noCongesLeaveEnd,
+			reason: 'Should not appear in admin view',
+			status: 'APPROVED',
+			approverId: adminUser.id,
+			decisionAt: new Date(),
+		},
+	});
+
+	console.log('✅ Created leave requests for conges tests');
+
 	console.log('✨ Test database seeded successfully!');
 	console.log('');
 	console.log('Test credentials:');
 	console.log('  Admin: test-admin@larib-portal.test / ristifou');
 	console.log('  User:  test-user@larib-portal.test / ristifou');
+	console.log('  No Conges User: no-conges@larib-portal.test / ristifou');
 }
 
 main()

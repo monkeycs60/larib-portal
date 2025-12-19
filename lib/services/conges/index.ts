@@ -156,6 +156,12 @@ export async function getLeaveCalendarData(month: Date): Promise<{
       status: 'APPROVED',
       startDate: { lte: rangeEnd },
       endDate: { gte: rangeStart },
+      user: {
+        role: 'USER',
+        applications: {
+          has: 'CONGES',
+        },
+      },
     },
     include: {
       user: {
@@ -320,6 +326,12 @@ function resolveLegendStatus({
 export async function getAdminLeaveDashboard(): Promise<AdminDashboardSummary> {
   const [users, requests] = await Promise.all([
     prisma.user.findMany({
+      where: {
+        role: 'USER',
+        applications: {
+          has: 'CONGES',
+        },
+      },
       select: {
         id: true,
         email: true,
@@ -333,6 +345,14 @@ export async function getAdminLeaveDashboard(): Promise<AdminDashboardSummary> {
       },
     }),
     prisma.leaveRequest.findMany({
+      where: {
+        user: {
+          role: 'USER',
+          applications: {
+            has: 'CONGES',
+          },
+        },
+      },
       include: {
         user: {
           select: {
