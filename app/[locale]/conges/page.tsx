@@ -380,16 +380,7 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
   const teamLeaveOverviewSection = teamLeaveOverviewData ? (
     <section className='px-6'>
       <Suspense fallback={<div className='text-sm text-muted-foreground'>{t('admin.loading')}</div>}>
-        <TeamLeaveOverviewSection
-          rows={teamLeaveOverviewData.rows}
-          tableTitle={teamLeaveOverviewData.tableTitle}
-          summarySubtitle={teamLeaveOverviewData.summarySubtitle}
-          tableLabels={teamLeaveOverviewData.tableLabels}
-          statusLabels={teamLeaveOverviewData.statusLabels}
-          legendLabels={teamLeaveOverviewData.legendLabels}
-          allocationModal={teamLeaveOverviewData.allocationModal}
-          toasts={teamLeaveOverviewData.toasts}
-        />
+        <TeamLeaveOverviewSection data={teamLeaveOverviewData} />
       </Suspense>
     </section>
   ) : null

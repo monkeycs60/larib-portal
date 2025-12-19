@@ -29,7 +29,7 @@ import { updateLeaveAllocationAction } from '../actions'
 import type { AdminUserRow } from '@/lib/services/conges'
 import { formatUserName } from '@/lib/format-user-name'
 
-type TeamLeaveOverviewSectionProps = {
+export type TeamLeaveOverviewSectionData = {
   rows: AdminUserRow[]
   tableTitle: string
   summarySubtitle: string
@@ -70,6 +70,10 @@ type TeamLeaveOverviewSectionProps = {
   }
 }
 
+type TeamLeaveOverviewSectionProps = {
+  data: TeamLeaveOverviewSectionData
+}
+
 type AllocationState = Record<string, number>
 
 const statusVariant: Record<AdminUserRow['status'], 'destructive' | 'secondary' | 'default' | 'outline'> = {
@@ -80,16 +84,9 @@ const statusVariant: Record<AdminUserRow['status'], 'destructive' | 'secondary' 
   UNALLOCATED: 'outline',
 }
 
-export function TeamLeaveOverviewSection({
-  rows,
-  tableTitle,
-  summarySubtitle,
-  tableLabels,
-  statusLabels,
-  legendLabels,
-  allocationModal,
-  toasts,
-}: TeamLeaveOverviewSectionProps) {
+export function TeamLeaveOverviewSection({ data }: TeamLeaveOverviewSectionProps) {
+  const { rows, tableTitle, summarySubtitle, tableLabels, statusLabels, legendLabels, allocationModal, toasts } = data
+
   const initialAllocations = useMemo<AllocationState>(() => {
     return rows.reduce<AllocationState>((acc, row) => {
       acc[row.userId] = row.totalAllocationDays
