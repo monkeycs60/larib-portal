@@ -269,7 +269,6 @@ async function main() {
 
 	console.log('✅ Created user attempts and settings');
 
-	// Create leave request test data for testing working days calculation
 	console.log('📦 Creating leave request test data...');
 
 	// Set up user with leave allocation and contract dates
@@ -282,9 +281,6 @@ async function main() {
 		},
 	});
 
-	// Create an approved leave request that includes weekends and a holiday
-	// Dec 19-27, 2024: 9 calendar days but only 6 working days
-	// Dec 21-22 = weekend (2 days), Dec 25 = Christmas (1 day excluded), so 9 - 3 = 6 working days
 	await prisma.leaveRequest.create({
 		data: {
 			id: randomUUID(),
