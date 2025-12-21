@@ -5,6 +5,7 @@ import {
   createLeaveRequest,
   updateLeaveAllocation,
   updateLeaveStatus,
+  fetchFrenchHolidays,
 } from '@/lib/services/conges'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -31,14 +32,18 @@ export const requestLeaveAction = authenticatedAction
   .inputSchema(requestLeaveSchema)
   .action(async ({ parsedInput, ctx }) => {
     const shouldAutoApprove = ctx.user.role === 'ADMIN'
+    const frenchHolidays = await fetchFrenchHolidays()
 
-    await createLeaveRequest({
-      userId: ctx.userId,
-      startDate: new Date(parsedInput.startDate),
-      endDate: new Date(parsedInput.endDate),
-      reason: parsedInput.reason ?? null,
-      autoApprove: shouldAutoApprove ? { approverId: ctx.userId } : undefined,
-    })
+    await createLeaveRequest(
+      {
+        userId: ctx.userId,
+        startDate: new Date(parsedInput.startDate),
+        endDate: new Date(parsedInput.endDate),
+        reason: parsedInput.reason ?? null,
+        autoApprove: shouldAutoApprove ? { approverId: ctx.userId } : undefined,
+      },
+      frenchHolidays
+    )
 
     await revalidateConges()
 

@@ -12,6 +12,7 @@ import {
   startOfMonth,
   subMonths,
 } from 'date-fns'
+import { countWorkingDays } from './french-holidays'
 export {
   fetchFrenchHolidays,
   countWorkingDays,
@@ -216,7 +217,10 @@ export async function getLeaveCalendarData(month: Date): Promise<{
   return { calendarDays, availableMonths, todaysAbsences }
 }
 
-export async function getUserLeaveDashboard(userId: string): Promise<UserLeaveDashboard> {
+export async function getUserLeaveDashboard(
+  userId: string,
+  frenchHolidays: Record<string, string>
+): Promise<UserLeaveDashboard> {
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: userId },
     select: {
@@ -241,11 +245,11 @@ export async function getUserLeaveDashboard(userId: string): Promise<UserLeaveDa
 
   const approvedDays = requests
     .filter((request) => request.status === 'APPROVED')
-    .reduce((total, request) => total + countLeaveDays(request.startDate, request.endDate), 0)
+    .reduce((total, request) => total + countWorkingDays(request.startDate, request.endDate, frenchHolidays), 0)
 
   const pendingDays = requests
     .filter((request) => request.status === 'PENDING')
-    .reduce((total, request) => total + countLeaveDays(request.startDate, request.endDate), 0)
+    .reduce((total, request) => total + countWorkingDays(request.startDate, request.endDate, frenchHolidays), 0)
 
   const totalAllocationDays = user.congesTotalDays ?? 0
   const remainingDays = Math.max(totalAllocationDays - approvedDays, 0)
@@ -323,7 +327,9 @@ function resolveLegendStatus({
   return 'GOOD'
 }
 
-export async function getAdminLeaveDashboard(): Promise<AdminDashboardSummary> {
+export async function getAdminLeaveDashboard(
+  frenchHolidays: Record<string, string>
+): Promise<AdminDashboardSummary> {
   const [users, requests] = await Promise.all([
     prisma.user.findMany({
       where: {
@@ -380,11 +386,11 @@ export async function getAdminLeaveDashboard(): Promise<AdminDashboardSummary> {
 
     const approvedDays = userRequests
       .filter((request) => request.status === 'APPROVED')
-      .reduce((total, request) => total + countLeaveDays(request.startDate, request.endDate), 0)
+      .reduce((total, request) => total + countWorkingDays(request.startDate, request.endDate, frenchHolidays), 0)
 
     const pendingDays = userRequests
       .filter((request) => request.status === 'PENDING')
-      .reduce((total, request) => total + countLeaveDays(request.startDate, request.endDate), 0)
+      .reduce((total, request) => total + countWorkingDays(request.startDate, request.endDate, frenchHolidays), 0)
 
     const remainingDays = Math.max((user.congesTotalDays ?? 0) - approvedDays, 0)
     const balanceAfterPending = Math.max(remainingDays - pendingDays, 0)
@@ -433,7 +439,7 @@ export async function getAdminLeaveDashboard(): Promise<AdminDashboardSummary> {
   const pendingRequestsCount = requests.filter((request) => request.status === 'PENDING').length
   const pendingDaysTotal = requests
     .filter((request) => request.status === 'PENDING')
-    .reduce((total, request) => total + countLeaveDays(request.startDate, request.endDate), 0)
+    .reduce((total, request) => total + countWorkingDays(request.startDate, request.endDate, frenchHolidays), 0)
 
   const pendingRequests = requests
     .filter((request) => request.status === 'PENDING')
@@ -448,7 +454,7 @@ export async function getAdminLeaveDashboard(): Promise<AdminDashboardSummary> {
       endDate: request.endDate.toISOString(),
       createdAt: request.createdAt.toISOString(),
       reason: request.reason ?? null,
-      totalDays: countLeaveDays(request.startDate, request.endDate),
+      totalDays: countWorkingDays(request.startDate, request.endDate, frenchHolidays),
     }))
 
   return {
@@ -459,15 +465,18 @@ export async function getAdminLeaveDashboard(): Promise<AdminDashboardSummary> {
   }
 }
 
-export async function createLeaveRequest(input: {
-  userId: string
-  startDate: Date
-  endDate: Date
-  reason?: string | null
-  autoApprove?: {
-    approverId: string
-  }
-}): Promise<void> {
+export async function createLeaveRequest(
+  input: {
+    userId: string
+    startDate: Date
+    endDate: Date
+    reason?: string | null
+    autoApprove?: {
+      approverId: string
+    }
+  },
+  frenchHolidays: Record<string, string>
+): Promise<void> {
   const { start, end } = normaliseRange(input.startDate, input.endDate)
 
   const today = startOfDay(new Date())
@@ -497,15 +506,15 @@ export async function createLeaveRequest(input: {
     throw new Error('leaveOverlap')
   }
 
-  const requestedDays = countLeaveDays(start, end)
+  const requestedDays = countWorkingDays(start, end, frenchHolidays)
 
   const approvedDays = existingRequests
     .filter((request) => request.status === 'APPROVED')
-    .reduce((total, request) => total + countLeaveDays(request.startDate, request.endDate), 0)
+    .reduce((total, request) => total + countWorkingDays(request.startDate, request.endDate, frenchHolidays), 0)
 
   const pendingDays = existingRequests
     .filter((request) => request.status === 'PENDING')
-    .reduce((total, request) => total + countLeaveDays(request.startDate, request.endDate), 0)
+    .reduce((total, request) => total + countWorkingDays(request.startDate, request.endDate, frenchHolidays), 0)
 
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: input.userId },

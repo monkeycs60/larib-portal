@@ -269,30 +269,32 @@ async function main() {
 
 	console.log('✅ Created user attempts and settings');
 
-	// Create leave requests for conges filtering tests
-	console.log('📦 Creating leave requests for conges tests...');
+	console.log('📦 Creating leave request test data...');
 
-	// Create an approved leave for the regular user (with CONGES access)
-	const today = new Date();
-	const leaveStartDate = new Date(today);
-	leaveStartDate.setDate(today.getDate() - 2);
-	const leaveEndDate = new Date(today);
-	leaveEndDate.setDate(today.getDate() + 3);
+	// Set up user with leave allocation and contract dates
+	await prisma.user.update({
+		where: { id: regularUser.id },
+		data: {
+			congesTotalDays: 30,
+			arrivalDate: new Date('2024-01-01'),
+			departureDate: new Date('2025-12-31'),
+		},
+	});
 
 	await prisma.leaveRequest.create({
 		data: {
 			id: randomUUID(),
 			userId: regularUser.id,
-			startDate: leaveStartDate,
-			endDate: leaveEndDate,
-			reason: 'Vacation',
+			startDate: new Date('2024-12-19'),
+			endDate: new Date('2024-12-27'),
 			status: 'APPROVED',
 			approverId: adminUser.id,
-			decisionAt: new Date(),
+			decisionAt: new Date('2024-12-01'),
 		},
 	});
 
 	// Create a leave for the user WITHOUT CONGES access (should be filtered out in admin view)
+	const today = new Date();
 	const noCongesLeaveStart = new Date(today);
 	noCongesLeaveStart.setDate(today.getDate() - 1);
 	const noCongesLeaveEnd = new Date(today);
@@ -311,7 +313,7 @@ async function main() {
 		},
 	});
 
-	console.log('✅ Created leave requests for conges tests');
+	console.log('✅ Created leave request test data');
 
 	console.log('✨ Test database seeded successfully!');
 	console.log('');

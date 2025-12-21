@@ -7,7 +7,7 @@ import {
   getLeaveCalendarData,
   getUserLeaveDashboard,
   getAdminLeaveDashboard,
-  countLeaveDays,
+  countWorkingDays,
   fetchFrenchHolidays,
 } from '@/lib/services/conges'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -66,12 +66,13 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
   const monthParam = typeof sp?.month === 'string' ? sp.month : null
   const activeMonth = parseMonth(monthParam)
 
-  const [t, userDashboard, calendarData, adminDashboard, frenchHolidays] = await Promise.all([
+  const frenchHolidays = await fetchFrenchHolidays()
+
+  const [t, userDashboard, calendarData, adminDashboard] = await Promise.all([
     getTranslations({ locale, namespace: 'conges' }),
-    getUserLeaveDashboard(session.user.id),
+    getUserLeaveDashboard(session.user.id, frenchHolidays),
     getLeaveCalendarData(activeMonth),
-    session.user.role === 'ADMIN' ? getAdminLeaveDashboard() : Promise.resolve(null),
-    fetchFrenchHolidays(),
+    session.user.role === 'ADMIN' ? getAdminLeaveDashboard(frenchHolidays) : Promise.resolve(null),
   ])
 
   const requestTrigger = session.user.role === 'ADMIN' ? t('request.triggerAdmin') : t('request.trigger')
@@ -328,7 +329,7 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
               </TableHeader>
               <TableBody>
                 {userDashboard.history.map((entry) => {
-                  const dayCount = countLeaveDays(new Date(entry.startDate), new Date(entry.endDate))
+                  const dayCount = countWorkingDays(new Date(entry.startDate), new Date(entry.endDate), frenchHolidays)
                   const dayCountLabel = t('history.dayCount', { count: dayCount })
                   return (
                     <TableRow key={entry.id}>
