@@ -2,20 +2,27 @@ import { redirect } from 'next/navigation';
 import { getTypedSession } from './auth-helpers';
 import { BetterAuthSession } from '@/types/session';
 import { getLocale } from 'next-intl/server';
+import { getUserAccountStatus } from './services/users';
 
 /**
  * Authentication guard for protected pages
  * Redirects to login if user is not authenticated
+ * Redirects to /access-expired if user account is inactive (departure date passed)
  * Returns the session if authenticated
  */
 export async function requireAuth(): Promise<BetterAuthSession> {
   const session = await getTypedSession();
-  
+  const locale = await getLocale();
+
   if (!session) {
-    const locale = await getLocale();
     redirect(`/${locale}/login`);
   }
-  
+
+  const accountStatus = await getUserAccountStatus(session.user.id);
+  if (accountStatus === 'INACTIVE') {
+    redirect(`/${locale}/access-expired`);
+  }
+
   return session;
 }
 

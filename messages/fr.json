@@ -209,7 +209,18 @@
 		"statusInvitationExpiredDesc": "Lien d'invitation expiré",
 		"resendInvitation": "Renvoyer l'invitation",
 		"resending": "Envoi...",
-		"invitationResent": "Invitation renvoyée"
+		"invitationResent": "Invitation renvoyée",
+		"accountStatus": "Statut du compte",
+		"accountActive": "Actif",
+		"accountInactive": "Inactif",
+		"accountActiveDesc": "Le compte est actif",
+		"accountInactiveDesc": "La date de départ est passée",
+		"filterAll": "Tous",
+		"filterActive": "Actifs",
+		"filterInactive": "Inactifs",
+		"filterPending": "En attente",
+		"departureDateReactivation": "Ce changement réactivera le compte de l'utilisateur. Il recevra une notification par e-mail et retrouvera l'accès à la plateforme.",
+		"departureDateDeactivation": "Attention : Cette date de départ est dans le passé. L'utilisateur sera marqué comme inactif et perdra l'accès à la plateforme."
 	},
 	"upload": {
 		"selectFile": "Choisir une image",
@@ -719,5 +730,14 @@
 				"statusError": "Impossible de mettre à jour le statut"
 			}
 		}
+	},
+	"accessExpired": {
+		"title": "Accès expiré",
+		"description": "Votre accès à cette plateforme est terminé. Votre date de départ est passée et vous ne pouvez plus utiliser l'application.",
+		"expiredOn": "Date de départ",
+		"account": "Compte",
+		"contactAdmin": "Si vous pensez qu'il s'agit d'une erreur, veuillez contacter un administrateur pour prolonger votre accès.",
+		"contactSupport": "Contacter le support",
+		"signOut": "Se déconnecter"
 	}
 }

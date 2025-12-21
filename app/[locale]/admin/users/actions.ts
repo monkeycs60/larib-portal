@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache"
 import { deleteUserById, updateUser, createPlaceholderUser } from "@/lib/services/users"
 import { listPositions, ensurePosition, updatePosition, deletePositions } from '@/lib/services/positions'
 import { createInvitation, deleteInvitationByEmail, consumeInvitation, getInvitationByEmail } from '@/lib/services/invitations'
-import { sendWelcomeEmail } from '@/lib/services/email'
+import { sendWelcomeEmail, sendAccessExtendedEmail } from '@/lib/services/email'
+import { computeAccountStatus } from '@/lib/services/users'
 import { adminOnlyAction } from "@/actions/safe-action"
 import { Prisma } from "@/app/generated/prisma"
 import { prisma } from "@/lib/prisma"
@@ -35,6 +36,20 @@ export const updateUserAction = adminOnlyAction
     const departureDate = parsedInput.departureDate ? new Date(parsedInput.departureDate) : null
     const language = parsedInput.language ?? (parsedInput.locale === 'fr' ? 'FR' : 'EN')
 
+    const currentUser = await prisma.user.findUnique({
+      where: { id: parsedInput.id },
+      select: {
+        departureDate: true,
+        firstName: true,
+        lastName: true,
+        language: true,
+      },
+    })
+
+    const oldDepartureDate = currentUser?.departureDate ?? null
+    const wasInactive = computeAccountStatus(oldDepartureDate) === 'INACTIVE'
+    const willBeActive = departureDate ? computeAccountStatus(departureDate) === 'ACTIVE' : true
+
     const updated = await updateUser({
       id: parsedInput.id,
       email: parsedInput.email,
@@ -50,6 +65,19 @@ export const updateUserAction = adminOnlyAction
       departureDate,
       applications: parsedInput.applications,
     })
+
+    if (wasInactive && willBeActive && oldDepartureDate && departureDate) {
+      const locale = (currentUser?.language === 'FR' ? 'fr' : 'en') as 'en' | 'fr'
+      await sendAccessExtendedEmail({
+        to: parsedInput.email,
+        locale,
+        firstName: parsedInput.firstName ?? undefined,
+        lastName: parsedInput.lastName ?? undefined,
+        oldDepartureDate,
+        newDepartureDate: departureDate,
+      })
+    }
+
     revalidatePath('/admin/users')
     return updated
   })

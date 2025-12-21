@@ -2,6 +2,18 @@ import { prisma } from '@/lib/prisma'
 import { Prisma } from '@/app/generated/prisma'
 import type { InvitationStatus } from './invitations'
 
+export type AccountStatus = 'ACTIVE' | 'INACTIVE'
+
+export function computeAccountStatus(departureDate: Date | null): AccountStatus {
+  if (!departureDate) return 'ACTIVE'
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const departure = new Date(departureDate)
+  departure.setHours(0, 0, 0, 0)
+  if (today > departure) return 'INACTIVE'
+  return 'ACTIVE'
+}
+
 export type UserWithAdminFields = Prisma.UserGetPayload<{
   select: {
     id: true
@@ -167,6 +179,7 @@ export async function createPlaceholderUser(data: CreatePlaceholderUserInput): P
 export type UserWithOnboardingStatus = UserWithAdminFields & {
   onboardingStatus: InvitationStatus
   invitationExpiresAt?: Date
+  accountStatus: AccountStatus
 }
 
 export async function listUsersWithOnboardingStatus(): Promise<UserWithOnboardingStatus[]> {
@@ -246,6 +259,24 @@ export async function listUsersWithOnboardingStatus(): Promise<UserWithOnboardin
       ...userWithoutAccounts,
       onboardingStatus,
       invitationExpiresAt,
+      accountStatus: computeAccountStatus(user.departureDate),
     }
   })
+}
+
+export async function getUserAccountStatus(userId: string): Promise<AccountStatus | null> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { departureDate: true },
+  })
+  if (!user) return null
+  return computeAccountStatus(user.departureDate)
+}
+
+export async function getUserDepartureDate(userId: string): Promise<Date | null> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { departureDate: true },
+  })
+  return user?.departureDate ?? null
 }

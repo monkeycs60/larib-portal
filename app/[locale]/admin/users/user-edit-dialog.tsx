@@ -19,8 +19,10 @@ import { updateUserAction, createPositionAction, updatePositionAction, deletePos
 import { useAction } from 'next-safe-action/hooks';
 import { COUNTRIES } from '@/lib/countries';
 import { toast } from 'sonner';
-import { Check } from 'lucide-react';
+import { Check, AlertTriangle, PartyPopper } from 'lucide-react';
 import DeletableSelectManager from '@/app/[locale]/bestof-larib/components/deletable-select-manager';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { computeAccountStatus } from '@/lib/services/users';
 
 const AVAILABLE_APPLICATIONS = ['BESTOF_LARIB', 'CONGES'] as const;
 type AvailableApplication = (typeof AVAILABLE_APPLICATIONS)[number];
@@ -42,6 +44,51 @@ const FormSchema = z.object({
 });
 
 export type UserFormValues = z.infer<typeof FormSchema>;
+
+function DepartureDateWarning({
+	initialDepartureDate,
+	newDepartureDate,
+}: {
+	initialDepartureDate?: string;
+	newDepartureDate?: string;
+}) {
+	const t = useTranslations('admin');
+
+	if (!newDepartureDate || newDepartureDate === initialDepartureDate) {
+		return null;
+	}
+
+	const initialDate = initialDepartureDate ? new Date(initialDepartureDate) : null;
+	const newDate = new Date(newDepartureDate);
+
+	const wasInactive = initialDate ? computeAccountStatus(initialDate) === 'INACTIVE' : false;
+	const willBeInactive = computeAccountStatus(newDate) === 'INACTIVE';
+	const willBeActive = computeAccountStatus(newDate) === 'ACTIVE';
+
+	if (wasInactive && willBeActive) {
+		return (
+			<Alert className="mt-2 border-green-200 bg-green-50">
+				<PartyPopper className="h-4 w-4 text-green-600" />
+				<AlertDescription className="text-green-700 text-sm">
+					{t('departureDateReactivation')}
+				</AlertDescription>
+			</Alert>
+		);
+	}
+
+	if (!wasInactive && willBeInactive) {
+		return (
+			<Alert className="mt-2 border-amber-200 bg-amber-50">
+				<AlertTriangle className="h-4 w-4 text-amber-600" />
+				<AlertDescription className="text-amber-700 text-sm">
+					{t('departureDateDeactivation')}
+				</AlertDescription>
+			</Alert>
+		);
+	}
+
+	return null;
+}
 
 export function UserEditDialog({
 	initial,
@@ -251,11 +298,15 @@ export function UserEditDialog({
 							</label>
 							<Input type='date' {...register('arrivalDate')} />
 						</div>
-						<div>
+						<div className="md:col-span-2">
 							<label className='block text-sm mb-1'>
 								{t('departureDate')}
 							</label>
 							<Input type='date' {...register('departureDate')} />
+							<DepartureDateWarning
+								initialDepartureDate={initial.departureDate}
+								newDepartureDate={watch('departureDate')}
+							/>
 						</div>
 					</div>
 

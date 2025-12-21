@@ -21,14 +21,19 @@ import {
 } from '@/components/ui/alert-dialog'
 import { toast } from 'sonner'
 import type { InvitationStatus } from '@/lib/services/invitations'
-import { MailIcon, UserIcon } from 'lucide-react'
+import type { AccountStatus } from '@/lib/services/users'
+import { MailIcon, UserIcon, CalendarX } from 'lucide-react'
+import { useMemo } from 'react'
 
 export type UserRow = UserFormValues & {
   name?: string | null
   createdAt?: string
   onboardingStatus?: InvitationStatus
   invitationExpiresAt?: Date | string
+  accountStatus?: AccountStatus
 }
+
+type StatusFilter = 'all' | 'active' | 'inactive' | 'pending'
 
 function OnboardingStatusBadge({ status }: { status: InvitationStatus }) {
   const t = useTranslations('admin')
@@ -57,6 +62,20 @@ function OnboardingStatusBadge({ status }: { status: InvitationStatus }) {
   }
 }
 
+function AccountStatusBadge({ status }: { status: AccountStatus }) {
+  const t = useTranslations('admin')
+
+  if (status === 'INACTIVE') {
+    return (
+      <Badge variant="outline" className="border-red-300 bg-red-50 text-red-700">
+        <CalendarX className="size-3 mr-1" />
+        {t('accountInactive')}
+      </Badge>
+    )
+  }
+  return null
+}
+
 function StatusLegend() {
   const t = useTranslations('admin')
 
@@ -81,6 +100,54 @@ function StatusLegend() {
         </Badge>
         <span>{t('statusInvitationExpiredDesc')}</span>
       </div>
+      <div className="flex items-center gap-1.5">
+        <Badge variant="outline" className="border-red-300 bg-red-50 text-red-700 text-xs">
+          <CalendarX className="size-3 mr-1" />
+          {t('accountInactive')}
+        </Badge>
+        <span>{t('accountInactiveDesc')}</span>
+      </div>
+    </div>
+  )
+}
+
+function StatusFilterButtons({
+  filter,
+  onFilterChange,
+  counts
+}: {
+  filter: StatusFilter
+  onFilterChange: (filter: StatusFilter) => void
+  counts: { all: number; active: number; inactive: number; pending: number }
+}) {
+  const t = useTranslations('admin')
+
+  const filters: Array<{ key: StatusFilter; label: string; count: number }> = [
+    { key: 'all', label: t('filterAll'), count: counts.all },
+    { key: 'active', label: t('filterActive'), count: counts.active },
+    { key: 'pending', label: t('filterPending'), count: counts.pending },
+    { key: 'inactive', label: t('filterInactive'), count: counts.inactive },
+  ]
+
+  return (
+    <div className="flex gap-2">
+      {filters.map(({ key, label, count }) => (
+        <Button
+          key={key}
+          variant={filter === key ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => onFilterChange(key)}
+          className="gap-1.5"
+        >
+          {label}
+          <Badge
+            variant="secondary"
+            className={filter === key ? 'bg-white/20 text-white' : 'bg-muted'}
+          >
+            {count}
+          </Badge>
+        </Button>
+      ))}
     </div>
   )
 }
@@ -89,6 +156,39 @@ export function UserTable({ users, positions, locale }: { users: UserRow[]; posi
   const t = useTranslations('admin')
   const [deleting, setDeleting] = useState<string | null>(null)
   const [resending, setResending] = useState<string | null>(null)
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
+
+  const counts = useMemo(() => {
+    const activeUsers = users.filter(
+      (user) => user.onboardingStatus === 'ACTIVE' && user.accountStatus === 'ACTIVE'
+    )
+    const inactiveUsers = users.filter((user) => user.accountStatus === 'INACTIVE')
+    const pendingUsers = users.filter(
+      (user) => user.onboardingStatus !== 'ACTIVE'
+    )
+
+    return {
+      all: users.length,
+      active: activeUsers.length,
+      inactive: inactiveUsers.length,
+      pending: pendingUsers.length,
+    }
+  }, [users])
+
+  const filteredUsers = useMemo(() => {
+    switch (statusFilter) {
+      case 'active':
+        return users.filter(
+          (user) => user.onboardingStatus === 'ACTIVE' && user.accountStatus === 'ACTIVE'
+        )
+      case 'inactive':
+        return users.filter((user) => user.accountStatus === 'INACTIVE')
+      case 'pending':
+        return users.filter((user) => user.onboardingStatus !== 'ACTIVE')
+      default:
+        return users
+    }
+  }, [users, statusFilter])
 
   const { execute: executeDelete } = useAction(deleteUserAction, {
     onSuccess() {
@@ -131,6 +231,11 @@ export function UserTable({ users, positions, locale }: { users: UserRow[]; posi
   return (
     <div className="space-y-4">
       <StatusLegend />
+      <StatusFilterButtons
+        filter={statusFilter}
+        onFilterChange={setStatusFilter}
+        counts={counts}
+      />
       <div className="bg-white rounded-md border">
         <div className="flex items-center justify-end p-3">
           <AddUserDialog positions={positions} locale={locale} />
@@ -148,8 +253,8 @@ export function UserTable({ users, positions, locale }: { users: UserRow[]; posi
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users.map((user) => (
-              <TableRow key={user.id} className={isPlaceholderUser(user) ? 'bg-muted/30' : ''}>
+            {filteredUsers.map((user) => (
+              <TableRow key={user.id} className={isPlaceholderUser(user) || user.accountStatus === 'INACTIVE' ? 'bg-muted/30' : ''}>
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <div className={`size-8 rounded-full flex items-center justify-center ${isPlaceholderUser(user) ? 'bg-muted border-2 border-dashed border-muted-foreground/30' : 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white'}`}>
@@ -167,7 +272,12 @@ export function UserTable({ users, positions, locale }: { users: UserRow[]; posi
                 </TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>
-                  <OnboardingStatusBadge status={user.onboardingStatus || 'ACTIVE'} />
+                  <div className="flex flex-wrap gap-1">
+                    <OnboardingStatusBadge status={user.onboardingStatus || 'ACTIVE'} />
+                    {user.accountStatus && (
+                      <AccountStatusBadge status={user.accountStatus} />
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell>{user.role}</TableCell>
                 <TableCell>{user.position || '—'}</TableCell>

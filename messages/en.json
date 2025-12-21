@@ -211,7 +211,18 @@
 		"statusInvitationExpiredDesc": "Invitation link has expired",
 		"resendInvitation": "Resend invitation",
 		"resending": "Sending...",
-		"invitationResent": "Invitation resent"
+		"invitationResent": "Invitation resent",
+		"accountStatus": "Account Status",
+		"accountActive": "Active",
+		"accountInactive": "Inactive",
+		"accountActiveDesc": "Account is active",
+		"accountInactiveDesc": "Departure date has passed",
+		"filterAll": "All",
+		"filterActive": "Active",
+		"filterInactive": "Inactive",
+		"filterPending": "Pending",
+		"departureDateReactivation": "This change will reactivate the user's account. They will receive an email notification and regain access to the platform.",
+		"departureDateDeactivation": "Warning: This departure date is in the past. The user will be marked as inactive and lose access to the platform."
 	},
 	"upload": {
 		"selectFile": "Select image",
@@ -721,5 +732,14 @@
 				"statusError": "Could not update request status"
 			}
 		}
+	},
+	"accessExpired": {
+		"title": "Access Expired",
+		"description": "Your access to this platform has ended. Your departure date has passed and you can no longer use the application.",
+		"expiredOn": "Departure date",
+		"account": "Account",
+		"contactAdmin": "If you believe this is an error, please contact an administrator to extend your access.",
+		"contactSupport": "Contact Support",
+		"signOut": "Sign out"
 	}
 }

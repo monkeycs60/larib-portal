@@ -129,3 +129,74 @@ export async function sendResetPasswordEmail(params: ResetPasswordEmailParams): 
   return { id: json.id ?? '' }
 }
 
+type AccessExtendedEmailParams = {
+  to: string
+  locale: 'en' | 'fr'
+  firstName?: string
+  lastName?: string
+  oldDepartureDate: Date
+  newDepartureDate: Date
+}
+
+function renderAccessExtendedEmail({ locale, firstName, lastName, oldDepartureDate, newDepartureDate }: AccessExtendedEmailParams) {
+  const fullName = [firstName, lastName].filter(Boolean).join(' ') || undefined
+  const subject = locale === 'fr'
+    ? 'Votre accès au portail a été prolongé'
+    : 'Your portal access has been extended'
+
+  const greeting = locale === 'fr' ? 'Bonjour' : 'Dear'
+  const nameLine = fullName ? ` ${fullName}` : ''
+  const intro = locale === 'fr'
+    ? 'Bonne nouvelle ! Un administrateur a prolongé votre accès au portail Cardio Larib.'
+    : 'Good news! An administrator has extended your access to the Cardio Larib portal.'
+  const oldDateLabel = locale === 'fr' ? 'Ancienne date de départ' : 'Previous departure date'
+  const newDateLabel = locale === 'fr' ? 'Nouvelle date de départ' : 'New departure date'
+  const formatDate = (date: Date) => date.toISOString().slice(0, 10)
+
+  const text = `${greeting}${nameLine},\n\n${intro}\n\n${oldDateLabel}: ${formatDate(oldDepartureDate)}\n${newDateLabel}: ${formatDate(newDepartureDate)}`
+
+  const html = `
+    <div style="font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <p>${greeting}${nameLine},</p>
+      <p>${intro}</p>
+      <table style="margin: 20px 0; border-collapse: collapse;">
+        <tr>
+          <td style="padding: 8px 16px 8px 0; color: #666;">${oldDateLabel}:</td>
+          <td style="padding: 8px 0; text-decoration: line-through; color: #999;">${formatDate(oldDepartureDate)}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 16px 8px 0; color: #666;">${newDateLabel}:</td>
+          <td style="padding: 8px 0; font-weight: bold; color: #16a34a;">${formatDate(newDepartureDate)}</td>
+        </tr>
+      </table>
+    </div>
+  `
+  return { subject, text, html }
+}
+
+export async function sendAccessExtendedEmail(params: AccessExtendedEmailParams): Promise<{ id: string } | { error: string }> {
+  const { subject, text, html } = renderAccessExtendedEmail(params)
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) return { error: 'RESEND_API_KEY missing' }
+  const from = process.env.RESEND_FROM || 'noreply@your-domain.com'
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from,
+      to: [params.to],
+      subject,
+      text,
+      html,
+    }),
+  })
+  if (!res.ok) {
+    return { error: `RESEND_REQUEST_FAILED_${res.status}` }
+  }
+  const json = await res.json() as { id?: string }
+  return { id: json.id ?? '' }
+}
+
