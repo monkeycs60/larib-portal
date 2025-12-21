@@ -47,3 +47,24 @@ export async function readInvitationByToken(token: string) {
 export async function consumeInvitation(rowId: string): Promise<void> {
   await prisma.verification.delete({ where: { id: rowId } })
 }
+
+export async function deleteInvitationByEmail(email: string): Promise<void> {
+  await prisma.verification.deleteMany({
+    where: { identifier: `INVITE:${email}` },
+  })
+}
+
+export type InvitationStatus = 'ACTIVE' | 'INVITATION_SENT' | 'INVITATION_EXPIRED'
+
+export type InvitationInfo = {
+  status: InvitationStatus
+  expiresAt?: Date
+}
+
+export async function getInvitationByEmail(email: string): Promise<{ rowId: string; expiresAt: Date } | null> {
+  const row = await prisma.verification.findFirst({
+    where: { identifier: `INVITE:${email}` },
+  })
+  if (!row) return null
+  return { rowId: row.id, expiresAt: row.expiresAt }
+}

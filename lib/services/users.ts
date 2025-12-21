@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@/app/generated/prisma'
+import type { InvitationStatus } from './invitations'
 
 export type UserWithAdminFields = Prisma.UserGetPayload<{
   select: {
@@ -161,4 +162,90 @@ export async function createPlaceholderUser(data: CreatePlaceholderUserInput): P
     },
   })
   return created
+}
+
+export type UserWithOnboardingStatus = UserWithAdminFields & {
+  onboardingStatus: InvitationStatus
+  invitationExpiresAt?: Date
+}
+
+export async function listUsersWithOnboardingStatus(): Promise<UserWithOnboardingStatus[]> {
+  const users = await prisma.user.findMany({
+    orderBy: { createdAt: 'desc' },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      firstName: true,
+      lastName: true,
+      phoneNumber: true,
+      role: true,
+      country: true,
+      birthDate: true,
+      language: true,
+      position: true,
+      arrivalDate: true,
+      departureDate: true,
+      congesTotalDays: true,
+      profilePhoto: true,
+      applications: true,
+      createdAt: true,
+      updatedAt: true,
+      accounts: {
+        where: {
+          providerId: 'credential',
+        },
+        select: {
+          id: true,
+          password: true,
+        },
+      },
+    },
+  })
+
+  const userEmails = users.map((user) => user.email)
+  const invitations = await prisma.verification.findMany({
+    where: {
+      identifier: { in: userEmails.map((email) => `INVITE:${email}`) },
+    },
+    select: {
+      identifier: true,
+      expiresAt: true,
+    },
+  })
+
+  const invitationByEmail = new Map(
+    invitations.map((invitation) => [
+      invitation.identifier.replace('INVITE:', ''),
+      invitation,
+    ])
+  )
+
+  return users.map((user) => {
+    const { accounts, ...userWithoutAccounts } = user
+    const hasPassword = accounts.some((account) => account.password !== null)
+    const invitation = invitationByEmail.get(user.email)
+
+    let onboardingStatus: InvitationStatus = 'ACTIVE'
+    let invitationExpiresAt: Date | undefined
+
+    if (hasPassword) {
+      onboardingStatus = 'ACTIVE'
+    } else if (invitation) {
+      invitationExpiresAt = invitation.expiresAt
+      if (new Date() > invitation.expiresAt) {
+        onboardingStatus = 'INVITATION_EXPIRED'
+      } else {
+        onboardingStatus = 'INVITATION_SENT'
+      }
+    } else {
+      onboardingStatus = 'INVITATION_EXPIRED'
+    }
+
+    return {
+      ...userWithoutAccounts,
+      onboardingStatus,
+      invitationExpiresAt,
+    }
+  })
 }
