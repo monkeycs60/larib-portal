@@ -142,9 +142,6 @@ export function UserTable({ users, positions, locale }: { users: UserRow[]; posi
               <TableHead>{t('email')}</TableHead>
               <TableHead>{t('onboardingStatus')}</TableHead>
               <TableHead>{t('role')}</TableHead>
-              <TableHead>{t('phone')}</TableHead>
-              <TableHead>{t('country')}</TableHead>
-              <TableHead>{t('language')}</TableHead>
               <TableHead>{t('position')}</TableHead>
               <TableHead>{t('applications')}</TableHead>
               <TableHead className="text-right">{t('actions')}</TableHead>
@@ -173,9 +170,6 @@ export function UserTable({ users, positions, locale }: { users: UserRow[]; posi
                   <OnboardingStatusBadge status={user.onboardingStatus || 'ACTIVE'} />
                 </TableCell>
                 <TableCell>{user.role}</TableCell>
-                <TableCell>{user.phoneNumber || '—'}</TableCell>
-                <TableCell>{user.country || '—'}</TableCell>
-                <TableCell>{user.language || '—'}</TableCell>
                 <TableCell>{user.position || '—'}</TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-1">
