@@ -147,6 +147,17 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Global placeholder color - light gray for better UX */
+  ::placeholder {
+    color: oklch(0.70 0.01 250);
+    opacity: 1;
+  }
+
+  .dark ::placeholder {
+    color: oklch(0.55 0.01 250);
+    opacity: 1;
+  }
 }
 
 /* TipTap / ProseMirror baseline styles to counter Tailwind Preflight resets */
