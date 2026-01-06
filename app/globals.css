@@ -148,7 +148,6 @@
     @apply bg-background text-foreground;
   }
 
-  /* Global placeholder color - light gray for better UX */
   ::placeholder {
     color: oklch(0.70 0.01 250);
     opacity: 1;
