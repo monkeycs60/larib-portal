@@ -25,6 +25,7 @@ const UpdateUserSchema = z.object({
   applications: z.array(z.enum(["BESTOF_LARIB", "CONGES", "CARDIOLARIB"]))
     .default([]),
   locale: z.enum(["en", "fr"]).optional(),
+  congesTotalDays: z.number().int().min(0).max(365).optional(),
 })
 
 export const updateUserAction = adminOnlyAction
@@ -49,6 +50,7 @@ export const updateUserAction = adminOnlyAction
       arrivalDate,
       departureDate,
       applications: parsedInput.applications,
+      congesTotalDays: parsedInput.congesTotalDays,
     })
     revalidatePath('/admin/users')
     return updated
@@ -91,6 +93,7 @@ const CreateInviteSchema = z.object({
   arrivalDate: z.string().min(1), // ISO date
   departureDate: z.string().min(1), // ISO date
   locale: z.enum(["en","fr"]),
+  congesTotalDays: z.number().int().min(0).max(365).optional(),
 })
 
 export const createUserInviteAction = adminOnlyAction
@@ -117,6 +120,7 @@ export const createUserInviteAction = adminOnlyAction
       applications: parsedInput.applications,
       arrivalDate,
       departureDate,
+      congesTotalDays: parsedInput.congesTotalDays,
     })
 
     // Create invitation token

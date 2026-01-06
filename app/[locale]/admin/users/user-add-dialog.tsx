@@ -36,7 +36,8 @@ const AddUserSchema = z.object({
   arrivalDate: z.string().min(1),
   departureDate: z.string().min(1),
   applications: z.array(z.enum(["BESTOF_LARIB","CONGES"])),
-  emailLanguage: z.enum(['en','fr'])
+  emailLanguage: z.enum(['en','fr']),
+  congesTotalDays: z.number().int().min(0).max(365).optional()
 })
 
 type AddUserValues = z.infer<typeof AddUserSchema>
@@ -276,6 +277,22 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
               })}
             </div>
           </div>
+
+          {apps.has('CONGES') && (
+            <div>
+              <label className="block text-sm mb-1">{t('leaveDaysLabel')}</label>
+              <Input
+                type="number"
+                min="0"
+                max="365"
+                placeholder="0"
+                onChange={(e) => {
+                  const value = e.target.value
+                  setValue('congesTotalDays', value === '' ? undefined : parseInt(value, 10))
+                }}
+              />
+            </div>
+          )}
 
           <div className="rounded-md border p-3">
             <div className="text-sm font-medium mb-2">{t('welcomeEmailPreview')}</div>

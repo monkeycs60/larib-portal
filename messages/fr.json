@@ -209,7 +209,8 @@
 		"statusInvitationExpiredDesc": "Lien d'invitation expiré",
 		"resendInvitation": "Renvoyer l'invitation",
 		"resending": "Envoi...",
-		"invitationResent": "Invitation renvoyée"
+		"invitationResent": "Invitation renvoyée",
+		"leaveDaysLabel": "Nombre de jours de congés"
 	},
 	"upload": {
 		"selectFile": "Choisir une image",
