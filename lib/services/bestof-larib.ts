@@ -71,6 +71,7 @@ export type ClinicalCaseWithDisplayTags = ClinicalCaseListItem & {
   personalDifficulty?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | null
   userAttemptState?: UserAttemptState
   firstCompletedAt?: Date | null
+  completionsCount?: number
 }
 
 export type CaseListFilters = {
@@ -99,6 +100,7 @@ export type CaseListSortField =
   | 'attempts'
   | 'personalDifficulty'
   | 'firstCompletedAt'
+  | 'completionsCount'
 export type CaseListSort = { field?: CaseListSortField; direction?: 'asc' | 'desc' }
 
 export type SerializedCaseFilters = {
@@ -193,7 +195,7 @@ const fetchClinicalCases = async ({
   }
 
   const orderBy = (() => {
-    const direction = sort?.direction ?? 'desc'
+    const direction = sort?.direction ?? 'asc'
     switch (sort?.field) {
       case 'name':
         return { name: direction }
@@ -208,7 +210,7 @@ const fetchClinicalCases = async ({
       case 'diseaseTag':
         return { diseaseTag: { name: direction } }
       default:
-        return { createdAt: 'desc' as const }
+        return { name: 'asc' as const }
     }
   })()
 
@@ -238,6 +240,27 @@ const fetchClinicalCases = async ({
       },
     },
   })
+
+  const caseIdsForCompletions = rows.map((row) => row.id)
+  const completionsPerCase = await (async () => {
+    if (caseIdsForCompletions.length === 0) return new Map<string, number>()
+    const attempts = await prisma.caseAttempt.findMany({
+      where: {
+        caseId: { in: caseIdsForCompletions },
+        validatedAt: { not: null },
+      },
+      select: { caseId: true, userId: true },
+    })
+    const uniqueUsersByCase = new Map<string, Set<string>>()
+    for (const attempt of attempts) {
+      const usersSet = uniqueUsersByCase.get(attempt.caseId) ?? new Set<string>()
+      usersSet.add(attempt.userId)
+      uniqueUsersByCase.set(attempt.caseId, usersSet)
+    }
+    return new Map<string, number>(
+      Array.from(uniqueUsersByCase.entries()).map(([caseId, usersSet]) => [caseId, usersSet.size])
+    )
+  })()
 
   let base: ClinicalCaseWithDisplayTags[] = rows.map((row) => ({
     id: row.id,
@@ -271,6 +294,7 @@ const fetchClinicalCases = async ({
         description: userTag.tag.description ?? null,
       }))
       .sort((a, b) => a.name.localeCompare(b.name)),
+    completionsCount: completionsPerCase.get(row.id) ?? 0,
   }))
 
   if (userId && base.length > 0) {
@@ -379,6 +403,8 @@ const fetchClinicalCases = async ({
   } else if (sort?.field === 'difficulty') {
     const order = { BEGINNER: 0, INTERMEDIATE: 1, ADVANCED: 2 } as const
     base.sort((a, b) => (order[a.difficulty] - order[b.difficulty]) * sortDirection)
+  } else if (sort?.field === 'completionsCount') {
+    base.sort((a, b) => ((a.completionsCount ?? 0) - (b.completionsCount ?? 0)) * sortDirection)
   }
 
   return base

@@ -179,6 +179,7 @@ export default async function BestofLaribPage({
 			adminTags: t('table.adminTags'),
 			userTags: t('table.userTags'),
 			actions: t('table.actions'),
+			completions: t('table.completions'),
 		},
 		status: {
 			published: t('status.published'),

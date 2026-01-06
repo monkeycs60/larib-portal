@@ -259,7 +259,8 @@
 			"myDifficulty": "Level",
 			"adminTags": "Admin Tags",
 			"userTags": "User Tags",
-			"actions": "Actions"
+			"actions": "Actions",
+			"completions": "Completions"
 		},
 		"difficulty": {
 			"beginner": "Beginner",
