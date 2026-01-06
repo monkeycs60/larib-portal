@@ -139,6 +139,9 @@ async function BestofStatisticsPageContent({
     usersLast30Days: t('userOverview.usersLast30Days'),
     usersByPosition: t('userOverview.usersByPosition'),
     noData: t('database.noData'),
+    showDetails: t('userOverview.showDetails'),
+    hideDetails: t('userOverview.hideDetails'),
+    casesCompleted: t('userOverview.casesCompleted'),
   };
 
   return (

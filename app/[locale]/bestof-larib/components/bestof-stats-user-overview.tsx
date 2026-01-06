@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   ChartContainer,
@@ -7,7 +8,9 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Pie, PieChart, Cell, Legend } from 'recharts';
+import { ChevronDown, ChevronUp, Calendar, CheckCircle2 } from 'lucide-react';
 import type { UserOverviewStatistics } from '@/lib/services/bestof-larib-stats';
 
 type UserOverviewProps = {
@@ -17,6 +20,10 @@ type UserOverviewProps = {
     usersLast30Days: string;
     usersByPosition: string;
     noData: string;
+    showDetails?: string;
+    hideDetails?: string;
+    lastActivity?: string;
+    casesCompleted?: string;
   };
 };
 
@@ -112,7 +119,17 @@ function UsersPieChart({
   );
 }
 
+function formatDate(date: Date): string {
+  return new Date(date).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
 export default function BestofStatsUserOverview({ stats, translations }: UserOverviewProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <Card>
@@ -127,14 +144,55 @@ export default function BestofStatsUserOverview({ stats, translations }: UserOve
       </Card>
 
       <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-xs font-medium text-muted-foreground">
-            {translations.usersLast30Days}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.usersLast30Days}</div>
-        </CardContent>
+        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xs font-medium text-muted-foreground">
+              {translations.usersLast30Days}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="text-2xl font-bold">{stats.usersLast30Days}</div>
+              {stats.activeUsersLast30Days.length > 0 && (
+                <CollapsibleTrigger className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                  <span>{isOpen ? (translations.hideDetails || 'Hide details') : (translations.showDetails || 'Show details')}</span>
+                  {isOpen ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                </CollapsibleTrigger>
+              )}
+            </div>
+            <CollapsibleContent>
+              <div className="border-t pt-3 mt-1 max-h-[300px] overflow-y-auto">
+                <div className="space-y-2">
+                  {stats.activeUsersLast30Days.map((user) => (
+                    <div
+                      key={user.userId}
+                      className="flex items-center justify-between py-2 px-2 rounded-md hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex flex-col min-w-0">
+                        <span className="font-medium text-sm truncate">{user.userName}</span>
+                        {user.userPosition && (
+                          <span className="text-xs text-muted-foreground truncate">{user.userPosition}</span>
+                        )}
+                      </div>
+                      <div className="flex flex-col items-end gap-0.5 shrink-0 ml-3">
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Calendar className="size-3" />
+                          <span>{formatDate(user.lastActivityDate)}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <CheckCircle2 className="size-3" />
+                          <span>
+                            {user.casesCompletedOnThatDay} {translations.casesCompleted || 'cases'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CollapsibleContent>
+          </CardContent>
+        </Collapsible>
       </Card>
 
       <UsersPieChart

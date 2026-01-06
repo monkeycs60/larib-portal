@@ -488,7 +488,10 @@
 				"totalActiveUsers": "Total active users",
 				"usersLast30Days": "Users connected in the last 30 days",
 				"usersByPosition": "Users by Position",
-				"noData": "No data available"
+				"noData": "No data available",
+				"showDetails": "Show details",
+				"hideDetails": "Hide details",
+				"casesCompleted": "cases"
 			},
 			"table": {
 				"user": "User",
