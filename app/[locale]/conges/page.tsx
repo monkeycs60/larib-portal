@@ -190,6 +190,16 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
           allocationSaved: t('admin.toasts.allocationSaved'),
           allocationInvalid: t('admin.toasts.allocationInvalid'),
         },
+        detailsLabels: {
+          period: t('admin.details.period'),
+          days: t('admin.details.days'),
+          status: t('admin.details.status'),
+          decision: t('admin.details.decision'),
+          empty: t('admin.details.empty'),
+        },
+        leaveStatusLabels: statusLabels,
+        computeDayCount: (entry: { startDate: string; endDate: string }) =>
+          countWorkingDays(new Date(entry.startDate), new Date(entry.endDate), frenchHolidays),
       }
     : null
 

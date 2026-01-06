@@ -93,6 +93,7 @@ export type AdminUserRow = {
   daysUntilDeparture: number | null
   lastLeaveDate: string | null
   status: AdminLegendStatus
+  leaveHistory: LeaveHistoryEntry[]
 }
 
 export type AdminDashboardSummary = {
@@ -369,6 +370,12 @@ export async function getAdminLeaveDashboard(
             role: true,
           },
         },
+        approver: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
       },
     }),
   ])
@@ -416,6 +423,21 @@ export async function getAdminLeaveDashboard(
       lastLeaveDate: lastApprovedLeave,
     })
 
+    const leaveHistory = userRequests
+      .sort((requestA, requestB) => requestB.startDate.getTime() - requestA.startDate.getTime())
+      .map<LeaveHistoryEntry>((request) => ({
+        id: request.id,
+        startDate: request.startDate.toISOString(),
+        endDate: request.endDate.toISOString(),
+        status: request.status,
+        reason: request.reason ?? null,
+        decisionAt: resolveLocaleDateValue(request.decisionAt ?? null),
+        approverName: request.approver
+          ? [request.approver.firstName, request.approver.lastName].filter(Boolean).join(' ').trim() || null
+          : null,
+        createdAt: request.createdAt.toISOString(),
+      }))
+
     return {
       userId: user.id,
       firstName: user.firstName,
@@ -433,6 +455,7 @@ export async function getAdminLeaveDashboard(
       daysUntilDeparture,
       lastLeaveDate: resolveLocaleDateValue(lastApprovedLeave),
       status,
+      leaveHistory,
     }
   })
 
