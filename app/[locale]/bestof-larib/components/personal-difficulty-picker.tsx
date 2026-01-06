@@ -47,9 +47,9 @@ export default function PersonalDifficultyPicker({ value, onChange, disabled, is
     },
     {
       value: 'INTERMEDIATE',
-      colorClass: 'bg-amber-500',
-      borderClass: 'border-amber-500/70 bg-amber-50',
-      textClass: 'text-amber-700',
+      colorClass: 'bg-rose-500',
+      borderClass: 'border-rose-500/70 bg-rose-50',
+      textClass: 'text-rose-700',
       label: t('difficulty.intermediate'),
     },
     {

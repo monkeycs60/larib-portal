@@ -37,7 +37,7 @@ function renderStatusBadge({
     const adminBadgeClass =
       status === 'PUBLISHED'
         ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-        : 'bg-amber-50 text-amber-700 border border-amber-200';
+        : 'bg-rose-50 text-rose-700 border border-rose-200';
     const adminLabel = status === 'PUBLISHED' ? translations.status.published : translations.status.draft;
     return <Badge className={`rounded-full px-3 py-1 text-xs font-medium ${adminBadgeClass}`}>{adminLabel}</Badge>;
   }
@@ -51,7 +51,7 @@ function renderStatusBadge({
   }
   if (progress?.hasDraftAttempt) {
     return (
-      <Badge className='rounded-full px-3 py-1 text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200'>
+      <Badge className='rounded-full px-3 py-1 text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200'>
         {translations.status.inProgress}
       </Badge>
     );
@@ -197,7 +197,7 @@ export default async function CasesTable({
                           caseItem.difficulty === 'BEGINNER'
                             ? 'border-green-500 text-green-700'
                             : caseItem.difficulty === 'INTERMEDIATE'
-                            ? 'border-amber-500 text-amber-700'
+                            ? 'border-rose-500 text-rose-700'
                             : 'border-red-500 text-red-700'
                         }
                       >
