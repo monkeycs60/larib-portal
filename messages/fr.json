@@ -258,7 +258,8 @@
 			"myDifficulty": "Niveau",
 			"adminTags": "Tags admin",
 			"userTags": "Tags utilisateur",
-			"actions": "Actions"
+			"actions": "Actions",
+			"completions": "Complétions"
 		},
 		"difficulty": {
 			"beginner": "Débutant",

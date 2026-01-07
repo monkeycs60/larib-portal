@@ -30,6 +30,7 @@ export type CasesTableTranslations = {
     adminTags: string;
     userTags: string;
     actions: string;
+    completions: string;
   };
   status: {
     published: string;
@@ -135,6 +136,11 @@ export default function CasesTableFallback({
             <TableHead>
               <SortHeader field='createdAt' label={translations.table.createdAt} activeField={sortField} direction={sortDirection} />
             </TableHead>
+            {isAdmin ? (
+              <TableHead>
+                <SortHeader field='completionsCount' label={translations.table.completions} activeField={sortField} direction={sortDirection} />
+              </TableHead>
+            ) : null}
             {isUserView ? (
               <TableHead>
                 <SortHeader field='firstCompletedAt' label={translations.table.firstCompletion} activeField={sortField} direction={sortDirection} />
@@ -159,7 +165,7 @@ export default function CasesTableFallback({
             <TableRow>
               <TableCell
                 colSpan={
-                  6 + (isAdmin ? 1 : 0) + (isUserView ? 2 : 0) + 2
+                  6 + (isAdmin ? 2 : 0) + (isUserView ? 2 : 0) + 2
                 }
                 className='text-center text-sm text-muted-foreground'
               >
@@ -244,6 +250,9 @@ export default function CasesTableFallback({
                   <TableCell>
                     {formatRelativeTime(caseItem.createdAt, (key: string, values?: Record<string, number>) => t(key, values))}
                   </TableCell>
+                  {isAdmin ? (
+                    <TableCell>{caseItem.completionsCount ?? 0}</TableCell>
+                  ) : null}
                   {isUserView ? (
                     <TableCell>
                       {caseItem.firstCompletedAt
