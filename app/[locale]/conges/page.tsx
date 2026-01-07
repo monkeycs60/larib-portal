@@ -7,7 +7,6 @@ import {
   getLeaveCalendarData,
   getUserLeaveDashboard,
   getAdminLeaveDashboard,
-  countWorkingDays,
   fetchFrenchHolidays,
 } from '@/lib/services/conges'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -198,8 +197,6 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
           empty: t('admin.details.empty'),
         },
         leaveStatusLabels: statusLabels,
-        computeDayCount: (entry: { startDate: string; endDate: string }) =>
-          countWorkingDays(new Date(entry.startDate), new Date(entry.endDate), frenchHolidays),
       }
     : null
 
@@ -339,8 +336,7 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
               </TableHeader>
               <TableBody>
                 {userDashboard.history.map((entry) => {
-                  const dayCount = countWorkingDays(new Date(entry.startDate), new Date(entry.endDate), frenchHolidays)
-                  const dayCountLabel = t('history.dayCount', { count: dayCount })
+                  const dayCountLabel = t('history.dayCount', { count: entry.dayCount })
                   return (
                     <TableRow key={entry.id}>
                       <TableCell>

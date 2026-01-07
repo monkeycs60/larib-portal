@@ -77,7 +77,6 @@ export type TeamLeaveOverviewSectionData = {
     empty: string
   }
   leaveStatusLabels: Record<LeaveRequestStatus, string>
-  computeDayCount: (entry: LeaveHistoryEntry) => number
 }
 
 type TeamLeaveOverviewSectionProps = {
@@ -102,7 +101,7 @@ const leaveStatusBadgeVariant: Record<LeaveRequestStatus, 'secondary' | 'default
 }
 
 export function TeamLeaveOverviewSection({ data }: TeamLeaveOverviewSectionProps) {
-  const { rows, tableTitle, summarySubtitle, tableLabels, statusLabels, legendLabels, allocationModal, toasts, detailsLabels, leaveStatusLabels, computeDayCount } = data
+  const { rows, tableTitle, summarySubtitle, tableLabels, statusLabels, legendLabels, allocationModal, toasts, detailsLabels, leaveStatusLabels } = data
 
   const initialAllocations = useMemo<AllocationState>(() => {
     return rows.reduce<AllocationState>((acc, row) => {
@@ -410,16 +409,14 @@ export function TeamLeaveOverviewSection({ data }: TeamLeaveOverviewSectionProps
                                   </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                  {row.leaveHistory.map((entry) => {
-                                    const dayCount = computeDayCount(entry)
-                                    return (
+                                  {row.leaveHistory.map((entry) => (
                                       <TableRow key={entry.id}>
                                         <TableCell>
                                           <span className='font-medium'>
                                             {new Date(entry.startDate).toLocaleDateString()} – {new Date(entry.endDate).toLocaleDateString()}
                                           </span>
                                         </TableCell>
-                                        <TableCell>{dayCount}</TableCell>
+                                        <TableCell>{entry.dayCount}</TableCell>
                                         <TableCell>
                                           <Badge variant={leaveStatusBadgeVariant[entry.status]}>
                                             {leaveStatusLabels[entry.status]}
@@ -438,8 +435,7 @@ export function TeamLeaveOverviewSection({ data }: TeamLeaveOverviewSectionProps
                                           )}
                                         </TableCell>
                                       </TableRow>
-                                    )
-                                  })}
+                                    ))}
                                 </TableBody>
                               </Table>
                             </div>

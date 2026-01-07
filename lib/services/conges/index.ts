@@ -25,6 +25,7 @@ export type LeaveHistoryEntry = {
   id: string
   startDate: string
   endDate: string
+  dayCount: number
   status: LeaveRequestStatus
   reason: string | null
   decisionAt: string | null
@@ -280,6 +281,7 @@ export async function getUserLeaveDashboard(
     id: request.id,
     startDate: request.startDate.toISOString(),
     endDate: request.endDate.toISOString(),
+    dayCount: countWorkingDays(request.startDate, request.endDate, frenchHolidays),
     status: request.status,
     reason: request.reason ?? null,
     decisionAt: resolveLocaleDateValue(request.decisionAt ?? null),
@@ -429,6 +431,7 @@ export async function getAdminLeaveDashboard(
         id: request.id,
         startDate: request.startDate.toISOString(),
         endDate: request.endDate.toISOString(),
+        dayCount: countWorkingDays(request.startDate, request.endDate, frenchHolidays),
         status: request.status,
         reason: request.reason ?? null,
         decisionAt: resolveLocaleDateValue(request.decisionAt ?? null),
