@@ -211,7 +211,8 @@
 		"statusInvitationExpiredDesc": "Invitation link has expired",
 		"resendInvitation": "Resend invitation",
 		"resending": "Sending...",
-		"invitationResent": "Invitation resent"
+		"invitationResent": "Invitation resent",
+		"leaveDaysLabel": "Number of leave days"
 	},
 	"upload": {
 		"selectFile": "Select image",

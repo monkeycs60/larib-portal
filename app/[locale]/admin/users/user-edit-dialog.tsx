@@ -39,6 +39,7 @@ const FormSchema = z.object({
 	arrivalDate: z.string().optional(),
 	departureDate: z.string().optional(),
 	applications: z.array(z.enum(['BESTOF_LARIB', 'CONGES', 'CARDIOLARIB'])),
+	congesTotalDays: z.number().int().min(0).max(365).optional(),
 });
 
 export type UserFormValues = z.infer<typeof FormSchema>;
@@ -299,6 +300,23 @@ export function UserEditDialog({
 							})}
 						</div>
 					</div>
+
+					{apps.has('CONGES') && (
+						<div>
+							<label className='block text-sm mb-1'>{t('leaveDaysLabel')}</label>
+							<Input
+								type='number'
+								min='0'
+								max='365'
+								placeholder='0'
+								defaultValue={initial.congesTotalDays ?? ''}
+								onChange={(event) => {
+									const value = event.target.value;
+									setValue('congesTotalDays', value === '' ? undefined : parseInt(value, 10));
+								}}
+							/>
+						</div>
+					)}
 
 					<DialogFooter>
 						<Button

@@ -122,6 +122,7 @@ export type CreatePlaceholderUserInput = {
   applications?: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'>
   arrivalDate?: Date | null
   departureDate?: Date | null
+  congesTotalDays?: number
 }
 
 export async function createPlaceholderUser(data: CreatePlaceholderUserInput): Promise<UserWithAdminFields> {
@@ -135,7 +136,7 @@ export async function createPlaceholderUser(data: CreatePlaceholderUserInput): P
       lastName: data.lastName ?? null,
       language: data.language ?? 'EN',
       position: data.position ?? null,
-      congesTotalDays: 0,
+      congesTotalDays: data.congesTotalDays ?? 0,
       applications: data.applications ?? [],
       arrivalDate: data.arrivalDate ?? null,
       departureDate: data.departureDate ?? null,
