@@ -324,15 +324,15 @@ export function RequestLeaveDialog({
               day_button:
                 'h-9 w-full p-0 font-normal hover:bg-accent hover:text-accent-foreground rounded-md inline-flex items-center justify-center',
               selected:
-                'bg-amber-500 text-white hover:bg-amber-600 hover:text-white focus:bg-amber-500 focus:text-white rounded-md',
+                'bg-rose-500 text-white hover:bg-rose-600 hover:text-white focus:bg-rose-500 focus:text-white rounded-md',
               range_start:
-                'day-range-start bg-amber-500 text-white hover:bg-amber-600 rounded-l-md',
+                'day-range-start bg-rose-500 text-white hover:bg-rose-600 rounded-l-md',
               range_end:
-                'day-range-end bg-amber-500 text-white hover:bg-amber-600 rounded-r-md',
+                'day-range-end bg-rose-500 text-white hover:bg-rose-600 rounded-r-md',
               range_middle:
-                'bg-amber-100 dark:bg-amber-900/30 text-amber-900 dark:text-amber-100 rounded-none',
+                'bg-rose-100 dark:bg-rose-900/30 text-rose-900 dark:text-rose-100 rounded-none',
               today: 'ring-1 ring-primary rounded-md font-semibold',
-              outside: 'text-muted-foreground/40 aria-selected:bg-amber-100/50',
+              outside: 'text-muted-foreground/40 aria-selected:bg-rose-100/50',
               disabled: 'text-muted-foreground/30 cursor-not-allowed',
               hidden: 'invisible',
             }}
@@ -441,7 +441,7 @@ export function RequestLeaveDialog({
                       <Badge
                         key={holiday.date.toISOString()}
                         variant='outline'
-                        className='bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'
+                        className='bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800'
                       >
                         <CalendarIcon className='h-3 w-3 mr-1' />
                         {format(holiday.date, 'd MMM', { locale: dateLocale })} - {holiday.name}

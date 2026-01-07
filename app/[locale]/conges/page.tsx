@@ -256,7 +256,7 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
             <CardContent>
               <div className='text-2xl font-semibold'>{card.value}</div>
               {card.helper ? (
-                <div className='text-sm font-medium text-orange-500'>{card.helper}</div>
+                <div className='text-sm font-medium text-rose-500'>{card.helper}</div>
               ) : null}
             </CardContent>
           </Card>

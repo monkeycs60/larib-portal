@@ -87,7 +87,7 @@ async function CaseViewPageContent({
                             c.difficulty === 'BEGINNER'
                                 ? 'border-green-500 text-green-700'
                                 : c.difficulty === 'INTERMEDIATE'
-                                ? 'border-amber-500 text-amber-700'
+                                ? 'border-rose-500 text-rose-700'
                                 : 'border-red-500 text-red-700'
                         }>
                         {t(`difficulty.${difficultyLabel}`)}

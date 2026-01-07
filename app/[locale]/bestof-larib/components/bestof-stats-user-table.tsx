@@ -43,7 +43,7 @@ export default function BestofStatsUserTable({ userStats, translations }: StatsU
     }
     if (daysSince <= 30) {
       return (
-        <Badge className='bg-orange-500 hover:bg-orange-600 text-white'>
+        <Badge className='bg-rose-500 hover:bg-rose-600 text-white'>
           {translations.activity.active}
         </Badge>
       );

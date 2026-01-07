@@ -362,7 +362,7 @@ export default function FiltersBar({
 						{[
 							{ value: '', colorClass: 'bg-muted-foreground/30', label: t('filters.any') },
 							{ value: 'BEGINNER', colorClass: 'bg-emerald-500', label: t('difficulty.beginner') },
-							{ value: 'INTERMEDIATE', colorClass: 'bg-amber-500', label: t('difficulty.intermediate') },
+							{ value: 'INTERMEDIATE', colorClass: 'bg-rose-500', label: t('difficulty.intermediate') },
 							{ value: 'ADVANCED', colorClass: 'bg-red-500', label: t('difficulty.advanced') },
 						].map((option) => (
 							<button
