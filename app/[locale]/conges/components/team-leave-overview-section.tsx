@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, type ChangeEvent } from 'react'
+import { Fragment, useMemo, useState, type ChangeEvent } from 'react'
 import { useAction } from 'next-safe-action/hooks'
 import { toast } from 'sonner'
 import {
@@ -24,10 +24,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { Minus, Pencil, Plus } from 'lucide-react'
+import { ChevronDown, ChevronRight, Minus, Pencil, Plus } from 'lucide-react'
 import { updateLeaveAllocationAction } from '../actions'
-import type { AdminUserRow } from '@/lib/services/conges'
+import type { AdminUserRow, LeaveHistoryEntry } from '@/lib/services/conges'
 import { formatUserName } from '@/lib/format-user-name'
+import type { LeaveRequestStatus } from '@/app/generated/prisma'
 
 export type TeamLeaveOverviewSectionData = {
   rows: AdminUserRow[]
@@ -68,6 +69,15 @@ export type TeamLeaveOverviewSectionData = {
     allocationSaved: string
     allocationInvalid: string
   }
+  detailsLabels: {
+    period: string
+    days: string
+    status: string
+    decision: string
+    empty: string
+  }
+  leaveStatusLabels: Record<LeaveRequestStatus, string>
+  computeDayCount: (entry: LeaveHistoryEntry) => number
 }
 
 type TeamLeaveOverviewSectionProps = {
@@ -84,8 +94,15 @@ const statusVariant: Record<AdminUserRow['status'], 'destructive' | 'secondary' 
   UNALLOCATED: 'outline',
 }
 
+const leaveStatusBadgeVariant: Record<LeaveRequestStatus, 'secondary' | 'default' | 'destructive' | 'outline'> = {
+  PENDING: 'secondary',
+  APPROVED: 'default',
+  REJECTED: 'destructive',
+  CANCELLED: 'outline',
+}
+
 export function TeamLeaveOverviewSection({ data }: TeamLeaveOverviewSectionProps) {
-  const { rows, tableTitle, summarySubtitle, tableLabels, statusLabels, legendLabels, allocationModal, toasts } = data
+  const { rows, tableTitle, summarySubtitle, tableLabels, statusLabels, legendLabels, allocationModal, toasts, detailsLabels, leaveStatusLabels, computeDayCount } = data
 
   const initialAllocations = useMemo<AllocationState>(() => {
     return rows.reduce<AllocationState>((acc, row) => {
@@ -96,11 +113,24 @@ export function TeamLeaveOverviewSection({ data }: TeamLeaveOverviewSectionProps
 
   const [allocations, setAllocations] = useState<AllocationState>(initialAllocations)
   const [activeAllocationUser, setActiveAllocationUser] = useState<string | null>(null)
+  const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set())
   const [allocationDialog, setAllocationDialog] = useState<{
     userId: string
     value: number
     inputValue: string
   } | null>(null)
+
+  const toggleUserExpansion = (userId: string) => {
+    setExpandedUsers((prev) => {
+      const next = new Set(prev)
+      if (next.has(userId)) {
+        next.delete(userId)
+      } else {
+        next.add(userId)
+      }
+      return next
+    })
+  }
 
   const { execute: saveAllocation, isExecuting: savingAllocation } = useAction(updateLeaveAllocationAction, {
     onSuccess: () => {
@@ -273,6 +303,7 @@ export function TeamLeaveOverviewSection({ data }: TeamLeaveOverviewSectionProps
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className='w-8' />
                 <TableHead>{tableLabels.user}</TableHead>
                 <TableHead>{tableLabels.role}</TableHead>
                 <TableHead>{tableLabels.allocation}</TableHead>
@@ -304,42 +335,119 @@ export function TeamLeaveOverviewSection({ data }: TeamLeaveOverviewSectionProps
                 )
                 const lastLeaveValue = row.lastLeaveDate ? new Date(row.lastLeaveDate).toLocaleDateString() : '—'
                 const percentageValue = `${Math.round(row.percentageUsed)}%`
+                const isExpanded = expandedUsers.has(row.userId)
 
                 return (
-                  <TableRow
-                    key={row.userId}
-                    className={hasDeparted ? 'bg-muted/40 text-muted-foreground' : undefined}
-                  >
-                    <TableCell>
-                      <div className='font-medium'>{displayName}</div>
-                      <div className='text-xs text-muted-foreground'>{row.email}</div>
-                    </TableCell>
-                    <TableCell>{statusLabels[row.role]}</TableCell>
-                    <TableCell>
-                      <div className='flex items-center justify-between gap-2'>
-                        <span className='font-medium'>{allocationValue}</span>
+                  <Fragment key={row.userId}>
+                    <TableRow
+                      className={`cursor-pointer ${hasDeparted ? 'bg-muted/40 text-muted-foreground' : ''}`}
+                      onClick={() => toggleUserExpansion(row.userId)}
+                    >
+                      <TableCell className='w-8'>
                         <Button
-                          size='icon'
                           variant='ghost'
-                          disabled={isSaving}
-                          onClick={() => openAllocationDialog(row.userId)}
+                          size='icon'
+                          className='h-6 w-6'
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            toggleUserExpansion(row.userId)
+                          }}
                         >
-                          <Pencil className='h-4 w-4' />
-                          <span className='sr-only'>{tableLabels.edit}</span>
+                          {isExpanded ? (
+                            <ChevronDown className='h-4 w-4' />
+                          ) : (
+                            <ChevronRight className='h-4 w-4' />
+                          )}
                         </Button>
-                      </div>
-                    </TableCell>
-                    <TableCell>{row.approvedDays}</TableCell>
-                    <TableCell>{row.pendingDays}</TableCell>
-                    <TableCell>{row.remainingDays}</TableCell>
-                    <TableCell>{row.balanceAfterPending}</TableCell>
-                    <TableCell>{percentageValue}</TableCell>
-                    <TableCell>{departureDisplay}</TableCell>
-                    <TableCell>{lastLeaveValue}</TableCell>
-                    <TableCell>
-                      <Badge variant={statusVariant[row.status]}>{legendLabels[row.status]}</Badge>
-                    </TableCell>
-                  </TableRow>
+                      </TableCell>
+                      <TableCell>
+                        <div className='font-medium'>{displayName}</div>
+                        <div className='text-xs text-muted-foreground'>{row.email}</div>
+                      </TableCell>
+                      <TableCell>{statusLabels[row.role]}</TableCell>
+                      <TableCell>
+                        <div className='flex items-center justify-between gap-2'>
+                          <span className='font-medium'>{allocationValue}</span>
+                          <Button
+                            size='icon'
+                            variant='ghost'
+                            disabled={isSaving}
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              openAllocationDialog(row.userId)
+                            }}
+                          >
+                            <Pencil className='h-4 w-4' />
+                            <span className='sr-only'>{tableLabels.edit}</span>
+                          </Button>
+                        </div>
+                      </TableCell>
+                      <TableCell>{row.approvedDays}</TableCell>
+                      <TableCell>{row.pendingDays}</TableCell>
+                      <TableCell>{row.remainingDays}</TableCell>
+                      <TableCell>{row.balanceAfterPending}</TableCell>
+                      <TableCell>{percentageValue}</TableCell>
+                      <TableCell>{departureDisplay}</TableCell>
+                      <TableCell>{lastLeaveValue}</TableCell>
+                      <TableCell>
+                        <Badge variant={statusVariant[row.status]}>{legendLabels[row.status]}</Badge>
+                      </TableCell>
+                    </TableRow>
+                    {isExpanded && (
+                      <TableRow className='bg-muted/30 hover:bg-muted/30'>
+                        <TableCell colSpan={12} className='p-4'>
+                          {row.leaveHistory.length === 0 ? (
+                            <p className='text-sm text-muted-foreground'>{detailsLabels.empty}</p>
+                          ) : (
+                            <div className='rounded-md border'>
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>{detailsLabels.period}</TableHead>
+                                    <TableHead>{detailsLabels.days}</TableHead>
+                                    <TableHead>{detailsLabels.status}</TableHead>
+                                    <TableHead>{detailsLabels.decision}</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {row.leaveHistory.map((entry) => {
+                                    const dayCount = computeDayCount(entry)
+                                    return (
+                                      <TableRow key={entry.id}>
+                                        <TableCell>
+                                          <span className='font-medium'>
+                                            {new Date(entry.startDate).toLocaleDateString()} – {new Date(entry.endDate).toLocaleDateString()}
+                                          </span>
+                                        </TableCell>
+                                        <TableCell>{dayCount}</TableCell>
+                                        <TableCell>
+                                          <Badge variant={leaveStatusBadgeVariant[entry.status]}>
+                                            {leaveStatusLabels[entry.status]}
+                                          </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                          {entry.decisionAt ? (
+                                            <div className='flex flex-col text-sm'>
+                                              <span>{new Date(entry.decisionAt).toLocaleDateString()}</span>
+                                              {entry.approverName && (
+                                                <span className='text-xs text-muted-foreground'>{entry.approverName}</span>
+                                              )}
+                                            </div>
+                                          ) : (
+                                            <span className='text-sm text-muted-foreground'>—</span>
+                                          )}
+                                        </TableCell>
+                                      </TableRow>
+                                    )
+                                  })}
+                                </TableBody>
+                              </Table>
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </Fragment>
                 )
               })}
             </TableBody>

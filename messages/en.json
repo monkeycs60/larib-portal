@@ -720,6 +720,13 @@
 				"statusApproved": "Request approved",
 				"statusRejected": "Request rejected",
 				"statusError": "Could not update request status"
+			},
+			"details": {
+				"period": "Period",
+				"days": "Days",
+				"status": "Status",
+				"decision": "Decision",
+				"empty": "No leave records for this team member."
 			}
 		}
 	}

@@ -718,6 +718,13 @@
 				"statusApproved": "Demande approuvée",
 				"statusRejected": "Demande refusée",
 				"statusError": "Impossible de mettre à jour le statut"
+			},
+			"details": {
+				"period": "Période",
+				"days": "Jours",
+				"status": "Statut",
+				"decision": "Décision",
+				"empty": "Aucun congé enregistré pour ce collaborateur."
 			}
 		}
 	}
