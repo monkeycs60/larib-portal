@@ -483,10 +483,13 @@
 				"completed": "complétés"
 			},
 			"userOverview": {
-				"totalActiveUsers": "Nombre total de users actifs",
-				"usersLast30Days": "Nombre total de users qui se sont connectés le mois derniers (30 derniers jours)",
-				"usersByPosition": "Graphique camembert avec le nombre et % de users par position",
-				"noData": "Aucune donnée disponible"
+				"totalActiveUsers": "Nombre total d'utilisateurs actifs",
+				"usersLast30Days": "Utilisateurs connectés les 30 derniers jours",
+				"usersByPosition": "Utilisateurs par poste",
+				"noData": "Aucune donnée disponible",
+				"showDetails": "Voir le détail",
+				"hideDetails": "Masquer le détail",
+				"casesCompleted": "cas"
 			},
 			"table": {
 				"user": "Utilisateur",

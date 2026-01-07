@@ -677,7 +677,7 @@ const cachedUserCompletionTrends = cache(async (filtersJson: string, groupBy: 'd
   const filters = JSON.parse(filtersJson) as StatsFilters | undefined;
   return unstable_cache(
     () => fetchUserCompletionTrendsData(filters, groupBy),
-    ['bestof:stats:user-trends:v2', filtersJson, groupBy],
+    ['bestof:stats:user-trends:v3', filtersJson, groupBy],
     { tags: [STATS_TAG, CASES_TAG] },
   )();
 });
@@ -848,10 +848,19 @@ export type DatabaseStatistics = {
   totalAdminTags: number;
 };
 
+export type ActiveUserInfo = {
+  userId: string;
+  userName: string;
+  userPosition: string | null;
+  lastActivityDate: Date;
+  casesCompletedOnThatDay: number;
+};
+
 export type UserOverviewStatistics = {
   totalActiveUsers: number;
   usersLast30Days: number;
   usersByPosition: Array<{ name: string; value: number; color: string }>;
+  activeUsersLast30Days: ActiveUserInfo[];
 };
 
 const CHART_COLORS = [
@@ -985,7 +994,7 @@ const fetchUserOverviewStatisticsData = async (): Promise<UserOverviewStatistics
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-  const [allUsers, usersLast30Days, usersByPositionData] = await Promise.all([
+  const [allUsers, usersLast30DaysWithActivity, usersByPositionData] = await Promise.all([
     prisma.user.findMany({
       where: {
         CaseAttempt: {
@@ -1007,7 +1016,26 @@ const fetchUserOverviewStatisticsData = async (): Promise<UserOverviewStatistics
           },
         },
       },
-      select: { id: true },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        name: true,
+        email: true,
+        position: true,
+        CaseAttempt: {
+          where: {
+            validatedAt: {
+              gte: thirtyDaysAgo,
+              not: null,
+            },
+          },
+          select: {
+            validatedAt: true,
+          },
+          orderBy: { validatedAt: 'desc' },
+        },
+      },
     }),
     prisma.user.groupBy({
       by: ['position'],
@@ -1026,19 +1054,51 @@ const fetchUserOverviewStatisticsData = async (): Promise<UserOverviewStatistics
     name: group.position || 'No position',
     value: group._count.id,
     color: CHART_COLORS[index % CHART_COLORS.length],
-  })).sort((a, b) => b.value - a.value);
+  })).sort((firstGroup, secondGroup) => secondGroup.value - firstGroup.value);
+
+  const activeUsersLast30Days: ActiveUserInfo[] = usersLast30DaysWithActivity.map((user) => {
+    const displayName = user.firstName
+      ? `${user.firstName} ${user.lastName || ''}`.trim()
+      : user.name || user.email;
+
+    const lastActivityDate = user.CaseAttempt[0]?.validatedAt;
+    if (!lastActivityDate) {
+      return null;
+    }
+
+    const lastActivityDateStart = new Date(lastActivityDate);
+    lastActivityDateStart.setHours(0, 0, 0, 0);
+    const lastActivityDateEnd = new Date(lastActivityDate);
+    lastActivityDateEnd.setHours(23, 59, 59, 999);
+
+    const casesCompletedOnThatDay = user.CaseAttempt.filter((attempt) => {
+      if (!attempt.validatedAt) return false;
+      const attemptDate = new Date(attempt.validatedAt);
+      return attemptDate >= lastActivityDateStart && attemptDate <= lastActivityDateEnd;
+    }).length;
+
+    return {
+      userId: user.id,
+      userName: displayName,
+      userPosition: user.position,
+      lastActivityDate,
+      casesCompletedOnThatDay,
+    };
+  }).filter((user): user is ActiveUserInfo => user !== null)
+    .sort((firstUser, secondUser) => secondUser.lastActivityDate.getTime() - firstUser.lastActivityDate.getTime());
 
   return {
     totalActiveUsers: allUsers.length,
-    usersLast30Days: usersLast30Days.length,
+    usersLast30Days: usersLast30DaysWithActivity.length,
     usersByPosition,
+    activeUsersLast30Days,
   };
 };
 
 const cachedUserOverviewStatistics = cache(async () => {
   return unstable_cache(
     () => fetchUserOverviewStatisticsData(),
-    ['bestof:stats:user-overview:v1'],
+    ['bestof:stats:user-overview:v2'],
     { tags: [STATS_TAG, CASES_TAG] },
   )();
 });
