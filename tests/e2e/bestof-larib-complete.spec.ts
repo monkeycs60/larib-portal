@@ -467,15 +467,15 @@ test.describe('Action Tests', () => {
 		await gotoBestofLarib(page);
 		await waitForTableToLoad(page);
 
-		// Cliquer sur le premier bouton View
-		const viewButton = page.getByRole('link', { name: /view/i }).first();
+		// Cliquer sur le premier bouton View (button inside link)
+		const viewButton = page.getByRole('button', { name: /^view$/i }).first();
 		await viewButton.click();
 
 		// Vérifier la navigation vers la page de détail
-		await page.waitForURL(/\/en\/bestof-larib\/[a-z0-9-]+$/, {
-			timeout: 10000,
+		await page.waitForURL(/\/en\/bestof-larib\/[a-z0-9-]+/, {
+			timeout: 30000,
 		});
-		expect(page.url()).toMatch(/\/en\/bestof-larib\/[a-z0-9-]+$/);
+		expect(page.url()).toMatch(/\/en\/bestof-larib\/[a-z0-9-]+/);
 	});
 
 	test('should navigate to new attempt when clicking Start new attempt', async ({

@@ -272,12 +272,18 @@ async function main() {
 	console.log('📦 Creating leave request test data...');
 
 	// Set up user with leave allocation and contract dates
+	// Use dynamic dates to ensure contract is always valid
+	const contractStartDate = new Date();
+	contractStartDate.setFullYear(contractStartDate.getFullYear() - 2);
+	const contractEndDate = new Date();
+	contractEndDate.setFullYear(contractEndDate.getFullYear() + 1);
+
 	await prisma.user.update({
 		where: { id: regularUser.id },
 		data: {
 			congesTotalDays: 30,
-			arrivalDate: new Date('2024-01-01'),
-			departureDate: new Date('2025-12-31'),
+			arrivalDate: contractStartDate,
+			departureDate: contractEndDate,
 		},
 	});
 
