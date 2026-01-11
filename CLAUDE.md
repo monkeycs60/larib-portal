@@ -1,6 +1,7 @@
 # Repository Guidelines
 
 - Use postgres mcp to debug database issues and test new features
+- NEVER use prisma migrate reset / do not reset db even if user asks for it
 
 ### Prohibited Practices
 
