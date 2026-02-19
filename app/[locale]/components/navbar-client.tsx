@@ -66,13 +66,9 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
 		setIsLoggingOut(true);
 		try {
 			await authClient.signOut();
-			// After auth state change, force RSC re-fetch and navigate with locale
-			router.push(applicationLink(locale, '/'));
-			router.refresh();
+			window.location.href = applicationLink(locale, '/');
 		} catch (e: unknown) {
 			console.error(e);
-			// noop; safe UI
-		} finally {
 			setIsLoggingOut(false);
 		}
 	};
