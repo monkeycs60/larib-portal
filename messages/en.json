@@ -746,6 +746,22 @@
 				"status": "Status",
 				"decision": "Decision",
 				"empty": "No leave records for this team member."
+			},
+			"decisionHistory": {
+				"title": "Decision history",
+				"empty": "No decisions recorded yet.",
+				"columns": {
+					"user": "User",
+					"period": "Period",
+					"days": "Days",
+					"status": "Status",
+					"reason": "Reason",
+					"decision": "Decision"
+				},
+				"filterAll": "All",
+				"filterApproved": "Approved",
+				"filterRejected": "Rejected",
+				"filterCancelled": "Cancelled"
 			}
 		}
 	}

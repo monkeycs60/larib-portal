@@ -16,6 +16,7 @@ import { RequestHistoryTable } from './components/request-history-table'
 import { LeaveCalendar } from './components/leave-calendar'
 import { PendingRequestsSection } from './components/pending-requests-section'
 import { TeamLeaveOverviewSection } from './components/team-leave-overview-section'
+import { DecisionHistorySection, type DecisionEntry } from './components/decision-history-section'
 import { CalendarSkeleton } from './components/calendar-skeleton'
 import { applicationLink } from '@/lib/application-link'
 
@@ -248,6 +249,46 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
       }
     : null
 
+  const decisionHistoryData = adminDashboard
+    ? (() => {
+        const decisionEntries: DecisionEntry[] = adminDashboard.rows.flatMap((row) =>
+          row.leaveHistory
+            .filter((entry) => entry.status !== 'PENDING')
+            .map((entry) => ({
+              ...entry,
+              userName: fullName(row.firstName, row.lastName, row.email),
+            }))
+        )
+
+        decisionEntries.sort((entryA, entryB) => {
+          const dateA = entryA.decisionAt ?? entryA.createdAt
+          const dateB = entryB.decisionAt ?? entryB.createdAt
+          return new Date(dateB).getTime() - new Date(dateA).getTime()
+        })
+
+        return {
+          entries: decisionEntries,
+          translations: {
+            title: t('admin.decisionHistory.title'),
+            empty: t('admin.decisionHistory.empty'),
+            columns: {
+              user: t('admin.decisionHistory.columns.user'),
+              period: t('admin.decisionHistory.columns.period'),
+              days: t('admin.decisionHistory.columns.days'),
+              status: t('admin.decisionHistory.columns.status'),
+              reason: t('admin.decisionHistory.columns.reason'),
+              decision: t('admin.decisionHistory.columns.decision'),
+            },
+            filterAll: t('admin.decisionHistory.filterAll'),
+            filterApproved: t('admin.decisionHistory.filterApproved'),
+            filterRejected: t('admin.decisionHistory.filterRejected'),
+            filterCancelled: t('admin.decisionHistory.filterCancelled'),
+            statusLabels,
+          },
+        }
+      })()
+    : null
+
   const pendingImpactLabel =
     userDashboard.summary.pendingDays > 0
       ? t('summary.pendingImpact', { count: userDashboard.summary.pendingDays })
@@ -392,6 +433,15 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
     </section>
   ) : null
 
+  const decisionHistorySection = decisionHistoryData ? (
+    <section className='px-6'>
+      <DecisionHistorySection
+        entries={decisionHistoryData.entries}
+        translations={decisionHistoryData.translations}
+      />
+    </section>
+  ) : null
+
   const teamLeaveOverviewSection = teamLeaveOverviewData ? (
     <section className='px-6'>
       <Suspense fallback={<div className='text-sm text-muted-foreground'>{t('admin.loading')}</div>}>
@@ -419,6 +469,7 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
       {isAdmin ? (
         <>
           {pendingRequestsSection}
+          {decisionHistorySection}
           {calendarSection}
           {teamLeaveOverviewSection}
         </>

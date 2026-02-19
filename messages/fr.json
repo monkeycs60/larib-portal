@@ -744,6 +744,22 @@
 				"status": "Statut",
 				"decision": "Décision",
 				"empty": "Aucun congé enregistré pour ce collaborateur."
+			},
+			"decisionHistory": {
+				"title": "Historique des décisions",
+				"empty": "Aucune décision enregistrée.",
+				"columns": {
+					"user": "Utilisateur",
+					"period": "Période",
+					"days": "Jours",
+					"status": "Statut",
+					"reason": "Motif",
+					"decision": "Décision"
+				},
+				"filterAll": "Toutes",
+				"filterApproved": "Approuvées",
+				"filterRejected": "Refusées",
+				"filterCancelled": "Annulées"
 			}
 		}
 	}
