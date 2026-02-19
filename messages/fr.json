@@ -648,7 +648,8 @@
 				"days": "Jours",
 				"status": "Statut",
 				"reason": "Motif",
-				"decision": "Décision"
+				"decision": "Décision",
+				"createdAt": "Créée le"
 			},
 			"dayCount": "{count, plural, one {# jour} other {# jours}}",
 			"status": {

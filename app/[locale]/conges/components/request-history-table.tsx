@@ -50,6 +50,7 @@ type RequestHistoryTableProps = {
       status: string
       reason: string
       decision: string
+      createdAt: string
       actions: string
     }
     status: {
@@ -120,6 +121,7 @@ export function RequestHistoryTable({
             <TableHead>{translations.columns.status}</TableHead>
             <TableHead>{translations.columns.reason}</TableHead>
             <TableHead>{translations.columns.decision}</TableHead>
+            <TableHead>{translations.columns.createdAt}</TableHead>
             <TableHead>{translations.columns.actions}</TableHead>
           </TableRow>
         </TableHeader>
@@ -158,6 +160,11 @@ export function RequestHistoryTable({
                   ) : (
                     <span className='text-sm text-muted-foreground'>—</span>
                   )}
+                </TableCell>
+                <TableCell>
+                  <span className='text-sm text-muted-foreground'>
+                    {format(new Date(entry.createdAt), 'PP', { locale: dateLocale })}
+                  </span>
                 </TableCell>
                 <TableCell>
                   {isPending ? (
@@ -229,6 +236,7 @@ export function RequestHistoryTable({
       </AlertDialog>
 
       <EditLeaveDialog
+        key={editTargetEntry?.id ?? 'closed'}
         entry={editTargetEntry}
         open={editTargetEntry !== null}
         onOpenChange={(isOpen) => {

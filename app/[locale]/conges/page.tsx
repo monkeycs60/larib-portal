@@ -127,6 +127,7 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
       status: t('history.columns.status'),
       reason: t('history.columns.reason'),
       decision: t('history.columns.decision'),
+      createdAt: t('history.columns.createdAt'),
       actions: t('history.actions'),
     },
     status: statusLabels,

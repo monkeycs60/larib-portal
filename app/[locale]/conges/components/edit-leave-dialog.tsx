@@ -106,7 +106,11 @@ export function EditLeaveDialog({
   translations,
   userContext,
 }: EditLeaveDialogProps) {
-  const [editSelectedRange, setEditSelectedRange] = useState<DateRange | undefined>(undefined)
+  const [editSelectedRange, setEditSelectedRange] = useState<DateRange | undefined>(
+    entry
+      ? { from: new Date(entry.startDate), to: new Date(entry.endDate) }
+      : undefined
+  )
 
   const dateLocale = userContext.locale === 'fr' ? fr : enUS
 
@@ -119,9 +123,9 @@ export function EditLeaveDialog({
   const editForm = useForm<EditFormValues>({
     resolver: zodResolver(editFormSchema),
     defaultValues: {
-      startDate: '',
-      endDate: '',
-      reason: '',
+      startDate: entry ? startOfDay(new Date(entry.startDate)).toISOString() : '',
+      endDate: entry ? startOfDay(new Date(entry.endDate)).toISOString() : '',
+      reason: entry?.reason ?? '',
     },
   })
 

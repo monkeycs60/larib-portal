@@ -650,7 +650,8 @@
 				"days": "Days",
 				"status": "Status",
 				"reason": "Reason",
-				"decision": "Decision"
+				"decision": "Decision",
+				"createdAt": "Created"
 			},
 			"dayCount": "{count, plural, one {# day} other {# days}}",
 			"status": {

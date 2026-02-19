@@ -234,7 +234,7 @@ export async function getUserLeaveDashboard(
 
   const requests = await prisma.leaveRequest.findMany({
     where: { userId },
-    orderBy: { startDate: 'desc' },
+    orderBy: { createdAt: 'desc' },
     include: {
       approver: {
         select: {
