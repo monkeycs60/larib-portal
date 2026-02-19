@@ -8,7 +8,64 @@ type WelcomeEmailParams = {
   accessEndDate?: Date | null
 }
 
-function renderWelcomeEmail({ locale, firstName, lastName, setupLink, accessEndDate }: WelcomeEmailParams) {
+function emailLayout(body: string, preheader?: string): string {
+  return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cardio Larib</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f5f7;font-family:Georgia,'Times New Roman',Times,serif;">
+  ${preheader ? `<div style="display:none;font-size:1px;color:#f4f5f7;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${preheader}</div>` : ''}
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f5f7;">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;">
+          <!-- Header -->
+          <tr>
+            <td align="center" style="background-color:#1a2744;padding:28px 40px;border-radius:8px 8px 0 0;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="font-family:Georgia,'Times New Roman',Times,serif;font-size:24px;font-weight:bold;color:#ffffff;letter-spacing:0.5px;">
+                    Cardio Larib
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td style="background-color:#ffffff;padding:40px 40px 32px 40px;border-left:1px solid #e5e7eb;border-right:1px solid #e5e7eb;">
+              ${body}
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#ffffff;padding:0 40px 32px 40px;border-left:1px solid #e5e7eb;border-right:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;border-radius:0 0 8px 8px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="border-top:1px solid #e5e7eb;padding-top:24px;">
+                    <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:12px;line-height:18px;color:#9ca3af;text-align:center;">
+                      Portail Cardio Larib
+                    </p>
+                    <p style="margin:6px 0 0 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:11px;line-height:16px;color:#d1d5db;text-align:center;">
+                      Ceci est un message automatique. Merci de ne pas y r&eacute;pondre.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
+}
+
+function renderWelcomeEmail({ locale, firstName, lastName, position, setupLink, accessEndDate }: WelcomeEmailParams) {
   const fullName = [firstName, lastName].filter(Boolean).join(' ') || undefined
   const subject = locale === 'fr'
     ? 'Bienvenue sur le portail Cardio Larib'
@@ -19,7 +76,7 @@ function renderWelcomeEmail({ locale, firstName, lastName, setupLink, accessEndD
   const intro = locale === 'fr'
     ? 'Ceci est un message automatique pour vous inviter à rejoindre la plateforme intranet de notre équipe, le portail Cardio Larib.'
     : 'This is an automatic message to invite you to join our team intranet platform, the Cardio Larib Portal.'
-  const ctaText = locale === 'fr' ? 'Lien d\'accès' : 'Set up link'
+  const ctaText = locale === 'fr' ? 'Configurer votre compte' : 'Set up your account'
   const expiresText = locale === 'fr' ? 'Votre compte sera valide jusqu\'au' : 'Your account will be valid until'
 
   const accessLine = accessEndDate ? `\n\n${expiresText} ${accessEndDate.toISOString().slice(0,10)}.` : ''
@@ -30,14 +87,55 @@ function renderWelcomeEmail({ locale, firstName, lastName, setupLink, accessEndD
 
   const text = `${greeting}${nameLine},\n\n${intro}\n\n${linkInstruction}\n\n${setupLink}${accessLine}`
 
-  const html = `
-    <div style="font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;">
-      <p>${greeting}${nameLine},</p>
-      <p>${intro}</p>
-      <p><a href="${setupLink}" style="background:#111827;color:#fff;padding:10px 14px;border-radius:6px;text-decoration:none;display:inline-block">${ctaText}</a></p>
-      ${accessEndDate ? `<p>${expiresText} <strong>${accessEndDate.toISOString().slice(0,10)}</strong>.</p>` : ''}
-    </div>
-  `
+  const positionBadge = position
+    ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;">
+        <tr>
+          <td style="background-color:#eef2ff;border:1px solid #c7d2fe;border-radius:4px;padding:6px 14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#4338ca;">
+            ${position}
+          </td>
+        </tr>
+      </table>`
+    : ''
+
+  const accessEndBlock = accessEndDate
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:28px;">
+        <tr>
+          <td style="background-color:#fefce8;border:1px solid #fde68a;border-radius:6px;padding:14px 18px;">
+            <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:13px;line-height:20px;color:#92400e;">
+              ${expiresText} <strong>${accessEndDate.toISOString().slice(0, 10)}</strong>.
+            </p>
+          </td>
+        </tr>
+      </table>`
+    : ''
+
+  const preheader = locale === 'fr'
+    ? 'Vous avez été invité à rejoindre le portail Cardio Larib'
+    : 'You have been invited to join the Cardio Larib portal'
+
+  const body = `
+    <p style="margin:0 0 20px 0;font-family:Georgia,'Times New Roman',Times,serif;font-size:18px;line-height:26px;color:#1a2744;">
+      ${greeting}${nameLine},
+    </p>
+    <p style="margin:0 0 20px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:15px;line-height:24px;color:#374151;">
+      ${intro}
+    </p>
+    ${positionBadge}
+    <p style="margin:0 0 24px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:15px;line-height:24px;color:#374151;">
+      ${linkInstruction}
+    </p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
+      <tr>
+        <td align="center" style="background-color:#e8604c;border-radius:6px;">
+          <a href="${setupLink}" target="_blank" style="display:inline-block;padding:14px 32px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:6px;">
+            ${ctaText}
+          </a>
+        </td>
+      </tr>
+    </table>
+    ${accessEndBlock}`
+
+  const html = emailLayout(body, preheader)
   return { subject, text, html }
 }
 
@@ -85,21 +183,42 @@ function renderResetPasswordEmail({ resetUrl, locale }: ResetPasswordEmailParams
     : 'You requested to reset your password. Click the link below to create a new password.'
   const ctaText = locale === 'fr' ? 'Réinitialiser mon mot de passe' : 'Reset my password'
   const expiryNote = locale === 'fr'
-    ? 'Ce lien expirera dans 1 heure. Si vous n\'avez pas demandé cette réinitialisation, vous pouvez ignorer cet e-mail.'
-    : 'This link will expire in 1 hour. If you did not request this reset, you can ignore this email.'
+    ? 'Ce lien expirera dans 1 heure.'
+    : 'This link will expire in 1 hour.'
+  const securityNote = locale === 'fr'
+    ? 'Si vous n\'avez pas demandé cette réinitialisation, vous pouvez ignorer cet e-mail en toute sécurité.'
+    : 'If you did not request this reset, you can safely ignore this email.'
 
-  const text = `${greeting}\n\n${intro}\n\n${resetUrl}\n\n${expiryNote}`
+  const text = `${greeting}\n\n${intro}\n\n${resetUrl}\n\n${expiryNote} ${securityNote}`
 
-  const html = `
-    <div style="font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <p>${greeting}</p>
-      <p>${intro}</p>
-      <p style="margin: 24px 0;">
-        <a href="${resetUrl}" style="background:#111827;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block">${ctaText}</a>
-      </p>
-      <p style="color:#666;font-size:14px;">${expiryNote}</p>
-    </div>
-  `
+  const preheader = locale === 'fr'
+    ? 'Votre lien de réinitialisation de mot de passe'
+    : 'Your password reset link'
+
+  const body = `
+    <p style="margin:0 0 20px 0;font-family:Georgia,'Times New Roman',Times,serif;font-size:18px;line-height:26px;color:#1a2744;">
+      ${greeting}
+    </p>
+    <p style="margin:0 0 28px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:15px;line-height:24px;color:#374151;">
+      ${intro}
+    </p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto 28px auto;">
+      <tr>
+        <td align="center" style="background-color:#e8604c;border-radius:6px;">
+          <a href="${resetUrl}" target="_blank" style="display:inline-block;padding:14px 32px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:6px;">
+            ${ctaText}
+          </a>
+        </td>
+      </tr>
+    </table>
+    <p style="margin:0 0 8px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:13px;line-height:20px;color:#9ca3af;">
+      ${expiryNote}
+    </p>
+    <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:13px;line-height:20px;color:#9ca3af;">
+      ${securityNote}
+    </p>`
+
+  const html = emailLayout(body, preheader)
   return { subject, text, html }
 }
 
@@ -142,6 +261,24 @@ type LeaveNotificationParams = {
   dayCount: number
   remainingDays: number
   reason: string | null
+}
+
+function eventTypePillStyle(eventType: LeaveNotificationEventType): { bgColor: string; textColor: string; borderColor: string } {
+  const styles: Record<LeaveNotificationEventType, { bgColor: string; textColor: string; borderColor: string }> = {
+    created: { bgColor: '#ecfdf5', textColor: '#065f46', borderColor: '#a7f3d0' },
+    edited: { bgColor: '#fffbeb', textColor: '#92400e', borderColor: '#fde68a' },
+    cancelled: { bgColor: '#fef2f2', textColor: '#991b1b', borderColor: '#fecaca' },
+  }
+  return styles[eventType]
+}
+
+function eventTypeLabel(eventType: LeaveNotificationEventType, locale: 'fr' | 'en'): string {
+  const labels: Record<LeaveNotificationEventType, Record<'fr' | 'en', string>> = {
+    created: { fr: 'Nouvelle demande', en: 'New request' },
+    edited: { fr: 'Demande modifiée', en: 'Updated request' },
+    cancelled: { fr: 'Demande annulée', en: 'Cancelled request' },
+  }
+  return labels[eventType][locale]
 }
 
 function renderLeaveNotificationEmail({
@@ -214,31 +351,49 @@ function renderLeaveNotificationEmail({
   ]
   const text = textParts.join('\n')
 
-  const html = `
-    <div style="font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <p><strong>${userName}</strong> ${action}</p>
-      <table style="border-collapse: collapse; margin: 16px 0;">
-        <tr>
-          <td style="padding: 6px 16px 6px 0; color: #666;">${locale === 'fr' ? 'Dates' : 'Dates'}</td>
-          <td style="padding: 6px 0;">${dateRange}</td>
-        </tr>
-        <tr>
-          <td style="padding: 6px 16px 6px 0; color: #666;">${locale === 'fr' ? 'Durée' : 'Duration'}</td>
-          <td style="padding: 6px 0;">${dayCount} ${daysLabel}</td>
-        </tr>
-        <tr>
-          <td style="padding: 6px 16px 6px 0; color: #666;">${locale === 'fr' ? 'Solde restant' : 'Remaining balance'}</td>
-          <td style="padding: 6px 0;">${remainingDays} ${remainingLabel}</td>
-        </tr>
-        ${reasonLine ? `
-        <tr>
-          <td style="padding: 6px 16px 6px 0; color: #666;">${locale === 'fr' ? 'Raison' : 'Reason'}</td>
-          <td style="padding: 6px 0;">${reason}</td>
-        </tr>` : ''}
-      </table>
-      <p style="color: #666; font-size: 14px;">${ctaLine}</p>
-    </div>
-  `
+  const pill = eventTypePillStyle(eventType)
+  const pillLabel = eventTypeLabel(eventType, locale)
+
+  const reasonRow = reason
+    ? `<tr>
+        <td style="padding:12px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#6b7280;background-color:#ffffff;">${locale === 'fr' ? 'Raison' : 'Reason'}</td>
+        <td style="padding:12px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1f2937;background-color:#ffffff;">${reason}</td>
+      </tr>`
+    : ''
+
+  const preheader = `${userName} ${action}`
+
+  const body = `
+    <p style="margin:0 0 6px 0;font-family:Georgia,'Times New Roman',Times,serif;font-size:18px;line-height:26px;color:#1a2744;">
+      <strong>${userName}</strong> ${action}
+    </p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;">
+      <tr>
+        <td style="background-color:${pill.bgColor};border:1px solid ${pill.borderColor};border-radius:4px;padding:4px 12px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:12px;font-weight:600;color:${pill.textColor};letter-spacing:0.3px;">
+          ${pillLabel}
+        </td>
+      </tr>
+    </table>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;margin-bottom:24px;">
+      <tr>
+        <td style="padding:12px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#6b7280;background-color:#f9fafb;">${locale === 'fr' ? 'Dates' : 'Dates'}</td>
+        <td style="padding:12px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1f2937;background-color:#f9fafb;">${dateRange}</td>
+      </tr>
+      <tr>
+        <td style="padding:12px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#6b7280;background-color:#ffffff;">${locale === 'fr' ? 'Durée' : 'Duration'}</td>
+        <td style="padding:12px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1f2937;background-color:#ffffff;"><strong>${dayCount}</strong> ${daysLabel}</td>
+      </tr>
+      <tr>
+        <td style="padding:12px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#6b7280;background-color:#f9fafb;">${locale === 'fr' ? 'Solde restant' : 'Remaining balance'}</td>
+        <td style="padding:12px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1f2937;background-color:#f9fafb;"><strong>${remainingDays}</strong> ${remainingLabel}</td>
+      </tr>
+      ${reasonRow}
+    </table>
+    <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:13px;line-height:20px;color:#9ca3af;">
+      ${ctaLine}
+    </p>`
+
+  const html = emailLayout(body, preheader)
 
   return { subject, text, html }
 }
@@ -271,4 +426,3 @@ export async function sendLeaveNotificationEmail(
   const json = await res.json() as { id?: string }
   return { id: json.id ?? '' }
 }
-
