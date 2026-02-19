@@ -658,7 +658,21 @@
 				"approved": "Approved",
 				"rejected": "Rejected",
 				"cancelled": "Cancelled"
-			}
+			},
+			"actions": "Actions",
+			"edit": "Edit",
+			"cancel": "Cancel",
+			"cancelConfirmTitle": "Cancel leave request",
+			"cancelConfirmDescription": "Are you sure you want to cancel this leave request? This action cannot be undone.",
+			"cancelConfirm": "Yes, cancel",
+			"cancelCancel": "Go back",
+			"cancelSuccess": "Leave request cancelled",
+			"cancelError": "Could not cancel the request",
+			"editTitle": "Edit leave request",
+			"editDescription": "Modify the dates or reason for your leave request.",
+			"editSubmit": "Save changes",
+			"editSuccess": "Leave request updated",
+			"editError": "Could not update the request"
 		},
 		"roles": {
 			"admin": "Admin",

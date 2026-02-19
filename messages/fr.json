@@ -656,7 +656,21 @@
 				"approved": "Approuvée",
 				"rejected": "Refusée",
 				"cancelled": "Annulée"
-			}
+			},
+			"actions": "Actions",
+			"edit": "Modifier",
+			"cancel": "Annuler",
+			"cancelConfirmTitle": "Annuler la demande de congé",
+			"cancelConfirmDescription": "Voulez-vous vraiment annuler cette demande de congé ? Cette action est irréversible.",
+			"cancelConfirm": "Oui, annuler",
+			"cancelCancel": "Retour",
+			"cancelSuccess": "Demande de congé annulée",
+			"cancelError": "Impossible d'annuler la demande",
+			"editTitle": "Modifier la demande de congé",
+			"editDescription": "Modifiez les dates ou le motif de votre demande.",
+			"editSubmit": "Enregistrer",
+			"editSuccess": "Demande de congé mise à jour",
+			"editError": "Impossible de modifier la demande"
 		},
 		"roles": {
 			"admin": "Admin",
