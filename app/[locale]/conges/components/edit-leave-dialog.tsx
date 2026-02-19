@@ -6,12 +6,11 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAction } from 'next-safe-action/hooks'
 import { toast } from 'sonner'
-import { startOfDay, format, getYear } from 'date-fns'
+import { format, startOfDay, getYear } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
 import { DayPicker } from 'react-day-picker'
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -23,70 +22,91 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
-import { AlertCircle, Calendar as CalendarIcon, Info, ChevronLeft, ChevronRight } from 'lucide-react'
-import { requestLeaveAction } from '../actions'
-import { countWorkingDays, getExcludedDaysInfo, getHolidayDatesForCalendar } from '@/lib/services/conges'
+import {
+  AlertCircle,
+  Calendar as CalendarIcon,
+  Info,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react'
+import { updateLeaveAction } from '../actions'
+import {
+  countWorkingDays,
+  getExcludedDaysInfo,
+  getHolidayDatesForCalendar,
+} from '@/lib/services/conges'
 import type { DateRange, Matcher } from 'react-day-picker'
 import { getIso, pluralize, dayPickerClassNames } from './day-picker-shared'
 
-type RequestLeaveDialogProps = {
-  translations: {
-    trigger: string
-    title: string
-    description: string
-    startLabel: string
-    endLabel: string
-    reasonLabel: string
-    optionalHint: string
-    submit: string
-    cancel: string
-    success: string
-    overlapError: string
-    invalidRange: string
-    missingRange: string
-    insufficientDays: string
-    pastDate: string
-    outsideContract: string
-    requestedDays: string
-    currentRemaining: string
-    afterRequest: string
-    excludedDays: string
-    weekendDays: string
-    holidays: string
-    holiday: string
-    day: string
-    days: string
-    holidayLegend: string
-  }
-  defaultMonthIso: string
-  userContext: {
-    remainingDays: number
-    arrivalDate: string | null
-    departureDate: string | null
-    locale: 'fr' | 'en'
-    frenchHolidays: Record<string, string>
-  }
+export type EditLeaveEntry = {
+  id: string
+  startDate: string
+  endDate: string
+  reason: string | null
+  dayCount: number
 }
 
-const formSchema = z.object({
+export type EditLeaveDialogTranslations = {
+  editTitle: string
+  editDescription: string
+  editSubmit: string
+  editSuccess: string
+  editError: string
+  startLabel: string
+  endLabel: string
+  reasonLabel: string
+  optionalHint: string
+  cancelButton: string
+  overlapError: string
+  invalidRange: string
+  missingRange: string
+  insufficientDays: string
+  pastDate: string
+  outsideContract: string
+  requestedDays: string
+  currentRemaining: string
+  afterRequest: string
+  excludedDays: string
+  weekendDays: string
+  holidays: string
+  holiday: string
+  day: string
+  days: string
+  holidayLegend: string
+}
+
+export type EditLeaveUserContext = {
+  remainingDays: number
+  arrivalDate: string | null
+  departureDate: string | null
+  locale: 'fr' | 'en'
+  frenchHolidays: Record<string, string>
+}
+
+type EditLeaveDialogProps = {
+  entry: EditLeaveEntry | null
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  translations: EditLeaveDialogTranslations
+  userContext: EditLeaveUserContext
+}
+
+const editFormSchema = z.object({
   startDate: z.string().min(1, 'start'),
   endDate: z.string().min(1, 'end'),
   reason: z.string().max(500).optional(),
 })
 
-type FormValues = z.infer<typeof formSchema>
+type EditFormValues = z.infer<typeof editFormSchema>
 
-export function RequestLeaveDialog({
+export function EditLeaveDialog({
+  entry,
+  open,
+  onOpenChange,
   translations,
-  defaultMonthIso,
   userContext,
-}: RequestLeaveDialogProps) {
-  const [open, setOpen] = useState(false)
-
-  const defaultMonth = useMemo(() => {
-    const parsed = new Date(defaultMonthIso)
-    return Number.isNaN(parsed.valueOf()) ? new Date() : parsed
-  }, [defaultMonthIso])
+}: EditLeaveDialogProps) {
+  const [editSelectedRange, setEditSelectedRange] = useState<DateRange | undefined>(undefined)
 
   const dateLocale = userContext.locale === 'fr' ? fr : enUS
 
@@ -96,8 +116,8 @@ export function RequestLeaveDialog({
     return { arrival, departure }
   }, [userContext.arrivalDate, userContext.departureDate])
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const editForm = useForm<EditFormValues>({
+    resolver: zodResolver(editFormSchema),
     defaultValues: {
       startDate: '',
       endDate: '',
@@ -105,9 +125,7 @@ export function RequestLeaveDialog({
     },
   })
 
-  const [selectedRange, setSelectedRange] = useState<DateRange | undefined>(undefined)
-
-  const { execute, isExecuting } = useAction(requestLeaveAction, {
+  const { execute: executeUpdate, isExecuting: isUpdating } = useAction(updateLeaveAction, {
     onError: ({ error }) => {
       if (error.serverError === 'leaveOverlap') {
         toast.error(translations.overlapError)
@@ -137,50 +155,53 @@ export function RequestLeaveDialog({
         return
       }
 
-      toast.error(error.serverError ?? translations.invalidRange)
+      toast.error(error.serverError ?? translations.editError)
     },
     onSuccess: ({ data }) => {
       if (data?.success) {
-        toast.success(translations.success)
-        form.reset()
-        setSelectedRange(undefined)
-        setOpen(false)
+        toast.success(translations.editSuccess)
+        editForm.reset()
+        setEditSelectedRange(undefined)
+        onOpenChange(false)
       }
     },
   })
 
-  const leaveCalculation = useMemo(() => {
-    if (!selectedRange?.from || !selectedRange?.to) {
+  const editLeaveCalculation = useMemo(() => {
+    if (!editSelectedRange?.from || !editSelectedRange?.to) {
       return null
     }
 
     const workingDays = countWorkingDays(
-      selectedRange.from,
-      selectedRange.to,
+      editSelectedRange.from,
+      editSelectedRange.to,
       userContext.frenchHolidays
     )
     const excludedInfo = getExcludedDaysInfo(
-      selectedRange.from,
-      selectedRange.to,
+      editSelectedRange.from,
+      editSelectedRange.to,
       userContext.frenchHolidays
     )
-    const remainingAfter = userContext.remainingDays - workingDays
+
+    const originalDayCount = entry?.dayCount ?? 0
+    const adjustedRemaining = userContext.remainingDays + originalDayCount
+    const remainingAfter = adjustedRemaining - workingDays
 
     return {
       requestedDays: workingDays,
-      currentRemaining: userContext.remainingDays,
+      currentRemaining: adjustedRemaining,
       remainingAfter,
       weekendsExcluded: excludedInfo.weekends,
       holidaysExcluded: excludedInfo.holidays,
       isNegative: remainingAfter < 0,
     }
-  }, [selectedRange, userContext.remainingDays, userContext.frenchHolidays])
+  }, [editSelectedRange, userContext.remainingDays, userContext.frenchHolidays, entry?.dayCount])
 
-  const contractValidation = useMemo(() => {
-    if (!selectedRange?.from) return null
+  const editContractValidation = useMemo(() => {
+    if (!editSelectedRange?.from) return null
 
-    const start = selectedRange.from
-    const end = selectedRange.to ?? selectedRange.from
+    const start = editSelectedRange.from
+    const end = editSelectedRange.to ?? editSelectedRange.from
 
     if (contractDates.arrival && start < startOfDay(contractDates.arrival)) {
       return {
@@ -197,38 +218,12 @@ export function RequestLeaveDialog({
     }
 
     return { isValid: true, message: null }
-  }, [selectedRange, contractDates, translations.outsideContract])
+  }, [editSelectedRange, contractDates, translations.outsideContract])
 
   const holidayDates = useMemo(() => {
     const currentYear = getYear(new Date())
     return getHolidayDatesForCalendar(userContext.frenchHolidays, currentYear - 1, currentYear + 2)
   }, [userContext.frenchHolidays])
-
-  const handleSubmit = async (values: FormValues) => {
-    if (!values.startDate || !values.endDate) {
-      toast.error(translations.missingRange)
-      return
-    }
-
-    const start = new Date(values.startDate)
-    const end = new Date(values.endDate)
-
-    if (start > end) {
-      toast.error(translations.invalidRange)
-      return
-    }
-
-    if (contractValidation && !contractValidation.isValid) {
-      toast.error(translations.outsideContract)
-      return
-    }
-
-    await execute({
-      startDate: values.startDate,
-      endDate: values.endDate,
-      reason: values.reason?.trim() ? values.reason.trim() : undefined,
-    })
-  }
 
   const minSelectable = useMemo(() => {
     const today = startOfDay(new Date())
@@ -250,30 +245,81 @@ export function RequestLeaveDialog({
     return matchers
   }, [minSelectable, maxSelectable])
 
+  const handleCloseEditDialog = () => {
+    editForm.reset()
+    setEditSelectedRange(undefined)
+    onOpenChange(false)
+  }
+
+  const handleEditSubmit = async (values: EditFormValues) => {
+    if (!entry) return
+
+    if (!values.startDate || !values.endDate) {
+      toast.error(translations.missingRange)
+      return
+    }
+
+    const start = new Date(values.startDate)
+    const end = new Date(values.endDate)
+
+    if (start > end) {
+      toast.error(translations.invalidRange)
+      return
+    }
+
+    if (editContractValidation && !editContractValidation.isValid) {
+      toast.error(translations.outsideContract)
+      return
+    }
+
+    await executeUpdate({
+      requestId: entry.id,
+      startDate: values.startDate,
+      endDate: values.endDate,
+      reason: values.reason?.trim() ? values.reason.trim() : undefined,
+    })
+  }
+
+  const handleOpenChange = (isOpen: boolean) => {
+    if (isOpen && entry) {
+      const startDate = new Date(entry.startDate)
+      const endDate = new Date(entry.endDate)
+      setEditSelectedRange({ from: startDate, to: endDate })
+      editForm.reset({
+        startDate: startOfDay(startDate).toISOString(),
+        endDate: startOfDay(endDate).toISOString(),
+        reason: entry.reason ?? '',
+      })
+    }
+    if (!isOpen) {
+      handleCloseEditDialog()
+    }
+    onOpenChange(isOpen)
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>{translations.trigger}</Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className='sm:max-w-5xl max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
-          <DialogTitle>{translations.title}</DialogTitle>
-          <DialogDescription>{translations.description}</DialogDescription>
+          <DialogTitle>{translations.editTitle}</DialogTitle>
+          <DialogDescription>{translations.editDescription}</DialogDescription>
         </DialogHeader>
-        <form className='grid gap-6' onSubmit={form.handleSubmit(handleSubmit)}>
+        <form className='grid gap-6' onSubmit={editForm.handleSubmit(handleEditSubmit)}>
           <div className='grid gap-3 md:grid-cols-2'>
             <div className='space-y-2'>
               <Label>{translations.startLabel}</Label>
               <div className='rounded-md border bg-muted/30 p-2 text-sm'>
-                {selectedRange?.from
-                  ? format(selectedRange.from, 'PPP', { locale: dateLocale })
+                {editSelectedRange?.from
+                  ? format(editSelectedRange.from, 'PPP', { locale: dateLocale })
                   : '—'}
               </div>
             </div>
             <div className='space-y-2'>
               <Label>{translations.endLabel}</Label>
               <div className='rounded-md border bg-muted/30 p-2 text-sm'>
-                {selectedRange?.to ? format(selectedRange.to, 'PPP', { locale: dateLocale }) : '—'}
+                {editSelectedRange?.to
+                  ? format(editSelectedRange.to, 'PPP', { locale: dateLocale })
+                  : '—'}
               </div>
             </div>
           </div>
@@ -281,14 +327,14 @@ export function RequestLeaveDialog({
           <DayPicker
             mode='range'
             numberOfMonths={2}
-            defaultMonth={defaultMonth}
-            selected={selectedRange}
+            defaultMonth={entry ? new Date(entry.startDate) : new Date()}
+            selected={editSelectedRange}
             onSelect={(range) => {
-              setSelectedRange(range)
+              setEditSelectedRange(range)
               const startIso = getIso(range?.from)
               const endIso = getIso(range?.to ?? range?.from)
-              form.setValue('startDate', startIso ?? '')
-              form.setValue('endDate', endIso ?? '')
+              editForm.setValue('startDate', startIso ?? '')
+              editForm.setValue('endDate', endIso ?? '')
             }}
             locale={dateLocale}
             weekStartsOn={1}
@@ -346,7 +392,7 @@ export function RequestLeaveDialog({
             {translations.holidayLegend}
           </div>
 
-          {leaveCalculation && (
+          {editLeaveCalculation && (
             <div className='space-y-3'>
               <div className='grid grid-cols-3 gap-3'>
                 <div className='rounded-lg border bg-card p-3 text-center'>
@@ -354,10 +400,14 @@ export function RequestLeaveDialog({
                     {translations.requestedDays}
                   </div>
                   <div className='text-2xl font-semibold text-primary'>
-                    {leaveCalculation.requestedDays}
+                    {editLeaveCalculation.requestedDays}
                   </div>
                   <div className='text-xs text-muted-foreground'>
-                    {pluralize(leaveCalculation.requestedDays, translations.day, translations.days)}
+                    {pluralize(
+                      editLeaveCalculation.requestedDays,
+                      translations.day,
+                      translations.days
+                    )}
                   </div>
                 </div>
                 <div className='rounded-lg border bg-card p-3 text-center'>
@@ -365,10 +415,14 @@ export function RequestLeaveDialog({
                     {translations.currentRemaining}
                   </div>
                   <div className='text-2xl font-semibold'>
-                    {leaveCalculation.currentRemaining}
+                    {editLeaveCalculation.currentRemaining}
                   </div>
                   <div className='text-xs text-muted-foreground'>
-                    {pluralize(leaveCalculation.currentRemaining, translations.day, translations.days)}
+                    {pluralize(
+                      editLeaveCalculation.currentRemaining,
+                      translations.day,
+                      translations.days
+                    )}
                   </div>
                 </div>
                 <div className='rounded-lg border bg-card p-3 text-center'>
@@ -377,31 +431,35 @@ export function RequestLeaveDialog({
                   </div>
                   <div
                     className={`text-2xl font-semibold ${
-                      leaveCalculation.isNegative ? 'text-destructive' : 'text-green-600'
+                      editLeaveCalculation.isNegative ? 'text-destructive' : 'text-green-600'
                     }`}
                   >
-                    {leaveCalculation.remainingAfter}
+                    {editLeaveCalculation.remainingAfter}
                   </div>
                   <div className='text-xs text-muted-foreground'>
-                    {pluralize(Math.abs(leaveCalculation.remainingAfter), translations.day, translations.days)}
+                    {pluralize(
+                      Math.abs(editLeaveCalculation.remainingAfter),
+                      translations.day,
+                      translations.days
+                    )}
                   </div>
                 </div>
               </div>
 
-              {(leaveCalculation.weekendsExcluded > 0 ||
-                leaveCalculation.holidaysExcluded.length > 0) && (
+              {(editLeaveCalculation.weekendsExcluded > 0 ||
+                editLeaveCalculation.holidaysExcluded.length > 0) && (
                 <div className='rounded-lg border bg-muted/30 p-3'>
                   <div className='flex items-center gap-2 text-sm text-muted-foreground mb-2'>
                     <Info className='h-4 w-4' />
                     {translations.excludedDays}
                   </div>
                   <div className='flex flex-wrap gap-2'>
-                    {leaveCalculation.weekendsExcluded > 0 && (
+                    {editLeaveCalculation.weekendsExcluded > 0 && (
                       <Badge variant='secondary'>
-                        {leaveCalculation.weekendsExcluded} {translations.weekendDays}
+                        {editLeaveCalculation.weekendsExcluded} {translations.weekendDays}
                       </Badge>
                     )}
-                    {leaveCalculation.holidaysExcluded.map((holiday) => (
+                    {editLeaveCalculation.holidaysExcluded.map((holiday) => (
                       <Badge
                         key={holiday.date.toISOString()}
                         variant='outline'
@@ -415,7 +473,7 @@ export function RequestLeaveDialog({
                 </div>
               )}
 
-              {leaveCalculation.isNegative && (
+              {editLeaveCalculation.isNegative && (
                 <Alert variant='destructive'>
                   <AlertCircle className='h-4 w-4' />
                   <AlertDescription>{translations.insufficientDays}</AlertDescription>
@@ -424,45 +482,37 @@ export function RequestLeaveDialog({
             </div>
           )}
 
-          {contractValidation && !contractValidation.isValid && (
+          {editContractValidation && !editContractValidation.isValid && (
             <Alert variant='destructive'>
               <AlertCircle className='h-4 w-4' />
-              <AlertDescription>{contractValidation.message}</AlertDescription>
+              <AlertDescription>{editContractValidation.message}</AlertDescription>
             </Alert>
           )}
 
           <div className='space-y-2'>
-            <Label htmlFor='reason'>{translations.reasonLabel}</Label>
+            <Label htmlFor='edit-reason'>{translations.reasonLabel}</Label>
             <Textarea
-              id='reason'
+              id='edit-reason'
               placeholder={translations.optionalHint}
               maxLength={500}
-              disabled={isExecuting}
-              {...form.register('reason')}
+              disabled={isUpdating}
+              {...editForm.register('reason')}
             />
           </div>
 
           <DialogFooter className='flex flex-col gap-2 sm:flex-row sm:justify-end'>
-            <Button
-              type='button'
-              variant='outline'
-              onClick={() => {
-                form.reset()
-                setSelectedRange(undefined)
-                setOpen(false)
-              }}
-            >
-              {translations.cancel}
+            <Button type='button' variant='outline' onClick={handleCloseEditDialog}>
+              {translations.cancelButton}
             </Button>
             <Button
               type='submit'
               disabled={
-                isExecuting ||
-                Boolean(leaveCalculation?.isNegative) ||
-                Boolean(contractValidation && !contractValidation.isValid)
+                isUpdating ||
+                Boolean(editLeaveCalculation?.isNegative) ||
+                Boolean(editContractValidation && !editContractValidation.isValid)
               }
             >
-              {translations.submit}
+              {translations.editSubmit}
             </Button>
           </DialogFooter>
         </form>
