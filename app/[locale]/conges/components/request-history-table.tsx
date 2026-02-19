@@ -34,6 +34,7 @@ import {
 import { Pencil, Trash2 } from 'lucide-react'
 import { cancelLeaveAction } from '../actions'
 import type { LeaveHistoryEntry } from '@/lib/services/conges'
+import { pluralize } from './day-picker-shared'
 import {
   EditLeaveDialog,
   type EditLeaveEntry,
@@ -59,7 +60,6 @@ type RequestHistoryTableProps = {
       REJECTED: string
       CANCELLED: string
     }
-    dayCount: string
     empty: string
     edit: string
     cancel: string
@@ -127,7 +127,7 @@ export function RequestHistoryTable({
         </TableHeader>
         <TableBody>
           {history.map((entry) => {
-            const dayCountLabel = translations.dayCount.replace('{count}', String(entry.dayCount))
+            const dayCountLabel = `${entry.dayCount} ${pluralize(entry.dayCount, translations.day, translations.days)}`
             const isPending = entry.status === 'PENDING'
 
             return (

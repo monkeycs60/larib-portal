@@ -131,7 +131,6 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
       actions: t('history.actions'),
     },
     status: statusLabels,
-    dayCount: t.raw('history.dayCount') as string,
     empty: t('history.empty'),
     edit: t('history.edit'),
     cancel: t('history.cancel'),
