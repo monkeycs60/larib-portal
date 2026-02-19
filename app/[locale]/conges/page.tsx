@@ -11,8 +11,8 @@ import {
 } from '@/lib/services/conges'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { RequestLeaveDialog } from './components/request-leave-dialog'
+import { RequestHistoryTable } from './components/request-history-table'
 import { LeaveCalendar } from './components/leave-calendar'
 import { PendingRequestsSection } from './components/pending-requests-section'
 import { TeamLeaveOverviewSection } from './components/team-leave-overview-section'
@@ -119,6 +119,54 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
     REJECTED: t('history.status.rejected'),
     CANCELLED: t('history.status.cancelled'),
   } as const
+
+  const historyTranslations = {
+    columns: {
+      period: t('history.columns.period'),
+      days: t('history.columns.days'),
+      status: t('history.columns.status'),
+      reason: t('history.columns.reason'),
+      decision: t('history.columns.decision'),
+      actions: t('history.actions'),
+    },
+    status: statusLabels,
+    dayCount: t.raw('history.dayCount') as string,
+    empty: t('history.empty'),
+    edit: t('history.edit'),
+    cancel: t('history.cancel'),
+    cancelConfirmTitle: t('history.cancelConfirmTitle'),
+    cancelConfirmDescription: t('history.cancelConfirmDescription'),
+    cancelConfirm: t('history.cancelConfirm'),
+    cancelCancel: t('history.cancelCancel'),
+    cancelSuccess: t('history.cancelSuccess'),
+    cancelError: t('history.cancelError'),
+    editTitle: t('history.editTitle'),
+    editDescription: t('history.editDescription'),
+    editSubmit: t('history.editSubmit'),
+    editSuccess: t('history.editSuccess'),
+    editError: t('history.editError'),
+    startLabel: t('request.start'),
+    endLabel: t('request.end'),
+    reasonLabel: t('request.reason'),
+    optionalHint: t('request.optional'),
+    cancelButton: t('request.cancel'),
+    overlapError: t('errors.overlap'),
+    invalidRange: t('errors.invalidRange'),
+    missingRange: t('errors.missingRange'),
+    insufficientDays: t('errors.insufficientDays'),
+    pastDate: t('errors.pastDate'),
+    outsideContract: t('errors.outsideContract'),
+    requestedDays: t('request.requestedDays'),
+    currentRemaining: t('request.currentRemaining'),
+    afterRequest: t('request.afterRequest'),
+    excludedDays: t('request.excludedDays'),
+    weekendDays: t('request.weekendDays'),
+    holidays: t('request.holidays'),
+    holiday: t('request.holiday'),
+    day: t('request.day'),
+    days: t('request.days'),
+    holidayLegend: t('request.holidayLegend'),
+  }
 
   const pendingRequestsData = adminDashboard
     ? {
@@ -321,52 +369,12 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
           <CardTitle>{t('history.title')}</CardTitle>
         </CardHeader>
         <CardContent>
-          {userDashboard.history.length === 0 ? (
-            <p className='text-sm text-muted-foreground'>{t('history.empty')}</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('history.columns.period')}</TableHead>
-                  <TableHead>{t('history.columns.days')}</TableHead>
-                  <TableHead>{t('history.columns.status')}</TableHead>
-                  <TableHead>{t('history.columns.reason')}</TableHead>
-                  <TableHead>{t('history.columns.decision')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {userDashboard.history.map((entry) => {
-                  const dayCountLabel = t('history.dayCount', { count: entry.dayCount })
-                  return (
-                    <TableRow key={entry.id}>
-                      <TableCell>
-                        <div className='font-medium'>
-                          {new Date(entry.startDate).toLocaleDateString()} – {new Date(entry.endDate).toLocaleDateString()}
-                        </div>
-                      </TableCell>
-                      <TableCell>{dayCountLabel}</TableCell>
-                      <TableCell>
-                        <Badge variant={statusBadgeVariant[entry.status]}>{statusLabels[entry.status]}</Badge>
-                      </TableCell>
-                      <TableCell>{entry.reason ?? '—'}</TableCell>
-                      <TableCell>
-                        {entry.decisionAt ? (
-                          <div className='flex flex-col text-sm'>
-                            <span>{new Date(entry.decisionAt).toLocaleDateString()}</span>
-                            {entry.approverName ? (
-                              <span className='text-xs text-muted-foreground'>{entry.approverName}</span>
-                            ) : null}
-                          </div>
-                        ) : (
-                          <span className='text-sm text-muted-foreground'>—</span>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
-          )}
+          <RequestHistoryTable
+            history={userDashboard.history}
+            translations={historyTranslations}
+            statusBadgeVariant={statusBadgeVariant}
+            userContext={userLeaveContext}
+          />
         </CardContent>
       </Card>
     </section>
