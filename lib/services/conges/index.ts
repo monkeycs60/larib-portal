@@ -599,3 +599,111 @@ export async function updateLeaveStatus(data: {
     },
   })
 }
+
+export async function cancelLeaveRequest(
+  requestId: string,
+  userId: string
+): Promise<void> {
+  const request = await prisma.leaveRequest.findUniqueOrThrow({
+    where: { id: requestId },
+    select: { userId: true, status: true },
+  })
+
+  if (request.userId !== userId) {
+    throw new Error('forbidden')
+  }
+
+  if (request.status !== 'PENDING') {
+    throw new Error('notPending')
+  }
+
+  await prisma.leaveRequest.update({
+    where: { id: requestId },
+    data: { status: 'CANCELLED' },
+  })
+}
+
+export async function updateLeaveRequest(
+  input: {
+    requestId: string
+    userId: string
+    startDate: Date
+    endDate: Date
+    reason?: string | null
+  },
+  frenchHolidays: Record<string, string>
+): Promise<void> {
+  const request = await prisma.leaveRequest.findUniqueOrThrow({
+    where: { id: input.requestId },
+    select: { userId: true, status: true },
+  })
+
+  if (request.userId !== input.userId) {
+    throw new Error('forbidden')
+  }
+
+  if (request.status !== 'PENDING') {
+    throw new Error('notPending')
+  }
+
+  const { start, end } = normaliseRange(input.startDate, input.endDate)
+
+  const today = startOfDay(new Date())
+  if (start < today) {
+    throw new Error('pastDate')
+  }
+
+  const existingRequests = await prisma.leaveRequest.findMany({
+    where: {
+      userId: input.userId,
+      status: { in: ['PENDING', 'APPROVED'] },
+      id: { not: input.requestId },
+    },
+    select: {
+      startDate: true,
+      endDate: true,
+      status: true,
+    },
+  })
+
+  const overlapping = existingRequests.some((existing) => {
+    const existingStart = startOfDay(existing.startDate)
+    const existingEnd = endOfDay(existing.endDate)
+    return existingStart <= end && existingEnd >= start
+  })
+
+  if (overlapping) {
+    throw new Error('leaveOverlap')
+  }
+
+  const requestedDays = countWorkingDays(start, end, frenchHolidays)
+
+  const approvedDays = existingRequests
+    .filter((existing) => existing.status === 'APPROVED')
+    .reduce((total, existing) => total + countWorkingDays(existing.startDate, existing.endDate, frenchHolidays), 0)
+
+  const pendingDays = existingRequests
+    .filter((existing) => existing.status === 'PENDING')
+    .reduce((total, existing) => total + countWorkingDays(existing.startDate, existing.endDate, frenchHolidays), 0)
+
+  const user = await prisma.user.findUniqueOrThrow({
+    where: { id: input.userId },
+    select: { congesTotalDays: true },
+  })
+
+  const totalAllocationDays = user.congesTotalDays ?? 0
+  const availableAfterPending = Math.max(totalAllocationDays - approvedDays - pendingDays, 0)
+
+  if (requestedDays > availableAfterPending) {
+    throw new Error('insufficientDays')
+  }
+
+  await prisma.leaveRequest.update({
+    where: { id: input.requestId },
+    data: {
+      startDate: start,
+      endDate: end,
+      reason: input.reason?.trim() || null,
+    },
+  })
+}
