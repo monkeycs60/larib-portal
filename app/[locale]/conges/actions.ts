@@ -5,6 +5,8 @@ import {
   createLeaveRequest,
   updateLeaveAllocation,
   updateLeaveStatus,
+  cancelLeaveRequest,
+  updateLeaveRequest,
   fetchFrenchHolidays,
 } from '@/lib/services/conges'
 import { revalidatePath } from 'next/cache'
@@ -84,5 +86,47 @@ export const updateLeaveAllocationAction = adminOnlyAction
 
     await revalidateConges()
 
+    return { success: true }
+  })
+
+const cancelLeaveSchema = z.object({
+  requestId: z.string().min(1),
+})
+
+export const cancelLeaveAction = authenticatedAction
+  .inputSchema(cancelLeaveSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    await cancelLeaveRequest(parsedInput.requestId, ctx.userId)
+    await revalidateConges()
+    return { success: true }
+  })
+
+const updateLeaveSchema = z
+  .object({
+    requestId: z.string().min(1),
+    startDate: z.string().min(1),
+    endDate: z.string().min(1),
+    reason: z.string().max(500).optional().nullable(),
+  })
+  .refine((value) => new Date(value.startDate) <= new Date(value.endDate), {
+    message: 'invalidRange',
+    path: ['endDate'],
+  })
+
+export const updateLeaveAction = authenticatedAction
+  .inputSchema(updateLeaveSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const frenchHolidays = await fetchFrenchHolidays()
+    await updateLeaveRequest(
+      {
+        requestId: parsedInput.requestId,
+        userId: ctx.userId,
+        startDate: new Date(parsedInput.startDate),
+        endDate: new Date(parsedInput.endDate),
+        reason: parsedInput.reason ?? null,
+      },
+      frenchHolidays
+    )
+    await revalidateConges()
     return { success: true }
   })
