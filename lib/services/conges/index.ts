@@ -491,6 +491,14 @@ export async function getAdminLeaveDashboard(
   }
 }
 
+export async function getAdminEmails(): Promise<string[]> {
+  const admins = await prisma.user.findMany({
+    where: { role: 'ADMIN' },
+    select: { email: true },
+  })
+  return admins.map((admin) => admin.email)
+}
+
 export async function createLeaveRequest(
   input: {
     userId: string

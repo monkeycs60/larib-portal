@@ -129,3 +129,146 @@ export async function sendResetPasswordEmail(params: ResetPasswordEmailParams): 
   return { id: json.id ?? '' }
 }
 
+type LeaveNotificationEventType = 'created' | 'edited' | 'cancelled'
+
+type LeaveNotificationParams = {
+  adminEmails: string[]
+  userEmail: string
+  locale: 'en' | 'fr'
+  eventType: LeaveNotificationEventType
+  userName: string
+  startDate: string
+  endDate: string
+  dayCount: number
+  remainingDays: number
+  reason: string | null
+}
+
+function renderLeaveNotificationEmail({
+  locale,
+  eventType,
+  userName,
+  startDate,
+  endDate,
+  dayCount,
+  remainingDays,
+  reason,
+}: LeaveNotificationParams) {
+  const subjects: Record<LeaveNotificationEventType, Record<'fr' | 'en', string>> = {
+    created: {
+      fr: `Nouvelle demande de congés - ${userName}`,
+      en: `New leave request - ${userName}`,
+    },
+    edited: {
+      fr: `Demande de congés modifiée - ${userName}`,
+      en: `Leave request updated - ${userName}`,
+    },
+    cancelled: {
+      fr: `Demande de congés annulée - ${userName}`,
+      en: `Leave request cancelled - ${userName}`,
+    },
+  }
+
+  const actions: Record<LeaveNotificationEventType, Record<'fr' | 'en', string>> = {
+    created: {
+      fr: 'a soumis une demande de congés',
+      en: 'submitted a leave request',
+    },
+    edited: {
+      fr: 'a modifié sa demande de congés',
+      en: 'updated their leave request',
+    },
+    cancelled: {
+      fr: 'a annulé sa demande de congés',
+      en: 'cancelled their leave request',
+    },
+  }
+
+  const subject = subjects[eventType][locale]
+  const action = actions[eventType][locale]
+
+  const daysLabel = locale === 'fr'
+    ? (dayCount > 1 ? 'jours ouvrés' : 'jour ouvré')
+    : (dayCount > 1 ? 'working days' : 'working day')
+  const remainingLabel = locale === 'fr'
+    ? (remainingDays > 1 ? 'jours restants' : 'jour restant')
+    : (remainingDays > 1 ? 'days remaining' : 'day remaining')
+  const dateRange = `${startDate} → ${endDate}`
+  const balanceLine = locale === 'fr'
+    ? `Solde restant : ${remainingDays} ${remainingLabel}`
+    : `Remaining balance: ${remainingDays} ${remainingLabel}`
+  const reasonLine = reason
+    ? (locale === 'fr' ? `Raison : ${reason}` : `Reason: ${reason}`)
+    : null
+  const ctaLine = locale === 'fr'
+    ? 'Connectez-vous au portail pour consulter cette demande.'
+    : 'Log in to the portal to review this request.'
+
+  const textParts = [
+    `${userName} ${action}`,
+    `${dateRange} (${dayCount} ${daysLabel})`,
+    balanceLine,
+    ...(reasonLine ? [reasonLine] : []),
+    '',
+    ctaLine,
+  ]
+  const text = textParts.join('\n')
+
+  const html = `
+    <div style="font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <p><strong>${userName}</strong> ${action}</p>
+      <table style="border-collapse: collapse; margin: 16px 0;">
+        <tr>
+          <td style="padding: 6px 16px 6px 0; color: #666;">${locale === 'fr' ? 'Dates' : 'Dates'}</td>
+          <td style="padding: 6px 0;">${dateRange}</td>
+        </tr>
+        <tr>
+          <td style="padding: 6px 16px 6px 0; color: #666;">${locale === 'fr' ? 'Durée' : 'Duration'}</td>
+          <td style="padding: 6px 0;">${dayCount} ${daysLabel}</td>
+        </tr>
+        <tr>
+          <td style="padding: 6px 16px 6px 0; color: #666;">${locale === 'fr' ? 'Solde restant' : 'Remaining balance'}</td>
+          <td style="padding: 6px 0;">${remainingDays} ${remainingLabel}</td>
+        </tr>
+        ${reasonLine ? `
+        <tr>
+          <td style="padding: 6px 16px 6px 0; color: #666;">${locale === 'fr' ? 'Raison' : 'Reason'}</td>
+          <td style="padding: 6px 0;">${reason}</td>
+        </tr>` : ''}
+      </table>
+      <p style="color: #666; font-size: 14px;">${ctaLine}</p>
+    </div>
+  `
+
+  return { subject, text, html }
+}
+
+export async function sendLeaveNotificationEmail(
+  params: LeaveNotificationParams
+): Promise<{ id: string } | { error: string }> {
+  const { subject, text, html } = renderLeaveNotificationEmail(params)
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) return { error: 'RESEND_API_KEY missing' }
+  const from = process.env.RESEND_FROM || 'noreply@your-domain.com'
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from,
+      to: params.adminEmails,
+      cc: [params.userEmail],
+      subject,
+      text,
+      html,
+    }),
+  })
+  if (!res.ok) {
+    return { error: `RESEND_REQUEST_FAILED_${res.status}` }
+  }
+  const json = await res.json() as { id?: string }
+  return { id: json.id ?? '' }
+}
+
