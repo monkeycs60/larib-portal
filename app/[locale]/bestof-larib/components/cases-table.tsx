@@ -13,6 +13,8 @@ import CaseDifficultyCell from './case-difficulty-cell';
 import StartNewAttemptLink from './start-new-attempt-link';
 import SortHeader from './sort-header';
 import CasesTableCacheHydrator from './cases-table-cache-hydrator';
+import { DicomCheckbox, DicomIndicator, DicomBulkChecker } from './dicom-cases-table-wrapper';
+import DicomAdminBadge from './dicom-admin-badge';
 import type {
   ClinicalCaseWithDisplayTags,
   CaseListSortField,
@@ -97,9 +99,16 @@ export default async function CasesTable({
     <div className='relative rounded-md border'>
       <TableOverlay />
       <CasesTableCacheHydrator cacheKey={cacheKey} cacheKeyString={cacheKeyString} cases={cases} />
+      <DicomBulkChecker caseIds={cases.map((caseItem) => caseItem.id)} />
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead className='w-10'>
+              <span className='sr-only'>DICOM</span>
+            </TableHead>
+            <TableHead className='w-10'>
+              <span className='text-xs text-muted-foreground'>DICOM</span>
+            </TableHead>
             <TableHead>
               <SortHeader field='status' label={translations.table.status} activeField={sortField} direction={sortDirection} />
             </TableHead>
@@ -156,7 +165,7 @@ export default async function CasesTable({
             <TableRow>
               <TableCell
                 colSpan={
-                  6 + (isAdmin ? 2 : 0) + (isUserView ? 2 : 0) + 2
+                  8 + (isAdmin ? 2 : 0) + (isUserView ? 2 : 0) + 2
                 }
                 className='text-center text-sm text-muted-foreground'
               >
@@ -177,8 +186,19 @@ export default async function CasesTable({
 
               return (
                 <TableRow key={caseItem.id}>
+                  <TableCell className='w-10'>
+                    <DicomCheckbox caseId={caseItem.id} />
+                  </TableCell>
+                  <TableCell className='w-10'>
+                    <DicomIndicator caseId={caseItem.id} />
+                  </TableCell>
                   <TableCell>{statusBadge}</TableCell>
-                  <TableCell className='font-medium'>{caseItem.name}</TableCell>
+                  <TableCell className='font-medium'>
+                    <div className='flex items-center gap-2'>
+                      {caseItem.name}
+                      {isAdmin ? <DicomAdminBadge caseId={caseItem.id} /> : null}
+                    </div>
+                  </TableCell>
                   <TableCell>{caseItem.examType?.name ?? '-'}</TableCell>
                   {isAdmin ? (
                     <TableCell>
@@ -266,6 +286,7 @@ export default async function CasesTable({
                               adminTags={adminTags}
                               clinicalCase={{
                                 id: caseItem.id,
+                                caseNumber: caseItem.caseNumber,
                                 name: caseItem.name,
                                 difficulty: caseItem.difficulty,
                                 status: caseItem.status,

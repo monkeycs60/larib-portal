@@ -111,6 +111,7 @@ model ClinicalCase {
   difficulty DifficultyLevel
   status     CaseStatus      @default(DRAFT)
   tags       String[]        @default([])
+  caseNumber Int             @unique @default(autoincrement())
 
   // Content: either pdf or text or both (validated at app level)
   pdfUrl      String?

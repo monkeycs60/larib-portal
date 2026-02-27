@@ -147,6 +147,26 @@
   body {
     @apply bg-background text-foreground;
   }
+  button,
+  a,
+  [role="button"],
+  [role="link"],
+  [role="checkbox"],
+  [role="radio"],
+  [role="switch"],
+  [role="tab"],
+  [role="menuitem"],
+  [role="option"],
+  label[for],
+  select,
+  summary,
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="submit"],
+  input[type="button"],
+  input[type="reset"] {
+    cursor: pointer;
+  }
 
   ::placeholder {
     color: oklch(0.70 0.01 250);

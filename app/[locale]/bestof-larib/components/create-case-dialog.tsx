@@ -58,6 +58,7 @@ type AdminTag = { id: string; name: string; color: string; description: string |
 
 type ClinicalCase = {
   id: string;
+  caseNumber: number;
   name: string;
   difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
   status: 'DRAFT' | 'PUBLISHED';
@@ -530,6 +531,17 @@ export default function CreateCaseDialog({
                 </DialogTitle>
             </DialogHeader>
 				<form className='space-y-4' onSubmit={onSubmit}>
+					{clinicalCase ? (
+						<div className='bg-muted rounded p-3 text-sm'>
+							<div className='font-medium'>{t('dicom.caseNumber')}: {String(clinicalCase.caseNumber).padStart(4, '0')}</div>
+							{clinicalCase.examType ? (
+								<div className='text-muted-foreground mt-1'>
+									{t('dicom.ftpPath', { path: `bestof/${clinicalCase.examType.name}/${String(clinicalCase.caseNumber).padStart(4, '0')}/` })}
+								</div>
+							) : null}
+						</div>
+					) : null}
+
 					<section className='space-y-3'>
 						<div className='grid md:grid-cols-2 gap-3'>
 							<div>

@@ -580,6 +580,23 @@
 				"previous": "Previous",
 				"next": "Next"
 			}
+		},
+		"dicom": {
+			"download": "Download DICOMs",
+			"downloadBatch": "Download DICOMs ({count} cases)",
+			"downloading": "Downloading...",
+			"noDicoms": "No DICOMs available",
+			"selectAll": "Select all",
+			"deselectAll": "Deselect all",
+			"selected": "{count} selected",
+			"batchLimit": "Maximum 50 cases per download",
+			"estimatedSize": "Estimated size: {size}",
+			"available": "DICOMs available",
+			"notAvailable": "No DICOMs",
+			"fileCount": "{count} files",
+			"ftpPath": "Expected FTP path: {path}",
+			"caseNumber": "Case #",
+			"hint": "{count} cases with DICOMs available — check cases to download"
 		}
 	},
 	"conges": {

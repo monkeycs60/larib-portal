@@ -15,6 +15,7 @@ import { ChartBar } from 'lucide-react';
 import CreateCaseDialog from './components/create-case-dialog';
 import FiltersBar from './components/filters-bar';
 import CasesTable from './components/cases-table';
+import { DicomSelectionBar } from './components/dicom-cases-table-wrapper';
 import { type CasesTableTranslations } from './components/cases-table-fallback';
 import TagsManagerModal from './components/tags-manager-modal';
 import type { BestofCacheKey } from '@/lib/bestof-cache-key';
@@ -260,6 +261,8 @@ export default async function BestofLaribPage({
 				cacheKey={cacheKey}
 				cacheKeyString={cacheKeyString}
 			/>
+
+			<DicomSelectionBar />
 		</div>
 	);
 }

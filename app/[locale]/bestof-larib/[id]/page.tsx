@@ -8,6 +8,7 @@ import { getUserCaseState, listUserCaseAttempts } from '@/lib/services/bestof-la
 import { listUserTags, getCaseUserTagIds } from '@/lib/services/bestof-larib-tags';
 import BackButton from './components/back-button';
 import PdfViewer from './components/pdf-viewer';
+import DicomDownloadButton from './components/dicom-download-button';
 
 async function CaseViewPageContent({
 	params,
@@ -81,17 +82,20 @@ async function CaseViewPageContent({
                     {c.examType?.name ? (
                         <Badge variant='secondary'>{c.examType.name}</Badge>
                     ) : null}
-                    <Badge
-                        variant='outline'
-                        className={
-                            c.difficulty === 'BEGINNER'
-                                ? 'border-green-500 text-green-700'
-                                : c.difficulty === 'INTERMEDIATE'
-                                ? 'border-rose-500 text-rose-700'
-                                : 'border-red-500 text-red-700'
-                        }>
-                        {t(`difficulty.${difficultyLabel}`)}
-                    </Badge>
+                    {isAdmin ? (
+                        <Badge
+                            variant='outline'
+                            className={
+                                c.difficulty === 'BEGINNER'
+                                    ? 'border-green-500 text-green-700'
+                                    : c.difficulty === 'INTERMEDIATE'
+                                    ? 'border-rose-500 text-rose-700'
+                                    : 'border-red-500 text-red-700'
+                            }>
+                            {t(`difficulty.${difficultyLabel}`)}
+                        </Badge>
+                    ) : null}
+                    <DicomDownloadButton caseId={c.id} />
                 </div>
             </div>
 

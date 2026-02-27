@@ -43,6 +43,7 @@ const nextConfig: NextConfig = {
     typescript: {
         ignoreBuildErrors: true,
     },
+    serverExternalPackages: ['ssh2-sftp-client', 'ssh2'],
     compress: true,
     images: {
       remotePatterns,

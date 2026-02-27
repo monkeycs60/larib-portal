@@ -18,6 +18,7 @@ export const userCasesTag = (userId: string) => `${USER_CASES_TAG_PREFIX}:${user
 export type ClinicalCaseListItem = Prisma.ClinicalCaseGetPayload<{
   select: {
     id: true
+    caseNumber: true
     name: true
     difficulty: true
     status: true
@@ -36,6 +37,7 @@ const listClinicalCasesQuery = async (): Promise<ClinicalCaseListItem[]> =>
     orderBy: { createdAt: 'desc' },
     select: {
       id: true,
+      caseNumber: true,
       name: true,
       difficulty: true,
       status: true,
@@ -219,6 +221,7 @@ const fetchClinicalCases = async ({
     orderBy,
     select: {
       id: true,
+      caseNumber: true,
       name: true,
       difficulty: true,
       status: true,
@@ -264,6 +267,7 @@ const fetchClinicalCases = async ({
 
   let base: ClinicalCaseWithDisplayTags[] = rows.map((row) => ({
     id: row.id,
+    caseNumber: row.caseNumber,
     name: row.name,
     difficulty: row.difficulty,
     status: row.status,
@@ -557,6 +561,7 @@ export async function createClinicalCase(data: CreateClinicalCaseInput) {
     },
     select: {
       id: true,
+      caseNumber: true,
       name: true,
       status: true,
     },
@@ -608,6 +613,7 @@ const fetchCaseById = async (id: string) =>
     where: { id },
     select: {
       id: true,
+      caseNumber: true,
       name: true,
       difficulty: true,
       status: true,

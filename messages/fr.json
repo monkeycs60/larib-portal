@@ -578,6 +578,23 @@
 				"previous": "Précédent",
 				"next": "Suivant"
 			}
+		},
+		"dicom": {
+			"download": "Télécharger les DICOMs",
+			"downloadBatch": "Télécharger les DICOMs ({count} cas)",
+			"downloading": "Téléchargement...",
+			"noDicoms": "Aucun DICOM disponible",
+			"selectAll": "Tout sélectionner",
+			"deselectAll": "Tout désélectionner",
+			"selected": "{count} sélectionné(s)",
+			"batchLimit": "Maximum 50 cas par téléchargement",
+			"estimatedSize": "Taille estimée : {size}",
+			"available": "DICOMs disponibles",
+			"notAvailable": "Pas de DICOMs",
+			"fileCount": "{count} fichiers",
+			"ftpPath": "Chemin FTP attendu : {path}",
+			"caseNumber": "Cas n°",
+			"hint": "{count} cas avec DICOMs disponibles — cochez les cas pour télécharger"
 		}
 	},
 	"conges": {

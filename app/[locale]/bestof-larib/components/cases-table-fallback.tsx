@@ -305,6 +305,7 @@ export default function CasesTableFallback({
                               adminTags={adminTags}
                               clinicalCase={{
                                 id: caseItem.id,
+                                caseNumber: caseItem.caseNumber,
                                 name: caseItem.name,
                                 difficulty: caseItem.difficulty,
                                 status: caseItem.status,
