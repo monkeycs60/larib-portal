@@ -26,8 +26,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'batch_too_large', max: MAX_BATCH_SIZE }, { status: 400 })
   }
 
+  const isAdmin = session.user.role === 'ADMIN'
   const cases = await prisma.clinicalCase.findMany({
-    where: { id: { in: caseIds } },
+    where: { id: { in: caseIds }, ...(!isAdmin && { status: 'PUBLISHED' }) },
     select: { id: true, caseNumber: true, examType: { select: { name: true } } },
   })
 

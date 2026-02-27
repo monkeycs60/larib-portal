@@ -10,7 +10,9 @@ function getSftpConfig() {
     username: process.env.SFTP_USERNAME,
   }
 
-  if (process.env.SFTP_PRIVATE_KEY_PATH) {
+  if (process.env.SFTP_PRIVATE_KEY) {
+    config.privateKey = process.env.SFTP_PRIVATE_KEY
+  } else if (process.env.SFTP_PRIVATE_KEY_PATH) {
     config.privateKey = readFileSync(process.env.SFTP_PRIVATE_KEY_PATH)
   } else if (process.env.SFTP_PASSWORD) {
     config.password = process.env.SFTP_PASSWORD

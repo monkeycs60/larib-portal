@@ -18,8 +18,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'caseId_missing' }, { status: 400 })
   }
 
+  const isAdmin = session.user.role === 'ADMIN'
   const clinicalCase = await prisma.clinicalCase.findUnique({
-    where: { id: caseId },
+    where: { id: caseId, ...(!isAdmin && { status: 'PUBLISHED' }) },
     select: { caseNumber: true, name: true, examType: { select: { name: true } } },
   })
 
