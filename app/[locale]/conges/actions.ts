@@ -7,6 +7,8 @@ import {
   updateLeaveStatus,
   cancelLeaveRequest,
   updateLeaveRequest,
+  adminDeleteLeaveRequest,
+  adminUpdateLeaveRequest,
   fetchFrenchHolidays,
   countWorkingDays,
   getAdminEmails,
@@ -238,6 +240,47 @@ export const updateLeaveAction = authenticatedAction
       frenchHolidays,
     })
 
+    await revalidateConges()
+    return { success: true }
+  })
+
+const adminDeleteLeaveSchema = z.object({
+  requestId: z.string().min(1),
+})
+
+export const adminDeleteLeaveAction = adminOnlyAction
+  .inputSchema(adminDeleteLeaveSchema)
+  .action(async ({ parsedInput }) => {
+    await adminDeleteLeaveRequest(parsedInput.requestId)
+    await revalidateConges()
+    return { success: true }
+  })
+
+const adminUpdateLeaveSchema = z
+  .object({
+    requestId: z.string().min(1),
+    startDate: z.string().min(1),
+    endDate: z.string().min(1),
+    reason: z.string().max(500).optional().nullable(),
+  })
+  .refine((value) => new Date(value.startDate) <= new Date(value.endDate), {
+    message: 'invalidRange',
+    path: ['endDate'],
+  })
+
+export const adminUpdateLeaveAction = adminOnlyAction
+  .inputSchema(adminUpdateLeaveSchema)
+  .action(async ({ parsedInput }) => {
+    const frenchHolidays = await fetchFrenchHolidays()
+    await adminUpdateLeaveRequest(
+      {
+        requestId: parsedInput.requestId,
+        startDate: new Date(parsedInput.startDate),
+        endDate: new Date(parsedInput.endDate),
+        reason: parsedInput.reason ?? null,
+      },
+      frenchHolidays
+    )
     await revalidateConges()
     return { success: true }
   })

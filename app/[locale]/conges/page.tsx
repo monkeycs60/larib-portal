@@ -169,6 +169,43 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
     holidayLegend: t('request.holidayLegend'),
   }
 
+  const adminActionTranslations = adminDashboard
+    ? {
+        edit: t('admin.actions.edit'),
+        delete: t('admin.actions.delete'),
+        deleteConfirmTitle: t('admin.actions.deleteConfirmTitle'),
+        deleteConfirmDescription: t('admin.actions.deleteConfirmDescription'),
+        deleteConfirm: t('admin.actions.deleteConfirm'),
+        deleteCancel: t('admin.actions.deleteCancel'),
+      }
+    : null
+
+  const adminEditDialogTranslations = adminDashboard
+    ? {
+        title: t('admin.editModal.title'),
+        description: t('admin.editModal.description'),
+        submit: t('admin.editModal.submit'),
+        cancel: t('admin.editModal.cancel'),
+        editSuccess: t('admin.toasts.editSuccess'),
+        editError: t('admin.toasts.editError'),
+        overlapError: t('errors.overlap'),
+        invalidRange: t('errors.invalidRange'),
+        missingRange: t('errors.missingRange'),
+        startLabel: t('request.start'),
+        endLabel: t('request.end'),
+        reasonLabel: t('request.reason'),
+        optionalHint: t('request.optional'),
+        requestedDays: t('request.requestedDays'),
+        excludedDays: t('request.excludedDays'),
+        weekendDays: t('request.weekendDays'),
+        holidays: t('request.holidays'),
+        holiday: t('request.holiday'),
+        day: t('request.day'),
+        days: t('request.days'),
+        holidayLegend: t('request.holidayLegend'),
+      }
+    : null
+
   const pendingRequestsData = adminDashboard
     ? {
         pendingRequests: adminDashboard.pendingRequests,
@@ -188,6 +225,8 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
           statusApproved: t('admin.toasts.statusApproved'),
           statusRejected: t('admin.toasts.statusRejected'),
           statusError: t('admin.toasts.statusError'),
+          deleted: t('admin.toasts.deleted'),
+          deleteError: t('admin.toasts.deleteError'),
         },
       }
     : null
@@ -256,6 +295,7 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
             .filter((entry) => entry.status !== 'PENDING')
             .map((entry) => ({
               ...entry,
+              userId: row.userId,
               userName: fullName(row.firstName, row.lastName, row.email),
             }))
         )
@@ -278,6 +318,7 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
               status: t('admin.decisionHistory.columns.status'),
               reason: t('admin.decisionHistory.columns.reason'),
               decision: t('admin.decisionHistory.columns.decision'),
+              actions: t('admin.decisionHistory.columns.actions'),
             },
             filterAll: t('admin.decisionHistory.filterAll'),
             filterApproved: t('admin.decisionHistory.filterApproved'),
@@ -421,23 +462,35 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
     </section>
   )
 
-  const pendingRequestsSection = pendingRequestsData ? (
+  const pendingRequestsSection = pendingRequestsData && adminActionTranslations && adminEditDialogTranslations ? (
     <section className='px-6'>
       <Suspense fallback={<div className='text-sm text-muted-foreground'>{t('admin.loading')}</div>}>
         <PendingRequestsSection
           pendingRequests={pendingRequestsData.pendingRequests}
           labels={pendingRequestsData.labels}
           toasts={pendingRequestsData.toasts}
+          adminActions={adminActionTranslations}
+          editDialogTranslations={adminEditDialogTranslations}
+          locale={locale}
+          frenchHolidays={frenchHolidays}
         />
       </Suspense>
     </section>
   ) : null
 
-  const decisionHistorySection = decisionHistoryData ? (
+  const decisionHistorySection = decisionHistoryData && adminActionTranslations && adminEditDialogTranslations ? (
     <section className='px-6'>
       <DecisionHistorySection
         entries={decisionHistoryData.entries}
         translations={decisionHistoryData.translations}
+        adminActions={{
+          ...adminActionTranslations,
+          deleted: t('admin.toasts.deleted'),
+          deleteError: t('admin.toasts.deleteError'),
+        }}
+        editDialogTranslations={adminEditDialogTranslations}
+        locale={locale}
+        frenchHolidays={frenchHolidays}
       />
     </section>
   ) : null

@@ -753,7 +753,25 @@
 				"allocationInvalid": "Entrez un nombre de jours valide",
 				"statusApproved": "Demande approuvée",
 				"statusRejected": "Demande refusée",
-				"statusError": "Impossible de mettre à jour le statut"
+				"statusError": "Impossible de mettre à jour le statut",
+				"deleted": "Demande de congé supprimée",
+				"deleteError": "Impossible de supprimer la demande",
+				"editSuccess": "Demande de congé mise à jour",
+				"editError": "Impossible de modifier la demande"
+			},
+			"actions": {
+				"edit": "Modifier",
+				"delete": "Supprimer",
+				"deleteConfirmTitle": "Supprimer la demande de congé",
+				"deleteConfirmDescription": "Voulez-vous vraiment supprimer cette demande de congé ? Cette action est irréversible.",
+				"deleteConfirm": "Oui, supprimer",
+				"deleteCancel": "Annuler"
+			},
+			"editModal": {
+				"title": "Modifier la demande de congé",
+				"description": "Modifiez les dates ou le motif.",
+				"submit": "Enregistrer",
+				"cancel": "Annuler"
 			},
 			"details": {
 				"period": "Période",
@@ -771,7 +789,8 @@
 					"days": "Jours",
 					"status": "Statut",
 					"reason": "Motif",
-					"decision": "Décision"
+					"decision": "Décision",
+					"actions": "Actions"
 				},
 				"filterAll": "Toutes",
 				"filterApproved": "Approuvées",

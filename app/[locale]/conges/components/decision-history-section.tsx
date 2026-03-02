@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useAction } from 'next-safe-action/hooks'
+import { toast } from 'sonner'
 import {
   Table,
   TableBody,
@@ -12,10 +14,25 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import { Pencil, Trash2 } from 'lucide-react'
 import type { LeaveRequestStatus } from '@/app/generated/prisma'
+import { adminDeleteLeaveAction } from '../actions'
+import { AdminEditLeaveDialog, type AdminEditLeaveEntry, type AdminEditLeaveDialogTranslations } from './admin-edit-leave-dialog'
 
 export type DecisionEntry = {
   id: string
+  userId: string
   userName: string
   startDate: string
   endDate: string
@@ -37,6 +54,7 @@ type DecisionHistoryTranslations = {
     status: string
     reason: string
     decision: string
+    actions: string
   }
   filterAll: string
   filterApproved: string
@@ -45,9 +63,24 @@ type DecisionHistoryTranslations = {
   statusLabels: Record<LeaveRequestStatus, string>
 }
 
+type AdminActionTranslations = {
+  edit: string
+  delete: string
+  deleteConfirmTitle: string
+  deleteConfirmDescription: string
+  deleteConfirm: string
+  deleteCancel: string
+  deleted: string
+  deleteError: string
+}
+
 type DecisionHistoryProps = {
   entries: DecisionEntry[]
   translations: DecisionHistoryTranslations
+  adminActions: AdminActionTranslations
+  editDialogTranslations: AdminEditLeaveDialogTranslations
+  locale: 'fr' | 'en'
+  frenchHolidays: Record<string, string>
 }
 
 const statusBadgeVariant: Record<LeaveRequestStatus, 'secondary' | 'default' | 'destructive' | 'outline'> = {
@@ -59,8 +92,26 @@ const statusBadgeVariant: Record<LeaveRequestStatus, 'secondary' | 'default' | '
 
 type StatusFilter = 'ALL' | 'APPROVED' | 'REJECTED' | 'CANCELLED'
 
-export function DecisionHistorySection({ entries, translations }: DecisionHistoryProps) {
+export function DecisionHistorySection({
+  entries,
+  translations,
+  adminActions,
+  editDialogTranslations,
+  locale,
+  frenchHolidays,
+}: DecisionHistoryProps) {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL')
+  const [editEntry, setEditEntry] = useState<AdminEditLeaveEntry | null>(null)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+
+  const { execute: executeDelete, isExecuting: isDeleting } = useAction(adminDeleteLeaveAction, {
+    onSuccess: () => {
+      toast.success(adminActions.deleted)
+    },
+    onError: () => {
+      toast.error(adminActions.deleteError)
+    },
+  })
 
   const filteredEntries = useMemo(() => {
     if (statusFilter === 'ALL') return entries
@@ -74,72 +125,137 @@ export function DecisionHistorySection({ entries, translations }: DecisionHistor
     { key: 'CANCELLED', label: translations.filterCancelled },
   ]
 
+  const handleEdit = (entry: DecisionEntry) => {
+    setEditEntry({
+      id: entry.id,
+      startDate: entry.startDate,
+      endDate: entry.endDate,
+      reason: entry.reason,
+      dayCount: entry.dayCount,
+    })
+    setEditDialogOpen(true)
+  }
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{translations.title}</CardTitle>
-        <div className='flex flex-wrap gap-2 pt-2'>
-          {filterButtons.map((filterButton) => (
-            <Button
-              key={filterButton.key}
-              variant={statusFilter === filterButton.key ? 'default' : 'outline'}
-              size='sm'
-              onClick={() => setStatusFilter(filterButton.key)}
-            >
-              {filterButton.label}
-            </Button>
-          ))}
-        </div>
-      </CardHeader>
-      <CardContent>
-        {filteredEntries.length === 0 ? (
-          <p className='text-sm text-muted-foreground'>{translations.empty}</p>
-        ) : (
-          <div className='overflow-x-auto'>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{translations.columns.user}</TableHead>
-                  <TableHead>{translations.columns.period}</TableHead>
-                  <TableHead>{translations.columns.days}</TableHead>
-                  <TableHead>{translations.columns.status}</TableHead>
-                  <TableHead>{translations.columns.reason}</TableHead>
-                  <TableHead>{translations.columns.decision}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredEntries.map((entry) => (
-                  <TableRow key={entry.id}>
-                    <TableCell className='font-medium'>{entry.userName}</TableCell>
-                    <TableCell>
-                      {new Date(entry.startDate).toLocaleDateString()} – {new Date(entry.endDate).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>{entry.dayCount}</TableCell>
-                    <TableCell>
-                      <Badge variant={statusBadgeVariant[entry.status]}>
-                        {translations.statusLabels[entry.status]}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{entry.reason ?? '—'}</TableCell>
-                    <TableCell>
-                      {entry.decisionAt ? (
-                        <div className='flex flex-col text-sm'>
-                          <span>{new Date(entry.decisionAt).toLocaleDateString()}</span>
-                          {entry.approverName && (
-                            <span className='text-xs text-muted-foreground'>{entry.approverName}</span>
-                          )}
-                        </div>
-                      ) : (
-                        <span className='text-sm text-muted-foreground'>—</span>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>{translations.title}</CardTitle>
+          <div className='flex flex-wrap gap-2 pt-2'>
+            {filterButtons.map((filterButton) => (
+              <Button
+                key={filterButton.key}
+                variant={statusFilter === filterButton.key ? 'default' : 'outline'}
+                size='sm'
+                onClick={() => setStatusFilter(filterButton.key)}
+              >
+                {filterButton.label}
+              </Button>
+            ))}
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </CardHeader>
+        <CardContent>
+          {filteredEntries.length === 0 ? (
+            <p className='text-sm text-muted-foreground'>{translations.empty}</p>
+          ) : (
+            <div className='overflow-x-auto'>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{translations.columns.user}</TableHead>
+                    <TableHead>{translations.columns.period}</TableHead>
+                    <TableHead>{translations.columns.days}</TableHead>
+                    <TableHead>{translations.columns.status}</TableHead>
+                    <TableHead>{translations.columns.reason}</TableHead>
+                    <TableHead>{translations.columns.decision}</TableHead>
+                    <TableHead>{translations.columns.actions}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredEntries.map((entry) => (
+                    <TableRow key={entry.id}>
+                      <TableCell className='font-medium'>{entry.userName}</TableCell>
+                      <TableCell>
+                        {new Date(entry.startDate).toLocaleDateString()} – {new Date(entry.endDate).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>{entry.dayCount}</TableCell>
+                      <TableCell>
+                        <Badge variant={statusBadgeVariant[entry.status]}>
+                          {translations.statusLabels[entry.status]}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{entry.reason ?? '—'}</TableCell>
+                      <TableCell>
+                        {entry.decisionAt ? (
+                          <div className='flex flex-col text-sm'>
+                            <span>{new Date(entry.decisionAt).toLocaleDateString()}</span>
+                            {entry.approverName && (
+                              <span className='text-xs text-muted-foreground'>{entry.approverName}</span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className='text-sm text-muted-foreground'>—</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {entry.status === 'APPROVED' ? (
+                          <div className='flex gap-1'>
+                            <Button
+                              size='icon'
+                              variant='ghost'
+                              title={adminActions.edit}
+                              onClick={() => handleEdit(entry)}
+                            >
+                              <Pencil className='h-4 w-4' />
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  size='icon'
+                                  variant='ghost'
+                                  title={adminActions.delete}
+                                  disabled={isDeleting}
+                                >
+                                  <Trash2 className='h-4 w-4 text-destructive' />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>{adminActions.deleteConfirmTitle}</AlertDialogTitle>
+                                  <AlertDialogDescription>{adminActions.deleteConfirmDescription}</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>{adminActions.deleteCancel}</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => executeDelete({ requestId: entry.id })}
+                                    className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                                  >
+                                    {adminActions.deleteConfirm}
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        ) : (
+                          <span className='text-sm text-muted-foreground'>—</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      <AdminEditLeaveDialog
+        entry={editEntry}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        translations={editDialogTranslations}
+        locale={locale}
+        frenchHolidays={frenchHolidays}
+      />
+    </>
   )
 }

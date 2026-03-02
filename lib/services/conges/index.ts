@@ -631,6 +631,71 @@ export async function cancelLeaveRequest(
   })
 }
 
+export async function adminDeleteLeaveRequest(requestId: string): Promise<void> {
+  const request = await prisma.leaveRequest.findUniqueOrThrow({
+    where: { id: requestId },
+    select: { status: true },
+  })
+
+  if (request.status !== 'PENDING' && request.status !== 'APPROVED') {
+    throw new Error('invalidStatus')
+  }
+
+  await prisma.leaveRequest.delete({ where: { id: requestId } })
+}
+
+export async function adminUpdateLeaveRequest(
+  input: {
+    requestId: string
+    startDate: Date
+    endDate: Date
+    reason?: string | null
+  },
+  frenchHolidays: Record<string, string>
+): Promise<void> {
+  const request = await prisma.leaveRequest.findUniqueOrThrow({
+    where: { id: input.requestId },
+    select: { userId: true, status: true },
+  })
+
+  if (request.status !== 'PENDING' && request.status !== 'APPROVED') {
+    throw new Error('invalidStatus')
+  }
+
+  const { start, end } = normaliseRange(input.startDate, input.endDate)
+
+  const existingRequests = await prisma.leaveRequest.findMany({
+    where: {
+      userId: request.userId,
+      status: { in: ['PENDING', 'APPROVED'] },
+      id: { not: input.requestId },
+    },
+    select: {
+      startDate: true,
+      endDate: true,
+    },
+  })
+
+  const overlapping = existingRequests.some((existing) => {
+    const existingStart = startOfDay(existing.startDate)
+    const existingEnd = endOfDay(existing.endDate)
+    return existingStart <= end && existingEnd >= start
+  })
+
+  if (overlapping) {
+    throw new Error('leaveOverlap')
+  }
+
+  await prisma.leaveRequest.update({
+    where: { id: input.requestId },
+    data: {
+      startDate: start,
+      endDate: end,
+      reason: input.reason?.trim() || null,
+    },
+  })
+}
+
 export async function updateLeaveRequest(
   input: {
     requestId: string

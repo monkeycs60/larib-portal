@@ -755,7 +755,25 @@
 				"allocationInvalid": "Enter a valid number of days",
 				"statusApproved": "Request approved",
 				"statusRejected": "Request rejected",
-				"statusError": "Could not update request status"
+				"statusError": "Could not update request status",
+				"deleted": "Leave request deleted",
+				"deleteError": "Could not delete the request",
+				"editSuccess": "Leave request updated",
+				"editError": "Could not update the request"
+			},
+			"actions": {
+				"edit": "Edit",
+				"delete": "Delete",
+				"deleteConfirmTitle": "Delete leave request",
+				"deleteConfirmDescription": "Are you sure you want to delete this leave request? This action cannot be undone.",
+				"deleteConfirm": "Yes, delete",
+				"deleteCancel": "Cancel"
+			},
+			"editModal": {
+				"title": "Edit leave request",
+				"description": "Modify the dates or reason.",
+				"submit": "Save",
+				"cancel": "Cancel"
 			},
 			"details": {
 				"period": "Period",
@@ -773,7 +791,8 @@
 					"days": "Days",
 					"status": "Status",
 					"reason": "Reason",
-					"decision": "Decision"
+					"decision": "Decision",
+					"actions": "Actions"
 				},
 				"filterAll": "All",
 				"filterApproved": "Approved",
