@@ -123,8 +123,8 @@ export function EditLeaveDialog({
   const editForm = useForm<EditFormValues>({
     resolver: zodResolver(editFormSchema),
     defaultValues: {
-      startDate: entry ? startOfDay(new Date(entry.startDate)).toISOString() : '',
-      endDate: entry ? startOfDay(new Date(entry.endDate)).toISOString() : '',
+      startDate: entry ? getIso(new Date(entry.startDate)) ?? '' : '',
+      endDate: entry ? getIso(new Date(entry.endDate)) ?? '' : '',
       reason: entry?.reason ?? '',
     },
   })
@@ -290,8 +290,8 @@ export function EditLeaveDialog({
       const endDate = new Date(entry.endDate)
       setEditSelectedRange({ from: startDate, to: endDate })
       editForm.reset({
-        startDate: startOfDay(startDate).toISOString(),
-        endDate: startOfDay(endDate).toISOString(),
+        startDate: getIso(startDate) ?? '',
+        endDate: getIso(endDate) ?? '',
         reason: entry.reason ?? '',
       })
     }
