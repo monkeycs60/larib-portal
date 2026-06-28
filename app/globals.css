@@ -43,6 +43,76 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+/* Redesign tokens (additive) — reference design system scales.
+   Hex source of truth, cohabit with the OKLCH semantic tokens above.
+   No existing utility is overridden: scales are new, shadows are
+   namespaced as `shadow-elevation-*`, radius/font are intentionally
+   left untouched here. */
+@theme {
+  --color-gray-0: #ffffff;
+  --color-gray-25: #fafbfc;
+  --color-gray-50: #f5f7fa;
+  --color-gray-100: #eceff3;
+  --color-gray-200: #dde2e9;
+  --color-gray-300: #c4ccd6;
+  --color-gray-400: #9aa5b3;
+  --color-gray-500: #6b7685;
+  --color-gray-600: #4d5765;
+  --color-gray-700: #363f4c;
+  --color-gray-800: #232a34;
+  --color-gray-900: #141a22;
+
+  --color-navy-50: #eef2f8;
+  --color-navy-100: #d6e0ee;
+  --color-navy-200: #aac0dc;
+  --color-navy-300: #7197c2;
+  --color-navy-400: #3f6aa3;
+  --color-navy-500: #1f4b86;
+  --color-navy-600: #173d6e;
+  --color-navy-700: #122f54;
+  --color-navy-800: #0e2542;
+  --color-navy-900: #0a1b30;
+
+  --color-coral-50: #fff1f4;
+  --color-coral-100: #ffdbe3;
+  --color-coral-200: #ffb6c6;
+  --color-coral-300: #fb88a3;
+  --color-coral-400: #f55c83;
+  --color-coral-500: #ec3b68;
+  --color-coral-600: #d61f55;
+  --color-coral-700: #b01547;
+
+  --color-success-50: #ecfdf3;
+  --color-success-100: #cdf3dd;
+  --color-success-500: #16a34a;
+  --color-success-600: #15803d;
+  --color-success-700: #166534;
+
+  --color-warn-50: #fff8eb;
+  --color-warn-100: #fbe3bd;
+  --color-warn-500: #d97706;
+  --color-warn-600: #b45309;
+  --color-warn-700: #92400e;
+
+  --color-danger-50: #fef2f2;
+  --color-danger-100: #fbd5d5;
+  --color-danger-500: #dc2626;
+  --color-danger-600: #b91c1c;
+  --color-danger-700: #991b1b;
+
+  --color-bg-app: #f5f7fa;
+  --color-bg-surface: #ffffff;
+  --color-text-primary: #141a22;
+  --color-text-secondary: #6b7685;
+  --color-text-muted: #9aa5b3;
+  --color-line: #dde2e9;
+
+  --shadow-elevation-xs: 0 1px 2px rgba(16, 28, 48, 0.06);
+  --shadow-elevation-sm: 0 1px 3px rgba(16, 28, 48, 0.08), 0 1px 2px rgba(16, 28, 48, 0.04);
+  --shadow-elevation-md: 0 6px 18px rgba(16, 28, 48, 0.1);
+  --shadow-elevation-lg: 0 16px 40px rgba(16, 28, 48, 0.16);
+}
+
 :root {
   --radius: 0.75rem;
 
