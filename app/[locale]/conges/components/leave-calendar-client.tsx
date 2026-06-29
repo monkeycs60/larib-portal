@@ -224,14 +224,14 @@ export function LeaveCalendarClient({ content }: LeaveCalendarProps) {
 							variant='outline'
 							size='icon'
 							onClick={() => handleNavigate('previous')}
-							className='h-8 w-8 rounded-full border-muted-foreground/25 hover:border-primary hover:bg-primary/10 hover:text-primary'>
+							className='h-8 w-8 rounded-full border-line hover:border-navy-600 hover:bg-navy-50 hover:text-navy-600'>
 							<ChevronLeft className='h-4 w-4' />
 						</Button>
 						<Button
 							variant='outline'
 							size='icon'
 							onClick={() => handleNavigate('next')}
-							className='h-8 w-8 rounded-full border-muted-foreground/25 hover:border-primary hover:bg-primary/10 hover:text-primary'>
+							className='h-8 w-8 rounded-full border-line hover:border-navy-600 hover:bg-navy-50 hover:text-navy-600'>
 							<ChevronRight className='h-4 w-4' />
 						</Button>
 					</div>
@@ -248,7 +248,7 @@ export function LeaveCalendarClient({ content }: LeaveCalendarProps) {
 				</div>
 			</CardHeader>
 			<CardContent className='space-y-4'>
-				<div className='grid grid-cols-7 gap-2 text-center text-xs font-medium uppercase tracking-wide text-muted-foreground'>
+				<div className='grid grid-cols-7 gap-2 text-center text-xs font-medium uppercase tracking-wide text-text-secondary'>
 					{weekdayLabels.map((label) => (
 						<div key={label} className='py-1'>
 							{label}
@@ -268,18 +268,18 @@ export function LeaveCalendarClient({ content }: LeaveCalendarProps) {
 						return (
 							<div
 								key={date.toISOString()}
-								className={`rounded-lg border p-2 ${
+								className={`rounded-lg border border-line p-2 ${
 									sameMonth
-										? 'bg-background'
-										: 'bg-muted/30 text-muted-foreground'
-								} ${isToday ? 'border-primary shadow-sm' : ''}`}>
+										? 'bg-bg-surface'
+										: 'bg-gray-50 text-text-secondary'
+								} ${isToday ? 'border-coral-500 shadow-elevation-sm' : ''}`}>
 								<div className='mb-2 flex items-center justify-between text-sm font-semibold'>
 									<span>{dayNumber}</span>
 									{isToday ? <Badge variant='outline'>•</Badge> : null}
 								</div>
 								<div className='space-y-1'>
 									{displayAbsentees.length === 0 ? (
-										<p className='text-xs text-muted-foreground'>
+										<p className='text-xs text-text-secondary'>
 											{translations('calendar.empty')}
 										</p>
 									) : (
@@ -305,7 +305,7 @@ export function LeaveCalendarClient({ content }: LeaveCalendarProps) {
 											<PopoverTrigger asChild>
 												<Badge
 													variant='outline'
-													className='cursor-pointer text-[10px] hover:bg-accent'>
+													className='cursor-pointer text-[10px] hover:bg-gray-100'>
 													{translations('calendar.more', {
 														count: overflow,
 													})}
