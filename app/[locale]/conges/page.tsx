@@ -523,8 +523,8 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
       {isAdmin ? (
         <>
           {pendingRequestsSection}
-          {decisionHistorySection}
           {calendarSection}
+          {decisionHistorySection}
           {teamLeaveOverviewSection}
         </>
       ) : (
