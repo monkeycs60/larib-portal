@@ -70,7 +70,7 @@ export default function CreateAdminPage() {
           <CardTitle className="text-2xl font-bold">
             Créer un compte administrateur
           </CardTitle>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-text-secondary">
             Remplissez le formulaire pour créer votre compte admin
           </p>
         </CardHeader>
@@ -86,7 +86,7 @@ export default function CreateAdminPage() {
                 {...register("email")}
               />
               {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
+                <p className="text-sm text-danger-600">{errors.email.message}</p>
               )}
             </div>
 
@@ -109,7 +109,7 @@ export default function CreateAdminPage() {
                 </button>
               </div>
               {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
+                <p className="text-sm text-danger-600">{errors.password.message}</p>
               )}
             </div>
 
@@ -132,7 +132,7 @@ export default function CreateAdminPage() {
                 </button>
               </div>
               {errors.confirmPassword && (
-                <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
+                <p className="text-sm text-danger-600">{errors.confirmPassword.message}</p>
               )}
             </div>
 
@@ -155,12 +155,12 @@ export default function CreateAdminPage() {
                 </button>
               </div>
               {errors.accessCode && (
-                <p className="text-sm text-destructive">{errors.accessCode.message}</p>
+                <p className="text-sm text-danger-600">{errors.accessCode.message}</p>
               )}
             </div>
 
             {errors.root && (
-              <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 p-3 rounded-md">
+              <div className="flex items-center gap-2 text-sm text-danger-600 bg-danger-50 p-3 rounded-md">
                 <AlertCircle className="h-4 w-4" />
                 <span>{errors.root.message}</span>
               </div>
