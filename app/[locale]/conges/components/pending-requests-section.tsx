@@ -5,6 +5,8 @@ import { useAction } from 'next-safe-action/hooks'
 import { toast } from 'sonner'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,6 +37,7 @@ type PendingRequestsSectionProps = {
     daySingular: string
     dayPlural: string
     subtitle: string
+    pending: string
   }
   toasts: {
     statusApproved: string
@@ -117,7 +120,7 @@ export function PendingRequestsSection({
         </CardHeader>
         <CardContent>
           {pendingRequests.length === 0 ? (
-            <p className='text-sm text-muted-foreground'>{labels.empty}</p>
+            <p className='text-sm text-text-secondary'>{labels.empty}</p>
           ) : (
             <div className='space-y-4'>
               {pendingRequests.map((request) => {
@@ -125,27 +128,34 @@ export function PendingRequestsSection({
                 const isActing = activeStatusRequest === request.id && savingStatus
                 const template = request.totalDays === 1 ? labels.daySingular : labels.dayPlural
                 const daysLabel = template.replace('{count}', request.totalDays.toString())
+                const initials = (`${request.firstName?.[0] ?? ''}${request.lastName?.[0] ?? ''}`.trim() || request.email?.[0] || '?').toUpperCase()
                 return (
-                  <div key={request.id} className='flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between'>
-                    <div className='space-y-1'>
-                      <div className='text-sm font-semibold'>{displayName}</div>
-                      <div className='text-xs text-muted-foreground'>
-                        {labels.period}:{' '}
-                        <strong>
-                          {new Date(request.startDate).toLocaleDateString()} – {new Date(request.endDate).toLocaleDateString()}
-                        </strong>{' '}
-                        ({daysLabel})
-                      </div>
-                      <div className='text-xs text-muted-foreground'>
-                        {labels.created}: {new Date(request.createdAt).toLocaleString()}
-                      </div>
-                      {request.reason ? (
-                        <div className='text-xs text-muted-foreground'>
-                          {labels.reason}: {request.reason}
+                  <div key={request.id} className='flex flex-col gap-3 rounded-lg border border-line p-4 sm:flex-row sm:items-center sm:justify-between'>
+                    <div className='flex items-start gap-3'>
+                      <Avatar className='h-10 w-10'>
+                        <AvatarFallback className='bg-navy-50 text-navy-700 text-xs font-semibold'>{initials}</AvatarFallback>
+                      </Avatar>
+                      <div className='space-y-1'>
+                        <div className='text-sm font-semibold text-text-primary'>{displayName}</div>
+                        <div className='text-xs text-text-secondary'>
+                          {labels.period}:{' '}
+                          <strong>
+                            {new Date(request.startDate).toLocaleDateString()} – {new Date(request.endDate).toLocaleDateString()}
+                          </strong>{' '}
+                          ({daysLabel})
                         </div>
-                      ) : null}
+                        <div className='text-xs text-text-secondary'>
+                          {labels.created}: {new Date(request.createdAt).toLocaleString()}
+                        </div>
+                        {request.reason ? (
+                          <div className='text-xs text-text-secondary'>
+                            {labels.reason}: {request.reason}
+                          </div>
+                        ) : null}
+                      </div>
                     </div>
-                    <div className='flex gap-2'>
+                    <div className='flex items-center gap-2'>
+                      <Badge variant='warning'>{labels.pending}</Badge>
                       <Button
                         size='icon'
                         variant='ghost'
@@ -162,7 +172,7 @@ export function PendingRequestsSection({
                             title={adminActions.delete}
                             disabled={isDeleting}
                           >
-                            <Trash2 className='h-4 w-4 text-destructive' />
+                            <Trash2 className='h-4 w-4 text-danger-600' />
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
@@ -174,7 +184,7 @@ export function PendingRequestsSection({
                             <AlertDialogCancel>{adminActions.deleteCancel}</AlertDialogCancel>
                             <AlertDialogAction
                               onClick={() => executeDelete({ requestId: request.id })}
-                              className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                              className='bg-danger-600 text-white hover:bg-danger-700'
                             >
                               {adminActions.deleteConfirm}
                             </AlertDialogAction>
@@ -185,16 +195,17 @@ export function PendingRequestsSection({
                         size='sm'
                         variant='outline'
                         disabled={isActing}
-                        onClick={() => void handleStatusChange(request.id, 'REJECTED')}
-                      >
-                        {labels.reject}
-                      </Button>
-                      <Button
-                        size='sm'
-                        disabled={isActing}
                         onClick={() => void handleStatusChange(request.id, 'APPROVED')}
                       >
                         {labels.approve}
+                      </Button>
+                      <Button
+                        size='sm'
+                        variant='ghost'
+                        disabled={isActing}
+                        onClick={() => void handleStatusChange(request.id, 'REJECTED')}
+                      >
+                        {labels.reject}
                       </Button>
                     </div>
                   </div>

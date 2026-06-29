@@ -220,6 +220,7 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
           daySingular: t.raw('admin.pending.daySingular') as string,
           dayPlural: t.raw('admin.pending.dayPlural') as string,
           subtitle: t('admin.pending.subtitle', { days: adminDashboard.pendingDaysTotal }),
+          pending: t('admin.table.pending'),
         },
         toasts: {
           statusApproved: t('admin.toasts.statusApproved'),
