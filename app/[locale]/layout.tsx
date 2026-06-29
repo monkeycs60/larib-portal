@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation';
 import { routing } from '@/app/i18n/routing';
 import { Toaster } from 'sonner'
 import "../globals.css";
-import { Navbar } from "./components/navbar";
+import { AppShell } from "./components/app-shell";
 
 const libreBaskerville = Libre_Baskerville({
   weight: ['400', '700'],
@@ -65,8 +65,7 @@ export default async function LocaleLayout({
         className={`${inter.variable} ${libreBaskerville.variable} antialiased font-sans`}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <Navbar />
-          {children}
+          <AppShell>{children}</AppShell>
           <Toaster richColors position="top-right" />
         </NextIntlClientProvider>
       </body>
