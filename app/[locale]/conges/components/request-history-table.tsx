@@ -70,7 +70,7 @@ type RequestHistoryTableProps = {
     cancelSuccess: string
     cancelError: string
   } & EditLeaveDialogTranslations
-  statusBadgeVariant: Record<string, 'secondary' | 'default' | 'destructive' | 'outline'>
+  statusBadgeVariant: Record<string, 'warning' | 'success' | 'danger' | 'neutral'>
   userContext: EditLeaveUserContext
 }
 
