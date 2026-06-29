@@ -60,12 +60,12 @@ export function AppSidebar({ user }: { user: SidebarUser }) {
   return (
     <aside className="sticky top-0 flex h-screen w-64 shrink-0 flex-col bg-navy-700 text-white">
       <div className="flex items-center gap-3 px-6 py-5">
-        <div className="flex h-7 w-14 items-start justify-center overflow-hidden">
+        <div className="flex h-9 w-[72px] items-start justify-center overflow-hidden">
           <Image
             src="/logo-app.png"
             alt="Larib Portal logo"
-            width={56}
-            height={56}
+            width={72}
+            height={72}
             className="brightness-0 invert"
           />
         </div>
