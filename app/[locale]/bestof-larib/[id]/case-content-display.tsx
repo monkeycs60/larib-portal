@@ -26,10 +26,10 @@ export default function CaseContentDisplay({ children, isLocked, revealKey, isAd
 
 	if (!isLocked) {
 		return (
-			<div className='min-h-[70vh] flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 rounded'>
+			<div className='min-h-[70vh] flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 rounded'>
 				<div className='max-w-md text-center p-6 space-y-3'>
 					<div className='text-4xl mb-4'>🔒</div>
-					<p className='text-slate-700 font-medium text-lg'>
+					<p className='text-text-secondary font-medium text-lg'>
 						{t('contentHiddenBeforeValidation')}
 					</p>
 				</div>
@@ -39,16 +39,16 @@ export default function CaseContentDisplay({ children, isLocked, revealKey, isAd
 
 	if (!isRevealed) {
 		return (
-			<div className='min-h-[70vh] flex items-center justify-center bg-gradient-to-br from-emerald-50 to-emerald-100 rounded'>
+			<div className='min-h-[70vh] flex items-center justify-center bg-gradient-to-br from-success-50 to-success-100 rounded'>
 				<div className='max-w-md text-center p-6 space-y-4'>
 					<div className='text-4xl mb-4'>✅</div>
-					<p className='text-emerald-900 font-semibold text-xl'>
+					<p className='text-success-700 font-semibold text-xl'>
 						{t('revealContent')}
 					</p>
 					<Button
 						onClick={() => setIsRevealed(true)}
 						size='lg'
-						className='mt-4 bg-emerald-600 hover:bg-emerald-700'
+						className='mt-4 bg-success-600 hover:bg-success-700'
 					>
 						<EyeIcon className='w-5 h-5 mr-2' />
 						{t('clickToReveal')}

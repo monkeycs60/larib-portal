@@ -13,9 +13,9 @@ type UserCaseHistoryProps = {
 export default function UserCaseHistory({ caseHistory, userId }: UserCaseHistoryProps) {
   const getDifficultyBadge = (difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED') => {
     const variants = {
-      BEGINNER: { variant: 'outline' as const, label: 'Beginner', color: 'text-green-600' },
-      INTERMEDIATE: { variant: 'outline' as const, label: 'Intermediate', color: 'text-yellow-600' },
-      ADVANCED: { variant: 'outline' as const, label: 'Advanced', color: 'text-red-600' },
+      BEGINNER: { variant: 'outline' as const, label: 'Beginner', color: 'text-success-600' },
+      INTERMEDIATE: { variant: 'outline' as const, label: 'Intermediate', color: 'text-warn-600' },
+      ADVANCED: { variant: 'outline' as const, label: 'Advanced', color: 'text-danger-600' },
     };
 
     const config = variants[difficulty];
@@ -27,12 +27,12 @@ export default function UserCaseHistory({ caseHistory, userId }: UserCaseHistory
   };
 
   const getLevelIndicator = (level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | null) => {
-    if (!level) return <span className='text-muted-foreground text-xs'>—</span>;
+    if (!level) return <span className='text-text-secondary text-xs'>—</span>;
 
     const variants = {
-      BEGINNER: 'bg-green-500',
-      INTERMEDIATE: 'bg-yellow-500',
-      ADVANCED: 'bg-red-500',
+      BEGINNER: 'bg-success-500',
+      INTERMEDIATE: 'bg-warn-500',
+      ADVANCED: 'bg-danger-500',
     };
 
     return <div className={`size-2.5 rounded-full ${variants[level]}`} />;
@@ -59,7 +59,7 @@ export default function UserCaseHistory({ caseHistory, userId }: UserCaseHistory
 
   if (caseHistory.length === 0) {
     return (
-      <div className='text-center py-6 text-muted-foreground'>
+      <div className='text-center py-6 text-text-secondary'>
         No case history available
       </div>
     );
@@ -122,7 +122,7 @@ export default function UserCaseHistory({ caseHistory, userId }: UserCaseHistory
         </TableBody>
       </Table>
       {caseHistory.length > 10 && (
-        <div className='p-4 text-center text-sm text-muted-foreground'>
+        <div className='p-4 text-center text-sm text-text-secondary'>
           Showing 10 most recent attempts out of {caseHistory.length} total
         </div>
       )}
