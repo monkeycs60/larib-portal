@@ -75,7 +75,7 @@ function StatsPieChart({
                     formatter={(value, name) => (
                       <div className="flex items-center gap-3">
                         <span className="font-semibold">{value}</span>
-                        <span className="text-muted-foreground">—</span>
+                        <span className="text-text-secondary">—</span>
                         <span>{name}</span>
                       </div>
                     )}
@@ -117,7 +117,7 @@ function StatsPieChart({
             </PieChart>
           </ChartContainer>
         ) : (
-          <div className="h-[280px] flex items-center justify-center text-muted-foreground text-sm">
+          <div className="h-[280px] flex items-center justify-center text-text-secondary text-sm">
             {noDataMessage}
           </div>
         )}
@@ -136,7 +136,7 @@ function DatabaseSummaryCard({
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-xs font-medium text-muted-foreground">{title}</CardTitle>
+        <CardTitle className="text-xs font-medium text-text-secondary">{title}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
@@ -159,13 +159,13 @@ export default function BestofStatsDatabaseCharts({ stats, translations }: Datab
   return (
     <div className="space-y-6">
       <div className="w-full md:w-64">
-        <Card className="bg-blue-50">
+        <Card className="bg-navy-50">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">{translations.totalCases}</CardTitle>
+            <CardTitle className="text-sm font-medium text-text-secondary">{translations.totalCases}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-1">
             <div className="text-4xl font-bold">{stats.totalCases}</div>
-            <div className="text-sm text-muted-foreground">{stats.totalCompletedCases} {translations.completed}</div>
+            <div className="text-sm text-text-secondary">{stats.totalCompletedCases} {translations.completed}</div>
           </CardContent>
         </Card>
       </div>

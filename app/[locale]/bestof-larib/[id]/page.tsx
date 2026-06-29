@@ -84,14 +84,14 @@ async function CaseViewPageContent({
                     ) : null}
                     {isAdmin ? (
                         <Badge
-                            variant='outline'
-                            className={
+                            variant={
                                 c.difficulty === 'BEGINNER'
-                                    ? 'border-green-500 text-green-700'
+                                    ? 'success'
                                     : c.difficulty === 'INTERMEDIATE'
-                                    ? 'border-rose-500 text-rose-700'
-                                    : 'border-red-500 text-red-700'
-                            }>
+                                    ? 'warning'
+                                    : 'danger'
+                            }
+                            className='rounded-full px-3 py-1'>
                             {t(`difficulty.${difficultyLabel}`)}
                         </Badge>
                     ) : null}

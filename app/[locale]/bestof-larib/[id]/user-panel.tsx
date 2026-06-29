@@ -149,7 +149,7 @@ export default function CaseInteractionPanel({ config }: { config: CaseInteracti
             </div>
             <div className="flex flex-col gap-2 max-h-44 overflow-auto pr-1">
               {attempts.filter((attempt) => !!attempt.validatedAt).length === 0 ? (
-                <div className="text-sm text-muted-foreground">{t('caseView.noAttempts')}</div>
+                <div className="text-sm text-text-secondary">{t('caseView.noAttempts')}</div>
               ) : attempts
                   .filter((attempt) => !!attempt.validatedAt)
                   .sort((leftAttempt, rightAttempt) => new Date(leftAttempt.createdAt).getTime() - new Date(rightAttempt.createdAt).getTime())
@@ -166,11 +166,11 @@ export default function CaseInteractionPanel({ config }: { config: CaseInteracti
                       >
                         <div className="text-sm">
                           <div className="font-medium">Attempt {num}</div>
-                          <div className="text-xs text-muted-foreground">{dt}</div>
+                          <div className="text-xs text-text-secondary">{dt}</div>
                         </div>
-                        <div className="flex items-center gap-2 text-green-600">
+                        <div className="flex items-center gap-2 text-success-600">
                           <CheckCircle2 className="size-4" />
-                          <Eye className="size-4 text-muted-foreground" />
+                          <Eye className="size-4 text-text-secondary" />
                         </div>
                       </button>
                     )
@@ -190,7 +190,7 @@ export default function CaseInteractionPanel({ config }: { config: CaseInteracti
                   initialSelectedIds={config.userTagIds}
                   onSelectionChange={onLocalTagsChange}
                 />
-              ) : (<div className="text-xs text-muted-foreground">-</div>)}
+              ) : (<div className="text-xs text-text-secondary">-</div>)}
             </div>
             <div className="space-y-1">
               <Label>{t('caseView.myDifficulty')}</Label>
@@ -320,7 +320,7 @@ export function AnalysisForm({ isAdmin, caseId, values, onChange, hideInlineSave
           autoComplete="off"
         />
       </div>
-      <div className="text-xs text-muted-foreground">{t('caseView.requiredBeforeValidation')}</div>
+      <div className="text-xs text-text-secondary">{t('caseView.requiredBeforeValidation')}</div>
       {hideInlineSave ? null : (
         <div className="flex gap-2">
           <Button type="submit" disabled={isAdmin || !formState.isValid || isExecuting}>{t('saveProgress')}</Button>
