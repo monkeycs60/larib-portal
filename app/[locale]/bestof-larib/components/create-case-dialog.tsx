@@ -24,6 +24,7 @@ import {
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { tagChipStyle } from '@/lib/tag-color';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
@@ -661,8 +662,8 @@ export default function CreateCaseDialog({
 												.map((tag) => (
 													<div
 														key={tag.id}
-														className='inline-flex items-center gap-1 rounded px-2 py-1 text-xs text-white'
-														style={{ backgroundColor: tag.color }}
+														className='inline-flex items-center gap-1 rounded border px-2 py-1 text-xs font-medium'
+														style={tagChipStyle(tag.color)}
 													>
 														<span>{tag.name}</span>
 														<button
@@ -691,8 +692,8 @@ export default function CreateCaseDialog({
 														onClick={() => {
 															setSelectedAdminTags((previous) => [...previous, tag.id]);
 														}}
-														className='inline-flex items-center gap-1 rounded px-2 py-1 text-xs text-white hover:opacity-80'
-														style={{ backgroundColor: tag.color }}
+														className='inline-flex items-center gap-1 rounded border px-2 py-1 text-xs font-medium hover:opacity-80'
+														style={tagChipStyle(tag.color)}
 													>
 														<span>{tag.name}</span>
 														<span>+</span>
