@@ -36,19 +36,19 @@ function OnboardingStatusBadge({ status }: { status: InvitationStatus }) {
   switch (status) {
     case 'ACTIVE':
       return (
-        <Badge variant="default" className="bg-green-600 hover:bg-green-600">
+        <Badge variant="success">
           {t('statusActive')}
         </Badge>
       )
     case 'INVITATION_SENT':
       return (
-        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
+        <Badge variant="warning">
           {t('statusInvitationSent')}
         </Badge>
       )
     case 'INVITATION_EXPIRED':
       return (
-        <Badge variant="destructive">
+        <Badge variant="danger">
           {t('statusInvitationExpired')}
         </Badge>
       )
@@ -61,22 +61,22 @@ function StatusLegend() {
   const t = useTranslations('admin')
 
   return (
-    <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+    <div className="flex flex-wrap items-center gap-4 text-sm text-text-secondary">
       <span className="font-medium">{t('statusLegend')}:</span>
       <div className="flex items-center gap-1.5">
-        <Badge variant="default" className="bg-green-600 hover:bg-green-600 text-xs">
+        <Badge variant="success" className="text-xs">
           {t('statusActive')}
         </Badge>
         <span>{t('statusActiveDesc')}</span>
       </div>
       <div className="flex items-center gap-1.5">
-        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100 text-xs">
+        <Badge variant="warning" className="text-xs">
           {t('statusInvitationSent')}
         </Badge>
         <span>{t('statusInvitationSentDesc')}</span>
       </div>
       <div className="flex items-center gap-1.5">
-        <Badge variant="destructive" className="text-xs">
+        <Badge variant="danger" className="text-xs">
           {t('statusInvitationExpired')}
         </Badge>
         <span>{t('statusInvitationExpiredDesc')}</span>
@@ -149,19 +149,19 @@ export function UserTable({ users, positions, locale }: { users: UserRow[]; posi
           </TableHeader>
           <TableBody>
             {users.map((user) => (
-              <TableRow key={user.id} className={isPlaceholderUser(user) ? 'bg-muted/30' : ''}>
+              <TableRow key={user.id} className={isPlaceholderUser(user) ? 'bg-gray-50' : ''}>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <div className={`size-8 rounded-full flex items-center justify-center ${isPlaceholderUser(user) ? 'bg-muted border-2 border-dashed border-muted-foreground/30' : 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white'}`}>
+                    <div className={`size-8 rounded-full flex items-center justify-center text-sm font-semibold ${isPlaceholderUser(user) ? 'bg-gray-100 border-2 border-dashed border-gray-300' : 'bg-navy-600 text-white'}`}>
                       {isPlaceholderUser(user) ? (
-                        <UserIcon className="size-4 text-muted-foreground" />
+                        <UserIcon className="size-4 text-text-secondary" />
                       ) : (
                         (user.firstName?.[0] || user.name?.[0] || user.email[0]).toUpperCase()
                       )}
                     </div>
                     <div className="flex flex-col">
-                      <span className="font-medium">{[user.firstName, user.lastName].filter(Boolean).join(' ') || user.name || '—'}</span>
-                      <span className="text-xs text-muted-foreground">{user.position || '—'}</span>
+                      <span className="font-medium text-text-primary">{[user.firstName, user.lastName].filter(Boolean).join(' ') || user.name || '—'}</span>
+                      <span className="text-xs text-text-secondary">{user.position || '—'}</span>
                     </div>
                   </div>
                 </TableCell>
@@ -174,7 +174,7 @@ export function UserTable({ users, positions, locale }: { users: UserRow[]; posi
                 <TableCell>
                   <div className="flex flex-wrap gap-1">
                     {user.applications?.map((application) => (
-                      <span key={application} className="px-2 py-0.5 rounded border text-xs">
+                      <span key={application} className="px-2 py-0.5 rounded-md border border-line bg-gray-50 text-xs text-text-secondary">
                         {t(`app_${application}`)}
                       </span>
                     ))}
