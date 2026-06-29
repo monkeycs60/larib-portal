@@ -108,7 +108,7 @@ export function RequestHistoryTable({
   }
 
   if (history.length === 0) {
-    return <p className='text-sm text-muted-foreground'>{translations.empty}</p>
+    return <p className='text-sm text-text-secondary'>{translations.empty}</p>
   }
 
   return (
@@ -152,17 +152,17 @@ export function RequestHistoryTable({
                         {format(new Date(entry.decisionAt), 'PP', { locale: dateLocale })}
                       </span>
                       {entry.approverName ? (
-                        <span className='text-xs text-muted-foreground'>
+                        <span className='text-xs text-text-secondary'>
                           {entry.approverName}
                         </span>
                       ) : null}
                     </div>
                   ) : (
-                    <span className='text-sm text-muted-foreground'>—</span>
+                    <span className='text-sm text-text-secondary'>—</span>
                   )}
                 </TableCell>
                 <TableCell>
-                  <span className='text-sm text-muted-foreground'>
+                  <span className='text-sm text-text-secondary'>
                     {format(new Date(entry.createdAt), 'PP', { locale: dateLocale })}
                   </span>
                 </TableCell>
@@ -188,7 +188,7 @@ export function RequestHistoryTable({
                             <Button
                               variant='ghost'
                               size='icon'
-                              className='h-8 w-8 text-destructive hover:text-destructive'
+                              className='h-8 w-8 text-danger-600 hover:text-danger-700'
                               onClick={() => setCancelTargetId(entry.id)}
                             >
                               <Trash2 className='h-4 w-4' />
