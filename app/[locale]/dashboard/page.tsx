@@ -93,7 +93,7 @@ export default async function DashboardPage({
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="max-w-4xl"
           >
-            <h1 className="text-5xl md:text-6xl font-serif font-medium tracking-tight text-text-primary mb-4 leading-[1.1]">
+            <h1 className="text-5xl md:text-6xl font-medium tracking-tight text-text-primary mb-4 leading-[1.1]">
               {t('title')}
             </h1>
             <p className="text-xl md:text-2xl text-text-secondary font-light tracking-wide">
@@ -135,7 +135,7 @@ export default async function DashboardPage({
                           <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-navy-50 p-3 text-navy-600 transition-transform duration-500 group-hover:scale-110">
                             {getAppIcon(app)}
                           </div>
-                          <h3 className="text-2xl font-serif font-medium text-text-primary mb-2 group-hover:text-navy-600 transition-colors duration-300">
+                          <h3 className="text-2xl font-medium text-text-primary mb-2 group-hover:text-navy-600 transition-colors duration-300">
                             {adminT(`app_${app}`)}
                           </h3>
                           <p className="text-base text-text-secondary leading-relaxed max-w-md">
@@ -191,7 +191,7 @@ export default async function DashboardPage({
                               <path d="M42 38c0-5.523-4.477-10-10-10-1.5 0-2.9.33-4.17.92" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>
                             </svg>
                           </div>
-                          <h3 className="text-2xl font-serif font-medium text-text-primary mb-2 group-hover:text-navy-600 transition-colors duration-300">
+                          <h3 className="text-2xl font-medium text-text-primary mb-2 group-hover:text-navy-600 transition-colors duration-300">
                             {adminT('usersNav')}
                           </h3>
                           <p className="text-base text-text-secondary leading-relaxed max-w-md">
