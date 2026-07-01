@@ -104,10 +104,10 @@ export default async function DashboardPage({
       </div>
 
       <main className="mx-auto max-w-7xl px-8 pb-32">
-        <div className="space-y-24">
+        <div className="space-y-12">
           {/* Applications */}
           <section>
-            <div className="flex items-center gap-4 mb-12">
+            <div className="flex items-center gap-4 mb-6">
               <h2 className="text-sm font-semibold uppercase tracking-wider text-text-secondary">
                 {t('appsSectionTitle')}
               </h2>
@@ -124,26 +124,26 @@ export default async function DashboardPage({
                 <motion.div key={app} variants={item}>
                   <Link href={appSlug(app)} className="block h-full">
                     <div className="group h-full relative overflow-hidden rounded-2xl border border-line bg-bg-surface shadow-elevation-sm transition-all duration-500 hover:shadow-elevation-md hover:-translate-y-1">
-                      <div className="absolute top-6 right-6 z-10">
-                         <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-50 text-gray-500 transition-all duration-500 group-hover:bg-gray-100 group-hover:scale-110">
-                            <ArrowRight className="w-5 h-5 -rotate-45 group-hover:rotate-0 transition-transform duration-500" />
+                      <div className="absolute top-4 right-4 z-10">
+                         <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-50 text-gray-500 transition-all duration-500 group-hover:bg-gray-100 group-hover:scale-110">
+                            <ArrowRight className="w-4 h-4 -rotate-45 group-hover:rotate-0 transition-transform duration-500" />
                          </div>
                       </div>
                       
-                      <div className="p-10 h-full flex flex-col">
-                        <div className="mb-6">
-                          <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-navy-50 p-3 text-navy-600 transition-transform duration-500 group-hover:scale-110">
+                      <div className="p-6 h-full flex flex-col">
+                        <div className="mb-4">
+                          <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-navy-50 p-2.5 text-navy-600 transition-transform duration-500 group-hover:scale-110">
                             {getAppIcon(app)}
                           </div>
-                          <h3 className="text-2xl font-medium text-text-primary mb-2 group-hover:text-navy-600 transition-colors duration-300">
+                          <h3 className="text-lg font-semibold text-text-primary mb-1 group-hover:text-navy-600 transition-colors duration-300">
                             {adminT(`app_${app}`)}
                           </h3>
-                          <p className="text-base text-text-secondary leading-relaxed max-w-md">
+                          <p className="text-sm text-text-secondary leading-relaxed max-w-md">
                             {t(`appDesc_${app}`)}
                           </p>
                         </div>
                         
-                        <div className="mt-auto pt-8">
+                        <div className="mt-auto pt-4">
                           <span className="inline-flex items-center text-sm font-medium uppercase tracking-wider text-navy-600">
                             {t('openApp')}
                           </span>
@@ -159,7 +159,7 @@ export default async function DashboardPage({
           {/* Admin-only section */}
           {session.user.role === 'ADMIN' && (
             <section>
-               <div className="flex items-center gap-4 mb-12">
+               <div className="flex items-center gap-4 mb-6">
                 <h2 className="text-sm font-semibold uppercase tracking-wider text-text-secondary">
                   {t('adminSectionTitle')}
                 </h2>
@@ -175,15 +175,15 @@ export default async function DashboardPage({
                 <motion.div variants={item}>
                   <Link href={'/admin/users'} className="block h-full">
                     <div className="group h-full relative overflow-hidden rounded-2xl border border-line bg-bg-surface shadow-elevation-sm transition-all duration-500 hover:shadow-elevation-md hover:-translate-y-1">
-                      <div className="absolute top-6 right-6 z-10">
-                         <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-50 text-gray-500 transition-all duration-500 group-hover:bg-gray-100 group-hover:scale-110">
-                            <ArrowRight className="w-5 h-5 -rotate-45 group-hover:rotate-0 transition-transform duration-500" />
+                      <div className="absolute top-4 right-4 z-10">
+                         <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-50 text-gray-500 transition-all duration-500 group-hover:bg-gray-100 group-hover:scale-110">
+                            <ArrowRight className="w-4 h-4 -rotate-45 group-hover:rotate-0 transition-transform duration-500" />
                          </div>
                       </div>
 
-                      <div className="p-10 h-full flex flex-col">
-                        <div className="mb-6">
-                          <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-navy-50 p-3 text-navy-600 transition-transform duration-500 group-hover:scale-110">
+                      <div className="p-6 h-full flex flex-col">
+                        <div className="mb-4">
+                          <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-navy-50 p-2.5 text-navy-600 transition-transform duration-500 group-hover:scale-110">
                             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
                               <circle cx="18" cy="16" r="6" stroke="currentColor" strokeWidth="2" fill="none"/>
                               <path d="M6 38c0-6.627 5.373-12 12-12s12 5.373 12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>
@@ -191,15 +191,15 @@ export default async function DashboardPage({
                               <path d="M42 38c0-5.523-4.477-10-10-10-1.5 0-2.9.33-4.17.92" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>
                             </svg>
                           </div>
-                          <h3 className="text-2xl font-medium text-text-primary mb-2 group-hover:text-navy-600 transition-colors duration-300">
+                          <h3 className="text-lg font-semibold text-text-primary mb-1 group-hover:text-navy-600 transition-colors duration-300">
                             {adminT('usersNav')}
                           </h3>
-                          <p className="text-base text-text-secondary leading-relaxed max-w-md">
+                          <p className="text-sm text-text-secondary leading-relaxed max-w-md">
                             {adminT('usersSubtitle')}
                           </p>
                         </div>
 
-                        <div className="mt-auto pt-8">
+                        <div className="mt-auto pt-4">
                           <span className="inline-flex items-center text-sm font-medium uppercase tracking-wider text-navy-600">
                             {t('openApp')}
                           </span>
