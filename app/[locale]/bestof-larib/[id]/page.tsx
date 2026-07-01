@@ -50,7 +50,8 @@ async function CaseViewPageContent({
 				analysis: {
 					lvef: s.lastAttempt?.lvef ?? undefined,
 					kinetic: s.lastAttempt?.kinetic ?? undefined,
-					lge: s.lastAttempt?.lge ?? undefined,
+					lgePresent: s.lastAttempt?.lgePresent ?? undefined,
+					lgeDetails: s.lastAttempt?.lgeDetails ?? undefined,
 					finalDx: s.lastAttempt?.finalDx ?? undefined,
 				},
 				report: s.lastAttempt?.report ?? null,
@@ -67,7 +68,7 @@ async function CaseViewPageContent({
 		if (!shouldStartNewAttempt) return prefillState;
 		return {
 			...prefillState,
-			analysis: { lvef: '', kinetic: '', lge: '', finalDx: '' },
+			analysis: { lvef: '', kinetic: '', lgePresent: false, lgeDetails: '', finalDx: '' },
 			report: '',
 			validatedAt: null,
 		} satisfies PrefillState;
