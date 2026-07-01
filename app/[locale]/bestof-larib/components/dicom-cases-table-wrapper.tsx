@@ -46,10 +46,10 @@ export function DicomSelectionBar() {
   return (
     <div className='sticky bottom-4 z-50 mx-auto w-fit'>
       <div className='flex items-center gap-3 rounded-lg border bg-background px-4 py-3 shadow-lg'>
-        <HardDrive className='size-4 text-emerald-600' />
+        <HardDrive className='size-4 text-success-600' />
         {selectedCount === 0 ? (
           <>
-            <span className='text-sm text-muted-foreground'>
+            <span className='text-sm text-text-secondary'>
               {t('hint', { count: availableCount })}
             </span>
             <Button
@@ -84,7 +84,7 @@ export function DicomSelectionBar() {
               {downloading ? t('downloading') : t('downloadBatch', { count: selectedCount })}
             </Button>
             {selectedCount > MAX_BATCH && (
-              <span className='text-xs text-destructive'>{t('batchLimit')}</span>
+              <span className='text-xs text-danger-600'>{t('batchLimit')}</span>
             )}
           </>
         )}
@@ -114,7 +114,7 @@ export function DicomIndicator({ caseId }: { caseId: string }) {
 
   return (
     <span title={hasDicoms ? 'DICOMs available' : 'No DICOMs'}>
-      <HardDrive className={`size-4 ${hasDicoms ? 'text-emerald-600' : 'text-slate-300'}`} />
+      <HardDrive className={`size-4 ${hasDicoms ? 'text-success-600' : 'text-gray-300'}`} />
     </span>
   )
 }

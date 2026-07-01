@@ -59,12 +59,12 @@ export function ForgotPasswordForm() {
       <div className="max-w-md mx-auto w-full">
         <Card>
           <CardHeader className="text-center space-y-4">
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-              <CheckCircle className="w-6 h-6 text-green-600" />
+            <div className="w-12 h-12 bg-success-100 rounded-full flex items-center justify-center mx-auto">
+              <CheckCircle className="w-6 h-6 text-success-600" />
             </div>
             <div>
               <CardTitle className="text-xl">{t('emailSent')}</CardTitle>
-              <p className="text-muted-foreground mt-2">
+              <p className="text-text-secondary mt-2">
                 {t('emailSentDescription')}
               </p>
             </div>
@@ -86,12 +86,12 @@ export function ForgotPasswordForm() {
     <div className="max-w-md mx-auto w-full">
       <Card>
         <CardHeader className="text-center space-y-4">
-          <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto">
-            <Mail className="w-6 h-6 text-primary-foreground" />
+          <div className="w-12 h-12 bg-navy-600 rounded-full flex items-center justify-center mx-auto">
+            <Mail className="w-6 h-6 text-white" />
           </div>
           <div>
             <CardTitle className="text-xl">{t('forgotPasswordTitle')}</CardTitle>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-text-secondary mt-2">
               {t('forgotPasswordDescription')}
             </p>
           </div>
@@ -109,12 +109,12 @@ export function ForgotPasswordForm() {
                 disabled={isLoading}
               />
               {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
+                <p className="text-sm text-danger-600">{errors.email.message}</p>
               )}
             </div>
 
             {error && (
-              <div className="flex items-center gap-2 text-sm text-destructive">
+              <div className="flex items-center gap-2 text-sm text-danger-600">
                 <AlertCircle className="w-4 h-4" />
                 {error}
               </div>
@@ -128,7 +128,7 @@ export function ForgotPasswordForm() {
           <div className="text-center">
             <Link
               href={applicationLink(locale, '/login')}
-              className="text-sm text-muted-foreground hover:text-primary inline-flex items-center gap-1"
+              className="text-sm text-text-secondary hover:text-navy-600 inline-flex items-center gap-1"
             >
               <ArrowLeft className="w-4 h-4" />
               {t('backToLogin')}

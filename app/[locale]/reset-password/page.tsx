@@ -19,7 +19,7 @@ function ResetPasswordSkeleton({ heading, description, loadingLabel }: ResetPass
           <Skeleton className="h-12 w-12 rounded-full mx-auto" />
           <div>
             <CardTitle className="text-xl">{heading}</CardTitle>
-            <p className="text-muted-foreground mt-2">{description}</p>
+            <p className="text-text-secondary mt-2">{description}</p>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">

@@ -31,12 +31,12 @@ export const setPasswordFromInviteAction = unauthenticatedAction
       body: {
         email: payload.email,
         password,
-        name: [payload.firstName, payload.lastName].filter(Boolean).join(' ') || undefined,
+        name: [payload.firstName, payload.lastName].filter(Boolean).join(' ') || payload.email,
       },
     })
 
     if ('error' in result && result.error) {
-      throw new Error(result.error.message || 'SIGNUP_FAILED')
+      throw new Error((result.error as { message?: string }).message || 'SIGNUP_FAILED')
     }
 
     // Update role/applications/metadata

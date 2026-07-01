@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
+import { tagChipStyle } from '@/lib/tag-color'
 import CaseTagQuickPicker, { type CaseDisplayTag } from './case-tag-quick-picker'
 import { useTranslations } from 'next-intl'
 
@@ -22,7 +23,7 @@ export default function CaseTagCell({ mode, caseId, initialTags }: { mode: Mode;
 					<span className="text-xs text-muted-foreground">{t('caseView.noTagsSelected')}</span>
 				) : (
 					assignedTags.map((tag) => (
-						<Badge key={tag.id} className="border-transparent text-white" style={{ backgroundColor: tag.color }}>
+						<Badge key={tag.id} className="border font-medium" style={tagChipStyle(tag.color)}>
 							{tag.name}
 						</Badge>
 					))

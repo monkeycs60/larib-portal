@@ -85,19 +85,19 @@ type TeamLeaveOverviewSectionProps = {
 
 type AllocationState = Record<string, number>
 
-const statusVariant: Record<AdminUserRow['status'], 'destructive' | 'secondary' | 'default' | 'outline'> = {
-  CRITICAL: 'destructive',
-  WARNING_USAGE: 'secondary',
-  WARNING_INACTIVE: 'outline',
-  GOOD: 'default',
-  UNALLOCATED: 'outline',
+const statusVariant: Record<AdminUserRow['status'], 'danger' | 'warning' | 'success' | 'neutral'> = {
+  CRITICAL: 'danger',
+  WARNING_USAGE: 'warning',
+  WARNING_INACTIVE: 'neutral',
+  GOOD: 'success',
+  UNALLOCATED: 'neutral',
 }
 
-const leaveStatusBadgeVariant: Record<LeaveRequestStatus, 'secondary' | 'default' | 'destructive' | 'outline'> = {
-  PENDING: 'secondary',
-  APPROVED: 'default',
-  REJECTED: 'destructive',
-  CANCELLED: 'outline',
+const leaveStatusBadgeVariant: Record<LeaveRequestStatus, 'warning' | 'success' | 'danger' | 'neutral'> = {
+  PENDING: 'warning',
+  APPROVED: 'success',
+  REJECTED: 'danger',
+  CANCELLED: 'neutral',
 }
 
 export function TeamLeaveOverviewSection({ data }: TeamLeaveOverviewSectionProps) {
@@ -229,7 +229,7 @@ export function TeamLeaveOverviewSection({ data }: TeamLeaveOverviewSectionProps
           </DialogHeader>
           <div className='space-y-6'>
             <div>
-              <p className='text-sm text-muted-foreground'>{allocationModal.current}</p>
+              <p className='text-sm text-text-secondary'>{allocationModal.current}</p>
               <div className='mt-3 flex items-center justify-center gap-3'>
                 <Button
                   type='button'
@@ -290,9 +290,9 @@ export function TeamLeaveOverviewSection({ data }: TeamLeaveOverviewSectionProps
             <CardTitle>{tableTitle}</CardTitle>
             <CardDescription className='text-xs'>{summarySubtitle}</CardDescription>
           </div>
-          <div className='flex flex-wrap gap-2 text-[10px] font-medium uppercase tracking-wide text-muted-foreground'>
+          <div className='flex flex-wrap gap-2 text-[10px] font-medium uppercase tracking-wide text-text-secondary'>
             {(Object.entries(legendLabels) as Array<[keyof typeof legendLabels, string]>).map(([key, label]) => (
-              <Badge key={key} variant={statusVariant[key] ?? 'secondary'} className='px-2 py-0 text-[10px]'>
+              <Badge key={key} variant={statusVariant[key] ?? 'neutral'} className='px-2 py-0 text-[10px]'>
                 {label}
               </Badge>
             ))}
@@ -339,7 +339,7 @@ export function TeamLeaveOverviewSection({ data }: TeamLeaveOverviewSectionProps
                 return (
                   <Fragment key={row.userId}>
                     <TableRow
-                      className={`cursor-pointer ${hasDeparted ? 'bg-muted/40 text-muted-foreground' : ''}`}
+                      className={`cursor-pointer ${hasDeparted ? 'bg-gray-50 text-text-secondary' : ''}`}
                       onClick={() => toggleUserExpansion(row.userId)}
                     >
                       <TableCell className='w-8'>
@@ -361,7 +361,7 @@ export function TeamLeaveOverviewSection({ data }: TeamLeaveOverviewSectionProps
                       </TableCell>
                       <TableCell>
                         <div className='font-medium'>{displayName}</div>
-                        <div className='text-xs text-muted-foreground'>{row.email}</div>
+                        <div className='text-xs text-text-secondary'>{row.email}</div>
                       </TableCell>
                       <TableCell>{statusLabels[row.role]}</TableCell>
                       <TableCell>
@@ -393,10 +393,10 @@ export function TeamLeaveOverviewSection({ data }: TeamLeaveOverviewSectionProps
                       </TableCell>
                     </TableRow>
                     {isExpanded && (
-                      <TableRow className='bg-muted/30 hover:bg-muted/30'>
+                      <TableRow className='bg-gray-50 hover:bg-gray-50'>
                         <TableCell colSpan={12} className='p-4'>
                           {row.leaveHistory.length === 0 ? (
-                            <p className='text-sm text-muted-foreground'>{detailsLabels.empty}</p>
+                            <p className='text-sm text-text-secondary'>{detailsLabels.empty}</p>
                           ) : (
                             <div className='rounded-md border'>
                               <Table>
@@ -427,11 +427,11 @@ export function TeamLeaveOverviewSection({ data }: TeamLeaveOverviewSectionProps
                                             <div className='flex flex-col text-sm'>
                                               <span>{new Date(entry.decisionAt).toLocaleDateString()}</span>
                                               {entry.approverName && (
-                                                <span className='text-xs text-muted-foreground'>{entry.approverName}</span>
+                                                <span className='text-xs text-text-secondary'>{entry.approverName}</span>
                                               )}
                                             </div>
                                           ) : (
-                                            <span className='text-sm text-muted-foreground'>—</span>
+                                            <span className='text-sm text-text-secondary'>—</span>
                                           )}
                                         </TableCell>
                                       </TableRow>

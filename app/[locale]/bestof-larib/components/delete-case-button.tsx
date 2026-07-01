@@ -33,8 +33,8 @@ export default function DeleteCaseButton({ id }: { id: string }) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button type="button" size="sm" variant="destructive" disabled={isExecuting}>
-          <Trash2 />{t('delete')}
+        <Button type="button" size="icon" variant="outline" title={t('delete')} disabled={isExecuting}>
+          <Trash2 className="text-danger-600" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
@@ -44,7 +44,7 @@ export default function DeleteCaseButton({ id }: { id: string }) {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-          <AlertDialogAction onClick={() => execute({ id })}>
+          <AlertDialogAction onClick={() => execute({ id })} className="bg-danger-600 text-white hover:bg-danger-700">
             {isExecuting ? t('deleting') : t('delete')}
           </AlertDialogAction>
         </AlertDialogFooter>

@@ -232,7 +232,7 @@ export function UserEditDialog({
 								</label>
 								<button
 									type='button'
-									className='text-xs text-blue-600'
+									className='text-xs text-navy-600'
 									onClick={() => setManagePositionsOpen(true)}>
 									{t('manage')}
 								</button>
@@ -263,7 +263,7 @@ export function UserEditDialog({
 					<div>
 						<div className="flex items-center justify-between mb-3">
 							<div className="text-sm font-medium">{t('applications')}</div>
-							<div className="text-xs font-medium px-2 py-1 rounded-full bg-muted">
+							<div className="text-xs font-medium px-2 py-1 rounded-full bg-gray-100 text-text-secondary">
 								{apps.size} / {AVAILABLE_APPLICATIONS.length} {t('applicationsSelected')}
 							</div>
 						</div>
@@ -278,21 +278,21 @@ export function UserEditDialog({
 										className={`
 											relative flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left
 											${isSelected
-												? 'border-primary bg-primary/5 shadow-sm'
-												: 'border-muted hover:border-muted-foreground/50 hover:bg-muted/50'
+												? 'border-navy-600 bg-navy-50 shadow-sm'
+												: 'border-line hover:border-gray-300 hover:bg-gray-50'
 											}
 										`}
 									>
 										<div className={`
 											flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors
 											${isSelected
-												? 'border-primary bg-primary text-primary-foreground'
-												: 'border-muted-foreground/30'
+												? 'border-navy-600 bg-navy-600 text-white'
+												: 'border-gray-300'
 											}
 										`}>
 											{isSelected && <Check className="h-3 w-3" />}
 										</div>
-										<span className={`text-sm font-medium ${isSelected ? 'text-foreground' : 'text-muted-foreground'}`}>
+										<span className={`text-sm font-medium ${isSelected ? 'text-text-primary' : 'text-text-secondary'}`}>
 											{t(`app_${app}`)}
 										</span>
 									</button>

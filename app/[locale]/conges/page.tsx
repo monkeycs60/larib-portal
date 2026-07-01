@@ -44,11 +44,11 @@ function fullName(firstName: string | null, lastName: string | null, fallback?: 
   return fallback ?? '—'
 }
 
-const statusBadgeVariant: Record<'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED', 'secondary' | 'default' | 'destructive' | 'outline'> = {
-  PENDING: 'secondary',
-  APPROVED: 'default',
-  REJECTED: 'destructive',
-  CANCELLED: 'outline',
+const statusBadgeVariant: Record<'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED', 'warning' | 'success' | 'danger' | 'neutral'> = {
+  PENDING: 'warning',
+  APPROVED: 'success',
+  REJECTED: 'danger',
+  CANCELLED: 'neutral',
 }
 
 export default async function CongesPage({ params, searchParams }: PageParams) {
@@ -220,6 +220,7 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
           daySingular: t.raw('admin.pending.daySingular') as string,
           dayPlural: t.raw('admin.pending.dayPlural') as string,
           subtitle: t('admin.pending.subtitle', { days: adminDashboard.pendingDaysTotal }),
+          pending: t('admin.table.pending'),
         },
         toasts: {
           statusApproved: t('admin.toasts.statusApproved'),
@@ -378,24 +379,24 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
         {summaryCards.map((card) => (
           <Card key={card.label}>
             <CardHeader className='pb-2'>
-              <CardTitle className='text-sm font-medium text-muted-foreground'>{card.label}</CardTitle>
+              <CardTitle className='text-sm font-medium text-text-secondary'>{card.label}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className='text-2xl font-semibold'>{card.value}</div>
               {card.helper ? (
-                <div className='text-sm font-medium text-rose-500'>{card.helper}</div>
+                <div className='text-sm font-medium text-coral-600'>{card.helper}</div>
               ) : null}
             </CardContent>
           </Card>
         ))}
         <Card>
           <CardHeader className='pb-2'>
-            <CardTitle className='text-sm font-medium text-muted-foreground'>{t('summary.contractLabel')}</CardTitle>
+            <CardTitle className='text-sm font-medium text-text-secondary'>{t('summary.contractLabel')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className='text-sm'>{contractInfo}</div>
             {contractDatesInfo ? (
-              <div className='mt-1 text-xs text-muted-foreground'>{contractDatesInfo}</div>
+              <div className='mt-1 text-xs text-text-secondary'>{contractDatesInfo}</div>
             ) : null}
           </CardContent>
         </Card>
@@ -423,15 +424,15 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
         </CardHeader>
         <CardContent>
           {calendarData.todaysAbsences.length === 0 ? (
-            <p className='text-sm text-muted-foreground'>{t('today.none')}</p>
+            <p className='text-sm text-text-secondary'>{t('today.none')}</p>
           ) : (
             <ul className='space-y-2'>
               {calendarData.todaysAbsences.map((absence) => (
-                <li key={absence.userId} className='flex items-center justify-between rounded-md border p-3'>
+                <li key={absence.userId} className='flex items-center justify-between rounded-md border border-line p-3'>
                   <div>
                     <div className='font-medium'>{fullName(absence.firstName, absence.lastName)}</div>
                     {absence.position ? (
-                      <p className='text-xs text-muted-foreground'>{absence.position}</p>
+                      <p className='text-xs text-text-secondary'>{absence.position}</p>
                     ) : null}
                   </div>
                   <Badge variant='outline'>{roleLabels[absence.role]}</Badge>
@@ -464,7 +465,7 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
 
   const pendingRequestsSection = pendingRequestsData && adminActionTranslations && adminEditDialogTranslations ? (
     <section className='px-6'>
-      <Suspense fallback={<div className='text-sm text-muted-foreground'>{t('admin.loading')}</div>}>
+      <Suspense fallback={<div className='text-sm text-text-secondary'>{t('admin.loading')}</div>}>
         <PendingRequestsSection
           pendingRequests={pendingRequestsData.pendingRequests}
           labels={pendingRequestsData.labels}
@@ -497,7 +498,7 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
 
   const teamLeaveOverviewSection = teamLeaveOverviewData ? (
     <section className='px-6'>
-      <Suspense fallback={<div className='text-sm text-muted-foreground'>{t('admin.loading')}</div>}>
+      <Suspense fallback={<div className='text-sm text-text-secondary'>{t('admin.loading')}</div>}>
         <TeamLeaveOverviewSection data={teamLeaveOverviewData} />
       </Suspense>
     </section>
@@ -511,7 +512,7 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
         <div className='flex flex-col gap-4 md:flex-row md:items-center md:justify-between'>
           <div>
             <h1 className='text-2xl font-semibold'>{t('title')}</h1>
-            <p className='text-sm text-muted-foreground'>{t('subtitle')}</p>
+            <p className='text-sm text-text-secondary'>{t('subtitle')}</p>
           </div>
           {!isAdmin && (
             <RequestLeaveDialog translations={requestTranslations} defaultMonthIso={activeMonth.toISOString()} userContext={userLeaveContext} />
@@ -522,8 +523,8 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
       {isAdmin ? (
         <>
           {pendingRequestsSection}
-          {decisionHistorySection}
           {calendarSection}
+          {decisionHistorySection}
           {teamLeaveOverviewSection}
         </>
       ) : (

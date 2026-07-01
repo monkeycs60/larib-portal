@@ -99,7 +99,7 @@ export function FileUpload({
 		setUploading(true);
 		try {
 			const { deleteProfilePhotoAction } = await import('@/actions/avatar');
-			const result = await deleteProfilePhotoAction();
+			const result = await deleteProfilePhotoAction({});
 			if (result?.serverError) {
 				throw new Error('delete_failed');
 			}

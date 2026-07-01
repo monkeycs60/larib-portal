@@ -83,7 +83,7 @@ export default async function DashboardPage({
   }
 
   return (
-    <div className="min-h-screen bg-background selection:bg-primary/10">
+    <div className="min-h-screen bg-bg-app selection:bg-navy-600/10">
       {/* Hero Section - Compact & Clean */}
       <div className="relative pt-16 pb-10 px-8">
         <div className="relative mx-auto max-w-7xl">
@@ -93,25 +93,25 @@ export default async function DashboardPage({
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="max-w-4xl"
           >
-            <h1 className="text-5xl md:text-6xl font-serif font-medium tracking-tight text-foreground mb-4 leading-[1.1]">
+            <h1 className="text-5xl md:text-6xl font-medium tracking-tight text-text-primary mb-4 leading-[1.1]">
               {t('title')}
             </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground font-light tracking-wide">
-              {randomGreeting}, <span className="text-foreground font-normal">{userName}</span>.
+            <p className="text-xl md:text-2xl text-text-secondary font-light tracking-wide">
+              {randomGreeting}, <span className="text-text-primary font-normal">{userName}</span>.
             </p>
           </motion.div>
         </div>
       </div>
 
       <main className="mx-auto max-w-7xl px-8 pb-32">
-        <div className="space-y-24">
+        <div className="space-y-12">
           {/* Applications */}
           <section>
-            <div className="flex items-center gap-4 mb-12">
-              <h2 className="text-lg font-medium tracking-wide text-foreground">
+            <div className="flex items-center gap-4 mb-6">
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-text-secondary">
                 {t('appsSectionTitle')}
               </h2>
-              <div className="h-px flex-1 bg-border/60" />
+              <div className="h-px flex-1 bg-line" />
             </div>
             
             <motion.div 
@@ -123,28 +123,28 @@ export default async function DashboardPage({
               {apps.map((app) => (
                 <motion.div key={app} variants={item}>
                   <Link href={appSlug(app)} className="block h-full">
-                    <div className="group h-full relative overflow-hidden rounded-[2rem] bg-secondary dark:bg-card transition-all duration-500 hover:shadow-2xl hover:shadow-black/5 hover:-translate-y-1">
-                      <div className="absolute top-6 right-6 z-10">
-                         <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/50 backdrop-blur-sm text-foreground transition-all duration-500 group-hover:bg-white group-hover:scale-110">
-                            <ArrowRight className="w-5 h-5 -rotate-45 group-hover:rotate-0 transition-transform duration-500" />
+                    <div className="group h-full relative overflow-hidden rounded-2xl border border-line bg-bg-surface shadow-elevation-sm transition-all duration-500 hover:shadow-elevation-md hover:-translate-y-1">
+                      <div className="absolute top-4 right-4 z-10">
+                         <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-50 text-gray-500 transition-all duration-500 group-hover:bg-gray-100 group-hover:scale-110">
+                            <ArrowRight className="w-4 h-4 -rotate-45 group-hover:rotate-0 transition-transform duration-500" />
                          </div>
                       </div>
                       
-                      <div className="p-10 h-full flex flex-col">
-                        <div className="mb-6">
-                          <div className="w-14 h-14 mb-6 text-primary transition-transform duration-500 group-hover:scale-110">
+                      <div className="p-6 h-full flex flex-col">
+                        <div className="mb-4">
+                          <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-navy-50 p-2.5 text-navy-600 transition-transform duration-500 group-hover:scale-110">
                             {getAppIcon(app)}
                           </div>
-                          <h3 className="text-2xl font-serif font-medium text-foreground mb-2 group-hover:text-primary transition-colors duration-300">
+                          <h3 className="text-lg font-semibold text-text-primary mb-1 group-hover:text-navy-600 transition-colors duration-300">
                             {adminT(`app_${app}`)}
                           </h3>
-                          <p className="text-base text-muted-foreground leading-relaxed max-w-md">
+                          <p className="text-sm text-text-secondary leading-relaxed max-w-md">
                             {t(`appDesc_${app}`)}
                           </p>
                         </div>
                         
-                        <div className="mt-auto pt-8">
-                          <span className="inline-flex items-center text-sm font-medium uppercase tracking-wider text-primary">
+                        <div className="mt-auto pt-4">
+                          <span className="inline-flex items-center text-sm font-medium uppercase tracking-wider text-navy-600">
                             {t('openApp')}
                           </span>
                         </div>
@@ -159,11 +159,11 @@ export default async function DashboardPage({
           {/* Admin-only section */}
           {session.user.role === 'ADMIN' && (
             <section>
-               <div className="flex items-center gap-4 mb-12">
-                <h2 className="text-lg font-medium tracking-wide text-foreground">
+               <div className="flex items-center gap-4 mb-6">
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-text-secondary">
                   {t('adminSectionTitle')}
                 </h2>
-                <div className="h-px flex-1 bg-border/60" />
+                <div className="h-px flex-1 bg-line" />
               </div>
               
               <motion.div
@@ -174,16 +174,16 @@ export default async function DashboardPage({
               >
                 <motion.div variants={item}>
                   <Link href={'/admin/users'} className="block h-full">
-                    <div className="group h-full relative overflow-hidden rounded-[2rem] bg-secondary dark:bg-card transition-all duration-500 hover:shadow-2xl hover:shadow-black/5 hover:-translate-y-1">
-                      <div className="absolute top-6 right-6 z-10">
-                         <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/50 backdrop-blur-sm text-foreground transition-all duration-500 group-hover:bg-white group-hover:scale-110">
-                            <ArrowRight className="w-5 h-5 -rotate-45 group-hover:rotate-0 transition-transform duration-500" />
+                    <div className="group h-full relative overflow-hidden rounded-2xl border border-line bg-bg-surface shadow-elevation-sm transition-all duration-500 hover:shadow-elevation-md hover:-translate-y-1">
+                      <div className="absolute top-4 right-4 z-10">
+                         <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-50 text-gray-500 transition-all duration-500 group-hover:bg-gray-100 group-hover:scale-110">
+                            <ArrowRight className="w-4 h-4 -rotate-45 group-hover:rotate-0 transition-transform duration-500" />
                          </div>
                       </div>
 
-                      <div className="p-10 h-full flex flex-col">
-                        <div className="mb-6">
-                          <div className="w-14 h-14 mb-6 text-primary transition-transform duration-500 group-hover:scale-110">
+                      <div className="p-6 h-full flex flex-col">
+                        <div className="mb-4">
+                          <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-navy-50 p-2.5 text-navy-600 transition-transform duration-500 group-hover:scale-110">
                             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
                               <circle cx="18" cy="16" r="6" stroke="currentColor" strokeWidth="2" fill="none"/>
                               <path d="M6 38c0-6.627 5.373-12 12-12s12 5.373 12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>
@@ -191,16 +191,16 @@ export default async function DashboardPage({
                               <path d="M42 38c0-5.523-4.477-10-10-10-1.5 0-2.9.33-4.17.92" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>
                             </svg>
                           </div>
-                          <h3 className="text-2xl font-serif font-medium text-foreground mb-2 group-hover:text-primary transition-colors duration-300">
+                          <h3 className="text-lg font-semibold text-text-primary mb-1 group-hover:text-navy-600 transition-colors duration-300">
                             {adminT('usersNav')}
                           </h3>
-                          <p className="text-base text-muted-foreground leading-relaxed max-w-md">
+                          <p className="text-sm text-text-secondary leading-relaxed max-w-md">
                             {adminT('usersSubtitle')}
                           </p>
                         </div>
 
-                        <div className="mt-auto pt-8">
-                          <span className="inline-flex items-center text-sm font-medium uppercase tracking-wider text-primary">
+                        <div className="mt-auto pt-4">
+                          <span className="inline-flex items-center text-sm font-medium uppercase tracking-wider text-navy-600">
                             {t('openApp')}
                           </span>
                         </div>

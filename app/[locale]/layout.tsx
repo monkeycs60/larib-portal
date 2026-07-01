@@ -1,20 +1,14 @@
 import type { Metadata } from "next";
-import { Libre_Baskerville, Inter } from "next/font/google";
+import { Inter_Tight } from "next/font/google";
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/app/i18n/routing';
 import { Toaster } from 'sonner'
 import "../globals.css";
-import { Navbar } from "./components/navbar";
+import { AppShell } from "./components/app-shell";
 
-const libreBaskerville = Libre_Baskerville({
-  weight: ['400', '700'],
-  variable: "--font-serif",
-  subsets: ["latin"],
-});
-
-const inter = Inter({
+const interTight = Inter_Tight({
   variable: "--font-sans",
   subsets: ["latin"],
 });
@@ -62,11 +56,10 @@ export default async function LocaleLayout({
   return (
     <html lang={locale}>
       <body
-        className={`${inter.variable} ${libreBaskerville.variable} antialiased font-sans`}
+        className={`${interTight.variable} antialiased font-sans`}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <Navbar />
-          {children}
+          <AppShell>{children}</AppShell>
           <Toaster richColors position="top-right" />
         </NextIntlClientProvider>
       </body>

@@ -36,14 +36,14 @@ export default function BestofStatsUserTable({ userStats, translations }: StatsU
     }
     if (daysSince <= 7) {
       return (
-        <Badge className='bg-green-500 hover:bg-green-600 text-white'>
+        <Badge variant='success'>
           {translations.activity.veryActive}
         </Badge>
       );
     }
     if (daysSince <= 30) {
       return (
-        <Badge className='bg-rose-500 hover:bg-rose-600 text-white'>
+        <Badge variant='warning'>
           {translations.activity.active}
         </Badge>
       );
@@ -60,7 +60,7 @@ export default function BestofStatsUserTable({ userStats, translations }: StatsU
   if (userStats.length === 0) {
     return (
       <div className='text-center py-12'>
-        <p className='text-muted-foreground'>{translations.noCasesCompleted}</p>
+        <p className='text-text-secondary'>{translations.noCasesCompleted}</p>
       </div>
     );
   }
@@ -89,7 +89,7 @@ export default function BestofStatsUserTable({ userStats, translations }: StatsU
               <TableCell>
                 <div>
                   <div className='font-medium'>{userStat.userName}</div>
-                  <div className='text-xs text-muted-foreground'>{userStat.userEmail}</div>
+                  <div className='text-xs text-text-secondary'>{userStat.userEmail}</div>
                 </div>
               </TableCell>
               <TableCell>
@@ -106,14 +106,14 @@ export default function BestofStatsUserTable({ userStats, translations }: StatsU
                 {userStat.lastCompletedAt ? (
                   <span className='text-sm'>{new Date(userStat.lastCompletedAt).toLocaleDateString()}</span>
                 ) : (
-                  <span className='text-sm text-muted-foreground'>—</span>
+                  <span className='text-sm text-text-secondary'>—</span>
                 )}
               </TableCell>
               <TableCell className='text-right'>
                 {userStat.daysSinceLastActivity !== null ? (
                   <span className='text-sm'>{userStat.daysSinceLastActivity}d</span>
                 ) : (
-                  <span className='text-sm text-muted-foreground'>—</span>
+                  <span className='text-sm text-text-secondary'>—</span>
                 )}
               </TableCell>
               <TableCell>{getActivityBadge(userStat.daysSinceLastActivity)}</TableCell>

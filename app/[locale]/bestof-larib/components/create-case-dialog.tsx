@@ -24,6 +24,7 @@ import {
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { tagChipStyle } from '@/lib/tag-color';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
@@ -535,7 +536,7 @@ export default function CreateCaseDialog({
 						<div className='bg-muted rounded p-3 text-sm'>
 							<div className='font-medium'>{t('dicom.caseNumber')}: {String(clinicalCase.caseNumber).padStart(4, '0')}</div>
 							{clinicalCase.examType ? (
-								<div className='text-muted-foreground mt-1'>
+								<div className='text-text-secondary mt-1'>
 									{t('dicom.ftpPath', { path: `bestof/${clinicalCase.examType.name}/${String(clinicalCase.caseNumber).padStart(4, '0')}/` })}
 								</div>
 							) : null}
@@ -558,7 +559,7 @@ export default function CreateCaseDialog({
 									{isAdmin && (
 										<button
 											type='button'
-											className='text-xs text-blue-600'
+											className='text-xs text-navy-600'
 											onClick={() => setManageExamTypesOpen(true)}>
 											Manage
 										</button>
@@ -606,7 +607,7 @@ export default function CreateCaseDialog({
 									{isAdmin && (
 										<button
 											type='button'
-											className='text-xs text-blue-600'
+											className='text-xs text-navy-600'
 											onClick={() => setManageDiseaseTagsOpen(true)}>
 											Manage
 										</button>
@@ -654,15 +655,15 @@ export default function CreateCaseDialog({
 								<div className='border rounded p-3 space-y-2'>
 									<div className='flex flex-wrap gap-2'>
 										{selectedAdminTags.length === 0 ? (
-											<span className='text-sm text-muted-foreground'>No tags selected</span>
+											<span className='text-sm text-text-secondary'>No tags selected</span>
 										) : (
 											localAdminTags
 												.filter((tag) => selectedAdminTags.includes(tag.id))
 												.map((tag) => (
 													<div
 														key={tag.id}
-														className='inline-flex items-center gap-1 rounded px-2 py-1 text-xs text-white'
-														style={{ backgroundColor: tag.color }}
+														className='inline-flex items-center gap-1 rounded border px-2 py-1 text-xs font-medium'
+														style={tagChipStyle(tag.color)}
 													>
 														<span>{tag.name}</span>
 														<button
@@ -691,8 +692,8 @@ export default function CreateCaseDialog({
 														onClick={() => {
 															setSelectedAdminTags((previous) => [...previous, tag.id]);
 														}}
-														className='inline-flex items-center gap-1 rounded px-2 py-1 text-xs text-white hover:opacity-80'
-														style={{ backgroundColor: tag.color }}
+														className='inline-flex items-center gap-1 rounded border px-2 py-1 text-xs font-medium hover:opacity-80'
+														style={tagChipStyle(tag.color)}
 													>
 														<span>{tag.name}</span>
 														<span>+</span>
@@ -714,7 +715,7 @@ export default function CreateCaseDialog({
 									disabled={isExecuting}
 									max={10}
 								/>
-								<div className='text-xs text-muted-foreground mt-1'>
+								<div className='text-xs text-text-secondary mt-1'>
 									{t('hints.tags')}
 								</div>
 							</div>
@@ -725,7 +726,7 @@ export default function CreateCaseDialog({
 						<div className='text-sm font-medium'>
 							{t('content.section')}
 						</div>
-						<div className='text-sm text-muted-foreground'>
+						<div className='text-sm text-text-secondary'>
 							{t('content.helper')}
 						</div>
 
@@ -743,7 +744,7 @@ export default function CreateCaseDialog({
 											href={pdfUrl}
 											target='_blank'
 											rel='noreferrer'
-											className='text-xs text-blue-600 underline'>
+											className='text-xs text-navy-600 underline'>
 											{t('view')}
 										</a>
 										<Button
@@ -757,7 +758,7 @@ export default function CreateCaseDialog({
 								</div>
 							) : (
 								<label className='block border border-dashed rounded p-6 text-center cursor-pointer'>
-									<div className='text-sm text-muted-foreground'>
+									<div className='text-sm text-text-secondary'>
 										{t('content.pdfDrop')}
 									</div>
 									<input
@@ -772,11 +773,11 @@ export default function CreateCaseDialog({
 									/>
 								</label>
 							)}
-							<div className='text-xs text-muted-foreground mt-1'>
+							<div className='text-xs text-text-secondary mt-1'>
 								{t('content.pdfHint')}
 							</div>
 							{hasText ? (
-								<div className='mt-2 text-yellow-700 bg-yellow-50 border border-yellow-200 text-sm rounded p-2'>
+								<div className='mt-2 text-warn-700 bg-warn-50 border border-warn-100 text-sm rounded p-2'>
 									{t('errors.exclusivePdfDisabled')}
 								</div>
 							) : null}
@@ -793,12 +794,12 @@ export default function CreateCaseDialog({
 								disabled={!!pdfUrl}
 							/>
 							{!pdfUrl && !textContent ? (
-								<div className='mt-2 text-yellow-700 bg-yellow-50 border border-yellow-200 text-sm rounded p-2'>
+								<div className='mt-2 text-warn-700 bg-warn-50 border border-warn-100 text-sm rounded p-2'>
 									{t('errors.contentRequired')}
 								</div>
 							) : null}
 							{pdfUrl ? (
-								<div className='mt-2 text-yellow-700 bg-yellow-50 border border-yellow-200 text-sm rounded p-2'>
+								<div className='mt-2 text-warn-700 bg-warn-50 border border-warn-100 text-sm rounded p-2'>
 									{t('errors.exclusiveTextDisabled')}
 								</div>
 							) : null}

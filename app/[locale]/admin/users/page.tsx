@@ -25,7 +25,7 @@ export default async function AdminUsersPage({
     <div className="space-y-4 max-w-7xl mx-auto">
       <div>
         <h1 className="text-2xl font-semibold">{t('usersTitle')}</h1>
-        <p className="text-muted-foreground">{t('usersSubtitle')}</p>
+        <p className="text-text-secondary">{t('usersSubtitle')}</p>
       </div>
       <UserTable users={users as unknown as UserRow[]} positions={positions} locale={locale} />
     </div>

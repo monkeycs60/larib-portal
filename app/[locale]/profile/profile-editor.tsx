@@ -190,7 +190,7 @@ export function ProfileEditor({ initial, positions = [] }: Props) {
           <div className="space-y-1">
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-500">{tAdmin('position')}</div>
-              <button type="button" className="text-xs text-blue-600" onClick={() => { setAddPosOpen(true); setNewPosName('') }} disabled={creatingPos}>
+              <button type="button" className="text-xs text-navy-600" onClick={() => { setAddPosOpen(true); setNewPosName('') }} disabled={creatingPos}>
                 {tAdmin('addNewPosition')}
               </button>
             </div>
@@ -256,7 +256,7 @@ export function ProfileEditor({ initial, positions = [] }: Props) {
                   onClick={() => toggleApp(app)}
                   className={
                     apps.has(app)
-                      ? 'px-2 py-1 rounded border bg-primary text-primary-foreground text-xs'
+                      ? 'px-2 py-1 rounded border bg-navy-600 text-white text-xs'
                       : 'px-2 py-1 rounded border text-xs'
                   }
                 >
