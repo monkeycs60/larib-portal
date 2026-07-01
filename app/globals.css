@@ -37,6 +37,12 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-bg-app: var(--bg-app);
+  --color-bg-surface: var(--bg-surface);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-line: var(--line);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -100,12 +106,6 @@
   --color-danger-600: #b91c1c;
   --color-danger-700: #991b1b;
 
-  --color-bg-app: #f5f7fa;
-  --color-bg-surface: #ffffff;
-  --color-text-primary: #141a22;
-  --color-text-secondary: #6b7685;
-  --color-text-muted: #9aa5b3;
-  --color-line: #dde2e9;
 
   --shadow-elevation-xs: 0 1px 2px rgba(16, 28, 48, 0.06);
   --shadow-elevation-sm: 0 1px 3px rgba(16, 28, 48, 0.08), 0 1px 2px rgba(16, 28, 48, 0.04);
@@ -115,6 +115,14 @@
 
 :root {
   --radius: 0.75rem;
+
+  /* Redesign semantic surfaces/text (light) */
+  --bg-app: #f5f7fa;
+  --bg-surface: #ffffff;
+  --text-primary: #141a22;
+  --text-secondary: #6b7685;
+  --text-muted: #9aa5b3;
+  --line: #dde2e9;
 
   /* Research Hospital Palette - Navy/Indigo with Amber accents */
   --background: oklch(0.99 0.002 250); /* White with slight blue hint */
@@ -165,6 +173,14 @@
 }
 
 .dark {
+  /* Redesign semantic surfaces/text (dark) — navy-based */
+  --bg-app: #0a1b30;
+  --bg-surface: #0e2542;
+  --text-primary: #f5f7fa;
+  --text-secondary: #aac0dc;
+  --text-muted: #7197c2;
+  --line: #173d6e;
+
   /* Dark mode - Navy/Indigo theme */
   --background: oklch(0.14 0.02 250);
   --foreground: oklch(0.98 0.005 250);
