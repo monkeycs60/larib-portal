@@ -13,7 +13,9 @@
     "applications": "Applications",
     "sectionOverview": "Overview",
     "sectionApplications": "Applications",
-    "sectionAdministration": "Administration"
+    "sectionAdministration": "Administration",
+    "collapseSidebar": "Collapse menu",
+    "expandSidebar": "Expand menu"
   },
   "home": {
     "title": "Hello World",

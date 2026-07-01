@@ -13,7 +13,9 @@
     "applications": "Applications",
     "sectionOverview": "Vue d’ensemble",
     "sectionApplications": "Applications",
-    "sectionAdministration": "Administration"
+    "sectionAdministration": "Administration",
+    "collapseSidebar": "Réduire le menu",
+    "expandSidebar": "Déployer le menu"
   },
   "home": {
     "title": "Bonjour le monde",
