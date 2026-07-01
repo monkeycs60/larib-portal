@@ -35,7 +35,7 @@ export const createAdminAction = actionClient
     })
 
     if ('error' in result && result.error) {
-      throw new Error(result.error.message || 'SIGNUP_FAILED')
+      throw new Error((result.error as { message?: string }).message || 'SIGNUP_FAILED')
     }
 
     await prisma.user.update({
