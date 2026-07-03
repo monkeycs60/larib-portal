@@ -3,8 +3,11 @@ import { randomUUID } from 'crypto';
 import dotenv from 'dotenv';
 import path from 'path';
 
-// Load test environment variables before initializing auth
-dotenv.config({ path: path.resolve(__dirname, '..', '.env.test') });
+// Load test environment variables before initializing auth.
+// `override: true` is required: importing `../lib/auth` (hoisted above this line)
+// initializes Prisma, which auto-loads `.env` and sets DATABASE_URL to the dev db
+// first. Without override this seed would wipe/write the DEV database instead of testdb.
+dotenv.config({ path: path.resolve(__dirname, '..', '.env.test'), override: true });
 
 import { auth } from '../lib/auth';
 
