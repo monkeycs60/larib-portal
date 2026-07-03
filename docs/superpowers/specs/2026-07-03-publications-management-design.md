@@ -33,7 +33,7 @@ Modèle de rôles retenu (**option incrémentale**) — deux niveaux qui coexist
 - **Super-admin portail** = `role = ADMIN` (inchangé). Gère les utilisateurs (page `/admin/users`) et reste **admin de toutes les apps** par extension (surensemble). C'est le « super user » demandé pour la gestion des users.
 - **Admin par app** = nouveau champ `adminApplications: Application[]` sur `User` (sous-ensemble de `applications`). Permet de désigner un **gestionnaire d'une app** sans en faire un super-admin portail → matrice publi-admin/publi-user, conges-admin/conges-user, etc.
 
-**Admin publications** = `role === 'ADMIN'` (super-admin) **OU** `PUBLICATIONS ∈ adminApplications`. Encapsulé dans un helper `isPublicationsAdmin(user)`.
+**Admin publications** = `role === 'ADMIN'` (super-admin) **OU** `PUBLICATIONS ∈ adminApplications`, soit le helper `canAdminApp(user, 'PUBLICATIONS')` fourni par la refonte RBAC.
 
 | Rôle (vis-à-vis des publications) | Droits |
 |---|---|
@@ -46,7 +46,7 @@ Règles clés :
 - Le droit d'édition d'un article = **admin publications** **OU** (user = auteur de position 1 de cet article). Être « dernier auteur » ne donne **pas** de droit d'édition.
 - La vue « Mes publications » liste **tous** les articles où le user apparaît comme auteur, et affiche l'action **Éditer** ou **Voir** selon la règle ci-dessus (mix dans une même liste).
 
-**Périmètre du changement de rôles** : seule la sous-app publications **consomme** `adminApplications` dans ce projet. `role = ADMIN` continue de fonctionner partout (super-admin = admin de tout). Congés/Bestof gardent leur logique actuelle jusqu'à une éventuelle migration ultérieure (**hors périmètre**). Le champ `adminApplications` est posé de façon générique pour ces futures migrations. `getTypedSession()` doit désormais inclure `adminApplications` dans son `select` pour être disponible partout comme `role`/`applications`.
+**Dépendance — refonte RBAC (sous-projet 1, fait AVANT)** : le modèle de rôles par app (`adminApplications`, helpers `isSuperAdmin`/`canAdminApp`/`canAccessApp`, gardes `superAdminAction`/`appAdminAction(app)`, hydratation dans `getTypedSession()`, UI `/admin/users`) est livré par la refonte RBAC — voir `2026-07-03-rbac-refactor-design.md`. Publications se contente de **consommer** ces primitives et d'ajouter `PUBLICATIONS` aux listes d'apps.
 
 Gating d'accès à la sous-app : via `User.applications` (comme les autres apps), nouvelle valeur d'enum `PUBLICATIONS`.
 
@@ -151,7 +151,7 @@ Tuiles : publications totales, en cours, taux d'acceptation (accepté/soumis), d
 
 ### Points de branchement pour une nouvelle sous-app (checklist)
 1. **Prisma** : `+ PUBLICATIONS` à `enum Application` ; nouveaux modèles/enums ci-dessus ; colonne `publicationsEmailOptOut` sur `User` ; migration (⚠ jamais `migrate reset`).
-2. **Accès & rôles (UI admin)** : ajouter `PUBLICATIONS` aux zod enums de `app/[locale]/admin/users/actions.ts` (pour `applications`) ; ajouter `adminApplications` (zod + persistance dans `updateUser`/`createUserInvite`) ; faire évoluer `user-add-dialog.tsx` + `user-edit-dialog.tsx` pour offrir, **par app, deux cases : Accès + Admin de l'app** (`applications` / `adminApplications`), en plus de la case super-admin (`role`). La page `/admin/users` reste gated par `role === 'ADMIN'` (super-admin only). Inclure `adminApplications` dans le `select` de `getTypedSession()`.
+2. **Accès & rôles** : le mécanisme par app (`adminApplications`, UI Accès+Admin de `/admin/users`, hydratation `getTypedSession`) est **déjà livré par la refonte RBAC**. Ici, uniquement : ajouter `PUBLICATIONS` aux listes d'apps (zod `applications`/`adminApplications` de `admin/users/actions.ts`, `AVAILABLE_APPLICATIONS` des dialogs). « Admin publications » = `canAdminApp(user, 'PUBLICATIONS')` ; gardes via `appAdminAction('PUBLICATIONS')` / `canAccessApp('PUBLICATIONS')`.
 3. **Dashboard** : `dashboard/page.tsx` — `appOrder`, `appSlug`, `getAppIcon`.
 4. **Navigation** : `app/[locale]/components/app-sidebar.tsx` (+ `navbar-client.tsx`) — entrée `if (applications.includes('PUBLICATIONS'))`.
 5. **i18n** : `app_PUBLICATIONS`, `appDesc_PUBLICATIONS` + namespace `publications` dans `messages/en.json` et `messages/fr.json`.
@@ -189,7 +189,7 @@ Fonctions async (pas de classes), `import { prisma }`, `select` explicite, types
 ## 8. Phasage
 
 ### Phase 1 — Socle utilisable (MVP)
-Modèle de données + migration + carte dashboard + gating (`PUBLICATIONS`) + sidebar ; **rôles par app (`adminApplications` + `isPublicationsAdmin`) et évolution de l'UI `/admin/users` (Accès + Admin par app, super-admin conservé)** ; banques études/auteurs(+lien user)/journaux/affiliations ; CRUD article (titre, étude, type, statut champ unique, auteurs ordonnés) ; soumissions (historique) + étapes + synchro statut proposée + liste « prochains journaux » ; vue « Mes publications » (édition 1ᵉʳ auteur / lecture seule sinon) ; import PubMed un-par-un + saisie rapide rétrospective.
+Modèle de données + migration + carte dashboard + gating (`PUBLICATIONS`) + sidebar ; **(pré-requis : refonte RBAC déjà livrée) accès & rôle publications via `canAccessApp`/`canAdminApp('PUBLICATIONS')`, + `PUBLICATIONS` dans les pickers `/admin/users`** ; banques études/auteurs(+lien user)/journaux/affiliations ; CRUD article (titre, étude, type, statut champ unique, auteurs ordonnés) ; soumissions (historique) + étapes + synchro statut proposée + liste « prochains journaux » ; vue « Mes publications » (édition 1ᵉʳ auteur / lecture seule sinon) ; import PubMed un-par-un + saisie rapide rétrospective.
 
 ### Phase 2 — Outils à valeur
 Constructeur de co-authorship → `.docx` (KPI picker, affiliations, correspondant confirmé, copier) ; tableau de bord KPI admin ; import PubMed en masse (liste de PMIDs).

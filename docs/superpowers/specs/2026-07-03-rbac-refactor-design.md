@@ -62,9 +62,11 @@ Le point de bascule unique aujourd'hui est `adminOnlyAction` (`:31-37`). On le r
 - `lib/services/conges/index.ts:496` `getAdminEmails` : cibler les **admins Congés** — `where: { OR: [{ role: 'ADMIN' }, { adminApplications: { has: 'CONGES' } }] }`.
 
 ### 5.3 Basculer en **admin Bestof** (`canAdminApp(user, 'BESTOF_LARIB')`)
-- Actions (`app/[locale]/bestof-larib/actions.ts`) : exam-types `:80/:112/:96`, disease-tags `:88/:121/:104`, `updateCaseAction:132`, `deleteCaseAction:152`, et **admin tags** `:164/:169/:175/:184/:195/:229/:247` → `appAdminAction('BESTOF_LARIB')`.
+- Actions (`app/[locale]/bestof-larib/actions.ts`) : **`createCaseAction:53`** (auj. `authenticatedAction` → devient admin), exam-types `:80/:112/:96`, disease-tags `:88/:121/:104`, `updateCaseAction:132`, et **admin tags** `:164/:169/:175/:184/:195/:229/:247` → `appAdminAction('BESTOF_LARIB')`.
+- **`deleteCaseAction:152` → `superAdminAction`** (suppression destructive d'un cas réservée au **super-admin**, décision produit — exception à la règle §2).
 - Pages statistiques (`statistics/page.tsx:37`, `.../users/[userId]/page.tsx:32`, `.../attempts/[attemptId]/page.tsx:22`) → `requireAppAdmin('BESTOF_LARIB')`.
 - UI `bestof-larib/page.tsx:59` + `[id]/page.tsx:41` (`isAdmin` pour create/edit, filtres draft, admin tags) → `canAdminApp(user,'BESTOF_LARIB')`.
+- **Garde d'accès** `bestof-larib/page.tsx:33` : ajouter `canAccessApp(user,'BESTOF_LARIB')` (sinon `redirect(dashboard)`), comme Congés (décision produit).
 - Routes DICOM `app/api/bestof/dicoms/{check-bulk:21,download:21,download-batch:29}` (accès aux cas non publiés) → `canAdminApp(user,'BESTOF_LARIB')`.
 
 ### 5.4 Invitation / acceptation
@@ -75,10 +77,11 @@ Le point de bascule unique aujourd'hui est `adminOnlyAction` (`:31-37`). On le r
 - `user-add-dialog.tsx` + `user-edit-dialog.tsx` : pour chaque app, **deux cases — Accès + Admin de l'app** (`applications` / `adminApplications`), en plus du toggle **super-admin** (`role`). Réutilise `AVAILABLE_APPLICATIONS`.
 - Corriger au passage l'incohérence d'enum `applications` (les actions incluent `CARDIOLARIB`, le add-dialog l'omet) — aligner.
 
-## 7. Anomalies existantes à trancher (dans ce refactor)
-1. **`createCaseAction`** (`bestof-larib/actions.ts:53`) est `authenticatedAction` (tout user connecté peut créer un cas). Reco : le passer en `appAdminAction('BESTOF_LARIB')` par cohérence (⚠ changement de comportement) — **à confirmer**.
-2. **`bestof-larib/page.tsx:33`** n'a **aucune garde d'accès** (tout user connecté y accède, seule l'UID change). Reco : ajouter `canAccessApp(user,'BESTOF_LARIB')` comme pour Congés — **à confirmer**.
-3. **`CARDIOLARIB`** : valeur d'enum sans route ; on la laisse hors des pickers UI (statu quo), juste aligner les schémas.
+## 7. Anomalies existantes — décisions prises
+1. **`createCaseAction`** (`bestof-larib/actions.ts:53`) → **admin Bestof** (`appAdminAction('BESTOF_LARIB')`). Création réservée aux admins de l'app (cohérent avec l'édition).
+2. **`deleteCaseAction`** (`:152`) → **super-admin uniquement** (`superAdminAction`). Suppression destructive d'un cas volontairement plus restrictive que l'édition.
+3. **`bestof-larib/page.tsx:33`** → **exiger l'accès** `canAccessApp('BESTOF_LARIB')` (comme Congés).
+4. **`CARDIOLARIB`** : valeur d'enum sans route ; laissée hors des pickers UI (statu quo), schémas alignés.
 
 ## 8. Tests
 - Unitaires : `isSuperAdmin` / `canAdminApp` / `canAccessApp` (super-admin passe tout ; admin d'une app ≠ admin d'une autre ; membre bloqué).
