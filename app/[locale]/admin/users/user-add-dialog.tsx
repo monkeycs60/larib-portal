@@ -36,6 +36,7 @@ const AddUserSchema = z.object({
   arrivalDate: z.string().min(1),
   departureDate: z.string().min(1),
   applications: z.array(z.enum(["BESTOF_LARIB","CONGES"])),
+  adminApplications: z.array(z.enum(["BESTOF_LARIB","CONGES"])),
   emailLanguage: z.enum(['en','fr']),
   congesTotalDays: z.number().int().min(0).max(365).optional()
 })
@@ -123,13 +124,25 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
 
   const { register, handleSubmit, setValue, watch, reset } = useForm<AddUserValues>({
     resolver: zodResolver(AddUserSchema),
-    defaultValues: { role: 'USER', applications: [], emailLanguage: (locale as 'en' | 'fr') },
+    defaultValues: { role: 'USER', applications: [], adminApplications: [], emailLanguage: (locale as 'en' | 'fr') },
   })
 
   const apps = new Set(watch('applications'))
+  const adminApps = new Set(watch('adminApplications'))
   function toggleApp(app: AvailableApplication) {
-    if (apps.has(app)) apps.delete(app); else apps.add(app)
+    if (apps.has(app)) {
+      apps.delete(app)
+      adminApps.delete(app)
+    } else {
+      apps.add(app)
+    }
     setValue('applications', Array.from(apps))
+    setValue('adminApplications', Array.from(adminApps))
+  }
+  function toggleAdminApp(app: AvailableApplication) {
+    if (!apps.has(app)) return
+    if (adminApps.has(app)) adminApps.delete(app); else adminApps.add(app)
+    setValue('adminApplications', Array.from(adminApps))
   }
 
   async function submitUser(values: AddUserValues) {
@@ -247,32 +260,61 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
             <div className="grid grid-cols-2 gap-3">
               {AVAILABLE_APPLICATIONS.map((app) => {
                 const isSelected = apps.has(app)
+                const isAdminSelected = adminApps.has(app)
                 return (
-                  <button
-                    type="button"
+                  <div
                     key={app}
-                    onClick={() => toggleApp(app)}
                     className={`
-                      relative flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left
+                      rounded-lg border-2 p-3 transition-all
                       ${isSelected
                         ? 'border-navy-600 bg-navy-50 shadow-sm'
                         : 'border-line hover:border-gray-300 hover:bg-gray-50'
                       }
                     `}
                   >
-                    <div className={`
-                      flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors
-                      ${isSelected
-                        ? 'border-navy-600 bg-navy-600 text-white'
-                        : 'border-gray-300'
-                      }
-                    `}>
-                      {isSelected && <Check className="h-3 w-3" />}
-                    </div>
-                    <span className={`text-sm font-medium ${isSelected ? 'text-text-primary' : 'text-text-secondary'}`}>
+                    <div className="text-sm font-medium mb-2 text-text-primary">
                       {t(`app_${app}`)}
-                    </span>
-                  </button>
+                    </div>
+                    <div className="space-y-1.5">
+                      <button
+                        type="button"
+                        onClick={() => toggleApp(app)}
+                        className="flex w-full items-center gap-2 text-left"
+                      >
+                        <div className={`
+                          flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-colors
+                          ${isSelected
+                            ? 'border-navy-600 bg-navy-600 text-white'
+                            : 'border-gray-300'
+                          }
+                        `}>
+                          {isSelected && <Check className="h-2.5 w-2.5" />}
+                        </div>
+                        <span className={`text-xs font-medium ${isSelected ? 'text-text-primary' : 'text-text-secondary'}`}>
+                          {t('appAccess')}
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => toggleAdminApp(app)}
+                        disabled={!isSelected}
+                        className="flex w-full items-center gap-2 text-left disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        <div className={`
+                          flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-colors
+                          ${isAdminSelected
+                            ? 'border-navy-600 bg-navy-600 text-white'
+                            : 'border-gray-300'
+                          }
+                        `}>
+                          {isAdminSelected && <Check className="h-2.5 w-2.5" />}
+                        </div>
+                        <span className={`text-xs font-medium ${isAdminSelected ? 'text-text-primary' : 'text-text-secondary'}`}>
+                          {t('appAdmin')}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
                 )
               })}
             </div>

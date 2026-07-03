@@ -49,6 +49,7 @@ export const setPasswordFromInviteAction = unauthenticatedAction
         language: payload.locale === 'fr' ? 'FR' : 'EN',
         position: payload.position ?? null,
         applications: payload.applications,
+        adminApplications: payload.adminApplications ?? [],
         departureDate: payload.departureDate ?? null,
       },
     })

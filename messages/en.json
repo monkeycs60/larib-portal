@@ -167,6 +167,8 @@
     "departureDate": "Departure date",
     "profilePhoto": "Profile photo",
     "applications": "Allowed applications",
+    "appAccess": "Access",
+    "appAdmin": "App admin",
     "app_BESTOF_LARIB": "Training Best-of",
     "app_CONGES": "Leave management",
     "app_CARDIOLARIB": "cardiolarib",

@@ -209,6 +209,7 @@ export function UserTable({ users, positions, locale }: { users: UserRow[]; posi
                       arrivalDate: user.arrivalDate ? new Date(user.arrivalDate as unknown as string).toISOString().slice(0,10) : undefined,
                       departureDate: user.departureDate ? new Date(user.departureDate as unknown as string).toISOString().slice(0,10) : undefined,
                       applications: (user.applications ?? []) as UserFormValues['applications'],
+                      adminApplications: (user.adminApplications ?? []) as UserFormValues['adminApplications'],
                     }}
                   />
                   <AlertDialog>

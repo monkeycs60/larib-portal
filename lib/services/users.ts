@@ -20,6 +20,7 @@ export type UserWithAdminFields = Prisma.UserGetPayload<{
     congesTotalDays: true
     profilePhoto: true
     applications: true
+    adminApplications: true
     createdAt: true
     updatedAt: true
   }
@@ -45,6 +46,7 @@ export async function listUsers(): Promise<UserWithAdminFields[]> {
       congesTotalDays: true,
       profilePhoto: true,
       applications: true,
+      adminApplications: true,
       createdAt: true,
       updatedAt: true,
     },
@@ -80,6 +82,7 @@ export type UpdateUserInput = {
   profilePhotoKey?: string | null
   congesTotalDays?: number
   applications?: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'>
+  adminApplications?: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'>
 }
 
 export async function updateUser(data: UpdateUserInput): Promise<UserWithAdminFields> {
@@ -106,6 +109,7 @@ export async function updateUser(data: UpdateUserInput): Promise<UserWithAdminFi
       congesTotalDays: true,
       profilePhoto: true,
       applications: true,
+      adminApplications: true,
       createdAt: true,
       updatedAt: true,
     },
@@ -120,6 +124,7 @@ export type CreatePlaceholderUserInput = {
   language?: 'EN' | 'FR'
   position?: string | null
   applications?: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'>
+  adminApplications?: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'>
   arrivalDate?: Date | null
   departureDate?: Date | null
   congesTotalDays?: number
@@ -138,6 +143,7 @@ export async function createPlaceholderUser(data: CreatePlaceholderUserInput): P
       position: data.position ?? null,
       congesTotalDays: data.congesTotalDays ?? 0,
       applications: data.applications ?? [],
+      adminApplications: data.adminApplications ?? [],
       arrivalDate: data.arrivalDate ?? null,
       departureDate: data.departureDate ?? null,
     },
@@ -158,6 +164,7 @@ export async function createPlaceholderUser(data: CreatePlaceholderUserInput): P
       congesTotalDays: true,
       profilePhoto: true,
       applications: true,
+      adminApplications: true,
       createdAt: true,
       updatedAt: true,
     },
@@ -190,6 +197,7 @@ export async function listUsersWithOnboardingStatus(): Promise<UserWithOnboardin
       congesTotalDays: true,
       profilePhoto: true,
       applications: true,
+      adminApplications: true,
       createdAt: true,
       updatedAt: true,
       accounts: {

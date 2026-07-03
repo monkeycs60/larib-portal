@@ -24,6 +24,7 @@ const UpdateUserSchema = z.object({
   departureDate: z.string().optional().nullable(),
   applications: z.array(z.enum(["BESTOF_LARIB", "CONGES", "CARDIOLARIB"]))
     .default([]),
+  adminApplications: z.array(z.enum(["BESTOF_LARIB", "CONGES", "CARDIOLARIB"])).optional(),
   locale: z.enum(["en", "fr"]).optional(),
   congesTotalDays: z.number().int().min(0).max(365).optional(),
 })
@@ -35,6 +36,8 @@ export const updateUserAction = superAdminAction
     const arrivalDate = parsedInput.arrivalDate ? new Date(parsedInput.arrivalDate) : null
     const departureDate = parsedInput.departureDate ? new Date(parsedInput.departureDate) : null
     const language = parsedInput.language ?? (parsedInput.locale === 'fr' ? 'FR' : 'EN')
+    const adminApplications = (parsedInput.adminApplications ?? [])
+      .filter((application) => (parsedInput.applications ?? []).includes(application))
 
     const updated = await updateUser({
       id: parsedInput.id,
@@ -50,6 +53,7 @@ export const updateUserAction = superAdminAction
       arrivalDate,
       departureDate,
       applications: parsedInput.applications,
+      adminApplications,
       congesTotalDays: parsedInput.congesTotalDays,
     })
     revalidatePath('/admin/users')
@@ -90,6 +94,7 @@ const CreateInviteSchema = z.object({
   position: z.string().trim().optional().nullable(),
   applications: z.array(z.enum(["BESTOF_LARIB", "CONGES", "CARDIOLARIB"]))
     .default([]),
+  adminApplications: z.array(z.enum(["BESTOF_LARIB", "CONGES", "CARDIOLARIB"])).optional(),
   arrivalDate: z.string().min(1), // ISO date
   departureDate: z.string().min(1), // ISO date
   locale: z.enum(["en","fr"]),
@@ -101,6 +106,8 @@ export const createUserInviteAction = superAdminAction
   .action(async ({ parsedInput }) => {
     const arrivalDate = new Date(parsedInput.arrivalDate)
     const departureDate = new Date(parsedInput.departureDate)
+    const adminApplications = (parsedInput.adminApplications ?? [])
+      .filter((application) => (parsedInput.applications ?? []).includes(application))
 
     // Create or ensure the position exists if provided
     let positionName: string | null = parsedInput.position ?? null
@@ -118,6 +125,7 @@ export const createUserInviteAction = superAdminAction
       language: parsedInput.locale === 'fr' ? 'FR' : 'EN',
       position: positionName,
       applications: parsedInput.applications,
+      adminApplications,
       arrivalDate,
       departureDate,
       congesTotalDays: parsedInput.congesTotalDays,
@@ -132,6 +140,7 @@ export const createUserInviteAction = superAdminAction
       role: parsedInput.role,
       position: positionName,
       applications: parsedInput.applications,
+      adminApplications,
       arrivalDate,
       departureDate,
     })
@@ -201,6 +210,7 @@ export const resendInvitationAction = superAdminAction
         role: true,
         position: true,
         applications: true,
+        adminApplications: true,
         arrivalDate: true,
         departureDate: true,
         accounts: {
@@ -232,6 +242,7 @@ export const resendInvitationAction = superAdminAction
       role: user.role as 'ADMIN' | 'USER',
       position: user.position,
       applications: user.applications as Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'>,
+      adminApplications: user.adminApplications as Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'>,
       arrivalDate: user.arrivalDate,
       departureDate: user.departureDate,
     })
