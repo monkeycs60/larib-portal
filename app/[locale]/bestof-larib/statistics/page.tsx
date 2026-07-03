@@ -13,6 +13,7 @@ import {
 import { listExamTypes, listDiseaseTags } from '@/lib/services/bestof-larib';
 import { listAdminTags } from '@/lib/services/bestof-larib-tags';
 import { applicationLink } from '@/lib/application-link';
+import { canAdminApp } from '@/lib/permissions';
 import { Link } from '@/app/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -34,7 +35,7 @@ async function BestofStatisticsPageContent({
   const t = await getTranslations({ locale, namespace: 'bestof.statistics' });
   const session = await requireAuth();
 
-  if (!session || session.user.role !== 'ADMIN') {
+  if (!canAdminApp(session.user, 'BESTOF_LARIB')) {
     redirect(applicationLink(locale, '/bestof-larib'));
   }
 

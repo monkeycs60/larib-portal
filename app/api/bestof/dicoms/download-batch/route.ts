@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getTypedSession } from '@/lib/auth-helpers'
 import { prisma } from '@/lib/prisma'
 import { createSftpClient, getDicomPath } from '@/lib/services/sftp'
+import { canAdminApp } from '@/lib/permissions'
 import archiver from 'archiver'
 import { PassThrough } from 'stream'
 
@@ -26,7 +27,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'batch_too_large', max: MAX_BATCH_SIZE }, { status: 400 })
   }
 
-  const isAdmin = session.user.role === 'ADMIN'
+  const isAdmin = canAdminApp(session.user, 'BESTOF_LARIB')
   const cases = await prisma.clinicalCase.findMany({
     where: { id: { in: caseIds }, ...(!isAdmin && { status: 'PUBLISHED' }) },
     select: { id: true, caseNumber: true, examType: { select: { name: true } } },

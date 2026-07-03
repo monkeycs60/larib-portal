@@ -9,6 +9,7 @@ import {
 } from '@/lib/services/bestof-larib';
 import { listAdminTags, listUserTags } from '@/lib/services/bestof-larib-tags';
 import { requireAuth } from '@/lib/auth-guard';
+import { redirect } from 'next/navigation';
 import { Link } from '@/app/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { ChartBar } from 'lucide-react';
@@ -20,6 +21,8 @@ import { type CasesTableTranslations } from './components/cases-table-fallback';
 import TagsManagerModal from './components/tags-manager-modal';
 import type { BestofCacheKey } from '@/lib/bestof-cache-key';
 import { serialiseBestofCacheKey } from '@/lib/bestof-cache-key';
+import { applicationLink } from '@/lib/application-link';
+import { canAccessApp, canAdminApp } from '@/lib/permissions';
 
 export default async function BestofLaribPage({
 	params,
@@ -31,6 +34,11 @@ export default async function BestofLaribPage({
 	const { locale } = await params;
 	const t = await getTranslations({ locale, namespace: 'bestof' });
 	const session = await requireAuth();
+
+	if (!canAccessApp(session.user, 'BESTOF_LARIB')) {
+		redirect(applicationLink(locale, '/dashboard'));
+	}
+
 	const sp = await searchParams;
 
 	const asArray = (
@@ -56,7 +64,7 @@ export default async function BestofLaribPage({
 		return filtered as (typeof validDifficulties)[number][];
 	};
 
-	const isAdmin = session?.user?.role === 'ADMIN';
+	const isAdmin = canAdminApp(session.user, 'BESTOF_LARIB');
 	const rawStatus = typeof sp?.status === 'string' ? sp.status : undefined;
 	const statusFilter: 'PUBLISHED' | 'DRAFT' | undefined =
 		isAdmin && rawStatus && ['PUBLISHED', 'DRAFT'].includes(rawStatus)

@@ -44,7 +44,3 @@ export const appAdminAction = (app: Application) =>
     }
     return next({ ctx })
   })
-
-// Temporary alias so existing imports keep compiling during the migration
-// (removed in a later task once all usages are migrated).
-export const adminOnlyAction = superAdminAction

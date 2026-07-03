@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { getCaseById } from '@/lib/services/bestof-larib';
 import { Badge } from '@/components/ui/badge';
 import { requireAuth } from '@/lib/auth-guard';
+import { canAdminApp } from '@/lib/permissions';
 import WorkArea, { PrefillState } from './work-area';
 import type { CaseAttemptSummary } from '@/lib/services/bestof-larib-attempts';
 import { getUserCaseState, listUserCaseAttempts } from '@/lib/services/bestof-larib-attempts';
@@ -38,7 +39,7 @@ async function CaseViewPageContent({
 			: c.difficulty === 'INTERMEDIATE'
 			? 'intermediate'
 			: 'advanced';
-	const isAdmin = (session?.user?.role ?? 'USER') === 'ADMIN';
+	const isAdmin = canAdminApp(session.user, 'BESTOF_LARIB');
 
 	const userId = session?.user?.id;
 	const [prefillState, attempts, userTags, userTagIds] = userId
