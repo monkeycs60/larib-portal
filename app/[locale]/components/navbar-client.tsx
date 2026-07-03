@@ -18,6 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { LogOut } from 'lucide-react';
 import { authClient } from '@/lib/auth-client';
 import { applicationLink } from '@/lib/application-link';
+import { isSuperAdmin } from '@/lib/permissions';
 import Image from 'next/image';
 
 type NavbarUser = {
@@ -144,7 +145,7 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
 												{user.email}
 											</div>
 											<div className='mt-1 flex flex-wrap items-center gap-1'>
-												{user.role === 'ADMIN' && (
+												{isSuperAdmin(user) && (
 													<Badge
 														variant='default'
 														className='text-[10px]'>

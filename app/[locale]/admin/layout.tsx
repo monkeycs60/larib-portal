@@ -2,6 +2,7 @@ import { ReactNode } from "react"
 import { getTranslations } from "next-intl/server"
 import { getTypedSession } from "@/lib/auth-helpers"
 import { notFound, redirect } from "next/navigation"
+import { isSuperAdmin } from "@/lib/permissions"
 
 export default async function AdminLayout({
   children,
@@ -16,7 +17,7 @@ export default async function AdminLayout({
   if (!session) {
     redirect(`/${locale}/login`)
   }
-  if (session.user.role !== 'ADMIN') notFound()
+  if (!isSuperAdmin(session.user)) notFound()
 
   await getTranslations({ locale, namespace: 'admin' })
 

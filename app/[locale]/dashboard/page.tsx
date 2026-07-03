@@ -3,6 +3,7 @@ import { Link } from '@/app/i18n/navigation'
 import { getTranslations } from 'next-intl/server'
 import { formatUserName } from '@/lib/format-user-name'
 import { getRandomGreeting } from '@/lib/random-greeting'
+import { isSuperAdmin } from '@/lib/permissions'
 import * as motion from "framer-motion/client"
 import { ArrowRight } from 'lucide-react'
 
@@ -157,7 +158,7 @@ export default async function DashboardPage({
           </section>
 
           {/* Admin-only section */}
-          {session.user.role === 'ADMIN' && (
+          {isSuperAdmin(session.user) && (
             <section>
                <div className="flex items-center gap-4 mb-6">
                 <h2 className="text-sm font-semibold uppercase tracking-wider text-text-secondary">

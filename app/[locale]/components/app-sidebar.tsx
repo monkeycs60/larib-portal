@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { LayoutDashboard, GraduationCap, CalendarDays, Users, ChevronLeft, ChevronRight, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { isSuperAdmin } from '@/lib/permissions'
 
 type SidebarUser = {
   role?: 'ADMIN' | 'USER'
@@ -31,7 +32,7 @@ export function AppSidebar({ user }: { user: SidebarUser }) {
   const [collapsed, setCollapsed] = useState(false)
 
   const applications = user.applications ?? []
-  const isAdmin = user.role === 'ADMIN'
+  const isAdmin = isSuperAdmin(user)
 
   const applicationItems: SidebarItem[] = []
   if (applications.includes('BESTOF_LARIB')) {

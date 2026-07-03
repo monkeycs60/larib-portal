@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge'
 import { Globe, LogOut } from 'lucide-react'
 import { authClient } from '@/lib/auth-client'
 import { applicationLink } from '@/lib/application-link'
+import { isSuperAdmin } from '@/lib/permissions'
 
 type TopBarUser = {
   email: string
@@ -98,7 +99,7 @@ export function AppTopBar({ user }: { user: TopBarUser }) {
               <div className="truncate font-medium text-text-primary">{displayName}</div>
               <div className="truncate text-xs text-text-secondary">{user.email}</div>
               <div className="mt-1 flex flex-wrap items-center gap-1">
-                {user.role === 'ADMIN' && (
+                {isSuperAdmin(user) && (
                   <Badge variant="default" className="text-[10px]">
                     {tAdmin('roleAdmin')}
                   </Badge>

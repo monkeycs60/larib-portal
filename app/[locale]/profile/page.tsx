@@ -4,6 +4,7 @@ import { getTypedSession } from "@/lib/auth-helpers";
 import { ProfileEditor } from "./profile-editor";
 import { listPositions } from "@/lib/services/positions";
 import { prisma } from "@/lib/prisma";
+import { isSuperAdmin } from "@/lib/permissions";
 
 export default async function ProfilePage({ params }: { params: Promise<{ locale: string }> }) {
   const session = await getTypedSession()
@@ -36,11 +37,11 @@ export default async function ProfilePage({ params }: { params: Promise<{ locale
     ? new Date(user.birthDate).toISOString().slice(0,10)
     : null
 
-  const positions = user.role === 'ADMIN' ? await listPositions() : []
+  const positions = isSuperAdmin(user) ? await listPositions() : []
 
   const initialValues = {
     email: user.email,
-    isAdmin: user.role === 'ADMIN',
+    isAdmin: isSuperAdmin(user),
     firstName: user.firstName ?? undefined,
     lastName: user.lastName ?? undefined,
     phoneNumber: user.phoneNumber ?? undefined,
