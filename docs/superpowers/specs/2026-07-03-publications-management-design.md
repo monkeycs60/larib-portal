@@ -29,17 +29,24 @@ Contrainte forte de démarrage : **il faut pouvoir saisir en rétrospectif tous 
 
 ## 2. Utilisateurs & permissions
 
-Rôle « admin publications » = **rôle `ADMIN` global du portail** (décision validée : pas de rôle dédié par app).
+Modèle de rôles retenu (**option incrémentale**) — deux niveaux qui coexistent, sans casser l'existant :
+- **Super-admin portail** = `role = ADMIN` (inchangé). Gère les utilisateurs (page `/admin/users`) et reste **admin de toutes les apps** par extension (surensemble). C'est le « super user » demandé pour la gestion des users.
+- **Admin par app** = nouveau champ `adminApplications: Application[]` sur `User` (sous-ensemble de `applications`). Permet de désigner un **gestionnaire d'une app** sans en faire un super-admin portail → matrice publi-admin/publi-user, conges-admin/conges-user, etc.
 
-| Rôle | Droits |
+**Admin publications** = `role === 'ADMIN'` (super-admin) **OU** `PUBLICATIONS ∈ adminApplications`. Encapsulé dans un helper `isPublicationsAdmin(user)`.
+
+| Rôle (vis-à-vis des publications) | Droits |
 |---|---|
-| **Admin** (`role = ADMIN`) | Tout : CRUD études/auteurs/journaux/affiliations, éditer **n'importe quel** article, KPI, constructeur de co-authorship. |
+| **Admin publications** (super-admin OU `adminApplications ∋ PUBLICATIONS`) | Tout : CRUD études/auteurs/journaux/affiliations, éditer **n'importe quel** article, KPI, constructeur de co-authorship. |
 | **1ᵉʳ auteur d'un article** (authorship `order = 1`, lié à un user) | Créer un article, éditer **ses propres articles** : statut, soumissions, détails, auteurs, liste des prochains journaux. |
 | **Co-auteur / autre position** (y compris dernier auteur) | **Lecture seule** sur ces articles : suit le statut. |
 
 Règles clés :
-- Le droit d'édition d'un article = `admin` **OU** (user est l'auteur de position 1 de cet article). Être « dernier auteur » ne donne **pas** de droit d'édition.
+- **Un admin est aussi un membre** : « Mes publications » est accessible à **tous**, admins compris. Un admin co-auteur voit et gère ses propres articles comme un user ; ses droits admin s'**ajoutent**, ils ne remplacent pas la vue membre.
+- Le droit d'édition d'un article = **admin publications** **OU** (user = auteur de position 1 de cet article). Être « dernier auteur » ne donne **pas** de droit d'édition.
 - La vue « Mes publications » liste **tous** les articles où le user apparaît comme auteur, et affiche l'action **Éditer** ou **Voir** selon la règle ci-dessus (mix dans une même liste).
+
+**Périmètre du changement de rôles** : seule la sous-app publications **consomme** `adminApplications` dans ce projet. `role = ADMIN` continue de fonctionner partout (super-admin = admin de tout). Congés/Bestof gardent leur logique actuelle jusqu'à une éventuelle migration ultérieure (**hors périmètre**). Le champ `adminApplications` est posé de façon générique pour ces futures migrations. `getTypedSession()` doit désormais inclure `adminApplications` dans son `select` pour être disponible partout comme `role`/`applications`.
 
 Gating d'accès à la sous-app : via `User.applications` (comme les autres apps), nouvelle valeur d'enum `PUBLICATIONS`.
 
@@ -98,7 +105,8 @@ Les libellés FR/EN sont gérés en i18n ; l'enum en base reste en anglais.
 - `@@unique([articleId, journalId])`.
 - Action « Soumettre au suivant » = promeut le `rank` le plus bas en une nouvelle `Submission`.
 
-**User** (per-app, convention repo) — ajout minimal :
+**User** (per-app, convention repo) — ajouts :
+- `adminApplications Application[] @default([])` — admin **par app** (sous-ensemble de `applications`). `role = ADMIN` reste le super-admin portail (gestion des users), admin de toutes les apps par extension.
 - `publicationsEmailOptOut Boolean @default(false)` (désinscription du digest mensuel).
 - `+ PUBLICATIONS` dans `applications`.
 - relations inverses : `authoredBy Author[]` (lien auteur), `studiesLed Study[]`, `articlesCreated Article[]`, `studiesCreated Study[]`.
@@ -143,7 +151,7 @@ Tuiles : publications totales, en cours, taux d'acceptation (accepté/soumis), d
 
 ### Points de branchement pour une nouvelle sous-app (checklist)
 1. **Prisma** : `+ PUBLICATIONS` à `enum Application` ; nouveaux modèles/enums ci-dessus ; colonne `publicationsEmailOptOut` sur `User` ; migration (⚠ jamais `migrate reset`).
-2. **Accès (UI admin)** : ajouter `PUBLICATIONS` aux zod enums de `app/[locale]/admin/users/actions.ts` et à `AVAILABLE_APPLICATIONS` dans `user-add-dialog.tsx` + `user-edit-dialog.tsx`.
+2. **Accès & rôles (UI admin)** : ajouter `PUBLICATIONS` aux zod enums de `app/[locale]/admin/users/actions.ts` (pour `applications`) ; ajouter `adminApplications` (zod + persistance dans `updateUser`/`createUserInvite`) ; faire évoluer `user-add-dialog.tsx` + `user-edit-dialog.tsx` pour offrir, **par app, deux cases : Accès + Admin de l'app** (`applications` / `adminApplications`), en plus de la case super-admin (`role`). La page `/admin/users` reste gated par `role === 'ADMIN'` (super-admin only). Inclure `adminApplications` dans le `select` de `getTypedSession()`.
 3. **Dashboard** : `dashboard/page.tsx` — `appOrder`, `appSlug`, `getAppIcon`.
 4. **Navigation** : `app/[locale]/components/app-sidebar.tsx` (+ `navbar-client.tsx`) — entrée `if (applications.includes('PUBLICATIONS'))`.
 5. **i18n** : `app_PUBLICATIONS`, `appDesc_PUBLICATIONS` + namespace `publications` dans `messages/en.json` et `messages/fr.json`.
@@ -152,7 +160,7 @@ Tuiles : publications totales, en cours, taux d'acceptation (accepté/soumis), d
 Fonctions async (pas de classes), `import { prisma }`, `select` explicite, types via `Prisma.*GetPayload`, cache tags + `unstable_cache`/`revalidateTag`. Découpage proposé : `studies.ts`, `articles.ts`, `authors.ts`, `journals.ts`, `affiliations.ts`, `submissions.ts`, `stats.ts`, `pubmed.ts`, `docx.ts`, `digest.ts`.
 
 ### Server actions — `app/[locale]/publications/actions.ts`
-`next-safe-action` : `adminOnlyAction` pour les banques ; `authenticatedAction` + garde métier « admin OU 1ᵉʳ auteur de l'article » pour l'édition d'article. Revalider les deux locales (`revalidatePath('/en','layout')` + `/fr`) ou `revalidateTag`. Effets (toasts sonner, refresh) côté client via `useAction`.
+`next-safe-action` : nouveau guard `publicationsAdminAction` (basé sur `isPublicationsAdmin(user)` = super-admin **ou** `adminApplications ∋ PUBLICATIONS`) pour les banques ; `authenticatedAction` + garde métier « admin publications **OU** 1ᵉʳ auteur de l'article » pour l'édition d'article. Revalider les deux locales (`revalidatePath('/en','layout')` + `/fr`) ou `revalidateTag`. Effets (toasts sonner, refresh) côté client via `useAction`.
 
 ### Routes — `app/[locale]/publications/`
 - `page.tsx` — **« Mes publications »** (tous users) + points d'entrée ; admins voient les accès aux banques + KPI.
@@ -181,7 +189,7 @@ Fonctions async (pas de classes), `import { prisma }`, `select` explicite, types
 ## 8. Phasage
 
 ### Phase 1 — Socle utilisable (MVP)
-Modèle de données + migration + carte dashboard + gating (`PUBLICATIONS`) + sidebar ; banques études/auteurs(+lien user)/journaux/affiliations ; CRUD article (titre, étude, type, statut champ unique, auteurs ordonnés) ; soumissions (historique) + étapes + synchro statut proposée + liste « prochains journaux » ; vue « Mes publications » (édition 1ᵉʳ auteur / lecture seule sinon) ; import PubMed un-par-un + saisie rapide rétrospective.
+Modèle de données + migration + carte dashboard + gating (`PUBLICATIONS`) + sidebar ; **rôles par app (`adminApplications` + `isPublicationsAdmin`) et évolution de l'UI `/admin/users` (Accès + Admin par app, super-admin conservé)** ; banques études/auteurs(+lien user)/journaux/affiliations ; CRUD article (titre, étude, type, statut champ unique, auteurs ordonnés) ; soumissions (historique) + étapes + synchro statut proposée + liste « prochains journaux » ; vue « Mes publications » (édition 1ᵉʳ auteur / lecture seule sinon) ; import PubMed un-par-un + saisie rapide rétrospective.
 
 ### Phase 2 — Outils à valeur
 Constructeur de co-authorship → `.docx` (KPI picker, affiliations, correspondant confirmé, copier) ; tableau de bord KPI admin ; import PubMed en masse (liste de PMIDs).
