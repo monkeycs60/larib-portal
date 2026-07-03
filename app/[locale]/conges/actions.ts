@@ -1,6 +1,7 @@
 'use server'
 
-import { authenticatedAction, adminOnlyAction } from '@/actions/safe-action'
+import { authenticatedAction, appAdminAction } from '@/actions/safe-action'
+import { canAdminApp } from '@/lib/permissions'
 import {
   createLeaveRequest,
   updateLeaveAllocation,
@@ -103,7 +104,7 @@ const requestLeaveSchema = z
 export const requestLeaveAction = authenticatedAction
   .inputSchema(requestLeaveSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const shouldAutoApprove = ctx.user.role === 'ADMIN'
+    const shouldAutoApprove = canAdminApp(ctx.user, 'CONGES')
     const frenchHolidays = await fetchFrenchHolidays()
 
     const startDate = new Date(parsedInput.startDate)
@@ -141,7 +142,7 @@ const updateStatusSchema = z.object({
   status: z.enum(['APPROVED', 'REJECTED']),
 })
 
-export const updateLeaveStatusAction = adminOnlyAction
+export const updateLeaveStatusAction = appAdminAction('CONGES')
   .inputSchema(updateStatusSchema)
   .action(async ({ parsedInput, ctx }) => {
     await updateLeaveStatus({
@@ -160,7 +161,7 @@ const updateAllocationSchema = z.object({
   totalAllocationDays: z.number().int().min(0).max(3650),
 })
 
-export const updateLeaveAllocationAction = adminOnlyAction
+export const updateLeaveAllocationAction = appAdminAction('CONGES')
   .inputSchema(updateAllocationSchema)
   .action(async ({ parsedInput }) => {
     await updateLeaveAllocation({
@@ -248,7 +249,7 @@ const adminDeleteLeaveSchema = z.object({
   requestId: z.string().min(1),
 })
 
-export const adminDeleteLeaveAction = adminOnlyAction
+export const adminDeleteLeaveAction = appAdminAction('CONGES')
   .inputSchema(adminDeleteLeaveSchema)
   .action(async ({ parsedInput }) => {
     await adminDeleteLeaveRequest(parsedInput.requestId)
@@ -268,7 +269,7 @@ const adminUpdateLeaveSchema = z
     path: ['endDate'],
   })
 
-export const adminUpdateLeaveAction = adminOnlyAction
+export const adminUpdateLeaveAction = appAdminAction('CONGES')
   .inputSchema(adminUpdateLeaveSchema)
   .action(async ({ parsedInput }) => {
     const frenchHolidays = await fetchFrenchHolidays()

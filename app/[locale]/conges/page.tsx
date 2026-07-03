@@ -19,6 +19,7 @@ import { TeamLeaveOverviewSection } from './components/team-leave-overview-secti
 import { DecisionHistorySection, type DecisionEntry } from './components/decision-history-section'
 import { CalendarSkeleton } from './components/calendar-skeleton'
 import { applicationLink } from '@/lib/application-link'
+import { canAccessApp, canAdminApp } from '@/lib/permissions'
 
 type PageParams = {
   params: Promise<{ locale: 'en' | 'fr' }>
@@ -56,8 +57,7 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
   const sp = await searchParams
   const session = await requireAuth()
 
-  const applications = (session.user.applications ?? []) as Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'>
-  const canAccess = session.user.role === 'ADMIN' || applications.includes('CONGES')
+  const canAccess = canAccessApp(session.user, 'CONGES')
 
   if (!canAccess) {
     redirect(applicationLink(locale, '/dashboard'))
@@ -72,10 +72,10 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
     getTranslations({ locale, namespace: 'conges' }),
     getUserLeaveDashboard(session.user.id, frenchHolidays),
     getLeaveCalendarData(activeMonth),
-    session.user.role === 'ADMIN' ? getAdminLeaveDashboard(frenchHolidays) : Promise.resolve(null),
+    canAdminApp(session.user, 'CONGES') ? getAdminLeaveDashboard(frenchHolidays) : Promise.resolve(null),
   ])
 
-  const requestTrigger = session.user.role === 'ADMIN' ? t('request.triggerAdmin') : t('request.trigger')
+  const requestTrigger = canAdminApp(session.user, 'CONGES') ? t('request.triggerAdmin') : t('request.trigger')
 
   const requestTranslations = {
     trigger: requestTrigger,
@@ -504,7 +504,7 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
     </section>
   ) : null
 
-  const isAdmin = session.user.role === 'ADMIN'
+  const isAdmin = canAdminApp(session.user, 'CONGES')
 
   return (
     <div className='space-y-8 py-6'>
