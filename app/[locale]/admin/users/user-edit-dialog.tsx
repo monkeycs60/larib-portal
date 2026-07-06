@@ -20,11 +20,16 @@ import { updateUserAction, createPositionAction, updatePositionAction, deletePos
 import { useAction } from 'next-safe-action/hooks';
 import { COUNTRIES } from '@/lib/countries';
 import { toast } from 'sonner';
-import { Check, Pencil } from 'lucide-react';
+import { Check, Pencil, Save, UserCog } from 'lucide-react';
 import DeletableSelectManager from '@/app/[locale]/bestof-larib/components/deletable-select-manager';
 
 const AVAILABLE_APPLICATIONS = ['BESTOF_LARIB', 'CONGES'] as const;
 type AvailableApplication = (typeof AVAILABLE_APPLICATIONS)[number];
+
+const APP_DOT: Record<AvailableApplication, string> = {
+	BESTOF_LARIB: '#ec3b68',
+	CONGES: '#6366f1',
+};
 
 const FormSchema = z.object({
 	id: z.string(),
@@ -174,205 +179,215 @@ export function UserEditDialog({
 					<Pencil className='size-4' />
 				</Button>
 			</DialogTrigger>
-			<DialogContent>
-				<DialogHeader>
-					<DialogTitle>{t('editUser')}</DialogTitle>
-				</DialogHeader>
-
-				<form className='space-y-3' onSubmit={onSubmit}>
-					<div className='grid md:grid-cols-2 gap-3'>
-						<div>
-							<label className='block text-sm mb-1'>{t('email')}</label>
-							<Input type='email' {...register('email')} />
-						</div>
-						<div>
-							<label className='block text-sm mb-1'>{t('role')}</label>
-							<Select {...register('role')}>
-								<option value='USER'>{t('roleUser')}</option>
-								<option value='ADMIN'>{t('roleAdmin')}</option>
-							</Select>
-						</div>
-						<div>
-							<label className='block text-sm mb-1'>
-								{t('firstName')}
-							</label>
-							<Input {...register('firstName')} />
-						</div>
-						<div>
-							<label className='block text-sm mb-1'>
-								{t('lastName')}
-							</label>
-							<Input {...register('lastName')} />
-						</div>
-						<div>
-							<label className='block text-sm mb-1'>{t('phone')}</label>
-							<Input {...register('phoneNumber')} />
-						</div>
-						<div>
-							<label className='block text-sm mb-1'>
-								{t('country')}
-							</label>
-							<Select
-								{...register('country')}
-								defaultValue={initial.country ?? ''}>
-								<option value=''>{t('selectPlaceholder')}</option>
-								{COUNTRIES.map((name) => (
-									<option key={name} value={name}>
-										{name}
-									</option>
-								))}
-							</Select>
-						</div>
-						<div>
-							<label className='block text-sm mb-1'>
-								{t('birthDate')}
-							</label>
-							<Input type='date' {...register('birthDate')} />
-						</div>
-						<div>
-							<label className='block text-sm mb-1'>
-								{t('language')}
-							</label>
-							<Select {...register('language')}>
-								<option value='EN'>English</option>
-								<option value='FR'>Français</option>
-							</Select>
-						</div>
-						<div>
-							<div className='flex items-center justify-between'>
-								<label className='block text-sm mb-1'>
-									{t('position')}
-								</label>
-								<button
-									type='button'
-									className='text-xs text-navy-600'
-									onClick={() => setManagePositionsOpen(true)}>
-									{t('manage')}
-								</button>
+			<DialogContent className='sm:max-w-2xl p-0 gap-0 max-h-[90vh] overflow-hidden flex flex-col'>
+				<form className='flex flex-1 min-h-0 flex-col' onSubmit={onSubmit}>
+					<div className='relative bg-bg-surface px-6 py-4'>
+						<span className='absolute left-0 top-0 h-full w-1 rounded-l-lg bg-coral-500' />
+						<div className='flex items-start gap-3'>
+							<div className='rounded-xl bg-coral-50 p-2.5 text-coral-600'>
+								<UserCog className='h-5 w-5' />
 							</div>
-							<Select {...register('position')}>
-								<option value=''>{t('selectPlaceholder')}</option>
-								{posList.map((position) => (
-									<option key={position.id} value={position.name}>
-										{position.name}
-									</option>
-								))}
-							</Select>
-						</div>
-						<div>
-							<label className='block text-sm mb-1'>
-								{t('arrivalDate')}
-							</label>
-							<Input type='date' {...register('arrivalDate')} />
-						</div>
-						<div>
-							<label className='block text-sm mb-1'>
-								{t('departureDate')}
-							</label>
-							<Input type='date' {...register('departureDate')} />
+							<DialogHeader className='gap-0.5'>
+								<DialogTitle className='text-lg font-bold'>{t('editUser')}</DialogTitle>
+								<p className='text-sm text-text-secondary'>{t('editUserSubtitle')}</p>
+							</DialogHeader>
 						</div>
 					</div>
 
-					<div>
-						<div className="flex items-center justify-between mb-3">
-							<div className="text-sm font-medium">{t('applications')}</div>
-							<div className="text-xs font-medium px-2 py-1 rounded-full bg-gray-100 text-text-secondary">
-								{apps.size} / {AVAILABLE_APPLICATIONS.length} {t('applicationsSelected')}
+					<div className='flex-1 overflow-y-auto bg-bg-app px-6 py-5 space-y-4'>
+						<section className='rounded-xl border border-line bg-bg-surface p-5'>
+							<div className='flex items-center gap-2 mb-4'>
+								<span className='h-1.5 w-1.5 rounded-full bg-coral-500' />
+								<span className='text-xs font-semibold uppercase tracking-wide text-coral-600'>{t('sectionIdentity')}</span>
+								<span className='h-px flex-1 bg-line ml-2' />
 							</div>
-						</div>
-						<div className="rounded-lg border border-line overflow-hidden">
-							<Table>
-								<TableHeader>
-									<TableRow>
-										<TableHead>{t('appColApp')}</TableHead>
-										<TableHead className="text-center">{t('appColUser')}</TableHead>
-										<TableHead className="text-center">{t('appColAdmin')}</TableHead>
-									</TableRow>
-								</TableHeader>
-								<TableBody>
-									{AVAILABLE_APPLICATIONS.map((app) => {
-										const isSelected = apps.has(app);
-										const isAdminSelected = adminApps.has(app);
-										const appLabel = t(`app_${app}`);
-										return (
-											<TableRow key={app}>
-												<TableCell className="text-sm font-medium text-text-primary">
-													{appLabel}
-												</TableCell>
-												<TableCell className="p-0 text-center">
-													<button
-														type="button"
-														onClick={() => toggleApp(app)}
-														aria-pressed={isSelected}
-														aria-label={`${t('appColUser')} - ${appLabel}`}
-														className="flex w-full items-center justify-center py-3"
-													>
-														<div className={`
-															flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-colors
-															${isSelected
-																? 'border-navy-600 bg-navy-600 text-white'
-																: 'border-gray-300'
-															}
-														`}>
-															{isSelected && <Check className="h-2.5 w-2.5" />}
-														</div>
-													</button>
-												</TableCell>
-												<TableCell className="p-0 text-center">
-													<button
-														type="button"
-														onClick={() => toggleAdminApp(app)}
-														aria-pressed={isAdminSelected}
-														aria-label={`${t('appColAdmin')} - ${appLabel}`}
-														className="flex w-full items-center justify-center py-3"
-													>
-														<div className={`
-															flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-colors
-															${isAdminSelected
-																? 'border-navy-600 bg-navy-600 text-white'
-																: 'border-gray-300'
-															}
-														`}>
-															{isAdminSelected && <Check className="h-2.5 w-2.5" />}
-														</div>
-													</button>
-												</TableCell>
-											</TableRow>
-										);
-									})}
-								</TableBody>
-							</Table>
-						</div>
+							<div className='grid md:grid-cols-2 gap-4'>
+								<div>
+									<label className='block text-sm font-medium text-text-primary mb-1.5'>{t('firstName')}</label>
+									<Input {...register('firstName')} />
+								</div>
+								<div>
+									<label className='block text-sm font-medium text-text-primary mb-1.5'>{t('lastName')}</label>
+									<Input {...register('lastName')} />
+								</div>
+								<div>
+									<label className='block text-sm font-medium text-text-primary mb-1.5'>{t('email')}</label>
+									<Input type='email' {...register('email')} />
+								</div>
+								<div>
+									<label className='block text-sm font-medium text-text-primary mb-1.5'>{t('phone')}</label>
+									<Input {...register('phoneNumber')} />
+								</div>
+								<div>
+									<label className='block text-sm font-medium text-text-primary mb-1.5'>{t('country')}</label>
+									<Select {...register('country')} defaultValue={initial.country ?? ''}>
+										<option value=''>{t('selectPlaceholder')}</option>
+										{COUNTRIES.map((name) => (
+											<option key={name} value={name}>
+												{name}
+											</option>
+										))}
+									</Select>
+								</div>
+								<div>
+									<label className='block text-sm font-medium text-text-primary mb-1.5'>{t('birthDate')}</label>
+									<Input type='date' {...register('birthDate')} />
+								</div>
+							</div>
+						</section>
+
+						<section className='rounded-xl border border-line bg-bg-surface p-5'>
+							<div className='flex items-center gap-2 mb-4'>
+								<span className='h-1.5 w-1.5 rounded-full bg-coral-500' />
+								<span className='text-xs font-semibold uppercase tracking-wide text-coral-600'>{t('sectionRoleSchedule')}</span>
+								<span className='h-px flex-1 bg-line ml-2' />
+							</div>
+							<div className='grid md:grid-cols-2 gap-4'>
+								<div>
+									<label className='block text-sm font-medium text-text-primary mb-1.5'>{t('role')}</label>
+									<Select {...register('role')}>
+										<option value='USER'>{t('roleUser')}</option>
+										<option value='ADMIN'>{t('roleAdmin')}</option>
+									</Select>
+								</div>
+								<div>
+									<div className='flex items-center justify-between mb-1.5'>
+										<label className='block text-sm font-medium text-text-primary'>{t('position')}</label>
+										<button
+											type='button'
+											className='text-xs font-medium text-coral-600'
+											onClick={() => setManagePositionsOpen(true)}>
+											{t('manage')}
+										</button>
+									</div>
+									<Select {...register('position')}>
+										<option value=''>{t('selectPlaceholder')}</option>
+										{posList.map((position) => (
+											<option key={position.id} value={position.name}>
+												{position.name}
+											</option>
+										))}
+									</Select>
+								</div>
+								<div>
+									<label className='block text-sm font-medium text-text-primary mb-1.5'>{t('arrivalDate')}</label>
+									<Input type='date' {...register('arrivalDate')} />
+								</div>
+								<div>
+									<label className='block text-sm font-medium text-text-primary mb-1.5'>{t('departureDate')}</label>
+									<Input type='date' {...register('departureDate')} />
+								</div>
+								<div className='md:col-span-2'>
+									<label className='block text-sm font-medium text-text-primary mb-1.5'>{t('language')}</label>
+									<Select {...register('language')}>
+										<option value='EN'>English</option>
+										<option value='FR'>Français</option>
+									</Select>
+								</div>
+							</div>
+						</section>
+
+						<section className='rounded-xl border border-line bg-bg-surface p-5'>
+							<div className='flex items-center gap-2 mb-4'>
+								<span className='h-1.5 w-1.5 rounded-full bg-coral-500' />
+								<span className='text-xs font-semibold uppercase tracking-wide text-coral-600'>{t('sectionAllowedApps')}</span>
+								<span className='ml-auto text-xs font-semibold px-2.5 py-1 rounded-full bg-coral-50 text-coral-600'>
+									{apps.size} / {AVAILABLE_APPLICATIONS.length} {t('applicationsSelected')}
+								</span>
+							</div>
+							<div className='rounded-lg border border-line overflow-hidden'>
+								<Table>
+									<TableHeader>
+										<TableRow>
+											<TableHead className='text-xs uppercase tracking-wide text-text-secondary'>{t('appColApp')}</TableHead>
+											<TableHead className='text-center text-xs uppercase tracking-wide text-text-secondary'>{t('appColUser')}</TableHead>
+											<TableHead className='text-center text-xs uppercase tracking-wide text-text-secondary'>{t('appColAdmin')}</TableHead>
+										</TableRow>
+									</TableHeader>
+									<TableBody>
+										{AVAILABLE_APPLICATIONS.map((app) => {
+											const isSelected = apps.has(app);
+											const isAdminSelected = adminApps.has(app);
+											const appLabel = t(`app_${app}`);
+											return (
+												<TableRow key={app} className={isSelected || isAdminSelected ? 'bg-coral-50/60' : undefined}>
+													<TableCell className='text-sm font-medium text-text-primary'>
+														<span className='inline-block h-2 w-2 rounded-full mr-2' style={{ backgroundColor: APP_DOT[app] }} />
+														{appLabel}
+													</TableCell>
+													<TableCell className='p-0 text-center'>
+														<button
+															type='button'
+															onClick={() => toggleApp(app)}
+															aria-pressed={isSelected}
+															aria-label={`${t('appColUser')} - ${appLabel}`}
+															className='flex w-full items-center justify-center py-3'
+														>
+															<div className={`
+																flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors
+																${isSelected
+																	? 'border-coral-500 bg-coral-500 text-white'
+																	: 'border-gray-300 bg-white'
+																}
+															`}>
+																{isSelected && <Check className='h-3 w-3' />}
+															</div>
+														</button>
+													</TableCell>
+													<TableCell className='p-0 text-center'>
+														<button
+															type='button'
+															onClick={() => toggleAdminApp(app)}
+															aria-pressed={isAdminSelected}
+															aria-label={`${t('appColAdmin')} - ${appLabel}`}
+															className='flex w-full items-center justify-center py-3'
+														>
+															<div className={`
+																flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors
+																${isAdminSelected
+																	? 'border-coral-500 bg-coral-500 text-white'
+																	: 'border-gray-300 bg-white'
+																}
+															`}>
+																{isAdminSelected && <Check className='h-3 w-3' />}
+															</div>
+														</button>
+													</TableCell>
+												</TableRow>
+											);
+										})}
+									</TableBody>
+								</Table>
+							</div>
+
+							{apps.has('CONGES') && (
+								<div className='mt-4'>
+									<label className='block text-sm font-medium text-text-primary mb-1.5'>{t('leaveDaysLabel')}</label>
+									<Input
+										type='number'
+										min='0'
+										max='365'
+										placeholder='0'
+										defaultValue={initial.congesTotalDays ?? ''}
+										onChange={(event) => {
+											const value = event.target.value;
+											setValue('congesTotalDays', value === '' ? undefined : parseInt(value, 10));
+										}}
+									/>
+								</div>
+							)}
+						</section>
 					</div>
 
-					{apps.has('CONGES') && (
-						<div>
-							<label className='block text-sm mb-1'>{t('leaveDaysLabel')}</label>
-							<Input
-								type='number'
-								min='0'
-								max='365'
-								placeholder='0'
-								defaultValue={initial.congesTotalDays ?? ''}
-								onChange={(event) => {
-									const value = event.target.value;
-									setValue('congesTotalDays', value === '' ? undefined : parseInt(value, 10));
-								}}
-							/>
-						</div>
-					)}
-
-					<DialogFooter>
-						<Button
-							type='button'
-							variant='outline'
-							onClick={() => setOpen(false)}>
+					<div className='flex items-center justify-end gap-3 border-t border-line bg-bg-surface px-6 py-4'>
+						<Button type='button' variant='outline' onClick={() => setOpen(false)}>
 							{t('cancel')}
 						</Button>
 						<Button type='submit' disabled={isExecuting}>
+							<Save className='h-4 w-4' />
 							{isExecuting ? t('saving') : t('save')}
 						</Button>
-					</DialogFooter>
+					</div>
 				</form>
 			</DialogContent>
 

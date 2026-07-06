@@ -145,6 +145,7 @@
     "actions": "Actions",
     "edit": "Edit",
     "editUser": "Edit user",
+    "editUserSubtitle": "Update this member's details and access",
     "delete": "Delete",
     "deleting": "Deleting...",
     "confirmDelete": "Are you sure you want to delete this user?",

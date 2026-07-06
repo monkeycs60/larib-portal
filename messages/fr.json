@@ -143,6 +143,7 @@
     "actions": "Actions",
     "edit": "Éditer",
     "editUser": "Éditer l'utilisateur",
+    "editUserSubtitle": "Modifier les informations et accès de ce membre",
     "delete": "Supprimer",
     "deleting": "Suppression...",
     "confirmDelete": "Voulez-vous vraiment supprimer cet utilisateur ?",
