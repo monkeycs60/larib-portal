@@ -15,6 +15,7 @@ import {
   LogOut,
   Pencil,
   ChevronUp,
+  Check,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -80,10 +81,10 @@ export function AppSidebar({ user }: { user: SidebarUser }) {
 
   const roleSubtitle = user.position || (isSuperAdmin(user) ? t('roleAdministrator') : t('roleMember'))
 
-  const toggleLanguage = () => {
-    const newLocale = locale === 'en' ? 'fr' : 'en'
+  const setLocale = (target: 'en' | 'fr') => {
+    if (target === locale) return
     const currentPath = window.location.pathname.replace(`/${locale}`, '')
-    router.push(currentPath || '/', { locale: newLocale })
+    router.push(currentPath || '/', { locale: target })
   }
 
   const handleLogout = async () => {
@@ -190,23 +191,36 @@ export function AppSidebar({ user }: { user: SidebarUser }) {
 
       <div className="border-t border-navy-600 p-3">
         <div className="space-y-2">
-          <button
-            type="button"
-            onClick={toggleLanguage}
-            title={locale === 'en' ? 'Switch to French' : 'Passer en anglais'}
-            className={cn(
-              'flex w-full items-center gap-3 rounded-lg py-2 text-sm font-medium text-navy-100 transition-colors hover:bg-navy-600 hover:text-white',
-              collapsed ? 'justify-center px-2' : 'px-3'
-            )}
-          >
-            <Globe className="h-4 w-4 shrink-0 text-navy-200" />
-            {!collapsed && (
-              <>
-                <span>{t('language')}</span>
-                <span className="ml-auto text-navy-200">{locale === 'en' ? 'EN' : 'FR'}</span>
-              </>
-            )}
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                title={t('language')}
+                className={cn(
+                  'flex w-full items-center gap-3 rounded-lg py-2 text-sm font-medium text-navy-100 transition-colors hover:bg-navy-600 hover:text-white cursor-pointer',
+                  collapsed ? 'justify-center px-2' : 'px-3'
+                )}
+              >
+                <Globe className="h-4 w-4 shrink-0 text-navy-200" />
+                {!collapsed && (
+                  <>
+                    <span>{t('language')}</span>
+                    <span className="ml-auto text-navy-200">{locale === 'en' ? 'EN' : 'FR'}</span>
+                  </>
+                )}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="top" align="start" className="w-56 mb-2">
+              <DropdownMenuItem onSelect={() => setLocale('en')}>
+                <Check className={cn('mr-2 size-4', locale === 'en' ? 'opacity-100' : 'opacity-0')} />
+                English
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setLocale('fr')}>
+                <Check className={cn('mr-2 size-4', locale === 'fr' ? 'opacity-100' : 'opacity-0')} />
+                Français
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
