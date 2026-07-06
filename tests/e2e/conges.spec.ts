@@ -63,13 +63,16 @@ test.describe('Conges - Leave Management', () => {
 
 			// Open the request leave dialog
 			await requestLeaveButton.click();
-			await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
+			const requestLeaveDialog = page.getByRole('dialog', {
+				name: /submit a leave request/i,
+			});
+			await expect(requestLeaveDialog).toBeVisible({ timeout: 5000 });
 			await expect(page.getByText(/submit a leave request/i)).toBeVisible();
 
 			// Verify dialog contains required elements
-			await expect(page.getByText('Start date', { exact: true })).toBeVisible();
-			await expect(page.getByText('End date', { exact: true })).toBeVisible();
-			await expect(page.getByText('Reason', { exact: true })).toBeVisible();
+			await expect(requestLeaveDialog.getByText('Start date', { exact: true })).toBeVisible();
+			await expect(requestLeaveDialog.getByText('End date', { exact: true })).toBeVisible();
+			await expect(requestLeaveDialog.getByLabel('Reason')).toBeVisible();
 
 			// Close dialog with Escape
 			await page.keyboard.press('Escape');

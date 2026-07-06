@@ -192,8 +192,8 @@ test.describe('Filter Tests', () => {
 		await searchInput.fill('Case 1');
 
 		// Attendre que l'URL change (le filtre utilise des query params)
-		await page.waitForURL(/\?q=Case/, { timeout: 3000 });
-		await page.waitForTimeout(500);
+		await expect(page).toHaveURL(/[?&]q=Case(?:\+|%20)1/, { timeout: 10000 });
+		await expect(page.locator('table tbody tr')).toHaveCount(1, { timeout: 10000 });
 
 		// Vérifier que le résultat est filtré
 		const rows = page.locator('table tbody tr');
@@ -657,8 +657,8 @@ test.describe('Performance & UX Tests', () => {
 
 		// Vérifier que les données sont complètes (pas de cellules vides critiques)
 		const firstRow = page.locator('table tbody tr').first();
-		await expect(firstRow.locator('td').nth(1)).not.toBeEmpty(); // Name
-		await expect(firstRow.locator('td').nth(2)).not.toBeEmpty(); // Exam Type
+		await expect(firstRow.locator('td').nth(3)).not.toBeEmpty(); // Name
+		await expect(firstRow.locator('td').nth(4)).not.toBeEmpty(); // Exam Type
 	});
 });
 
