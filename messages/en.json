@@ -102,7 +102,14 @@
     "title": "Profile",
     "welcome": "Welcome to your profile",
     "saved": "Profile updated",
-    "saveError": "Could not save profile"
+    "saveError": "Could not save profile",
+    "sectionAccountDetails": "Account details",
+    "sectionPersonalInfo": "Personal information",
+    "sectionProfilePhoto": "Profile photo",
+    "sectionRoleAccess": "Role & access",
+    "profilePhotoHelp": "PNG, JPG, or WEBP up to 5MB",
+    "selectImage": "Select image",
+    "allowedApplications": "Allowed applications"
   },
   "dashboard": {
     "title": "Dashboard",

@@ -28,6 +28,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ locale
       profilePhoto: true,
       role: true,
       applications: true,
+      adminApplications: true,
     }
   })
 
@@ -52,23 +53,20 @@ export default async function ProfilePage({ params }: { params: Promise<{ locale
     profilePhoto: user.profilePhoto ?? undefined,
     role: user.role,
     applications: (user.applications ?? []) as ['BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'] | undefined,
+    adminApplications: user.adminApplications ?? [],
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
-        <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-          <div className="px-4 py-5 sm:px-6">
-            <h3 className="text-lg leading-6 font-medium text-gray-900">{t('title')}</h3>
-            <p className="mt-1 max-w-2xl text-sm text-gray-500">{t('welcome')}</p>
-          </div>
-          <div className="border-t border-gray-200 p-4 sm:p-6">
-            <ProfileEditor
-              initial={initialValues}
-              positions={positions}
-            />
-          </div>
+    <div className="min-h-full bg-bg-app -mx-8 -my-6 px-8 py-6">
+      <div className="max-w-3xl mx-auto space-y-4">
+        <div className="border-l-4 border-coral-500 pl-4">
+          <h1 className="text-2xl md:text-3xl font-bold text-text-primary">{t('title')}</h1>
+          <p className="text-text-secondary">{t('welcome')}</p>
         </div>
+        <ProfileEditor
+          initial={initialValues}
+          positions={positions}
+        />
       </div>
     </div>
   )

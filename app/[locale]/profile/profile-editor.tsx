@@ -14,6 +14,9 @@ import { COUNTRIES } from "@/lib/countries"
 import { createPositionAction } from "@/actions/positions"
 import { FileUpload } from "@/components/ui/file-upload"
 import { InputDialog } from "@/components/ui/input-dialog"
+import { Save, Shield } from "lucide-react"
+import { accessibleApplications, canAdminApp } from "@/lib/permissions"
+import type { Application } from "@/app/generated/prisma"
 
 const Schema = z.object({
   firstName: z.string().optional().nullable(),
@@ -31,10 +34,17 @@ const Schema = z.object({
 
 export type ProfileEditorValues = z.infer<typeof Schema>
 
+const APP_DOT: Record<Application, string> = {
+  BESTOF_LARIB: '#ec3b68',
+  CONGES: '#6366f1',
+  CARDIOLARIB: '#0ea5e9',
+}
+
 type Props = {
   initial: ProfileEditorValues & {
     email: string
     isAdmin: boolean
+    adminApplications?: Application[]
   }
   positions?: Array<{ id: string; name: string }>
 }
@@ -89,9 +99,10 @@ export function ProfileEditor({ initial, positions = [] }: Props) {
       position: initial.isAdmin ? toNullIfEmpty(v.position) as string | null | undefined : (initial.position ?? null),
       country: toNullIfEmpty(v.country) as string | null | undefined,
       profilePhoto: toNullIfEmpty(v.profilePhoto) as string | null | undefined,
-      // role and applications only for admins
+      // role is editable for admins; applications stay read-only on this page
+      // and are always resent unchanged from the initial snapshot.
       ...(initial.isAdmin ? { role: v.role } : {}),
-      ...(initial.isAdmin ? { applications: v.applications } : {}),
+      ...(initial.isAdmin ? { applications: initial.applications } : {}),
     }
 
     setSaving(true)
@@ -100,12 +111,6 @@ export function ProfileEditor({ initial, positions = [] }: Props) {
     } finally {
       setSaving(false)
     }
-  }
-
-  const apps = new Set(form.watch('applications') ?? [])
-  function toggleApp(app: NonNullable<ProfileEditorValues['applications']>[number]) {
-    if (apps.has(app)) apps.delete(app); else apps.add(app)
-    form.setValue('applications', Array.from(apps))
   }
 
   const { execute: execCreatePos, isExecuting: creatingPos } = useAction(createPositionAction, {
@@ -132,93 +137,98 @@ export function ProfileEditor({ initial, positions = [] }: Props) {
     setNewPosName('')
   }
 
-  
-  
+  const allowedApplications = accessibleApplications({
+    applications: initial.applications ?? [],
+    adminApplications: initial.adminApplications ?? [],
+  })
+
   return (
-    <div className="space-y-6">
-      <div className="grid md:grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <div className="text-sm text-gray-500">Email</div>
-          <Input value={initial.email} disabled />
+    <div className="space-y-4">
+      <section className="rounded-xl border border-line bg-bg-surface p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <span className="h-1.5 w-1.5 rounded-full bg-coral-500" />
+          <span className="text-xs font-semibold uppercase tracking-wide text-coral-600">{tProfile('sectionAccountDetails')}</span>
+          <span className="h-px flex-1 bg-line" />
         </div>
-        <div className="space-y-1">
-          <div className="text-sm text-gray-500">{tAdmin('firstName')}</div>
-          {initial.isAdmin ? (
-            <Input {...form.register('firstName')} placeholder={tAdmin('firstName')} />
-          ) : (
-            <Input value={initial.firstName ?? ''} disabled />
-          )}
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">{tAdmin('email')}</label>
+            <Input value={initial.email} disabled />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">{tAdmin('firstName')}</label>
+            {initial.isAdmin ? (
+              <Input {...form.register('firstName')} placeholder={tAdmin('firstName')} />
+            ) : (
+              <Input value={initial.firstName ?? ''} disabled />
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">{tAdmin('lastName')}</label>
+            {initial.isAdmin ? (
+              <Input {...form.register('lastName')} placeholder={tAdmin('lastName')} />
+            ) : (
+              <Input value={initial.lastName ?? ''} disabled />
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">{tAdmin('phone')}</label>
+            <Input {...form.register('phoneNumber')} placeholder="+33..." />
+          </div>
         </div>
-        <div className="space-y-1">
-          <div className="text-sm text-gray-500">{tAdmin('lastName')}</div>
-          {initial.isAdmin ? (
-            <Input {...form.register('lastName')} placeholder={tAdmin('lastName')} />
-          ) : (
-            <Input value={initial.lastName ?? ''} disabled />
-          )}
+      </section>
+
+      <section className="rounded-xl border border-line bg-bg-surface p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <span className="h-1.5 w-1.5 rounded-full bg-coral-500" />
+          <span className="text-xs font-semibold uppercase tracking-wide text-coral-600">{tProfile('sectionPersonalInfo')}</span>
+          <span className="h-px flex-1 bg-line" />
         </div>
-        <div className="space-y-1">
-          <div className="text-sm text-gray-500">{tAdmin('phone')}</div>
-          <Input {...form.register('phoneNumber')} placeholder="+33..." />
-        </div>
-        <div className="space-y-1">
-          <div className="text-sm text-gray-500">{tAdmin('country')}</div>
-          <Select defaultValue={initial.country ?? ''} {...form.register('country')}>
-            <option value="">{tAdmin('selectPlaceholder')}</option>
-            {COUNTRIES.map((name) => (
-              <option key={name} value={name}>{name}</option>
-            ))}
-          </Select>
-        </div>
-        <div className="space-y-1">
-          <div className="text-sm text-gray-500">{tAdmin('birthDate')}</div>
-          <Input
-            key={`birthdate-${initial.birthDate}`}
-            type="date"
-            value={form.watch('birthDate') ?? ''}
-            onChange={(e) => form.setValue('birthDate', e.target.value || null)}
-          />
-        </div>
-        <div className="space-y-1">
-          <div className="text-sm text-gray-500">{tAdmin('language')}</div>
-          <Select defaultValue={initial.language} {...form.register('language')}>
-            <option value="EN">English</option>
-            <option value="FR">Français</option>
-          </Select>
-        </div>
-        {initial.isAdmin && (
-          <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-500">{tAdmin('position')}</div>
-              <button type="button" className="text-xs text-navy-600" onClick={() => { setAddPosOpen(true); setNewPosName('') }} disabled={creatingPos}>
-                {tAdmin('addNewPosition')}
-              </button>
-            </div>
-            <Select defaultValue={initial.position ?? ''} {...form.register('position')}>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">{tAdmin('country')}</label>
+            <Select defaultValue={initial.country ?? ''} {...form.register('country')}>
               <option value="">{tAdmin('selectPlaceholder')}</option>
-              {posList.map((p) => (
-                <option key={p.id} value={p.name}>{p.name}</option>
+              {COUNTRIES.map((name) => (
+                <option key={name} value={name}>{name}</option>
               ))}
             </Select>
           </div>
-        )}
-        <div className="md:col-span-2 space-y-2">
-          <div className="text-sm text-gray-500">{tAdmin('profilePhoto')}</div>
-          <FileUpload
-            accept="image/*"
-            maxSize={5 * 1024 * 1024}
-            valueUrl={form.watch('profilePhoto') ?? null}
-            onUploaded={({ url }) => {
-              form.setValue('profilePhoto', url)
-            }}
-            onDeleted={() => {
-              form.setValue('profilePhoto', null)
-            }}
-          />
-          {/* Keep the value in form state for server action */}
-          <input type="hidden" {...form.register('profilePhoto')} />
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">{tAdmin('birthDate')}</label>
+            <Input
+              key={`birthdate-${initial.birthDate}`}
+              type="date"
+              value={form.watch('birthDate') ?? ''}
+              onChange={(e) => form.setValue('birthDate', e.target.value || null)}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">{tAdmin('language')}</label>
+            <Select defaultValue={initial.language} {...form.register('language')}>
+              <option value="EN">English</option>
+              <option value="FR">Français</option>
+            </Select>
+          </div>
+          {initial.isAdmin && (
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-sm font-medium text-text-primary">{tAdmin('position')}</label>
+                <button type="button" className="text-xs font-medium text-coral-600" onClick={() => { setAddPosOpen(true); setNewPosName('') }} disabled={creatingPos}>
+                  {tAdmin('addNewPosition')}
+                </button>
+              </div>
+              <Select defaultValue={initial.position ?? ''} {...form.register('position')}>
+                <option value="">{tAdmin('selectPlaceholder')}</option>
+                {posList.map((p) => (
+                  <option key={p.id} value={p.name}>{p.name}</option>
+                ))}
+              </Select>
+            </div>
+          )}
         </div>
-      </div>
+      </section>
+
       <InputDialog
         open={addPosOpen}
         onOpenChange={setAddPosOpen}
@@ -233,49 +243,79 @@ export function ProfileEditor({ initial, positions = [] }: Props) {
         loading={creatingPos}
       />
 
-      <div className="grid md:grid-cols-2 gap-4">
-        {/* Role: hidden for non-admin users */}
-        {initial.isAdmin && (
-          <div>
-            <div className="text-sm text-gray-500 mb-1">{tAdmin('role')}</div>
-            <Select defaultValue={initial?.['role'] as 'ADMIN' | 'USER'} {...form.register('role')}>
-              <option value="USER">{tAdmin('roleUser')}</option>
-              <option value="ADMIN">{tAdmin('roleAdmin')}</option>
-            </Select>
-          </div>
-        )}
+      <section className="rounded-xl border border-line bg-bg-surface p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <span className="h-1.5 w-1.5 rounded-full bg-coral-500" />
+          <span className="text-xs font-semibold uppercase tracking-wide text-coral-600">{tProfile('sectionProfilePhoto')}</span>
+          <span className="h-px flex-1 bg-line" />
+        </div>
+        <FileUpload
+          accept="image/*"
+          maxSize={5 * 1024 * 1024}
+          valueUrl={form.watch('profilePhoto') ?? null}
+          onUploaded={({ url }) => {
+            form.setValue('profilePhoto', url)
+          }}
+          onDeleted={() => {
+            form.setValue('profilePhoto', null)
+          }}
+          labels={{ select: tProfile('selectImage'), helper: tProfile('profilePhotoHelp') }}
+        />
+        {/* Keep the value in form state for server action */}
+        <input type="hidden" {...form.register('profilePhoto')} />
+      </section>
 
-        <div>
-          <div className="text-sm text-gray-500 mb-2">{tAdmin('applications')}</div>
-          <div className="flex flex-wrap items-center gap-2">
+      <section className="rounded-xl border border-line bg-bg-surface p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <span className="h-1.5 w-1.5 rounded-full bg-coral-500" />
+          <span className="text-xs font-semibold uppercase tracking-wide text-coral-600">{tProfile('sectionRoleAccess')}</span>
+          <span className="h-px flex-1 bg-line" />
+        </div>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">{tAdmin('role')}</label>
             {initial.isAdmin ? (
-              (['BESTOF_LARIB','CONGES','CARDIOLARIB'] as const).map((app) => (
-                <button
-                  type="button"
-                  key={app}
-                  onClick={() => toggleApp(app)}
-                  className={
-                    apps.has(app)
-                      ? 'px-2 py-1 rounded border bg-navy-600 text-white text-xs'
-                      : 'px-2 py-1 rounded border text-xs'
-                  }
-                >
-                  {tAdmin(`app_${app}`)}
-                </button>
-              ))
+              <Select defaultValue={initial.role} {...form.register('role')}>
+                <option value="USER">{tAdmin('roleUser')}</option>
+                <option value="ADMIN">{tAdmin('roleAdmin')}</option>
+              </Select>
             ) : (
-              (form.watch('applications') ?? []).map((app) => (
-                <span key={app} className='px-2 py-1 rounded border bg-muted text-xs'>
-                  {tAdmin(`app_${app}`)}
+              <Input value={initial.role === 'ADMIN' ? tAdmin('roleAdmin') : tAdmin('roleUser')} disabled />
+            )}
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-text-primary mb-2">{tProfile('allowedApplications')}</label>
+          <div className="flex flex-wrap items-center gap-2">
+            {allowedApplications.length === 0 ? (
+              <span className="text-sm text-text-muted">—</span>
+            ) : (
+              allowedApplications.map((app) => (
+                <span key={app} className="inline-flex items-center gap-2 rounded-full border border-line bg-gray-50 py-1 pl-2.5 pr-1.5">
+                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: APP_DOT[app] }} />
+                  <span className="text-sm font-medium text-text-primary">{tAdmin(`app_${app}`)}</span>
+                  {initial.applications?.includes(app) && (
+                    <span className="rounded-full bg-white border border-line px-1.5 py-0.5 text-[10px] font-semibold uppercase text-text-secondary">
+                      {tAdmin('appColUser')}
+                    </span>
+                  )}
+                  {canAdminApp({ role: initial.role, adminApplications: initial.adminApplications }, app) && (
+                    <span className="inline-flex items-center gap-0.5 rounded-full bg-navy-800 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-white">
+                      <Shield className="h-2.5 w-2.5" />
+                      {tAdmin('appColAdmin')}
+                    </span>
+                  )}
                 </span>
               ))
             )}
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end border-t border-line pt-4">
         <Button type="button" onClick={saveAll} disabled={saving}>
+          <Save className="h-4 w-4" />
           {saving ? tAdmin('saving') : tAdmin('save')}
         </Button>
       </div>

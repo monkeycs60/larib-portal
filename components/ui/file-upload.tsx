@@ -4,7 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { X } from 'lucide-react';
+import { ImageIcon, Upload, X } from 'lucide-react';
+
+type FileUploadLabels = {
+	select: string;
+	helper: string;
+};
 
 type Props = {
 	accept: string;
@@ -13,6 +18,7 @@ type Props = {
 	onUploaded: (res: { url: string; key: string }) => void;
 	onDeleted?: () => void;
 	disabled?: boolean;
+	labels?: FileUploadLabels;
 };
 
 export function FileUpload({
@@ -22,6 +28,7 @@ export function FileUpload({
 	onUploaded,
 	onDeleted,
 	disabled,
+	labels,
 }: Props) {
 	const t = useTranslations('upload');
 	const inputRef = useRef<HTMLInputElement | null>(null);
@@ -112,16 +119,19 @@ export function FileUpload({
 		}
 	}
 
+	const selectLabel = labels?.select ?? t('selectFile');
+	const helperText = labels?.helper ?? t('hint');
+
 	return (
 		<div className='flex items-start gap-4'>
-			<div className='size-20 relative rounded bg-muted group'>
+			<div className='relative size-20 shrink-0 overflow-hidden rounded-xl bg-coral-50 flex items-center justify-center group'>
 				{preview ? (
 					// Local preview
 					// eslint-disable-next-line @next/next/no-img-element
 					<img
 						src={preview}
 						alt='preview'
-						className='object-cover w-full h-full rounded'
+						className='object-cover w-full h-full'
 					/>
 				) : currentUrl ? (
 					<>
@@ -130,7 +140,7 @@ export function FileUpload({
 							alt='avatar'
 							fill
 							sizes='80px'
-							className='object-cover rounded'
+							className='object-cover'
 						/>
 						{onDeleted && !disabled && !uploading && (
 							<button
@@ -142,16 +152,19 @@ export function FileUpload({
 							</button>
 						)}
 					</>
-				) : null}
+				) : (
+					<ImageIcon className='size-7 text-coral-500' />
+				)}
 			</div>
 			<div className='flex flex-col gap-2'>
 				<div className='flex gap-2'>
 					<Button
 						type='button'
-						variant='secondary'
+						variant='outline'
 						onClick={onPick}
 						disabled={disabled || uploading}>
-						{uploading ? t('uploading') : currentUrl || preview ? t('changeImage') : t('selectFile')}
+						<Upload className='size-4' />
+						{uploading ? t('uploading') : currentUrl || preview ? t('changeImage') : selectLabel}
 					</Button>
 				</div>
 				<Input
@@ -162,7 +175,7 @@ export function FileUpload({
 					onChange={onFileChange}
 					disabled={disabled || uploading}
 				/>
-				<div className='text-xs text-muted-foreground'>{t('hint')}</div>
+				<div className='text-sm text-text-secondary'>{helperText}</div>
 			</div>
 		</div>
 	);

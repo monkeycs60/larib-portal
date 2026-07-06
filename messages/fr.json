@@ -100,7 +100,14 @@
     "title": "Profil",
     "welcome": "Bienvenue sur votre profil",
     "saved": "Profil mis à jour",
-    "saveError": "Échec de l'enregistrement du profil"
+    "saveError": "Échec de l'enregistrement du profil",
+    "sectionAccountDetails": "Détails du compte",
+    "sectionPersonalInfo": "Informations personnelles",
+    "sectionProfilePhoto": "Photo de profil",
+    "sectionRoleAccess": "Rôle & accès",
+    "profilePhotoHelp": "PNG, JPG ou WEBP jusqu'à 5 Mo",
+    "selectImage": "Choisir une image",
+    "allowedApplications": "Applications autorisées"
   },
   "dashboard": {
     "title": "Tableau de bord",
