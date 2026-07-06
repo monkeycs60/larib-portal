@@ -128,6 +128,7 @@ export type CreatePlaceholderUserInput = {
   arrivalDate?: Date | null
   departureDate?: Date | null
   congesTotalDays?: number
+  profilePhoto?: string | null
 }
 
 export async function createPlaceholderUser(data: CreatePlaceholderUserInput): Promise<UserWithAdminFields> {
@@ -146,6 +147,7 @@ export async function createPlaceholderUser(data: CreatePlaceholderUserInput): P
       adminApplications: data.adminApplications ?? [],
       arrivalDate: data.arrivalDate ?? null,
       departureDate: data.departureDate ?? null,
+      profilePhoto: data.profilePhoto ?? null,
     },
     select: {
       id: true,

@@ -24,6 +24,7 @@ import { createUserInviteAction, createPositionAction, updatePositionAction, del
 import { toast } from 'sonner'
 import { Check, UserPlus, Send, ArrowRight, Plus } from 'lucide-react'
 import DeletableSelectManager from '@/app/[locale]/bestof-larib/components/deletable-select-manager'
+import { FileUpload } from '@/components/ui/file-upload'
 
 const AVAILABLE_APPLICATIONS = ['BESTOF_LARIB', 'CONGES'] as const
 type AvailableApplication = (typeof AVAILABLE_APPLICATIONS)[number]
@@ -44,7 +45,8 @@ const AddUserSchema = z.object({
   applications: z.array(z.enum(["BESTOF_LARIB","CONGES"])),
   adminApplications: z.array(z.enum(["BESTOF_LARIB","CONGES"])),
   emailLanguage: z.enum(['en','fr']),
-  congesTotalDays: z.number().int().min(0).max(365).optional()
+  congesTotalDays: z.number().int().min(0).max(365).optional(),
+  profilePhoto: z.string().url().optional().nullable(),
 })
 
 type AddUserValues = z.infer<typeof AddUserSchema>
@@ -130,7 +132,7 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
 
   const { register, handleSubmit, setValue, watch, reset } = useForm<AddUserValues>({
     resolver: zodResolver(AddUserSchema),
-    defaultValues: { role: 'USER', applications: [], adminApplications: [], emailLanguage: (locale as 'en' | 'fr') },
+    defaultValues: { role: 'USER', applications: [], adminApplications: [], emailLanguage: (locale as 'en' | 'fr'), profilePhoto: null },
   })
 
   const apps = new Set(watch('applications'))
@@ -278,6 +280,23 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
                   </Select>
                 </div>
               </div>
+            </section>
+
+            <section className="rounded-xl border border-line bg-bg-surface p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="h-1.5 w-1.5 rounded-full bg-coral-500" />
+                <span className="text-xs font-semibold uppercase tracking-wide text-coral-600">{t('sectionProfilePhoto')}</span>
+                <span className="h-px flex-1 bg-line ml-2" />
+              </div>
+              <FileUpload
+                accept="image/*"
+                maxSize={5 * 1024 * 1024}
+                valueUrl={watch('profilePhoto') ?? null}
+                onUploaded={({ url }) => setValue('profilePhoto', url)}
+                onDeleted={() => setValue('profilePhoto', null)}
+                labels={{ select: t('selectImage'), helper: t('profilePhotoHelp') }}
+              />
+              <input type="hidden" {...register('profilePhoto')} />
             </section>
 
             <section className="rounded-xl border border-line bg-bg-surface p-5">
