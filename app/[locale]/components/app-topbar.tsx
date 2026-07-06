@@ -81,7 +81,7 @@ export function AppTopBar({ user }: { user: TopBarUser }) {
         <DropdownMenuTrigger asChild>
           <button
             aria-label="Account menu"
-            className="inline-flex items-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-coral-500"
+            className="inline-flex items-center rounded-full cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-coral-500"
           >
             <Avatar className="size-9">
               <AvatarImage src={avatarSrc} alt={displayName} />
