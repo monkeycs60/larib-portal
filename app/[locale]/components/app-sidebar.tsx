@@ -68,9 +68,11 @@ export function AppSidebar({ user }: { user: SidebarUser }) {
         collapsed ? 'w-16' : 'w-64'
       )}
     >
-      <div
+      <Link
+        href="/dashboard"
+        aria-label={t('appName')}
         className={cn(
-          'flex flex-col items-center gap-2 py-5 text-center',
+          'flex flex-col items-center gap-2 py-5 text-center transition-opacity hover:opacity-80',
           collapsed ? 'px-2' : 'px-6'
         )}
       >
@@ -86,7 +88,7 @@ export function AppSidebar({ user }: { user: SidebarUser }) {
         {!collapsed && (
           <span className="text-sm font-semibold uppercase tracking-wider">{t('appName')}</span>
         )}
-      </div>
+      </Link>
 
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-4">
         {sections.map((section) => (
