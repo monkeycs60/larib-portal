@@ -65,13 +65,13 @@ function OnboardingStatusBadge({ status }: { status: InvitationStatus }) {
       )
     case 'INVITATION_SENT':
       return (
-        <Badge variant="warning" className="bg-warn-100 text-warn-700 border-warn-500 font-semibold">
+        <Badge variant="warning" className="bg-warn-50 text-warn-600 border-warn-500 font-semibold">
           {t('statusInvitationSent')}
         </Badge>
       )
     case 'INVITATION_EXPIRED':
       return (
-        <Badge variant="danger" className="bg-danger-100 text-danger-700 border-danger-500 font-semibold">
+        <Badge variant="danger" className="bg-danger-50 text-danger-600 border-danger-500 font-semibold">
           {t('statusInvitationExpired')}
         </Badge>
       )
@@ -93,13 +93,13 @@ function StatusLegend() {
         <span className="text-sm text-text-secondary">{t('statusActiveDesc')}</span>
       </div>
       <div className="flex items-center gap-1.5">
-        <Badge variant="warning" className="bg-warn-100 text-warn-700 border-warn-500 font-semibold">
+        <Badge variant="warning" className="bg-warn-50 text-warn-600 border-warn-500 font-semibold">
           {t('statusInvitationSent')}
         </Badge>
         <span className="text-sm text-text-secondary">{t('statusInvitationSentDesc')}</span>
       </div>
       <div className="flex items-center gap-1.5">
-        <Badge variant="danger" className="bg-danger-100 text-danger-700 border-danger-500 font-semibold">
+        <Badge variant="danger" className="bg-danger-50 text-danger-600 border-danger-500 font-semibold">
           {t('statusInvitationExpired')}
         </Badge>
         <span className="text-sm text-text-secondary">{t('statusInvitationExpiredDesc')}</span>
