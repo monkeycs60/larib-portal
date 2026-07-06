@@ -15,7 +15,10 @@
     "sectionApplications": "Applications",
     "sectionAdministration": "Administration",
     "collapseSidebar": "Collapse menu",
-    "expandSidebar": "Expand menu"
+    "expandSidebar": "Expand menu",
+    "language": "Language",
+    "roleAdministrator": "Administrator",
+    "roleMember": "Member"
   },
   "home": {
     "title": "Hello World",

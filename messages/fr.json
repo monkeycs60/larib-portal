@@ -15,7 +15,10 @@
     "sectionApplications": "Applications",
     "sectionAdministration": "Administration",
     "collapseSidebar": "Réduire le menu",
-    "expandSidebar": "Déployer le menu"
+    "expandSidebar": "Déployer le menu",
+    "language": "Langue",
+    "roleAdministrator": "Administrateur",
+    "roleMember": "Membre"
   },
   "home": {
     "title": "Bonjour le monde",

@@ -1,14 +1,43 @@
 'use client'
 
-import { useState } from 'react'
-import { Link, usePathname } from '@/app/i18n/navigation'
-import { useTranslations } from 'next-intl'
+import { useMemo, useState } from 'react'
+import { Link, usePathname, useRouter } from '@/app/i18n/navigation'
+import { useTranslations, useLocale } from 'next-intl'
 import Image from 'next/image'
-import { LayoutDashboard, GraduationCap, CalendarDays, Users, ChevronLeft, ChevronRight, type LucideIcon } from 'lucide-react'
+import {
+  LayoutDashboard,
+  GraduationCap,
+  CalendarDays,
+  Users,
+  ChevronLeft,
+  ChevronRight,
+  Globe,
+  LogOut,
+  Pencil,
+  ChevronUp,
+  type LucideIcon,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { isSuperAdmin, accessibleApplications } from '@/lib/permissions'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu'
+import { authClient } from '@/lib/auth-client'
+import { applicationLink } from '@/lib/application-link'
 
 type SidebarUser = {
+  email: string
+  name?: string | null
+  firstName?: string | null
+  lastName?: string | null
+  profilePhoto?: string | null
+  image?: string | null
+  position?: string | null
   role?: 'ADMIN' | 'USER'
   applications?: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'> | null
   adminApplications?: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'> | null
@@ -30,10 +59,43 @@ export function AppSidebar({ user }: { user: SidebarUser }) {
   const tDashboard = useTranslations('dashboard')
   const tAdmin = useTranslations('admin')
   const pathname = usePathname()
+  const locale = useLocale()
+  const router = useRouter()
   const [collapsed, setCollapsed] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   const accessible = accessibleApplications(user)
   const isAdmin = isSuperAdmin(user)
+
+  const displayName = useMemo(() => user.firstName ?? user.name ?? user.email, [user])
+
+  const initials = useMemo(() => {
+    const pick = (value: string) => (value?.trim()?.charAt(0) ?? '').toUpperCase()
+    const first = user.firstName ?? user.name ?? user.email
+    const last = user.lastName ?? ''
+    return `${pick(first)}${pick(last)}` || pick(user.email)
+  }, [user])
+
+  const avatarSrc = user.profilePhoto ?? user.image ?? undefined
+
+  const roleSubtitle = user.position || (isSuperAdmin(user) ? t('roleAdministrator') : t('roleMember'))
+
+  const toggleLanguage = () => {
+    const newLocale = locale === 'en' ? 'fr' : 'en'
+    const currentPath = window.location.pathname.replace(`/${locale}`, '')
+    router.push(currentPath || '/', { locale: newLocale })
+  }
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true)
+    try {
+      await authClient.signOut()
+      window.location.href = applicationLink(locale, '/')
+    } catch (error: unknown) {
+      console.error(error)
+      setIsLoggingOut(false)
+    }
+  }
 
   const applicationItems: SidebarItem[] = []
   if (accessible.includes('BESTOF_LARIB')) {
@@ -127,23 +189,87 @@ export function AppSidebar({ user }: { user: SidebarUser }) {
       </nav>
 
       <div className="border-t border-navy-600 p-3">
-        <button
-          type="button"
-          onClick={() => setCollapsed((previous) => !previous)}
-          aria-label={collapsed ? t('expandSidebar') : t('collapseSidebar')}
-          title={collapsed ? t('expandSidebar') : t('collapseSidebar')}
-          className={cn(
-            'flex w-full items-center gap-3 rounded-lg py-2 text-sm font-medium text-navy-100 transition-colors hover:bg-navy-600 hover:text-white',
-            collapsed ? 'justify-center px-2' : 'px-3'
-          )}
-        >
-          {collapsed ? (
-            <ChevronRight className="h-4 w-4 shrink-0 text-navy-200" />
-          ) : (
-            <ChevronLeft className="h-4 w-4 shrink-0 text-navy-200" />
-          )}
-          {!collapsed && <span>{t('collapseSidebar')}</span>}
-        </button>
+        <div className="space-y-2">
+          <button
+            type="button"
+            onClick={toggleLanguage}
+            title={locale === 'en' ? 'Switch to French' : 'Passer en anglais'}
+            className={cn(
+              'flex w-full items-center gap-3 rounded-lg py-2 text-sm font-medium text-navy-100 transition-colors hover:bg-navy-600 hover:text-white',
+              collapsed ? 'justify-center px-2' : 'px-3'
+            )}
+          >
+            <Globe className="h-4 w-4 shrink-0 text-navy-200" />
+            {!collapsed && (
+              <>
+                <span>{t('language')}</span>
+                <span className="ml-auto text-navy-200">{locale === 'en' ? 'EN' : 'FR'}</span>
+              </>
+            )}
+          </button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                aria-label="Account menu"
+                className={cn(
+                  'flex w-full items-center gap-3 rounded-lg bg-navy-600 py-2 text-left transition-colors hover:bg-navy-500 cursor-pointer',
+                  collapsed ? 'justify-center px-2' : 'px-3'
+                )}
+              >
+                <Avatar className="size-8">
+                  <AvatarImage src={avatarSrc} alt={displayName} />
+                  <AvatarFallback className="bg-coral-500 text-white font-semibold">{initials}</AvatarFallback>
+                </Avatar>
+                {!collapsed && (
+                  <>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-medium text-white">{displayName}</div>
+                      <div className="truncate text-xs text-navy-200">{roleSubtitle}</div>
+                    </div>
+                    <ChevronUp className="h-4 w-4 shrink-0 text-navy-200" />
+                  </>
+                )}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="top" align="start" className="w-56 mb-2">
+              <DropdownMenuItem asChild>
+                <Link href="/profile">
+                  <Pencil className="mr-2 size-4" />
+                  {t('editProfile')}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onSelect={handleLogout}
+                disabled={isLoggingOut}
+                className="text-danger-600 focus:text-danger-600"
+              >
+                <LogOut className="mr-2 size-4" />
+                {isLoggingOut ? t('loggingOut') : t('logout')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <button
+            type="button"
+            onClick={() => setCollapsed((previous) => !previous)}
+            aria-label={collapsed ? t('expandSidebar') : t('collapseSidebar')}
+            title={collapsed ? t('expandSidebar') : t('collapseSidebar')}
+            className={cn(
+              'flex w-full items-center gap-3 rounded-lg py-2 text-sm font-medium text-navy-100 transition-colors hover:bg-navy-600 hover:text-white',
+              collapsed ? 'justify-center px-2' : 'px-3'
+            )}
+          >
+            {collapsed ? (
+              <ChevronRight className="h-4 w-4 shrink-0 text-navy-200" />
+            ) : (
+              <ChevronLeft className="h-4 w-4 shrink-0 text-navy-200" />
+            )}
+            {!collapsed && <span>{t('collapseSidebar')}</span>}
+          </button>
+        </div>
       </div>
     </aside>
   )
