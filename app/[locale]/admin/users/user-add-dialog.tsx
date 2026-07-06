@@ -401,7 +401,7 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               {t('cancel')}
             </Button>
-            <Button type="submit" disabled={isExecuting} className="bg-gradient-to-br from-navy-700 to-navy-900 hover:from-navy-800 hover:to-navy-900 text-white shadow-sm">
+            <Button type="submit" disabled={isExecuting}>
               <Send className="h-4 w-4" />
               {isExecuting ? t('creating') : t('createAndSend')}
             </Button>
