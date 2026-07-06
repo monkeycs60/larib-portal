@@ -22,7 +22,7 @@ import { useState } from 'react'
 import { useAction } from 'next-safe-action/hooks'
 import { createUserInviteAction, createPositionAction, updatePositionAction, deletePositionsAction } from './actions'
 import { toast } from 'sonner'
-import { Check, UserPlus, Send, ArrowRight } from 'lucide-react'
+import { Check, UserPlus, Send, ArrowRight, Plus } from 'lucide-react'
 import DeletableSelectManager from '@/app/[locale]/bestof-larib/components/deletable-select-manager'
 
 const AVAILABLE_APPLICATIONS = ['BESTOF_LARIB', 'CONGES'] as const
@@ -194,7 +194,7 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm">{t('addUser')}</Button>
+        <Button size="sm"><Plus className="size-4" />{t('addUser')}</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-2xl p-0 gap-0 max-h-[90vh] overflow-hidden flex flex-col">
         <form className="flex flex-1 min-h-0 flex-col" onSubmit={onSubmit}>
