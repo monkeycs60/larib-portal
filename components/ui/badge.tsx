@@ -18,11 +18,11 @@ const badgeVariants = cva(
         outline:
           "border-line text-gray-700 [a&]:hover:bg-gray-50",
         success:
-          "border-success-100 bg-success-50 text-success-700 [a&]:hover:bg-success-100",
+          "border-[#A7F3D0] bg-[#ECFDF5] text-[#047857] [a&]:hover:bg-[#D1FAE5]",
         warning:
-          "border-warn-100 bg-warn-50 text-warn-700 [a&]:hover:bg-warn-100",
+          "border-[#FDBA74] bg-[#FFF3E9] text-[#EA580C] [a&]:hover:bg-[#FFE9D5]",
         danger:
-          "border-danger-100 bg-danger-50 text-danger-700 [a&]:hover:bg-danger-100",
+          "border-[#FECACA] bg-[#FEF2F2] text-[#DC2626] [a&]:hover:bg-[#FEE2E2]",
         neutral:
           "border-gray-200 bg-gray-100 text-gray-600 [a&]:hover:bg-gray-200",
       },
