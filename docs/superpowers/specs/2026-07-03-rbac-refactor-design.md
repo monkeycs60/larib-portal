@@ -13,7 +13,8 @@ On veut : un **super-admin portail** (gestion des comptes) + un rôle **Admin / 
 
 ## 2. Décisions (verrouillées)
 
-- **Modèle = tableaux d'enum** (Option 1) : on garde `applications: Application[]` (accès) et on ajoute `adminApplications: Application[]` (admin par app, sous-ensemble de `applications`).
+- **Modèle = tableaux d'enum** (Option 1) : on garde `applications: Application[]` (accès membre) et on ajoute `adminApplications: Application[]` (admin par app, **indépendant** de `applications`).
+- **Accès et admin sont indépendants par app** : par app, un user peut être membre seul, admin seul, les deux, ou aucun (pas d'accès). Être admin d'une app implique de pouvoir l'**ouvrir** (`canAccessApp` inclut `adminApplications`), sans exiger le grant « accès ».
 - **Super-admin = `Role.ADMIN`** (enum `Role` **conservé, pas de renommage**). `USER` = non super-admin.
 - **Admin d'une app** = `isSuperAdmin(user)` **OU** `app ∈ user.adminApplications`.
 - **Règle de répartition** : tout ce qui touche aux **comptes/portail** → super-admin ; tout ce qui est **métier d'une app** → admin de cette app. Le super-admin passe **toutes** les gardes.
@@ -35,7 +36,8 @@ On veut : un **super-admin portail** (gestion des comptes) + un rôle **Admin / 
 export function isSuperAdmin(user: { role: Role }): boolean         // role === 'ADMIN'
 export function canAdminApp(user: { role: Role; adminApplications: Application[] }, app: Application): boolean
   // isSuperAdmin(user) || user.adminApplications.includes(app)
-export function canAccessApp(user, app): boolean                    // isSuperAdmin || applications.includes(app)
+export function canAccessApp(user, app): boolean                    // isSuperAdmin || applications.includes(app) || adminApplications.includes(app)
+export function accessibleApplications(user): Application[]          // unique union of applications + adminApplications (nav/dashboard visibility)
 ```
 
 ### Gardes server-action — `actions/safe-action.ts`
@@ -58,7 +60,7 @@ Le point de bascule unique aujourd'hui est `adminOnlyAction` (`:31-37`). On le r
 ### 5.2 Basculer en **admin Congés** (`canAdminApp(user, 'CONGES')`)
 - Actions (`app/[locale]/conges/actions.ts`) : `updateLeaveStatusAction:144`, `updateLeaveAllocationAction:163`, `adminDeleteLeaveAction:251`, `adminUpdateLeaveAction:271` → `appAdminAction('CONGES')`.
 - `conges/actions.ts:106` (auto-approbation de sa propre demande) : condition `isSuperAdmin || canAdminApp(user,'CONGES')`.
-- `conges/page.tsx` : `isAdmin` (`:75,78,507,523-536`) → `canAdminApp(user,'CONGES')` pour afficher les sections admin (pending, historique décisions, vue équipe). Garde d'accès `:60` : `canAccessApp(user,'CONGES')` (un admin Congés a forcément l'accès puisque `adminApplications ⊆ applications`).
+- `conges/page.tsx` : `isAdmin` (`:75,78,507,523-536`) → `canAdminApp(user,'CONGES')` pour afficher les sections admin (pending, historique décisions, vue équipe). Garde d'accès `:60` : `canAccessApp(user,'CONGES')` (un admin Congés y accède car `canAccessApp` inclut `adminApplications`).
 - `lib/services/conges/index.ts:496` `getAdminEmails` : cibler les **admins Congés** — `where: { OR: [{ role: 'ADMIN' }, { adminApplications: { has: 'CONGES' } }] }`.
 
 ### 5.3 Basculer en **admin Bestof** (`canAdminApp(user, 'BESTOF_LARIB')`)
@@ -73,7 +75,7 @@ Le point de bascule unique aujourd'hui est `adminOnlyAction` (`:31-37`). On le r
 - `welcome/actions.ts:46,51` (écrit `role` + `applications` depuis l'invite) → gérer aussi `adminApplications` dans le payload d'invitation.
 
 ## 6. UI `/admin/users` (super-admin)
-- `admin/users/actions.ts` : ajouter `adminApplications: z.array(z.enum([...]))` aux schémas de `updateUserAction`/`createUserInviteAction` et persister via `updateUser`/`createUser` (`lib/services/users.ts`) ; validation `adminApplications ⊆ applications`.
+- `admin/users/actions.ts` : ajouter `adminApplications: z.array(z.enum([...]))` aux schémas de `updateUserAction`/`createUserInviteAction` et persister via `updateUser`/`createUser` (`lib/services/users.ts`). **Access et admin indépendants** (pas de contrainte de sous-ensemble). Nav (dashboard/sidebar/navbar) affiche les apps via `accessibleApplications` (membre ∪ admin).
 - `user-add-dialog.tsx` + `user-edit-dialog.tsx` : pour chaque app, **deux cases — Accès + Admin de l'app** (`applications` / `adminApplications`), en plus du toggle **super-admin** (`role`). Réutilise `AVAILABLE_APPLICATIONS`.
 - Corriger au passage l'incohérence d'enum `applications` (les actions incluent `CARDIOLARIB`, le add-dialog l'omet) — aligner.
 
