@@ -99,10 +99,7 @@ export function ProfileEditor({ initial, positions = [] }: Props) {
       position: initial.isAdmin ? toNullIfEmpty(v.position) as string | null | undefined : (initial.position ?? null),
       country: toNullIfEmpty(v.country) as string | null | undefined,
       profilePhoto: toNullIfEmpty(v.profilePhoto) as string | null | undefined,
-      // role is editable for admins; applications stay read-only on this page
-      // and are always resent unchanged from the initial snapshot.
-      ...(initial.isAdmin ? { role: v.role } : {}),
-      ...(initial.isAdmin ? { applications: initial.applications } : {}),
+      // role & applications are display-only on the profile (managed in /admin/users) — never sent
     }
 
     setSaving(true)
@@ -274,14 +271,7 @@ export function ProfileEditor({ initial, positions = [] }: Props) {
         <div className="grid md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-text-primary mb-1.5">{tAdmin('role')}</label>
-            {initial.isAdmin ? (
-              <Select defaultValue={initial.role} {...form.register('role')}>
-                <option value="USER">{tAdmin('roleUser')}</option>
-                <option value="ADMIN">{tAdmin('roleAdmin')}</option>
-              </Select>
-            ) : (
-              <Input value={initial.role === 'ADMIN' ? tAdmin('roleAdmin') : tAdmin('roleUser')} disabled />
-            )}
+            <Input value={initial.role === 'ADMIN' ? tAdmin('roleAdmin') : tAdmin('roleUser')} disabled />
           </div>
         </div>
 
