@@ -59,19 +59,19 @@ function OnboardingStatusBadge({ status }: { status: InvitationStatus }) {
   switch (status) {
     case 'ACTIVE':
       return (
-        <Badge variant="success">
+        <Badge variant="success" className="bg-success-100 text-success-700 border-success-500 font-semibold">
           {t('statusActive')}
         </Badge>
       )
     case 'INVITATION_SENT':
       return (
-        <Badge variant="warning">
+        <Badge variant="warning" className="bg-warn-100 text-warn-700 border-warn-500 font-semibold">
           {t('statusInvitationSent')}
         </Badge>
       )
     case 'INVITATION_EXPIRED':
       return (
-        <Badge variant="danger">
+        <Badge variant="danger" className="bg-danger-100 text-danger-700 border-danger-500 font-semibold">
           {t('statusInvitationExpired')}
         </Badge>
       )
@@ -87,19 +87,19 @@ function StatusLegend() {
     <div className="rounded-xl border border-line bg-bg-surface px-5 py-3 flex flex-wrap items-center gap-x-6 gap-y-2">
       <span className="text-xs font-semibold uppercase tracking-wide text-text-muted">{t('statusLegend')}</span>
       <div className="flex items-center gap-1.5">
-        <Badge variant="success">
+        <Badge variant="success" className="bg-success-100 text-success-700 border-success-500 font-semibold">
           {t('statusActive')}
         </Badge>
         <span className="text-sm text-text-secondary">{t('statusActiveDesc')}</span>
       </div>
       <div className="flex items-center gap-1.5">
-        <Badge variant="warning">
+        <Badge variant="warning" className="bg-warn-100 text-warn-700 border-warn-500 font-semibold">
           {t('statusInvitationSent')}
         </Badge>
         <span className="text-sm text-text-secondary">{t('statusInvitationSentDesc')}</span>
       </div>
       <div className="flex items-center gap-1.5">
-        <Badge variant="danger">
+        <Badge variant="danger" className="bg-danger-100 text-danger-700 border-danger-500 font-semibold">
           {t('statusInvitationExpired')}
         </Badge>
         <span className="text-sm text-text-secondary">{t('statusInvitationExpiredDesc')}</span>
