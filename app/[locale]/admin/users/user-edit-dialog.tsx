@@ -20,7 +20,7 @@ import { updateUserAction, createPositionAction, updatePositionAction, deletePos
 import { useAction } from 'next-safe-action/hooks';
 import { COUNTRIES } from '@/lib/countries';
 import { toast } from 'sonner';
-import { Check } from 'lucide-react';
+import { Check, Pencil } from 'lucide-react';
 import DeletableSelectManager from '@/app/[locale]/bestof-larib/components/deletable-select-manager';
 
 const AVAILABLE_APPLICATIONS = ['BESTOF_LARIB', 'CONGES'] as const;
@@ -170,8 +170,8 @@ export function UserEditDialog({
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
-				<Button variant='outline' size='sm'>
-					{t('edit')}
+				<Button variant='outline' size='icon' aria-label={t('edit')} title={t('edit')}>
+					<Pencil className='size-4' />
 				</Button>
 			</DialogTrigger>
 			<DialogContent>

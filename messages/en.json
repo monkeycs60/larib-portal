@@ -226,7 +226,9 @@
     "resendInvitation": "Resend invitation",
     "resending": "Sending...",
     "invitationResent": "Invitation resent",
-    "leaveDaysLabel": "Number of leave days"
+    "leaveDaysLabel": "Number of leave days",
+    "colApplicationsAccess": "Applications & access",
+    "usersSectionLabel": "Users"
   },
   "upload": {
     "selectFile": "Select image",

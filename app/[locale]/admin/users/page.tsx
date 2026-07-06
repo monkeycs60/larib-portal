@@ -23,12 +23,14 @@ export default async function AdminUsersPage({
   const positions = await listPositions()
 
   return (
-    <div className="space-y-4 max-w-7xl mx-auto">
-      <div>
-        <h1 className="text-2xl font-semibold">{t('usersTitle')}</h1>
-        <p className="text-text-secondary">{t('usersSubtitle')}</p>
+    <div className="min-h-full bg-[radial-gradient(60rem_40rem_at_top_right,var(--color-coral-50),transparent_70%)] bg-bg-app -mx-8 -my-6 px-8 py-6">
+      <div className="space-y-4 max-w-7xl mx-auto">
+        <div className="border-l-4 border-coral-500 pl-4">
+          <h1 className="text-2xl md:text-3xl font-bold text-text-primary">{t('usersTitle')}</h1>
+          <p className="text-text-secondary">{t('usersSubtitle')}</p>
+        </div>
+        <UserTable users={users as unknown as UserRow[]} positions={positions} locale={locale} />
       </div>
-      <UserTable users={users as unknown as UserRow[]} positions={positions} locale={locale} />
     </div>
   )
 }
