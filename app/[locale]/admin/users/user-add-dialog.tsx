@@ -176,7 +176,6 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
 
   // Email preview values
   const previewEmail = watch('email') || 'user@example.com'
-  const previewPos = watch('position')
   const previewEnd = watch('departureDate')
   const emailLang = watch('emailLanguage') || 'en'
 
