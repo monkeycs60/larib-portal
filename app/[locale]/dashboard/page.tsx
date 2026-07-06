@@ -3,7 +3,7 @@ import { Link } from '@/app/i18n/navigation'
 import { getTranslations } from 'next-intl/server'
 import { formatUserName } from '@/lib/format-user-name'
 import { getRandomGreeting } from '@/lib/random-greeting'
-import { isSuperAdmin } from '@/lib/permissions'
+import { isSuperAdmin, accessibleApplications } from '@/lib/permissions'
 import * as motion from "framer-motion/client"
 import { ArrowRight } from 'lucide-react'
 
@@ -17,7 +17,7 @@ export default async function DashboardPage({
   const t = await getTranslations({ locale, namespace: 'dashboard' })
   const adminT = await getTranslations({ locale, namespace: 'admin' })
 
-  const allApps = (session.user.applications ?? []) as Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'>
+  const allApps = accessibleApplications(session.user) as Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'>
   const appOrder: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'> = ['BESTOF_LARIB', 'CONGES', 'CARDIOLARIB']
   const apps = appOrder.filter(app => app !== 'CARDIOLARIB' && allApps.includes(app))
 

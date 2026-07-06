@@ -6,11 +6,12 @@ import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { LayoutDashboard, GraduationCap, CalendarDays, Users, ChevronLeft, ChevronRight, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { isSuperAdmin } from '@/lib/permissions'
+import { isSuperAdmin, accessibleApplications } from '@/lib/permissions'
 
 type SidebarUser = {
   role?: 'ADMIN' | 'USER'
   applications?: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'> | null
+  adminApplications?: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'> | null
 }
 
 type SidebarItem = {
@@ -31,14 +32,14 @@ export function AppSidebar({ user }: { user: SidebarUser }) {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
 
-  const applications = user.applications ?? []
+  const accessible = accessibleApplications(user)
   const isAdmin = isSuperAdmin(user)
 
   const applicationItems: SidebarItem[] = []
-  if (applications.includes('BESTOF_LARIB')) {
+  if (accessible.includes('BESTOF_LARIB')) {
     applicationItems.push({ href: '/bestof-larib', label: tAdmin('app_BESTOF_LARIB'), icon: GraduationCap })
   }
-  if (applications.includes('CONGES')) {
+  if (accessible.includes('CONGES')) {
     applicationItems.push({ href: '/conges', label: tAdmin('app_CONGES'), icon: CalendarDays })
   }
 

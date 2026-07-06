@@ -147,15 +147,12 @@ export function UserEditDialog({
 	function toggleApp(app: AvailableApplication) {
 		if (apps.has(app)) {
 			apps.delete(app);
-			adminApps.delete(app);
 		} else {
 			apps.add(app);
 		}
 		setValue('applications', Array.from(apps));
-		setValue('adminApplications', Array.from(adminApps));
 	}
 	function toggleAdminApp(app: AvailableApplication) {
-		if (!apps.has(app)) return;
 		if (adminApps.has(app)) {
 			adminApps.delete(app);
 		} else {
@@ -322,8 +319,7 @@ export function UserEditDialog({
 											<button
 												type="button"
 												onClick={() => toggleAdminApp(app)}
-												disabled={!isSelected}
-												className="flex w-full items-center gap-2 text-left disabled:cursor-not-allowed disabled:opacity-40"
+												className="flex w-full items-center gap-2 text-left"
 											>
 												<div className={`
 													flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-colors

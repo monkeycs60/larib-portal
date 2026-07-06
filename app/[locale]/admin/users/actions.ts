@@ -36,8 +36,7 @@ export const updateUserAction = superAdminAction
     const arrivalDate = parsedInput.arrivalDate ? new Date(parsedInput.arrivalDate) : null
     const departureDate = parsedInput.departureDate ? new Date(parsedInput.departureDate) : null
     const language = parsedInput.language ?? (parsedInput.locale === 'fr' ? 'FR' : 'EN')
-    const adminApplications = (parsedInput.adminApplications ?? [])
-      .filter((application) => (parsedInput.applications ?? []).includes(application))
+    const adminApplications = parsedInput.adminApplications ?? []
 
     const updated = await updateUser({
       id: parsedInput.id,
@@ -106,8 +105,7 @@ export const createUserInviteAction = superAdminAction
   .action(async ({ parsedInput }) => {
     const arrivalDate = new Date(parsedInput.arrivalDate)
     const departureDate = new Date(parsedInput.departureDate)
-    const adminApplications = (parsedInput.adminApplications ?? [])
-      .filter((application) => (parsedInput.applications ?? []).includes(application))
+    const adminApplications = parsedInput.adminApplications ?? []
 
     // Create or ensure the position exists if provided
     let positionName: string | null = parsedInput.position ?? null

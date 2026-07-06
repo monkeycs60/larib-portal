@@ -18,7 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { LogOut } from 'lucide-react';
 import { authClient } from '@/lib/auth-client';
 import { applicationLink } from '@/lib/application-link';
-import { isSuperAdmin } from '@/lib/permissions';
+import { isSuperAdmin, accessibleApplications } from '@/lib/permissions';
 import Image from 'next/image';
 
 type NavbarUser = {
@@ -32,6 +32,7 @@ type NavbarUser = {
     firstName?: string | null;
     lastName?: string | null;
     applications?: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'> | null;
+    adminApplications?: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'> | null;
 };
 
 export function NavbarClient({ user }: { user?: NavbarUser | null }) {
@@ -173,7 +174,7 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
 									</DropdownMenuGroup>
 									<DropdownMenuSeparator />
 									{(() => {
-									const availableApps = (user.applications ?? []).filter(
+									const availableApps = accessibleApplications(user).filter(
 										(app) => app !== 'CARDIOLARIB'
 									);
 									if (availableApps.length === 0) return null;
