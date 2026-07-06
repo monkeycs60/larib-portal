@@ -216,7 +216,7 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
             <section className="rounded-xl border border-line bg-bg-surface p-5">
               <div className="flex items-center gap-2 mb-4">
                 <span className="h-1.5 w-1.5 rounded-full bg-coral-500" />
-                <span className="text-xs font-semibold uppercase tracking-wide text-text-secondary">{t('sectionIdentity')}</span>
+                <span className="text-xs font-semibold uppercase tracking-wide text-coral-600">{t('sectionIdentity')}</span>
                 <span className="h-px flex-1 bg-line ml-2" />
               </div>
               <div className="grid md:grid-cols-2 gap-4">
@@ -238,7 +238,7 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
             <section className="rounded-xl border border-line bg-bg-surface p-5">
               <div className="flex items-center gap-2 mb-4">
                 <span className="h-1.5 w-1.5 rounded-full bg-coral-500" />
-                <span className="text-xs font-semibold uppercase tracking-wide text-text-secondary">{t('sectionRoleSchedule')}</span>
+                <span className="text-xs font-semibold uppercase tracking-wide text-coral-600">{t('sectionRoleSchedule')}</span>
                 <span className="h-px flex-1 bg-line ml-2" />
               </div>
               <div className="grid md:grid-cols-2 gap-4">
@@ -284,7 +284,7 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
             <section className="rounded-xl border border-line bg-bg-surface p-5">
               <div className="flex items-center gap-2 mb-4">
                 <span className="h-1.5 w-1.5 rounded-full bg-coral-500" />
-                <span className="text-xs font-semibold uppercase tracking-wide text-text-secondary">{t('sectionAllowedApps')}</span>
+                <span className="text-xs font-semibold uppercase tracking-wide text-coral-600">{t('sectionAllowedApps')}</span>
                 <span className="ml-auto text-xs font-semibold px-2.5 py-1 rounded-full bg-coral-50 text-coral-600">
                   {apps.size} / {AVAILABLE_APPLICATIONS.length} {t('applicationsSelected')}
                 </span>
@@ -374,7 +374,7 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
             <section className="rounded-xl border border-line bg-bg-surface p-5">
               <div className="flex items-center gap-2 mb-4">
                 <span className="h-1.5 w-1.5 rounded-full bg-coral-500" />
-                <span className="text-xs font-semibold uppercase tracking-wide text-text-secondary">{t('welcomeEmailPreview')}</span>
+                <span className="text-xs font-semibold uppercase tracking-wide text-coral-600">{t('welcomeEmailPreview')}</span>
                 <span className="h-px flex-1 bg-line ml-2" />
               </div>
               <div className="rounded-lg border border-line bg-bg-surface p-4 text-sm">
@@ -401,7 +401,7 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               {t('cancel')}
             </Button>
-            <Button type="submit" disabled={isExecuting} className="bg-navy-800 hover:bg-navy-900 text-white">
+            <Button type="submit" disabled={isExecuting} className="bg-gradient-to-br from-navy-700 to-navy-900 hover:from-navy-800 hover:to-navy-900 text-white shadow-sm">
               <Send className="h-4 w-4" />
               {isExecuting ? t('creating') : t('createAndSend')}
             </Button>
