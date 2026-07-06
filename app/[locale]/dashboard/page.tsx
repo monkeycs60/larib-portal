@@ -108,8 +108,8 @@ export default async function DashboardPage({
         <div className="space-y-12">
           {/* Applications */}
           <section>
-            <div className="flex items-center gap-4 mb-6">
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-text-secondary">
+            <div className="flex items-center gap-3 mb-6"><span className="h-1.5 w-1.5 rounded-full bg-coral-500" />
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-coral-600">
                 {t('appsSectionTitle')}
               </h2>
               <div className="h-px flex-1 bg-line" />
@@ -133,10 +133,10 @@ export default async function DashboardPage({
                       
                       <div className="p-6 h-full flex flex-col">
                         <div className="mb-4">
-                          <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-navy-50 p-2.5 text-navy-600 transition-transform duration-500 group-hover:scale-110">
+                          <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-coral-50 p-2.5 text-coral-500 transition-transform duration-500 group-hover:scale-110">
                             {getAppIcon(app)}
                           </div>
-                          <h3 className="text-lg font-semibold text-text-primary mb-1 group-hover:text-navy-600 transition-colors duration-300">
+                          <h3 className="text-lg font-semibold text-text-primary mb-1 group-hover:text-coral-600 transition-colors duration-300">
                             {adminT(`app_${app}`)}
                           </h3>
                           <p className="text-sm text-text-secondary leading-relaxed max-w-md">
@@ -144,9 +144,10 @@ export default async function DashboardPage({
                           </p>
                         </div>
                         
-                        <div className="mt-auto pt-4">
-                          <span className="inline-flex items-center text-sm font-medium uppercase tracking-wider text-navy-600">
+                        <div className="mt-auto border-t border-line pt-4">
+                          <span className="inline-flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wider text-coral-600">
                             {t('openApp')}
+                            <ArrowRight className="w-4 h-4" />
                           </span>
                         </div>
                       </div>
@@ -160,8 +161,8 @@ export default async function DashboardPage({
           {/* Admin-only section */}
           {isSuperAdmin(session.user) && (
             <section>
-               <div className="flex items-center gap-4 mb-6">
-                <h2 className="text-sm font-semibold uppercase tracking-wider text-text-secondary">
+               <div className="flex items-center gap-3 mb-6"><span className="h-1.5 w-1.5 rounded-full bg-coral-500" />
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-coral-600">
                   {t('adminSectionTitle')}
                 </h2>
                 <div className="h-px flex-1 bg-line" />
@@ -184,7 +185,7 @@ export default async function DashboardPage({
 
                       <div className="p-6 h-full flex flex-col">
                         <div className="mb-4">
-                          <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-navy-50 p-2.5 text-navy-600 transition-transform duration-500 group-hover:scale-110">
+                          <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-coral-50 p-2.5 text-coral-500 transition-transform duration-500 group-hover:scale-110">
                             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
                               <circle cx="18" cy="16" r="6" stroke="currentColor" strokeWidth="2" fill="none"/>
                               <path d="M6 38c0-6.627 5.373-12 12-12s12 5.373 12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>
@@ -192,7 +193,7 @@ export default async function DashboardPage({
                               <path d="M42 38c0-5.523-4.477-10-10-10-1.5 0-2.9.33-4.17.92" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>
                             </svg>
                           </div>
-                          <h3 className="text-lg font-semibold text-text-primary mb-1 group-hover:text-navy-600 transition-colors duration-300">
+                          <h3 className="text-lg font-semibold text-text-primary mb-1 group-hover:text-coral-600 transition-colors duration-300">
                             {adminT('usersNav')}
                           </h3>
                           <p className="text-sm text-text-secondary leading-relaxed max-w-md">
@@ -200,9 +201,10 @@ export default async function DashboardPage({
                           </p>
                         </div>
 
-                        <div className="mt-auto pt-4">
-                          <span className="inline-flex items-center text-sm font-medium uppercase tracking-wider text-navy-600">
+                        <div className="mt-auto border-t border-line pt-4">
+                          <span className="inline-flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wider text-coral-600">
                             {t('openApp')}
+                            <ArrowRight className="w-4 h-4" />
                           </span>
                         </div>
                       </div>
