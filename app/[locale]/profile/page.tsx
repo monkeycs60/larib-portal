@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { getTypedSession } from "@/lib/auth-helpers";
 import { ProfileEditor } from "./profile-editor";
+import { PageHeader } from "@/app/[locale]/components/page-header";
 import { listPositions } from "@/lib/services/positions";
 import { prisma } from "@/lib/prisma";
 import { isSuperAdmin } from "@/lib/permissions";
@@ -59,10 +60,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ locale
   return (
     <div className="min-h-full bg-bg-app -mx-8 -my-6 px-8 py-6">
       <div className="max-w-3xl mx-auto space-y-4">
-        <div className="border-l-4 border-coral-500 pl-4">
-          <h1 className="text-2xl md:text-3xl font-bold text-text-primary">{t('title')}</h1>
-          <p className="text-text-secondary">{t('welcome')}</p>
-        </div>
+        <PageHeader title={t('title')} subtitle={t('welcome')} />
         <ProfileEditor
           initial={initialValues}
           positions={positions}

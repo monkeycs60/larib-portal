@@ -18,6 +18,7 @@ import { PendingRequestsSection } from './components/pending-requests-section'
 import { TeamLeaveOverviewSection } from './components/team-leave-overview-section'
 import { DecisionHistorySection, type DecisionEntry } from './components/decision-history-section'
 import { CalendarSkeleton } from './components/calendar-skeleton'
+import { PageHeader } from '@/app/[locale]/components/page-header'
 import { applicationLink } from '@/lib/application-link'
 import { canAccessApp, canAdminApp } from '@/lib/permissions'
 
@@ -510,10 +511,7 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
     <div className='space-y-8 py-6'>
       <header className='px-6'>
         <div className='flex flex-col gap-4 md:flex-row md:items-center md:justify-between'>
-          <div>
-            <h1 className='text-2xl font-semibold'>{t('title')}</h1>
-            <p className='text-sm text-text-secondary'>{t('subtitle')}</p>
-          </div>
+          <PageHeader title={t('title')} subtitle={t('subtitle')} />
           {!isAdmin && (
             <RequestLeaveDialog translations={requestTranslations} defaultMonthIso={activeMonth.toISOString()} userContext={userLeaveContext} />
           )}

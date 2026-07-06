@@ -19,6 +19,7 @@ import CasesTable from './components/cases-table';
 import { DicomSelectionBar } from './components/dicom-cases-table-wrapper';
 import { type CasesTableTranslations } from './components/cases-table-fallback';
 import TagsManagerModal from './components/tags-manager-modal';
+import { PageHeader } from '@/app/[locale]/components/page-header';
 import type { BestofCacheKey } from '@/lib/bestof-cache-key';
 import { serialiseBestofCacheKey } from '@/lib/bestof-cache-key';
 import { applicationLink } from '@/lib/application-link';
@@ -213,10 +214,7 @@ export default async function BestofLaribPage({
 	return (
 		<div className='space-y-4 py-6 px-8 mx-auto'>
 			<div className='flex items-center justify-between'>
-				<div>
-					<h1 className='text-2xl font-semibold'>{t('title')}</h1>
-					<p className='text-sm text-muted-foreground'>{t('subtitle')}</p>
-				</div>
+				<PageHeader title={t('title')} subtitle={t('subtitle')} />
 				<div className='flex items-center gap-3'>
 					<TagsManagerModal isAdmin={isAdmin} />
 					{isAdmin ? (
