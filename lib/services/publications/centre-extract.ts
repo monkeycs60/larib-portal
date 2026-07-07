@@ -53,6 +53,10 @@ function normalizeCentreName(name: string): string {
   if (uniSuffix) return `CHU de ${uniSuffix[1].trim()}`
   const chuBare = name.match(/^chu\s+(?!de\b|d')(.+)$/i)
   if (chuBare) return `CHU de ${chuBare[1].trim()}`
+  const chruRegional = name.match(/^centre hospitalier r[eé]gional universitaire (?:de |d'|du |des )?(.+)$/i)
+  if (chruRegional) return `CHRU de ${chruRegional[1].trim()}`
+  const chruBare = name.match(/^chru\s+(?!de\b|d')(.+)$/i)
+  if (chruBare) return `CHRU de ${chruBare[1].trim()}`
   const chu = name.match(/^centre hospitalier universitaire (?:de |d'|du |des )?(.+)$/i)
   if (chu) return `CHU de ${chu[1].trim()}`
   const ch = name.match(/^centre hospitalier (.+)$/i)
