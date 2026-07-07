@@ -671,7 +671,11 @@
       "holiday": "holiday",
       "day": "day",
       "days": "days",
-      "holidayLegend": "Public holiday"
+      "holidayLegend": "Public holiday",
+      "datesSection": "Dates",
+      "selectedRangeLegend": "Selected range",
+      "optionalTag": "Optional",
+      "footerHint": "Pick a start date to begin"
     },
     "errors": {
       "overlap": "You already have a request covering that period.",

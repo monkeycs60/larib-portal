@@ -16,14 +16,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
-import { AlertCircle, Calendar as CalendarIcon, Info, ChevronLeft, ChevronRight } from 'lucide-react'
+import { AlertCircle, Calendar as CalendarIcon, Info, ChevronLeft, ChevronRight, Send } from 'lucide-react'
 import { requestLeaveAction } from '../actions'
 import { countWorkingDays, getExcludedDaysInfo, getHolidayDatesForCalendar } from '@/lib/services/conges'
 import type { DateRange, Matcher } from 'react-day-picker'
@@ -57,6 +55,10 @@ type RequestLeaveDialogProps = {
     day: string
     days: string
     holidayLegend: string
+    datesSection: string
+    selectedRangeLegend: string
+    optionalTag: string
+    footerHint: string
   }
   defaultMonthIso: string
   userContext: {
@@ -255,28 +257,47 @@ export function RequestLeaveDialog({
       <DialogTrigger asChild>
         <Button>{translations.trigger}</Button>
       </DialogTrigger>
-      <DialogContent className='sm:max-w-5xl max-h-[90vh] overflow-y-auto'>
-        <DialogHeader>
-          <DialogTitle>{translations.title}</DialogTitle>
-          <DialogDescription>{translations.description}</DialogDescription>
-        </DialogHeader>
-        <form className='grid gap-6' onSubmit={form.handleSubmit(handleSubmit)}>
-          <div className='grid gap-3 md:grid-cols-2'>
-            <div className='space-y-2'>
-              <Label>{translations.startLabel}</Label>
-              <div className='rounded-md border bg-muted/30 p-2 text-sm'>
-                {selectedRange?.from
-                  ? format(selectedRange.from, 'PPP', { locale: dateLocale })
-                  : '—'}
-              </div>
+      <DialogContent className='sm:max-w-4xl p-0 gap-0 max-h-[90vh] overflow-hidden flex flex-col'>
+        <div className='relative bg-bg-surface px-6 py-4'>
+          <span className='absolute left-0 top-0 h-full w-1 rounded-l-lg bg-coral-500' />
+          <div className='flex items-start gap-3'>
+            <div className='rounded-xl bg-coral-50 p-2.5 text-coral-600'>
+              <CalendarIcon className='h-5 w-5' />
             </div>
-            <div className='space-y-2'>
-              <Label>{translations.endLabel}</Label>
-              <div className='rounded-md border bg-muted/30 p-2 text-sm'>
-                {selectedRange?.to ? format(selectedRange.to, 'PPP', { locale: dateLocale }) : '—'}
-              </div>
-            </div>
+            <DialogHeader className='gap-0.5'>
+              <DialogTitle className='text-lg font-bold'>{translations.title}</DialogTitle>
+              <DialogDescription className='text-sm text-text-secondary'>{translations.description}</DialogDescription>
+            </DialogHeader>
           </div>
+        </div>
+        <form className='flex flex-1 min-h-0 flex-col' onSubmit={form.handleSubmit(handleSubmit)}>
+          <div className='flex-1 overflow-y-auto bg-bg-app px-6 py-5 space-y-4'>
+            <section className='rounded-xl border border-line bg-bg-surface p-5'>
+              <div className='flex items-center gap-2 mb-4'>
+                <span className='h-1.5 w-1.5 rounded-full bg-coral-500' />
+                <span className='text-xs font-semibold uppercase tracking-wide text-coral-600'>{translations.datesSection}</span>
+                <span className='h-px flex-1 bg-line ml-2' />
+              </div>
+              <div className='grid gap-4 md:grid-cols-2'>
+                <div>
+                  <label className='block text-sm font-medium text-text-primary mb-1.5'>{translations.startLabel}</label>
+                  <div className='flex items-center gap-2 rounded-lg border border-line bg-bg-surface px-3 py-2.5 text-sm'>
+                    <CalendarIcon className='h-4 w-4 shrink-0 text-text-muted' />
+                    <span className={selectedRange?.from ? 'text-text-primary' : 'text-text-muted'}>
+                      {selectedRange?.from ? format(selectedRange.from, 'PPP', { locale: dateLocale }) : '—'}
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <label className='block text-sm font-medium text-text-primary mb-1.5'>{translations.endLabel}</label>
+                  <div className='flex items-center gap-2 rounded-lg border border-line bg-bg-surface px-3 py-2.5 text-sm'>
+                    <CalendarIcon className='h-4 w-4 shrink-0 text-text-muted' />
+                    <span className={selectedRange?.to ? 'text-text-primary' : 'text-text-muted'}>
+                      {selectedRange?.to ? format(selectedRange.to, 'PPP', { locale: dateLocale }) : '—'}
+                    </span>
+                  </div>
+                </div>
+              </div>
 
           <DayPicker
             mode='range'
@@ -338,10 +359,17 @@ export function RequestLeaveDialog({
             }
           `}</style>
 
-          <div className='flex items-center gap-2 text-xs text-text-secondary'>
-            <span className='inline-block h-2 w-2 rounded-full bg-danger-500 ring-1 ring-white' />
-            {translations.holidayLegend}
-          </div>
+              <div className='mt-4 flex flex-wrap items-center gap-4 text-xs text-text-secondary'>
+                <span className='inline-flex items-center gap-1.5'>
+                  <span className='h-2 w-2 rounded-full bg-coral-500' />
+                  {translations.selectedRangeLegend}
+                </span>
+                <span className='inline-flex items-center gap-1.5'>
+                  <span className='h-2 w-2 rounded-full bg-danger-500 ring-1 ring-white' />
+                  {translations.holidayLegend}
+                </span>
+              </div>
+            </section>
 
           {leaveCalculation && (
             <div className='space-y-3'>
@@ -428,41 +456,58 @@ export function RequestLeaveDialog({
             </Alert>
           )}
 
-          <div className='space-y-2'>
-            <Label htmlFor='reason'>{translations.reasonLabel}</Label>
-            <Textarea
-              id='reason'
-              placeholder={translations.optionalHint}
-              maxLength={500}
-              disabled={isExecuting}
-              {...form.register('reason')}
-            />
+            <section className='rounded-xl border border-line bg-bg-surface p-5'>
+              <div className='flex items-center gap-2 mb-4'>
+                <span className='h-1.5 w-1.5 rounded-full bg-coral-500' />
+                <span className='text-xs font-semibold uppercase tracking-wide text-coral-600'>{translations.reasonLabel}</span>
+                <span className='text-xs text-text-muted'>{translations.optionalTag}</span>
+                <span className='h-px flex-1 bg-line ml-2' />
+              </div>
+              <Textarea
+                id='reason'
+                placeholder={translations.optionalHint}
+                maxLength={500}
+                rows={4}
+                disabled={isExecuting}
+                {...form.register('reason')}
+              />
+            </section>
           </div>
 
-          <DialogFooter className='flex flex-col gap-2 sm:flex-row sm:justify-end'>
-            <Button
-              type='button'
-              variant='outline'
-              onClick={() => {
-                form.reset()
-                setSelectedRange(undefined)
-                setOpen(false)
-              }}
-            >
-              {translations.cancel}
-            </Button>
-            <Button
-              type='submit'
-              variant='primary'
-              disabled={
-                isExecuting ||
-                Boolean(leaveCalculation?.isNegative) ||
-                Boolean(contractValidation && !contractValidation.isValid)
-              }
-            >
-              {translations.submit}
-            </Button>
-          </DialogFooter>
+          <div className='flex items-center justify-between gap-3 border-t border-line bg-bg-surface px-6 py-4'>
+            <div>
+              {!selectedRange?.to ? (
+                <span className='flex items-center gap-2 text-sm text-text-muted'>
+                  <span className='h-1.5 w-1.5 rounded-full bg-warn-500' />
+                  {translations.footerHint}
+                </span>
+              ) : null}
+            </div>
+            <div className='flex items-center gap-3'>
+              <Button
+                type='button'
+                variant='outline'
+                onClick={() => {
+                  form.reset()
+                  setSelectedRange(undefined)
+                  setOpen(false)
+                }}
+              >
+                {translations.cancel}
+              </Button>
+              <Button
+                type='submit'
+                disabled={
+                  isExecuting ||
+                  Boolean(leaveCalculation?.isNegative) ||
+                  Boolean(contractValidation && !contractValidation.isValid)
+                }
+              >
+                <Send className='size-4' />
+                {translations.submit}
+              </Button>
+            </div>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

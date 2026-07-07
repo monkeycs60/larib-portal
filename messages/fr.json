@@ -669,7 +669,11 @@
       "holiday": "férié",
       "day": "jour",
       "days": "jours",
-      "holidayLegend": "Jour férié"
+      "holidayLegend": "Jour férié",
+      "datesSection": "Dates",
+      "selectedRangeLegend": "Plage sélectionnée",
+      "optionalTag": "Optionnel",
+      "footerHint": "Choisissez une date de début pour commencer"
     },
     "errors": {
       "overlap": "Vous avez déjà une demande sur cette période.",

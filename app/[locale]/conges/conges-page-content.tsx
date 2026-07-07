@@ -77,6 +77,10 @@ export async function CongesPageContent({ locale, searchParams, adminView }: { l
   const requestTrigger = showAdmin ? t('request.triggerAdmin') : t('request.trigger')
 
   const requestTranslations = {
+    datesSection: t('request.datesSection'),
+    selectedRangeLegend: t('request.selectedRangeLegend'),
+    optionalTag: t('request.optionalTag'),
+    footerHint: t('request.footerHint'),
     trigger: requestTrigger,
     title: t('request.title'),
     description: t('request.description'),
