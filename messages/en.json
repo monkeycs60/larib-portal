@@ -675,7 +675,11 @@
       "datesSection": "Dates",
       "selectedRangeLegend": "Selected range",
       "optionalTag": "Optional",
-      "footerHint": "Pick a start date to begin"
+      "footerHint": "Pick a start date to begin",
+      "overlapTitle": "Your selection overlaps approved leave",
+      "overlapBody": "You already have approved leave on {dates}. Adjust your dates to avoid the overlap before sending.",
+      "approvedLeaveLegend": "Approved leave",
+      "conflictLegend": "Conflict"
     },
     "errors": {
       "overlap": "You already have a request covering that period.",

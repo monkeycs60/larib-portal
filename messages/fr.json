@@ -673,7 +673,11 @@
       "datesSection": "Dates",
       "selectedRangeLegend": "Plage sélectionnée",
       "optionalTag": "Optionnel",
-      "footerHint": "Choisissez une date de début pour commencer"
+      "footerHint": "Choisissez une date de début pour commencer",
+      "overlapTitle": "Votre sélection chevauche un congé validé",
+      "overlapBody": "Vous avez déjà un congé validé le {dates}. Ajustez vos dates pour éviter le chevauchement avant d’envoyer.",
+      "approvedLeaveLegend": "Congé validé",
+      "conflictLegend": "Conflit"
     },
     "errors": {
       "overlap": "Vous avez déjà une demande sur cette période.",

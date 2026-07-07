@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAction } from 'next-safe-action/hooks'
 import { toast } from 'sonner'
-import { startOfDay, format, getYear } from 'date-fns'
+import { startOfDay, format, getYear, eachDayOfInterval } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
 import { DayPicker } from 'react-day-picker'
 import {
@@ -21,7 +21,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
-import { AlertCircle, Calendar as CalendarIcon, Info, ChevronLeft, ChevronRight, Send } from 'lucide-react'
+import { AlertCircle, AlertTriangle, Calendar as CalendarIcon, Info, ChevronLeft, ChevronRight, Send } from 'lucide-react'
 import { requestLeaveAction } from '../actions'
 import { countWorkingDays, getExcludedDaysInfo, getHolidayDatesForCalendar } from '@/lib/services/conges'
 import type { DateRange, Matcher } from 'react-day-picker'
@@ -59,6 +59,10 @@ type RequestLeaveDialogProps = {
     selectedRangeLegend: string
     optionalTag: string
     footerHint: string
+    approvedLeaveLegend: string
+    conflictLegend: string
+    overlapTitle: string
+    overlapBody: string
   }
   defaultMonthIso: string
   userContext: {
@@ -67,6 +71,7 @@ type RequestLeaveDialogProps = {
     departureDate: string | null
     locale: 'fr' | 'en'
     frenchHolidays: Record<string, string>
+    approvedLeaves: Array<{ startDate: string; endDate: string }>
   }
 }
 
@@ -206,6 +211,51 @@ export function RequestLeaveDialog({
     return getHolidayDatesForCalendar(userContext.frenchHolidays, currentYear - 1, currentYear + 2)
   }, [userContext.frenchHolidays])
 
+  const approvedLeaveDays = useMemo(() => {
+    const days: Date[] = []
+    for (const leave of userContext.approvedLeaves) {
+      const from = startOfDay(new Date(leave.startDate))
+      const to = startOfDay(new Date(leave.endDate))
+      if (Number.isNaN(from.valueOf()) || Number.isNaN(to.valueOf()) || from > to) continue
+      for (const day of eachDayOfInterval({ start: from, end: to })) {
+        days.push(day)
+      }
+    }
+    return days
+  }, [userContext.approvedLeaves])
+
+  const selectedDayKeys = useMemo(() => {
+    const keys = new Set<string>()
+    if (selectedRange?.from) {
+      const from = startOfDay(selectedRange.from)
+      const to = startOfDay(selectedRange.to ?? selectedRange.from)
+      for (const day of eachDayOfInterval({ start: from, end: to })) {
+        keys.add(format(day, 'yyyy-MM-dd'))
+      }
+    }
+    return keys
+  }, [selectedRange])
+
+  const approvedLeaveMarkerDays = useMemo(
+    () => approvedLeaveDays.filter((day) => !selectedDayKeys.has(format(day, 'yyyy-MM-dd'))),
+    [approvedLeaveDays, selectedDayKeys]
+  )
+
+  const conflictDays = useMemo(
+    () =>
+      approvedLeaveDays
+        .filter((day) => selectedDayKeys.has(format(day, 'yyyy-MM-dd')))
+        .sort((left, right) => left.getTime() - right.getTime()),
+    [approvedLeaveDays, selectedDayKeys]
+  )
+
+  const hasConflict = conflictDays.length > 0
+
+  const conflictLabel = useMemo(
+    () => conflictDays.map((day) => format(day, 'd MMM yyyy', { locale: dateLocale })).join(', '),
+    [conflictDays, dateLocale]
+  )
+
   const handleSubmit = async (values: FormValues) => {
     if (!values.startDate || !values.endDate) {
       toast.error(translations.missingRange)
@@ -272,6 +322,15 @@ export function RequestLeaveDialog({
         </div>
         <form className='flex flex-1 min-h-0 flex-col' onSubmit={form.handleSubmit(handleSubmit)}>
           <div className='flex-1 overflow-y-auto bg-bg-app px-6 py-5 space-y-4'>
+            {hasConflict && (
+              <div className='flex items-start gap-3 rounded-xl border border-danger-100 bg-danger-50 px-4 py-3'>
+                <AlertTriangle className='h-5 w-5 shrink-0 text-danger-600 mt-0.5' />
+                <div>
+                  <p className='text-sm font-semibold text-danger-700'>{translations.overlapTitle}</p>
+                  <p className='text-sm text-danger-600 mt-0.5'>{translations.overlapBody.replace('{dates}', conflictLabel)}</p>
+                </div>
+              </div>
+            )}
             <section className='rounded-xl border border-line bg-bg-surface p-5'>
               <div className='flex items-center gap-2 mb-4'>
                 <span className='h-1.5 w-1.5 rounded-full bg-coral-500' />
@@ -316,9 +375,13 @@ export function RequestLeaveDialog({
             disabled={disabledDays}
             modifiers={{
               holiday: holidayDates,
+              approvedLeave: approvedLeaveMarkerDays,
+              conflict: conflictDays,
             }}
             modifiersClassNames={{
               holiday: 'holiday-day',
+              approvedLeave: 'approved-leave-day',
+              conflict: 'conflict-day',
             }}
             classNames={dayPickerClassNames}
             components={{
@@ -346,6 +409,20 @@ export function RequestLeaveDialog({
               background-color: var(--color-danger-500);
               box-shadow: 0 0 0 1px white;
             }
+            .approved-leave-day {
+              background-image: repeating-linear-gradient(
+                45deg,
+                #e2e8f0 0,
+                #e2e8f0 3px,
+                #f1f5f9 3px,
+                #f1f5f9 6px
+              );
+              color: var(--color-text-secondary);
+            }
+            .conflict-day {
+              box-shadow: inset 0 0 0 2px var(--color-danger-500);
+              border-radius: 0.375rem;
+            }
           `}</style>
 
               <div className='mt-4 flex flex-wrap items-center gap-4 text-xs text-text-secondary'>
@@ -356,6 +433,17 @@ export function RequestLeaveDialog({
                 <span className='inline-flex items-center gap-1.5'>
                   <span className='h-2 w-2 rounded-full bg-danger-500 ring-1 ring-white' />
                   {translations.holidayLegend}
+                </span>
+                <span className='inline-flex items-center gap-1.5'>
+                  <span
+                    className='h-2.5 w-3.5 rounded-sm border border-gray-200'
+                    style={{ backgroundImage: 'repeating-linear-gradient(45deg, #e2e8f0 0, #e2e8f0 2px, #f1f5f9 2px, #f1f5f9 4px)' }}
+                  />
+                  {translations.approvedLeaveLegend}
+                </span>
+                <span className='inline-flex items-center gap-1.5'>
+                  <span className='h-2.5 w-2.5 rounded-sm border-2 border-danger-500' />
+                  {translations.conflictLegend}
                 </span>
               </div>
             </section>
@@ -488,6 +576,7 @@ export function RequestLeaveDialog({
                 type='submit'
                 disabled={
                   isExecuting ||
+                  hasConflict ||
                   Boolean(leaveCalculation?.isNegative) ||
                   Boolean(contractValidation && !contractValidation.isValid)
                 }

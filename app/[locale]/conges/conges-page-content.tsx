@@ -77,6 +77,10 @@ export async function CongesPageContent({ locale, searchParams, adminView }: { l
   const requestTrigger = showAdmin ? t('request.triggerAdmin') : t('request.trigger')
 
   const requestTranslations = {
+    overlapTitle: t('request.overlapTitle'),
+    overlapBody: t.raw('request.overlapBody') as string,
+    approvedLeaveLegend: t('request.approvedLeaveLegend'),
+    conflictLegend: t('request.conflictLegend'),
     datesSection: t('request.datesSection'),
     selectedRangeLegend: t('request.selectedRangeLegend'),
     optionalTag: t('request.optionalTag'),
@@ -115,6 +119,9 @@ export async function CongesPageContent({ locale, searchParams, adminView }: { l
     departureDate: userDashboard.summary.departureDate,
     locale,
     frenchHolidays,
+    approvedLeaves: userDashboard.history
+      .filter((entry) => entry.status === 'APPROVED')
+      .map((entry) => ({ startDate: entry.startDate, endDate: entry.endDate })),
   }
 
   const statusLabels = {
