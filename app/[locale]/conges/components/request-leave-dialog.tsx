@@ -256,6 +256,16 @@ export function RequestLeaveDialog({
     [holidayDates, selectedDayKeys]
   )
 
+  const excludedWeekendDays = useMemo(() => {
+    if (!selectedRange?.from) return [] as Date[]
+    const from = startOfDay(selectedRange.from)
+    const to = startOfDay(selectedRange.to ?? selectedRange.from)
+    return eachDayOfInterval({ start: from, end: to }).filter((day) => {
+      const dayOfWeek = day.getDay()
+      return dayOfWeek === 0 || dayOfWeek === 6
+    })
+  }, [selectedRange])
+
   const conflictLabel = useMemo(
     () => conflictDays.map((day) => format(day, 'd MMM yyyy', { locale: dateLocale })).join(', '),
     [conflictDays, dateLocale]
@@ -380,16 +390,20 @@ export function RequestLeaveDialog({
             weekStartsOn={1}
             disabled={disabledDays}
             modifiers={{
+              weekend: { dayOfWeek: [0, 6] },
               holiday: holidayDates,
               approvedLeave: approvedLeaveMarkerDays,
               conflict: conflictDays,
               excludedHoliday: excludedHolidayDays,
+              excludedWeekend: excludedWeekendDays,
             }}
             modifiersClassNames={{
+              weekend: 'text-gray-400',
               holiday: 'holiday-day',
               approvedLeave: 'approved-leave-day',
               conflict: 'conflict-day',
               excludedHoliday: 'holiday-excluded-day',
+              excludedWeekend: 'holiday-excluded-day',
             }}
             classNames={dayPickerClassNames}
             components={{
