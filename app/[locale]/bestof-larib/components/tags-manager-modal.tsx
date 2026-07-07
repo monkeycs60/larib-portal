@@ -361,10 +361,6 @@ export default function TagsManagerModal({ isAdmin, trigger, onClose, disableRou
 							</form>
 						</section>
 					</div>
-
-					<div className="flex items-center justify-end gap-3 border-t border-line bg-bg-surface px-6 py-4">
-						<Button type="button" variant="outline" onClick={() => void handleOpen(false)}>{t('close') || 'Close'}</Button>
-					</div>
 				</DialogContent>
 			</Dialog>
 			<AlertDialog open={Boolean(deleteCandidate)} onOpenChange={(next) => { if (!next) setDeleteCandidate(null) }}>
