@@ -121,6 +121,7 @@
     "appDesc_BESTOF_LARIB": "Cas cliniques et contenus pédagogiques Best of Larib.",
     "appDesc_CONGES": "Gérez vos congés et demandes d'absences.",
     "appDesc_CARDIOLARIB": "Ressources et outils dédiés à CardioLarib.",
+    "appDesc_PUBLICATIONS": "Gérez les publications scientifiques, soumissions et co-signatures.",
     "greetings": [
       "Bienvenue",
       "Ravi de vous revoir",
@@ -182,6 +183,7 @@
     "app_BESTOF_LARIB": "Training Best-of",
     "app_CONGES": "Gestion des congés",
     "app_CARDIOLARIB": "cardiolarib",
+    "app_PUBLICATIONS": "Publications",
     "firstName": "Prénom",
     "lastName": "Nom de famille",
     "addUser": "Ajouter un utilisateur",
@@ -849,5 +851,12 @@
         "filterCancelled": "Annulées"
       }
     }
+  },
+  "publications": {
+    "title": "Mes publications",
+    "subtitle": "Suivez vos articles, soumissions et co-signatures.",
+    "empty": "Vous n'avez pas encore de publication.",
+    "adminBanksTitle": "Gérer les banques",
+    "actionError": "Une erreur est survenue. Veuillez réessayer."
   }
 }

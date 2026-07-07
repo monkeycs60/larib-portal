@@ -123,6 +123,7 @@
     "appDesc_BESTOF_LARIB": "Clinical cases and learning content from Best of Larib.",
     "appDesc_CONGES": "Manage your leave requests and absences.",
     "appDesc_CARDIOLARIB": "Resources and tools dedicated to CardioLarib.",
+    "appDesc_PUBLICATIONS": "Manage scientific publications, submissions and co-authorship.",
     "greetings": [
       "Welcome",
       "Great to see you again",
@@ -184,6 +185,7 @@
     "app_BESTOF_LARIB": "Training Best-of",
     "app_CONGES": "Leave management",
     "app_CARDIOLARIB": "cardiolarib",
+    "app_PUBLICATIONS": "Publications",
     "firstName": "First name",
     "lastName": "Last name",
     "addUser": "Add user",
@@ -851,5 +853,12 @@
         "filterCancelled": "Cancelled"
       }
     }
+  },
+  "publications": {
+    "title": "My publications",
+    "subtitle": "Track your articles, submissions and co-authorship.",
+    "empty": "You have no publications yet.",
+    "adminBanksTitle": "Manage banks",
+    "actionError": "Something went wrong. Please try again."
   }
 }
