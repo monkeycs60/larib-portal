@@ -10,9 +10,10 @@ async function upsertJournal(record: PubmedRecord, report: ImportReport): Promis
   const { name, issn, isoAbbrev } = record.journal
   const journalName = name || isoAbbrev
   if (!journalName) return null
-  const existing = issn
-    ? await prisma.journal.findFirst({ where: { issn }, select: { id: true } })
-    : await prisma.journal.findFirst({ where: { name: journalName }, select: { id: true } })
+  const existing = await prisma.journal.findFirst({
+    where: { OR: [...(issn ? [{ issn }] : []), { name: journalName }] },
+    select: { id: true },
+  })
   if (existing) return existing.id
   const created = await prisma.journal.create({ data: { name: journalName, issn: issn ?? null }, select: { id: true } })
   report.journalsCreated += 1

@@ -1,0 +1,23 @@
+[
+  {
+    "pmid": "39000001",
+    "title": "Multimodal imaging of the mitral valve.",
+    "abstract": "Background text.",
+    "doi": "10.1093/eurheartj/ehad100",
+    "publishedAt": "2023-03-07",
+    "journal": { "name": "European Heart Journal", "isoAbbrev": "Eur Heart J", "issn": "0195-668X", "publisher": null },
+    "authors": [
+      { "lastName": "Pezel", "foreName": "Theo", "initials": "T", "affiliation": "Lariboisiere Hospital, APHP, Paris, France.", "orcid": "0000-0002-1234-5678" },
+      { "lastName": "Garot", "foreName": "Jerome", "initials": "J", "affiliation": "ICPS, Massy, France.", "orcid": null }
+    ]
+  },
+  {
+    "pmid": "39000002",
+    "title": "Unrelated editorial to exclude.",
+    "abstract": null,
+    "doi": null,
+    "publishedAt": "2019-01-01",
+    "journal": { "name": "Some Journal", "isoAbbrev": "Some J", "issn": "1111-2222", "publisher": null },
+    "authors": [ { "lastName": "Pezel", "foreName": "Theo", "initials": "T", "affiliation": null, "orcid": "0000-0002-1234-5678" } ]
+  }
+]
