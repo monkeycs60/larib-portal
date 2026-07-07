@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@/app/generated/prisma'
 import { planAuthorshipMerge } from './authors-merge'
+import { pickPrimaryCentre } from './author-centre'
 import { PUBLICATIONS_AUTHORS_TAG, PUBLICATIONS_ARTICLES_TAG } from './import'
 
 export type AuthorListItem = Prisma.AuthorGetPayload<{
@@ -13,7 +14,9 @@ export type AuthorListItem = Prisma.AuthorGetPayload<{
     email: true
     orcid: true
     userId: true
+    centreId: true
     user: { select: { id: true; firstName: true; lastName: true; email: true } }
+    centre: { select: { id: true; name: true } }
     _count: { select: { authorships: true } }
   }
 }>
@@ -30,7 +33,9 @@ export async function listAuthors(): Promise<AuthorListItem[]> {
       email: true,
       orcid: true,
       userId: true,
+      centreId: true,
       user: { select: { id: true, firstName: true, lastName: true, email: true } },
+      centre: { select: { id: true, name: true } },
       _count: { select: { authorships: true } },
     },
   })
@@ -53,6 +58,7 @@ export type UpdateAuthorInput = {
   email?: string | null
   orcid?: string | null
   userId?: string | null
+  centreId?: string | null
 }
 
 export async function updateAuthor(data: UpdateAuthorInput) {
@@ -65,6 +71,7 @@ export async function updateAuthor(data: UpdateAuthorInput) {
       email: data.email ?? null,
       orcid: data.orcid ?? null,
       userId: data.userId ?? null,
+      centreId: data.centreId ?? null,
     },
     select: { id: true },
   })
@@ -106,6 +113,29 @@ export async function mergeAuthors(
     await tx.author.deleteMany({ where: { id: { in: sources } } })
     return { reassigned, dropped, deleted: sources.length }
   })
+}
+
+export async function recomputeAuthorCentres(): Promise<{ updated: number }> {
+  const links = await prisma.authorshipAffiliation.findMany({
+    select: { authorship: { select: { authorId: true } }, affiliation: { select: { centreId: true } } },
+  })
+  const ownCentres = new Set((await prisma.centre.findMany({ where: { isOwn: true }, select: { id: true } })).map((centre) => centre.id))
+  const byAuthor = new Map<string, string[]>()
+  for (const link of links) {
+    if (!link.affiliation.centreId) continue
+    const list = byAuthor.get(link.authorship.authorId) ?? []
+    list.push(link.affiliation.centreId)
+    byAuthor.set(link.authorship.authorId, list)
+  }
+  let updated = 0
+  for (const [authorId, centreIds] of byAuthor) {
+    const primary = pickPrimaryCentre(centreIds, ownCentres)
+    if (primary) {
+      await prisma.author.update({ where: { id: authorId }, data: { centreId: primary } })
+      updated += 1
+    }
+  }
+  return { updated }
 }
 
 export function isPrismaKnownError(error: unknown, code: string): boolean {

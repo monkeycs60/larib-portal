@@ -10,7 +10,7 @@ import {
   PUBLICATIONS_AUTHORS_TAG,
   PUBLICATIONS_ARTICLES_TAG,
 } from '@/lib/services/publications/import'
-import { updateAuthor, deleteAuthor, mergeAuthors, isPrismaKnownError } from '@/lib/services/publications/authors'
+import { updateAuthor, deleteAuthor, mergeAuthors, recomputeAuthorCentres, isPrismaKnownError } from '@/lib/services/publications/authors'
 import { backfillAffiliations, PUBLICATIONS_CENTRES_TAG, PUBLICATIONS_AFFILIATIONS_TAG } from '@/lib/services/publications/affiliations'
 import { renameCentre, setCentreOwn, deleteCentre, mergeCentres } from '@/lib/services/publications/centres'
 import { updateArticleStatus, ARTICLE_STATUSES } from '@/lib/services/publications/articles'
@@ -43,14 +43,28 @@ const AuthorInput = z.object({
   email: z.string().optional().nullable(),
   orcid: z.string().optional().nullable(),
   userId: z.string().optional().nullable(),
+  centreId: z.string().optional().nullable(),
 })
 
 export const updateAuthorAction = appAdminAction('PUBLICATIONS')
   .inputSchema(AuthorInput)
   .action(async ({ parsedInput }) => {
-    const updated = await updateAuthor({ ...parsedInput, email: parsedInput.email || null, userId: parsedInput.userId || null })
+    const updated = await updateAuthor({
+      ...parsedInput,
+      email: parsedInput.email || null,
+      userId: parsedInput.userId || null,
+      centreId: parsedInput.centreId || null,
+    })
     revalidateTag(PUBLICATIONS_AUTHORS_TAG)
     return updated
+  })
+
+export const recomputeAuthorCentresAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({}))
+  .action(async () => {
+    const result = await recomputeAuthorCentres()
+    revalidateTag(PUBLICATIONS_AUTHORS_TAG)
+    return result
   })
 
 export const deleteAuthorAction = appAdminAction('PUBLICATIONS')

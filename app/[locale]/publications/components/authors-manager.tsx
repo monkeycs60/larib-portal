@@ -25,7 +25,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
-import { updateAuthorAction, deleteAuthorAction, mergeAuthorsAction } from '../actions'
+import { updateAuthorAction, deleteAuthorAction, mergeAuthorsAction, recomputeAuthorCentresAction } from '../actions'
 import type { AuthorListItem, LinkableUser } from '@/lib/services/publications/authors'
 
 const EditSchema = z.object({
@@ -35,6 +35,7 @@ const EditSchema = z.object({
   email: z.string().optional(),
   orcid: z.string().optional(),
   userId: z.string().optional(),
+  centreId: z.string().optional(),
 })
 type EditValues = z.infer<typeof EditSchema>
 
@@ -42,7 +43,7 @@ function authorLabel(author: AuthorListItem): string {
   return `${author.firstName} ${author.lastName.toUpperCase()}`.trim()
 }
 
-export function AuthorsManager({ authors, users }: { authors: AuthorListItem[]; users: LinkableUser[] }) {
+export function AuthorsManager({ authors, users, centres }: { authors: AuthorListItem[]; users: LinkableUser[]; centres: { id: string; name: string }[] }) {
   const t = useTranslations('publications')
   const router = useRouter()
   const [query, setQuery] = useState('')
@@ -69,6 +70,7 @@ export function AuthorsManager({ authors, users }: { authors: AuthorListItem[]; 
       email: author.email ?? '',
       orcid: author.orcid ?? '',
       userId: author.userId ?? '',
+      centreId: author.centreId ?? '',
     })
   }
 
@@ -77,6 +79,10 @@ export function AuthorsManager({ authors, users }: { authors: AuthorListItem[]; 
     onError({ error }) { toast.error(error?.serverError === 'AUTHOR_IN_USE' ? t('authors.errorInUse') : t('actionError')) },
   })
   const { executeAsync: execMerge, isExecuting: merging } = useAction(mergeAuthorsAction, { onError() { toast.error(t('actionError')) } })
+  const { execute: runDerive, isExecuting: deriving } = useAction(recomputeAuthorCentresAction, {
+    onSuccess({ data }) { if (data) { toast.success(t('authors.derived', { count: data.updated })); router.refresh() } },
+    onError() { toast.error(t('actionError')) },
+  })
 
   const onSubmit = handleSubmit(async (values) => {
     if (!editing) return
@@ -137,6 +143,9 @@ export function AuthorsManager({ authors, users }: { authors: AuthorListItem[]; 
         <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t('authors.search')} className="max-w-sm" />
         <div className="flex items-center gap-2">
           {selected.size > 0 && <span className="text-sm text-text-secondary">{t('authors.selected', { count: selected.size })}</span>}
+          <Button variant="outline" size="sm" onClick={() => runDerive({})} disabled={deriving}>
+            {t('authors.derive')}
+          </Button>
           <Button variant="outline" size="sm" onClick={openMerge} disabled={selected.size < 2}>
             <GitMerge className="size-4" />
             {t('authors.merge')}
@@ -151,6 +160,7 @@ export function AuthorsManager({ authors, users }: { authors: AuthorListItem[]; 
             <TableHead>{t('authors.colName')}</TableHead>
             <TableHead>{t('authors.colPapers')}</TableHead>
             <TableHead>{t('authors.colOrcid')}</TableHead>
+            <TableHead>{t('authors.colCentre')}</TableHead>
             <TableHead>{t('authors.colUser')}</TableHead>
             <TableHead className="text-right">{t('authors.colActions')}</TableHead>
           </TableRow>
@@ -167,6 +177,7 @@ export function AuthorsManager({ authors, users }: { authors: AuthorListItem[]; 
               </TableCell>
               <TableCell>{author._count.authorships}</TableCell>
               <TableCell>{author.orcid ?? '—'}</TableCell>
+              <TableCell>{author.centre?.name ?? '—'}</TableCell>
               <TableCell>{author.user ? author.user.email : '—'}</TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-1">
@@ -202,6 +213,15 @@ export function AuthorsManager({ authors, users }: { authors: AuthorListItem[]; 
                 <option value="">{t('authors.noUser')}</option>
                 {users.map((user) => (
                   <option key={user.id} value={user.id}>{`${user.lastName ?? ''} ${user.firstName ?? ''}`.trim() || user.email}</option>
+                ))}
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm text-text-secondary">{t('authors.centre')}</label>
+              <Select {...register('centreId')}>
+                <option value="">{t('authors.noCentre')}</option>
+                {centres.map((centre) => (
+                  <option key={centre.id} value={centre.id}>{centre.name}</option>
                 ))}
               </Select>
             </div>
