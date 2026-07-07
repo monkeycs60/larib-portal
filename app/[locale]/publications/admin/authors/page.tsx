@@ -4,14 +4,14 @@ import { requireAuth } from '@/lib/auth-guard'
 import { applicationLink } from '@/lib/application-link'
 import { canAdminApp } from '@/lib/permissions'
 import { PageHeader } from '@/app/[locale]/components/page-header'
-import { Link } from '@/app/i18n/navigation'
-import { BacklogImport } from '@/app/[locale]/publications/components/backlog-import'
+import { listAuthors, listLinkableUsers } from '@/lib/services/publications/authors'
+import { AuthorsManager } from '@/app/[locale]/publications/components/authors-manager'
 
 type PageParams = {
   params: Promise<{ locale: 'en' | 'fr' }>
 }
 
-export default async function PublicationsAdminPage({ params }: PageParams) {
+export default async function PublicationsAuthorsPage({ params }: PageParams) {
   const { locale } = await params
   const session = await requireAuth()
 
@@ -20,16 +20,12 @@ export default async function PublicationsAdminPage({ params }: PageParams) {
   }
 
   const t = await getTranslations({ locale, namespace: 'publications' })
+  const [authors, users] = await Promise.all([listAuthors(), listLinkableUsers()])
 
   return (
     <div className="space-y-6 p-4 md:p-6">
-      <PageHeader title={t('import.title')} subtitle={t('import.subtitle')} />
-      <div>
-        <Link href="/publications/admin/authors" className="text-sm font-medium text-navy-600 underline-offset-4 hover:underline">
-          {t('authors.manageLink')} →
-        </Link>
-      </div>
-      <BacklogImport />
+      <PageHeader title={t('authors.title')} subtitle={t('authors.subtitle')} />
+      <AuthorsManager authors={authors} users={users} />
     </div>
   )
 }
