@@ -76,6 +76,7 @@ enum Application {
   BESTOF_LARIB
   CONGES
   CARDIOLARIB
+  PUBLICATIONS
 }
 
 // ---- Publications domain ----

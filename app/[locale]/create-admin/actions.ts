@@ -44,7 +44,7 @@ export const createAdminAction = actionClient
         role: "ADMIN",
         emailVerified: true,
         language: "FR",
-        applications: ["BESTOF_LARIB", "CONGES", "CARDIOLARIB"],
+        applications: ["BESTOF_LARIB", "CONGES", "CARDIOLARIB", "PUBLICATIONS"],
       }
     })
 

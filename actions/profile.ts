@@ -16,7 +16,7 @@ const UpdateSelfSchema = z.object({
   position: z.string().trim().optional().nullable(),
   profilePhoto: z.string().url().optional().nullable(),
   role: z.enum(["ADMIN","USER"]).optional(),
-  applications: z.array(z.enum(["BESTOF_LARIB","CONGES","CARDIOLARIB"]))
+  applications: z.array(z.enum(["BESTOF_LARIB","CONGES","CARDIOLARIB","PUBLICATIONS"]))
     .optional(),
   locale: z.enum(["en","fr"]).optional(),
 })

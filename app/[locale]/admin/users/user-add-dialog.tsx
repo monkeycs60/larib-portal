@@ -26,12 +26,13 @@ import { Check, UserPlus, Send, ArrowRight, Plus } from 'lucide-react'
 import DeletableSelectManager from '@/app/[locale]/bestof-larib/components/deletable-select-manager'
 import { FileUpload } from '@/components/ui/file-upload'
 
-const AVAILABLE_APPLICATIONS = ['BESTOF_LARIB', 'CONGES'] as const
+const AVAILABLE_APPLICATIONS = ['BESTOF_LARIB', 'CONGES', 'PUBLICATIONS'] as const
 type AvailableApplication = (typeof AVAILABLE_APPLICATIONS)[number]
 
 const APP_DOT: Record<AvailableApplication, string> = {
   BESTOF_LARIB: '#ec3b68',
   CONGES: '#6366f1',
+  PUBLICATIONS: '#0d9488',
 }
 
 const AddUserSchema = z.object({
@@ -42,8 +43,8 @@ const AddUserSchema = z.object({
   position: z.string().optional(),
   arrivalDate: z.string().min(1),
   departureDate: z.string().min(1),
-  applications: z.array(z.enum(["BESTOF_LARIB","CONGES"])),
-  adminApplications: z.array(z.enum(["BESTOF_LARIB","CONGES"])),
+  applications: z.array(z.enum(["BESTOF_LARIB","CONGES","PUBLICATIONS"])),
+  adminApplications: z.array(z.enum(["BESTOF_LARIB","CONGES","PUBLICATIONS"])),
   emailLanguage: z.enum(['en','fr']),
   congesTotalDays: z.number().int().min(0).max(365).optional(),
   profilePhoto: z.string().url().optional().nullable(),

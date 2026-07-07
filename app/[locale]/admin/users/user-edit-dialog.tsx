@@ -24,12 +24,13 @@ import { Check, Pencil, Save, UserCog } from 'lucide-react';
 import DeletableSelectManager from '@/app/[locale]/bestof-larib/components/deletable-select-manager';
 import { FileUpload } from '@/components/ui/file-upload';
 
-const AVAILABLE_APPLICATIONS = ['BESTOF_LARIB', 'CONGES'] as const;
+const AVAILABLE_APPLICATIONS = ['BESTOF_LARIB', 'CONGES', 'PUBLICATIONS'] as const;
 type AvailableApplication = (typeof AVAILABLE_APPLICATIONS)[number];
 
 const APP_DOT: Record<AvailableApplication, string> = {
 	BESTOF_LARIB: '#ec3b68',
 	CONGES: '#6366f1',
+	PUBLICATIONS: '#0d9488',
 };
 
 const FormSchema = z.object({
@@ -45,8 +46,8 @@ const FormSchema = z.object({
 	position: z.string().optional(),
 	arrivalDate: z.string().optional(),
 	departureDate: z.string().optional(),
-	applications: z.array(z.enum(['BESTOF_LARIB', 'CONGES', 'CARDIOLARIB'])),
-	adminApplications: z.array(z.enum(['BESTOF_LARIB', 'CONGES', 'CARDIOLARIB'])),
+	applications: z.array(z.enum(['BESTOF_LARIB', 'CONGES', 'CARDIOLARIB', 'PUBLICATIONS'])),
+	adminApplications: z.array(z.enum(['BESTOF_LARIB', 'CONGES', 'CARDIOLARIB', 'PUBLICATIONS'])),
 	congesTotalDays: z.number().int().min(0).max(365).optional(),
 	profilePhoto: z.string().url().optional().nullable(),
 });

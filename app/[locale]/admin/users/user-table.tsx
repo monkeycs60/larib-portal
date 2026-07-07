@@ -36,6 +36,7 @@ const APP_DOT: Record<string, string> = {
   BESTOF_LARIB: '#ec3b68',
   CONGES: '#6366f1',
   CARDIOLARIB: '#0ea5e9',
+  PUBLICATIONS: '#0d9488',
 }
 
 const AVATAR_TINTS = [

@@ -22,9 +22,9 @@ const UpdateUserSchema = z.object({
   position: z.string().trim().optional().nullable(),
   arrivalDate: z.string().optional().nullable(),
   departureDate: z.string().optional().nullable(),
-  applications: z.array(z.enum(["BESTOF_LARIB", "CONGES", "CARDIOLARIB"]))
+  applications: z.array(z.enum(["BESTOF_LARIB", "CONGES", "CARDIOLARIB", "PUBLICATIONS"]))
     .default([]),
-  adminApplications: z.array(z.enum(["BESTOF_LARIB", "CONGES", "CARDIOLARIB"])).optional(),
+  adminApplications: z.array(z.enum(["BESTOF_LARIB", "CONGES", "CARDIOLARIB", "PUBLICATIONS"])).optional(),
   locale: z.enum(["en", "fr"]).optional(),
   congesTotalDays: z.number().int().min(0).max(365).optional(),
   profilePhoto: z.string().url().optional().nullable(),
@@ -93,9 +93,9 @@ const CreateInviteSchema = z.object({
   firstName: z.string().trim().optional().nullable(),
   lastName: z.string().trim().optional().nullable(),
   position: z.string().trim().optional().nullable(),
-  applications: z.array(z.enum(["BESTOF_LARIB", "CONGES", "CARDIOLARIB"]))
+  applications: z.array(z.enum(["BESTOF_LARIB", "CONGES", "CARDIOLARIB", "PUBLICATIONS"]))
     .default([]),
-  adminApplications: z.array(z.enum(["BESTOF_LARIB", "CONGES", "CARDIOLARIB"])).optional(),
+  adminApplications: z.array(z.enum(["BESTOF_LARIB", "CONGES", "CARDIOLARIB", "PUBLICATIONS"])).optional(),
   arrivalDate: z.string().min(1), // ISO date
   departureDate: z.string().min(1), // ISO date
   locale: z.enum(["en","fr"]),
@@ -243,8 +243,8 @@ export const resendInvitationAction = superAdminAction
       lastName: user.lastName ?? undefined,
       role: user.role as 'ADMIN' | 'USER',
       position: user.position,
-      applications: user.applications as Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'>,
-      adminApplications: user.adminApplications as Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'>,
+      applications: user.applications as Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB' | 'PUBLICATIONS'>,
+      adminApplications: user.adminApplications as Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB' | 'PUBLICATIONS'>,
       arrivalDate: user.arrivalDate,
       departureDate: user.departureDate,
     })
