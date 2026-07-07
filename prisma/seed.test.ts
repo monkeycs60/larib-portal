@@ -28,6 +28,15 @@ async function main() {
 	await prisma.examType.deleteMany();
 	await prisma.verification.deleteMany();
 	await prisma.account.deleteMany();
+	await prisma.authorshipAffiliation.deleteMany();
+	await prisma.authorship.deleteMany();
+	await prisma.submission.deleteMany();
+	await prisma.journalTarget.deleteMany();
+	await prisma.article.deleteMany();
+	await prisma.study.deleteMany();
+	await prisma.author.deleteMany();
+	await prisma.affiliation.deleteMany();
+	await prisma.journal.deleteMany();
 	await prisma.user.deleteMany();
 
 	// Create test admin user
@@ -204,6 +213,69 @@ async function main() {
 	});
 	console.log('✅ Created Bestof admin:', bestofAdmin.email);
 
+	// Create publications users (member + app-admin) for RBAC tests
+	const publicationsAdminPassword = await ctx.password.hash('ristifou');
+	const publicationsAdmin = await prisma.user.create({
+		data: {
+			id: randomUUID(),
+			name: 'Publications Admin',
+			email: 'publications-admin@larib-portal.test',
+			emailVerified: true,
+			role: 'USER',
+			applications: ['PUBLICATIONS'],
+			adminApplications: ['PUBLICATIONS'],
+			accounts: { create: { id: randomUUID(), providerId: 'credential', accountId: 'publications-admin@larib-portal.test', password: publicationsAdminPassword } },
+		},
+	});
+	console.log('✅ Created Publications admin:', publicationsAdmin.email);
+
+	const publicationsUserPassword = await ctx.password.hash('ristifou');
+	const publicationsUser = await prisma.user.create({
+		data: {
+			id: randomUUID(),
+			name: 'Publications User',
+			email: 'publications-user@larib-portal.test',
+			emailVerified: true,
+			role: 'USER',
+			applications: ['PUBLICATIONS'],
+			accounts: { create: { id: randomUUID(), providerId: 'credential', accountId: 'publications-user@larib-portal.test', password: publicationsUserPassword } },
+		},
+	});
+	console.log('✅ Created Publications user:', publicationsUser.email);
+
+	// Minimal publications sample dataset (article where publicationsUser is first author)
+	const publicationsJournal = await prisma.journal.create({
+		data: { name: 'European Heart Journal', publisher: 'Oxford University Press', impactFactor: 39.3 },
+	});
+	const publicationsAffiliation = await prisma.affiliation.create({
+		data: { name: 'Lariboisière Hospital, APHP, Paris, France', institution: 'APHP', city: 'Paris', country: 'France' },
+	});
+	const publicationsFirstAuthor = await prisma.author.create({
+		data: { firstName: 'Publications', lastName: 'User', degrees: 'MD', user: { connect: { id: publicationsUser.id } }, defaultAffiliation: { connect: { id: publicationsAffiliation.id } } },
+	});
+	const publicationsCoAuthor = await prisma.author.create({
+		data: { firstName: 'Jane', lastName: 'Coauthor', degrees: 'MD, PhD', defaultAffiliation: { connect: { id: publicationsAffiliation.id } } },
+	});
+	const publicationsStudy = await prisma.study.create({
+		data: { title: 'MULTIVALVE registry', description: 'Retrospective multi-valve cohort', isClosed: false, createdBy: { connect: { id: publicationsAdmin.id } } },
+	});
+	await prisma.article.create({
+		data: {
+			title: 'Outcomes of multi-valve intervention: a retrospective cohort',
+			type: 'ORIGINAL',
+			status: 'UNDER_REVIEW',
+			study: { connect: { id: publicationsStudy.id } },
+			createdBy: { connect: { id: publicationsUser.id } },
+			authorships: {
+				create: [
+					{ order: 1, author: { connect: { id: publicationsFirstAuthor.id } } },
+					{ order: 2, isCorresponding: true, author: { connect: { id: publicationsCoAuthor.id } } },
+				],
+			},
+		},
+	});
+	console.log('✅ Created publications sample data');
+
 	// Create exam types first (using upsert to handle duplicates)
 	console.log('📦 Creating exam types...');
 	const examTypeNames = ['ECG', 'ECHO', 'HOLTER'];
@@ -364,6 +436,8 @@ async function main() {
 	console.log('  No Conges User: no-conges@larib-portal.test / ristifou');
 	console.log('  Conges Admin: conges-admin@larib-portal.test / ristifou');
 	console.log('  Bestof Admin: bestof-admin@larib-portal.test / ristifou');
+	console.log('  Publications Admin: publications-admin@larib-portal.test / ristifou');
+	console.log('  Publications User: publications-user@larib-portal.test / ristifou');
 }
 
 main()
