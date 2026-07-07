@@ -17,15 +17,21 @@ export default async function DashboardPage({
   const t = await getTranslations({ locale, namespace: 'dashboard' })
   const adminT = await getTranslations({ locale, namespace: 'admin' })
 
-  const allApps = accessibleApplications(session.user) as Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'>
-  const appOrder: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'> = ['BESTOF_LARIB', 'CONGES', 'CARDIOLARIB']
+  const allApps = accessibleApplications(session.user) as Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB' | 'PUBLICATIONS'>
+  const appOrder: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB' | 'PUBLICATIONS'> = ['BESTOF_LARIB', 'CONGES', 'PUBLICATIONS', 'CARDIOLARIB']
   const apps = appOrder.filter(app => app !== 'CARDIOLARIB' && allApps.includes(app))
 
-  function appSlug(app: 'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'): string {
-    return app === 'BESTOF_LARIB' ? '/bestof-larib' : app === 'CONGES' ? '/conges' : '/cardiolarib'
+  function appSlug(app: 'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB' | 'PUBLICATIONS'): string {
+    return app === 'BESTOF_LARIB'
+      ? '/bestof-larib'
+      : app === 'CONGES'
+        ? '/conges'
+        : app === 'PUBLICATIONS'
+          ? '/publications'
+          : '/cardiolarib'
   }
 
-  function getAppIcon(app: 'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB') {
+  function getAppIcon(app: 'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB' | 'PUBLICATIONS') {
     switch (app) {
       case 'BESTOF_LARIB':
         return (
@@ -52,6 +58,14 @@ export default async function DashboardPage({
         return (
           <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
             <path d="M24 38s-12-8-12-18c0-5 4-9 8-9 2.5 0 4 1.5 4 1.5s1.5-1.5 4-1.5c4 0 8 4 8 9 0 10-12 18-12 18z" stroke="currentColor" strokeWidth="2" fill="none"/>
+          </svg>
+        );
+      case 'PUBLICATIONS':
+        return (
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+            {/* Open book */}
+            <path d="M24 12C20 9 12 8 6 9v28c6-1 14 0 18 3 4-3 12-4 18-3V9c-6-1-14 0-18 3z" stroke="currentColor" strokeWidth="2" fill="none"/>
+            <path d="M24 12v28" stroke="currentColor" strokeWidth="2"/>
           </svg>
         );
     }
