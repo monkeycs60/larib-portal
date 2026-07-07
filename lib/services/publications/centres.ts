@@ -29,6 +29,7 @@ export async function mergeCentres(keepId: string, mergeIds: string[]): Promise<
   if (sources.length === 0) return { reassigned: 0, deleted: 0 }
   return prisma.$transaction(async (tx) => {
     const reassigned = (await tx.affiliation.updateMany({ where: { centreId: { in: sources } }, data: { centreId: keepId } })).count
+    await tx.author.updateMany({ where: { centreId: { in: sources } }, data: { centreId: keepId } })
     await tx.centre.deleteMany({ where: { id: { in: sources } } })
     return { reassigned, deleted: sources.length }
   })

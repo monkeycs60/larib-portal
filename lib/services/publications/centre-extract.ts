@@ -18,6 +18,7 @@ const CENTRE_RULES: CentreRule[] = [
   { match: /clinique[^,]{0,40}(?:ambroise|a\.?)[- ]?par[eé]/i, centre: 'Clinique Ambroise Paré' },
   { match: /\bindependent\b/i, centre: 'Independent' },
   { match: /montpied/i, centre: 'CHU de Clermont-Ferrand' },
+  { match: /louis pradel/i, centre: 'CHU de Lyon' },
 ]
 
 // A hospital always wins over a university / INSERM / research unit / department.
