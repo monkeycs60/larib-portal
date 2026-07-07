@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
-import { searchBacklogAction, importBacklogAction } from '../actions'
+import { searchBacklogAction, importBacklogAction, backfillAffiliationsAction } from '../actions'
 import type { PubmedCandidate, ImportReport } from '@/types/publications'
 
 export function BacklogImport() {
@@ -48,6 +48,16 @@ export function BacklogImport() {
     },
   })
 
+  const { execute: runBackfill, isExecuting: backfilling } = useAction(backfillAffiliationsAction, {
+    onSuccess({ data }) {
+      if (!data) return
+      toast.success(t('centres.backfillDone', { articles: data.articlesTouched, affiliations: data.affiliationsCreated, centres: data.centresCreated }))
+    },
+    onError() {
+      toast.error(t('import.importError'))
+    },
+  })
+
   function toggle(pmid: string) {
     setSelected((prev) => {
       const next = new Set(prev)
@@ -70,6 +80,9 @@ export function BacklogImport() {
         </div>
         <Button onClick={() => runSearch({ anchor })} disabled={searching || anchor.trim().length === 0}>
           {searching ? t('import.searching') : t('import.search')}
+        </Button>
+        <Button variant="outline" onClick={() => runBackfill({ anchor })} disabled={backfilling || anchor.trim().length === 0}>
+          {backfilling ? t('centres.backfilling') : t('centres.backfill')}
         </Button>
       </div>
 

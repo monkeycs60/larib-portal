@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import type { PubmedRecord, ImportReport } from '@/types/publications'
 import { authorDedupeKey } from './import-dedupe'
+import { upsertAffiliationWithCentre } from './affiliations'
 
 export const PUBLICATIONS_JOURNALS_TAG = 'publications:journals'
 export const PUBLICATIONS_AUTHORS_TAG = 'publications:authors'
@@ -66,13 +67,19 @@ export async function importRecords(records: PubmedRecord[], createdById: string
         continue
       }
       const publishedJournalId = await upsertJournal(record, report)
-      const authorships: Array<{ authorId: string; order: number }> = []
+      const affReport = { affiliationsCreated: 0, centresCreated: 0 }
+      const authorships: Array<{ authorId: string; order: number; affiliations: { create: Array<{ affiliationId: string; order: number }> } }> = []
       const seenAuthorIds = new Set<string>()
       for (const author of record.authors) {
         const authorId = await upsertAuthor(author, authorCache, report)
         if (seenAuthorIds.has(authorId)) continue // same person listed twice / homonym in one paper
         seenAuthorIds.add(authorId)
-        authorships.push({ authorId, order: authorships.length + 1 })
+        const affiliationCreate: Array<{ affiliationId: string; order: number }> = []
+        if (author.affiliation) {
+          const affiliationId = await prisma.$transaction((tx) => upsertAffiliationWithCentre(tx, author.affiliation as string, affReport))
+          if (affiliationId) affiliationCreate.push({ affiliationId, order: 1 })
+        }
+        authorships.push({ authorId, order: authorships.length + 1, affiliations: { create: affiliationCreate } })
       }
       await prisma.article.create({
         data: {

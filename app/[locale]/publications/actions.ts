@@ -11,6 +11,8 @@ import {
   PUBLICATIONS_ARTICLES_TAG,
 } from '@/lib/services/publications/import'
 import { updateAuthor, deleteAuthor, mergeAuthors, isPrismaKnownError } from '@/lib/services/publications/authors'
+import { backfillAffiliations, PUBLICATIONS_CENTRES_TAG, PUBLICATIONS_AFFILIATIONS_TAG } from '@/lib/services/publications/affiliations'
+import { renameCentre, setCentreOwn, deleteCentre, mergeCentres } from '@/lib/services/publications/centres'
 
 export const searchBacklogAction = appAdminAction('PUBLICATIONS')
   .inputSchema(z.object({ anchor: z.string().min(1), retmax: z.number().int().min(1).max(500).optional() }))
@@ -66,5 +68,49 @@ export const mergeAuthorsAction = appAdminAction('PUBLICATIONS')
     const result = await mergeAuthors(parsedInput.keepId, parsedInput.mergeIds)
     revalidateTag(PUBLICATIONS_AUTHORS_TAG)
     revalidateTag(PUBLICATIONS_ARTICLES_TAG)
+    return result
+  })
+
+export const backfillAffiliationsAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({ anchor: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    const candidates = await searchByAuthor(parsedInput.anchor, 500)
+    const records = await fetchByPmids(candidates.map((candidate) => candidate.pmid))
+    const report = await backfillAffiliations(records)
+    revalidateTag(PUBLICATIONS_CENTRES_TAG)
+    revalidateTag(PUBLICATIONS_AFFILIATIONS_TAG)
+    revalidateTag(PUBLICATIONS_AUTHORS_TAG)
+    return report
+  })
+
+export const renameCentreAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({ id: z.string().min(1), name: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    const result = await renameCentre(parsedInput.id, parsedInput.name)
+    revalidateTag(PUBLICATIONS_CENTRES_TAG)
+    return result
+  })
+
+export const setCentreOwnAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({ id: z.string().min(1), isOwn: z.boolean() }))
+  .action(async ({ parsedInput }) => {
+    const result = await setCentreOwn(parsedInput.id, parsedInput.isOwn)
+    revalidateTag(PUBLICATIONS_CENTRES_TAG)
+    return result
+  })
+
+export const mergeCentresAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({ keepId: z.string().min(1), mergeIds: z.array(z.string().min(1)).min(1) }))
+  .action(async ({ parsedInput }) => {
+    const result = await mergeCentres(parsedInput.keepId, parsedInput.mergeIds)
+    revalidateTag(PUBLICATIONS_CENTRES_TAG)
+    return result
+  })
+
+export const deleteCentreAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({ id: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    const result = await deleteCentre(parsedInput.id)
+    revalidateTag(PUBLICATIONS_CENTRES_TAG)
     return result
   })

@@ -926,6 +926,36 @@
       "merged": "Merged: {reassigned} papers reassigned, {deleted} authors removed.",
       "errorInUse": "This author is linked to papers and cannot be deleted (merge instead).",
       "manageLink": "Manage authors"
+    },
+    "centres": {
+      "title": "Centres",
+      "subtitle": "Curate the institutions behind author affiliations.",
+      "backfill": "Import affiliations from PubMed",
+      "backfilling": "Importing affiliations…",
+      "backfillDone": "{articles} articles updated, {affiliations} affiliations, {centres} centres.",
+      "search": "Search centres…",
+      "colName": "Centre",
+      "colOwn": "Our centre",
+      "colAffiliations": "Affiliations",
+      "colActions": "Actions",
+      "rename": "Rename",
+      "renameTitle": "Rename centre",
+      "name": "Name",
+      "save": "Save",
+      "cancel": "Cancel",
+      "merge": "Merge selected",
+      "mergeTitle": "Merge centres",
+      "mergeChooseKeeper": "Choose the centre to keep.",
+      "mergeConfirm": "Merge",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this centre?",
+      "deleteConfirmDesc": "Affiliations keep their data but lose the centre link.",
+      "selected": "{count} selected",
+      "renamed": "Centre renamed",
+      "merged": "Centres merged",
+      "deleted": "Centre deleted",
+      "ownSet": "Updated",
+      "manageLink": "Manage centres"
     }
   }
 }

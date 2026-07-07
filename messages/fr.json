@@ -924,6 +924,36 @@
       "merged": "Fusion : {reassigned} papiers réassignés, {deleted} auteurs supprimés.",
       "errorInUse": "Cet auteur est lié à des papiers et ne peut pas être supprimé (fusionnez plutôt).",
       "manageLink": "Gérer les auteurs"
+    },
+    "centres": {
+      "title": "Centres",
+      "subtitle": "Curez les institutions derrière les affiliations.",
+      "backfill": "Importer les affiliations depuis PubMed",
+      "backfilling": "Import des affiliations…",
+      "backfillDone": "{articles} articles mis à jour, {affiliations} affiliations, {centres} centres.",
+      "search": "Rechercher un centre…",
+      "colName": "Centre",
+      "colOwn": "Notre centre",
+      "colAffiliations": "Affiliations",
+      "colActions": "Actions",
+      "rename": "Renommer",
+      "renameTitle": "Renommer le centre",
+      "name": "Nom",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "merge": "Fusionner la sélection",
+      "mergeTitle": "Fusionner des centres",
+      "mergeChooseKeeper": "Choisissez le centre à conserver.",
+      "mergeConfirm": "Fusionner",
+      "delete": "Supprimer",
+      "deleteConfirm": "Supprimer ce centre ?",
+      "deleteConfirmDesc": "Les affiliations gardent leurs données mais perdent le lien au centre.",
+      "selected": "{count} sélectionné(s)",
+      "renamed": "Centre renommé",
+      "merged": "Centres fusionnés",
+      "deleted": "Centre supprimé",
+      "ownSet": "Mis à jour",
+      "manageLink": "Gérer les centres"
     }
   }
 }

@@ -24,9 +24,12 @@ export default async function PublicationsAdminPage({ params }: PageParams) {
   return (
     <div className="space-y-6 p-4 md:p-6">
       <PageHeader title={t('import.title')} subtitle={t('import.subtitle')} />
-      <div>
+      <div className="flex gap-4">
         <Link href="/publications/admin/authors" className="text-sm font-medium text-navy-600 underline-offset-4 hover:underline">
           {t('authors.manageLink')} →
+        </Link>
+        <Link href="/publications/admin/centres" className="text-sm font-medium text-navy-600 underline-offset-4 hover:underline">
+          {t('centres.manageLink')} →
         </Link>
       </div>
       <BacklogImport />
