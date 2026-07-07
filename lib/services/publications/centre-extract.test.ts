@@ -22,6 +22,7 @@ describe('guessCentre', () => {
     expect(guessCentre('Rouen University Hospital, Rouen, France')).toBe('CHU de Rouen')
     expect(guessCentre('Centre Hospitalier de Chartres, Chartres, France')).toBe('CH de Chartres')
     expect(guessCentre('Service de Cardiologie, CHU de Toulouse, France')).toBe('CHU de Toulouse')
+    expect(guessCentre('Cardiology, CHU Lille, Lille, France')).toBe('CHU de Lille')
   })
 
   it('groups independent contributors and merges Clinique Ambroise Paré variants', () => {
