@@ -430,6 +430,7 @@ model Author {
   firstName            String
   lastName             String
   degrees              String?
+  initials             String?
   email                String?
   orcid                String?
   defaultAffiliationId String?
@@ -441,7 +442,6 @@ model Author {
 
   authorships Authorship[]
 
-  @@unique([firstName, lastName])
   @@map("Author")
 }
 
