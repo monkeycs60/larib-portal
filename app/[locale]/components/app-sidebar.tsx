@@ -130,6 +130,9 @@ export function AppSidebar({ user }: { user: SidebarUser }) {
   if (accessible.includes('CONGES') && canAdminApp(user, 'CONGES')) {
     adminItems.push({ href: '/conges/admin', label: tAdmin('app_CONGES'), icon: CalendarDays, adminBadge: true })
   }
+  if (accessible.includes('PUBLICATIONS') && canAdminApp(user, 'PUBLICATIONS')) {
+    adminItems.push({ href: '/publications/admin', label: tAdmin('app_PUBLICATIONS'), icon: BookOpen, adminBadge: true })
+  }
   if (isAdmin) {
     adminItems.push({ href: '/admin/users', label: tAdmin('usersNav'), icon: Users })
   }
