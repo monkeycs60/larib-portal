@@ -397,6 +397,8 @@ model Journal {
   issn         String?
   publisher    String?
   impactFactor Float?
+  sjr          Float?
+  sjrYear      Int?
   category     String?
   url          String?
   createdAt    DateTime @default(now())
