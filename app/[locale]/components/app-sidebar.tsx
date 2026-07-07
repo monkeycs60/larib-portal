@@ -17,6 +17,7 @@ import {
   ChevronUp,
   Check,
   BookOpen,
+  Shield,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -49,6 +50,7 @@ type SidebarItem = {
   href: string
   label: string
   icon: LucideIcon
+  adminBadge?: boolean
 }
 
 type SidebarSection = {
@@ -123,10 +125,10 @@ export function AppSidebar({ user }: { user: SidebarUser }) {
 
   const adminItems: SidebarItem[] = []
   if (accessible.includes('BESTOF_LARIB') && canAdminApp(user, 'BESTOF_LARIB')) {
-    adminItems.push({ href: '/bestof-larib/admin', label: `${tAdmin('app_BESTOF_LARIB')} · ${tAdmin('appColAdmin')}`, icon: GraduationCap })
+    adminItems.push({ href: '/bestof-larib/admin', label: tAdmin('app_BESTOF_LARIB'), icon: GraduationCap, adminBadge: true })
   }
   if (accessible.includes('CONGES') && canAdminApp(user, 'CONGES')) {
-    adminItems.push({ href: '/conges/admin', label: `${tAdmin('app_CONGES')} · ${tAdmin('appColAdmin')}`, icon: CalendarDays })
+    adminItems.push({ href: '/conges/admin', label: tAdmin('app_CONGES'), icon: CalendarDays, adminBadge: true })
   }
   if (isAdmin) {
     adminItems.push({ href: '/admin/users', label: tAdmin('usersNav'), icon: Users })
@@ -135,6 +137,11 @@ export function AppSidebar({ user }: { user: SidebarUser }) {
   if (adminItems.length > 0) {
     sections.push({ heading: t('sectionAdministration'), items: adminItems })
   }
+
+  const activeHref = sections
+    .flatMap((section) => section.items.map((item) => item.href))
+    .filter((href) => pathname === href || pathname.startsWith(`${href}/`))
+    .sort((left, right) => right.length - left.length)[0]
 
   return (
     <aside
@@ -175,7 +182,7 @@ export function AppSidebar({ user }: { user: SidebarUser }) {
             )}
             <ul className="space-y-1">
               {section.items.map((item) => {
-                const active = pathname === item.href || pathname.startsWith(`${item.href}/`)
+                const active = item.href === activeHref
                 const Icon = item.icon
                 return (
                   <li key={item.href}>
@@ -191,7 +198,12 @@ export function AppSidebar({ user }: { user: SidebarUser }) {
                       )}
                     >
                       <Icon className={cn('h-4 w-4 shrink-0', active ? 'text-coral-400' : 'text-navy-200')} />
-                      {!collapsed && <span>{item.label}</span>}
+                      {!collapsed && (
+                        <span className="flex flex-1 items-center gap-1.5">
+                          {item.label}
+                          {item.adminBadge && <Shield className="h-3.5 w-3.5 shrink-0 text-coral-400" />}
+                        </span>
+                      )}
                     </Link>
                   </li>
                 )
