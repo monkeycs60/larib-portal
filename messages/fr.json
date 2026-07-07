@@ -954,6 +954,36 @@
       "deleted": "Centre supprimé",
       "ownSet": "Mis à jour",
       "manageLink": "Gérer les centres"
+    },
+    "articles": {
+      "title": "Articles",
+      "subtitle": "Parcourez les publications importées, leurs auteurs et centres.",
+      "search": "Rechercher par titre ou journal…",
+      "allStatuses": "Tous les statuts",
+      "colTitle": "Titre",
+      "colJournal": "Journal",
+      "colYear": "Année",
+      "colStatus": "Statut",
+      "colAuthors": "Auteurs",
+      "manageLink": "Parcourir les articles",
+      "backToList": "← Retour aux articles",
+      "authors": "Auteurs",
+      "affiliations": "Affiliations & centres",
+      "correspondingShort": "correspondant",
+      "noCentre": "sans centre",
+      "abstract": "Résumé",
+      "openPubmed": "PubMed",
+      "openDoi": "DOI",
+      "statusSaved": "Statut mis à jour",
+      "actionError": "Échec de la mise à jour. Réessayez.",
+      "status": {
+        "IN_PREPARATION": "En préparation",
+        "UNDER_REVIEW": "En revue",
+        "TO_RESUBMIT": "À resoumettre",
+        "ACCEPTED": "Accepté",
+        "PUBLISHED": "Publié",
+        "ABANDONED": "Abandonné"
+      }
     }
   }
 }

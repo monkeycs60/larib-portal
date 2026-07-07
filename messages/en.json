@@ -956,6 +956,36 @@
       "deleted": "Centre deleted",
       "ownSet": "Updated",
       "manageLink": "Manage centres"
+    },
+    "articles": {
+      "title": "Articles",
+      "subtitle": "Browse imported publications, their authors and centres.",
+      "search": "Search by title or journal…",
+      "allStatuses": "All statuses",
+      "colTitle": "Title",
+      "colJournal": "Journal",
+      "colYear": "Year",
+      "colStatus": "Status",
+      "colAuthors": "Authors",
+      "manageLink": "Browse articles",
+      "backToList": "← Back to articles",
+      "authors": "Authors",
+      "affiliations": "Affiliations & centres",
+      "correspondingShort": "corresponding",
+      "noCentre": "no centre",
+      "abstract": "Abstract",
+      "openPubmed": "PubMed",
+      "openDoi": "DOI",
+      "statusSaved": "Status updated",
+      "actionError": "Could not update. Please try again.",
+      "status": {
+        "IN_PREPARATION": "In preparation",
+        "UNDER_REVIEW": "Under review",
+        "TO_RESUBMIT": "To resubmit",
+        "ACCEPTED": "Accepted",
+        "PUBLISHED": "Published",
+        "ABANDONED": "Abandoned"
+      }
     }
   }
 }

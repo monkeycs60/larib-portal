@@ -13,6 +13,7 @@ import {
 import { updateAuthor, deleteAuthor, mergeAuthors, isPrismaKnownError } from '@/lib/services/publications/authors'
 import { backfillAffiliations, PUBLICATIONS_CENTRES_TAG, PUBLICATIONS_AFFILIATIONS_TAG } from '@/lib/services/publications/affiliations'
 import { renameCentre, setCentreOwn, deleteCentre, mergeCentres } from '@/lib/services/publications/centres'
+import { updateArticleStatus, ARTICLE_STATUSES } from '@/lib/services/publications/articles'
 
 export const searchBacklogAction = appAdminAction('PUBLICATIONS')
   .inputSchema(z.object({ anchor: z.string().min(1), retmax: z.number().int().min(1).max(500).optional() }))
@@ -113,4 +114,12 @@ export const deleteCentreAction = appAdminAction('PUBLICATIONS')
     const result = await deleteCentre(parsedInput.id)
     revalidateTag(PUBLICATIONS_CENTRES_TAG)
     return result
+  })
+
+export const updateArticleStatusAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({ id: z.string().min(1), status: z.enum(ARTICLE_STATUSES) }))
+  .action(async ({ parsedInput }) => {
+    const updated = await updateArticleStatus(parsedInput.id, parsedInput.status)
+    revalidateTag(PUBLICATIONS_ARTICLES_TAG)
+    return updated
   })
