@@ -256,7 +256,7 @@
     "hint": "PNG, JPG, or WEBP up to 5MB"
   },
   "bestof": {
-    "title": "Clinical Cases",
+    "title": "Training Best-of",
     "subtitle": "Browse and practice on clinical cases.",
     "createCase": "Create Case",
     "view": "View",

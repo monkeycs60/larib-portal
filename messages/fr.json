@@ -254,7 +254,7 @@
     "hint": "PNG, JPG ou WEBP jusqu'à 5 Mo"
   },
   "bestof": {
-    "title": "Cas cliniques",
+    "title": "Training Best-of",
     "subtitle": "Consultez et entraînez-vous sur des cas cliniques.",
     "createCase": "Créer un cas",
     "view": "Voir",
