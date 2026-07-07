@@ -2,11 +2,11 @@ type CentreRule = { match: RegExp; centre: string }
 
 // Curated keyword map for the team's known centres. Extend as curation reveals more.
 const CENTRE_RULES: CentreRule[] = [
-  { match: /lariboisi[eè]re/i, centre: 'Lariboisière – APHP' },
+  { match: /lariboisi[eè]re/i, centre: 'Lariboisière – AP-HP' },
   { match: /institut cardiovasculaire paris sud|\bICPS\b|jacques cartier|ramsay/i, centre: 'Institut Cardiovasculaire Paris Sud' },
-  { match: /bichat/i, centre: 'Bichat – APHP' },
-  { match: /piti[eé][- ]salp[eê]tri[eè]re/i, centre: 'Pitié-Salpêtrière – APHP' },
-  { match: /pompidou|\bHEGP\b/i, centre: 'HEGP – APHP' },
+  { match: /bichat/i, centre: 'Bichat – AP-HP' },
+  { match: /piti[eé][- ]salp[eê]tri[eè]re/i, centre: 'Pitié-Salpêtrière – AP-HP' },
+  { match: /pompidou|\bHEGP\b/i, centre: 'HEGP – AP-HP' },
 ]
 
 // A hospital always wins over a university / INSERM / research unit / department.

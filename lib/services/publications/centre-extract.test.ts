@@ -3,7 +3,7 @@ import { guessCentre } from './centre-extract'
 
 describe('guessCentre', () => {
   it('maps known institutions via curated keywords', () => {
-    expect(guessCentre('CMR Lab, Hopital Lariboisiere, APHP, Paris, France')).toBe('Lariboisière – APHP')
+    expect(guessCentre('CMR Lab, Hopital Lariboisiere, APHP, Paris, France')).toBe('Lariboisière – AP-HP')
     expect(guessCentre('Institut Cardiovasculaire Paris Sud, Hôpital Privé Jacques Cartier, Massy, France')).toBe('Institut Cardiovasculaire Paris Sud')
   })
 
@@ -13,7 +13,7 @@ describe('guessCentre', () => {
   })
 
   it('prefers the hospital when hospital + INSERM + university coexist', () => {
-    expect(guessCentre('Department of Cardiology, INSERM U970, Georges Pompidou Hospital, Université de Paris, Paris, France')).toBe('HEGP – APHP')
+    expect(guessCentre('Department of Cardiology, INSERM U970, Georges Pompidou Hospital, Université de Paris, Paris, France')).toBe('HEGP – AP-HP')
     expect(guessCentre('Cardiology Unit, Freeman Hospital, Institute of Genetic Medicine, Newcastle University, Newcastle, UK')).toBe('Freeman Hospital')
   })
 
