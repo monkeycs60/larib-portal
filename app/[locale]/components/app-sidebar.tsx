@@ -16,6 +16,7 @@ import {
   Pencil,
   ChevronUp,
   Check,
+  BookOpen,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -104,6 +105,9 @@ export function AppSidebar({ user }: { user: SidebarUser }) {
   }
   if (accessible.includes('CONGES')) {
     applicationItems.push({ href: '/conges', label: tAdmin('app_CONGES'), icon: CalendarDays })
+  }
+  if (accessible.includes('PUBLICATIONS')) {
+    applicationItems.push({ href: '/publications', label: tAdmin('app_PUBLICATIONS'), icon: BookOpen })
   }
 
   const sections: SidebarSection[] = [

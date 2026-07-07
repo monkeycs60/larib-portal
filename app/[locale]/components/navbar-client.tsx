@@ -187,7 +187,9 @@ export function NavbarClient({ user }: { user?: NavbarUser | null }) {
 												const slug =
 													app === 'BESTOF_LARIB'
 														? '/bestof-larib'
-														: '/conges';
+														: app === 'PUBLICATIONS'
+															? '/publications'
+															: '/conges';
 												return (
 													<DropdownMenuItem key={app} asChild>
 														<Link href={slug}>
