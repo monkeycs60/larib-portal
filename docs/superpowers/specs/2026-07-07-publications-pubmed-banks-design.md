@@ -103,6 +103,7 @@ Import et gestion des banques = **admin publications** (`appAdminAction('PUBLICA
 - **B1** — Moteur PubMed + import back-catalogue (auteurs + articles + journaux) avec curation. ← on commence ici.
 - **B2** — Journaux : Crossref + favoris + SJR + IF manuel.
 - **B3** — Gestion banque auteurs (dédup/fusion, lien user).
+- **B4** — Affiliations & **Centres** (auto-extraction + curation). Nuance validée : la string PubMed brute (par auteur/papier) est un input bruité ; on en distille (a) une **Affiliation** = ligne propre dédupliquée (pour le bloc auteurs numéroté), et (b) un **Centre** = institution/site stable, curé (ex. *Lariboisière – APHP*, *ICPS*), qui groupe plusieurs affiliations et porte un flag `isOwn` (« notre centre »). Approche : ré-importer les affiliations des papiers (le parseur les extrait déjà, B1 ne les stockait pas), deviner le centre par heuristique (mots-clés d'institution + fallback 1ᵉʳ segment), puis **curation manuelle** (fusion/renommage de centres, réassignation, flag notre centre). Modèle : nouveau `Centre` ← `Affiliation.centreId` ← lien par-papier `AuthorshipAffiliation`.
 
 Chaque tranche a son plan d'implémentation (writing-plans) écrit juste avant exécution.
 
