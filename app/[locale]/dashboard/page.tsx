@@ -3,9 +3,10 @@ import { Link } from '@/app/i18n/navigation'
 import { getTranslations } from 'next-intl/server'
 import { formatUserName } from '@/lib/format-user-name'
 import { getRandomGreeting } from '@/lib/random-greeting'
-import { isSuperAdmin, accessibleApplications } from '@/lib/permissions'
+import { isSuperAdmin, accessibleApplications, canAdminApp } from '@/lib/permissions'
 import * as motion from "framer-motion/client"
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, User, Shield } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 export default async function DashboardPage({
   params
@@ -135,40 +136,58 @@ export default async function DashboardPage({
               animate="show"
               className="grid grid-cols-1 md:grid-cols-2 gap-6"
             >
-              {apps.map((app) => (
+              {apps.map((app) => {
+                const hasUserAccess = (session.user.applications ?? []).includes(app)
+                const hasAdminAccess = canAdminApp(session.user, app)
+                const userButton = (
+                  <Button asChild size="lg" className="w-full justify-between">
+                    <Link href={appSlug(app)}>
+                      <span className="inline-flex items-center gap-2"><User className="w-4 h-4" />{t('btnUserAccess')}</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </Button>
+                )
+                const adminButton = (
+                  <Button asChild size="lg" className="w-full justify-between bg-gradient-to-br from-coral-500 to-coral-600 text-white hover:from-coral-600 hover:to-coral-700">
+                    <Link href={`${appSlug(app)}/admin`}>
+                      <span className="inline-flex items-center gap-2"><Shield className="w-4 h-4" />{t('btnAdmin')}</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </Button>
+                )
+                return (
                 <motion.div key={app} variants={item}>
-                  <Link href={appSlug(app)} className="block h-full">
-                    <div className="group h-full relative overflow-hidden rounded-2xl border border-line bg-bg-surface shadow-elevation-sm transition-all duration-500 hover:shadow-elevation-md hover:-translate-y-1">
-                      <div className="absolute top-4 right-4 z-10">
-                         <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-50 text-gray-500 transition-all duration-500 group-hover:bg-gray-100 group-hover:scale-110">
-                            <ArrowRight className="w-4 h-4 -rotate-45 group-hover:rotate-0 transition-transform duration-500" />
-                         </div>
+                  <div className="group h-full relative overflow-hidden rounded-2xl border border-line bg-bg-surface shadow-elevation-sm transition-all duration-500 hover:shadow-elevation-md hover:-translate-y-1">
+                    <div className="p-6 h-full flex flex-col">
+                      <div className="mb-4">
+                        <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-coral-50 p-2.5 text-coral-500 transition-transform duration-500 group-hover:scale-110">
+                          {getAppIcon(app)}
+                        </div>
+                        <h3 className="text-lg font-semibold text-text-primary mb-1 group-hover:text-coral-600 transition-colors duration-300">
+                          {adminT(`app_${app}`)}
+                        </h3>
+                        <p className="text-sm text-text-secondary leading-relaxed max-w-md">
+                          {t(`appDesc_${app}`)}
+                        </p>
                       </div>
-                      
-                      <div className="p-6 h-full flex flex-col">
-                        <div className="mb-4">
-                          <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-coral-50 p-2.5 text-coral-500 transition-transform duration-500 group-hover:scale-110">
-                            {getAppIcon(app)}
+
+                      <div className="mt-auto border-t border-line pt-4">
+                        {hasUserAccess && hasAdminAccess ? (
+                          <div className="grid grid-cols-2 gap-3">
+                            {userButton}
+                            {adminButton}
                           </div>
-                          <h3 className="text-lg font-semibold text-text-primary mb-1 group-hover:text-coral-600 transition-colors duration-300">
-                            {adminT(`app_${app}`)}
-                          </h3>
-                          <p className="text-sm text-text-secondary leading-relaxed max-w-md">
-                            {t(`appDesc_${app}`)}
-                          </p>
-                        </div>
-                        
-                        <div className="mt-auto border-t border-line pt-4">
-                          <span className="inline-flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wider text-coral-600">
-                            {t('openApp')}
-                            <ArrowRight className="w-4 h-4" />
-                          </span>
-                        </div>
+                        ) : hasAdminAccess ? (
+                          adminButton
+                        ) : (
+                          userButton
+                        )}
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 </motion.div>
-              ))}
+                )
+              })}
             </motion.div>
           </section>
 

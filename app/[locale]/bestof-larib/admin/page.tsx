@@ -1,6 +1,6 @@
-import { BestofPageContent } from './bestof-page-content';
+import { BestofPageContent } from '../bestof-page-content';
 
-export default async function BestofLaribPage({
+export default async function BestofLaribAdminPage({
 	params,
 	searchParams,
 }: {
@@ -9,5 +9,5 @@ export default async function BestofLaribPage({
 }) {
 	const { locale } = await params;
 	const sp = await searchParams;
-	return <BestofPageContent locale={locale} searchParams={sp} adminView={false} />;
+	return <BestofPageContent locale={locale} searchParams={sp} adminView={true} />;
 }

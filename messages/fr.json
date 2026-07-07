@@ -131,7 +131,9 @@
       "Excellente journée à vous",
       "Prêt pour de nouvelles découvertes",
       "Au plaisir de vous accompagner"
-    ]
+    ],
+    "btnUserAccess": "Accès utilisateur",
+    "btnAdmin": "Admin"
   },
   "metadata": {
     "title": "Larib Portal",

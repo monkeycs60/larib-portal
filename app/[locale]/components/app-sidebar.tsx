@@ -20,7 +20,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { isSuperAdmin, accessibleApplications } from '@/lib/permissions'
+import { isSuperAdmin, accessibleApplications, canAdminApp } from '@/lib/permissions'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -121,11 +121,19 @@ export function AppSidebar({ user }: { user: SidebarUser }) {
     sections.push({ heading: t('sectionApplications'), items: applicationItems })
   }
 
+  const adminItems: SidebarItem[] = []
+  if (accessible.includes('BESTOF_LARIB') && canAdminApp(user, 'BESTOF_LARIB')) {
+    adminItems.push({ href: '/bestof-larib/admin', label: `${tAdmin('app_BESTOF_LARIB')} · ${tAdmin('appColAdmin')}`, icon: GraduationCap })
+  }
+  if (accessible.includes('CONGES') && canAdminApp(user, 'CONGES')) {
+    adminItems.push({ href: '/conges/admin', label: `${tAdmin('app_CONGES')} · ${tAdmin('appColAdmin')}`, icon: CalendarDays })
+  }
   if (isAdmin) {
-    sections.push({
-      heading: t('sectionAdministration'),
-      items: [{ href: '/admin/users', label: tAdmin('usersNav'), icon: Users }],
-    })
+    adminItems.push({ href: '/admin/users', label: tAdmin('usersNav'), icon: Users })
+  }
+
+  if (adminItems.length > 0) {
+    sections.push({ heading: t('sectionAdministration'), items: adminItems })
   }
 
   return (

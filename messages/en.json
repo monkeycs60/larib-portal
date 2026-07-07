@@ -133,7 +133,9 @@
       "Have an excellent day",
       "Ready for new discoveries",
       "Happy to assist you"
-    ]
+    ],
+    "btnUserAccess": "User access",
+    "btnAdmin": "Admin"
   },
   "metadata": {
     "title": "Larib Portal",
