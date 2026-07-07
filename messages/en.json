@@ -314,7 +314,8 @@
     },
     "placeholders": {
       "customTags": "Enter comma-separated tags",
-      "textContent": "Enter the clinical case content here (optional if PDF is provided)..."
+      "textContent": "Enter the clinical case content here (optional if PDF is provided)...",
+      "caseName": "e.g. Acute anterior STEMI"
     },
     "hints": {
       "tags": "Up to 10 tags, comma separated."
@@ -340,7 +341,8 @@
     "deleteError": "Cannot delete: in use by {count} case(s)",
     "deleteGenericError": "Failed to delete items",
     "createDialog": {
-      "title": "Create New Clinical Case"
+      "title": "Create New Clinical Case",
+      "subtitle": "Add a case to the Training Best-of library"
     },
     "content": {
       "section": "Case Report",
@@ -349,7 +351,10 @@
       "text": "Text Content",
       "pdfDrop": "Click to upload PDF file (optional)",
       "pdfSelected": "PDF uploaded",
-      "pdfHint": "Maximum file size: 10MB"
+      "pdfHint": "Maximum file size: 10MB",
+      "pdfTab": "PDF file",
+      "pdfDropTitle": "Click to upload or drag a PDF here",
+      "pdfDropHint": "PDF only · maximum file size 10 MB"
     },
     "pdfUploaded": "PDF uploaded",
     "updated": "Case updated",
@@ -630,7 +635,12 @@
       "ftpPath": "Expected FTP path: {path}",
       "caseNumber": "Case #",
       "hint": "{count} cases with DICOMs available — check cases to download"
-    }
+    },
+    "sectionCaseDetails": "Case details",
+    "manage": "Manage",
+    "selectedCount": "{count} selected",
+    "availableTags": "Available tags",
+    "footerHint": "Provide a PDF or text content to continue"
   },
   "conges": {
     "title": "Leave management",

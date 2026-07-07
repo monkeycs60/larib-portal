@@ -29,8 +29,8 @@ import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { TagInput } from '@/components/ui/tag-input';
-import { Textarea } from '@/components/ui/textarea';
-import { Plus, Settings } from 'lucide-react';
+import { Plus, Settings, FilePlus2, Check, FileText, Type, UploadCloud, Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { useAction } from 'next-safe-action/hooks';
 import { createCaseAction, createDiseaseTagAction, createExamTypeAction, updateCaseAction, setCaseAdminTagsAction, deleteExamTypesAction, deleteDiseaseTagsAction, listAdminTagsAction, updateExamTypeAction, updateDiseaseTagAction } from '../actions';
 import { toast } from 'sonner';
@@ -72,6 +72,12 @@ type ClinicalCase = {
   adminTags?: AdminTag[];
 }
 
+const DIFFICULTY_OPTIONS = [
+  { value: 'BEGINNER', dotClass: 'bg-success-500' },
+  { value: 'INTERMEDIATE', dotClass: 'bg-warn-500' },
+  { value: 'ADVANCED', dotClass: 'bg-danger-500' },
+] as const;
+
 export default function CreateCaseDialog({
   examTypes,
   diseaseTags,
@@ -102,6 +108,7 @@ export default function CreateCaseDialog({
 	const [localAdminTags, setLocalAdminTags] = useState<AdminTag[]>(adminTags ?? []);
 	const tagsManagerTriggerRef = useRef<HTMLButtonElement>(null);
 	const [hasDataChanges, setHasDataChanges] = useState(false);
+	const [reportMode, setReportMode] = useState<'pdf' | 'text'>(clinicalCase?.textContent ? 'text' : 'pdf');
 
   const { register, handleSubmit, setValue, reset, watch, control } =
     useForm<FormValues>({
@@ -130,6 +137,7 @@ export default function CreateCaseDialog({
 		return s.length > 0;
 	})();
 	const tags = watch('tags') || [];
+	const difficulty = watch('difficulty') ?? 'BEGINNER';
 
   const { executeAsync: execCreate, isExecuting: creatingCase } = useAction(createCaseAction, {
     onError({ error }) {
@@ -523,128 +531,141 @@ export default function CreateCaseDialog({
 			<DialogTrigger asChild>
 				{trigger ? trigger : <Button>{t('createCase')}</Button>}
 			</DialogTrigger>
-			<DialogContent
-				size='large'
-				className='max-h-[90vh] overflow-y-auto max-w-[1400px] w-full'>
-            <DialogHeader>
-                <DialogTitle>
-                    {clinicalCase ? t('editCaseTitle', { name: clinicalCase.name }) : t('createDialog.title')}
-                </DialogTitle>
-            </DialogHeader>
-				<form className='space-y-4' onSubmit={onSubmit}>
-					{clinicalCase ? (
-						<div className='bg-muted rounded p-3 text-sm'>
-							<div className='font-medium'>{t('dicom.caseNumber')}: {String(clinicalCase.caseNumber).padStart(4, '0')}</div>
-							{clinicalCase.examType ? (
-								<div className='text-text-secondary mt-1'>
-									{t('dicom.ftpPath', { path: `bestof/${clinicalCase.examType.name}/${String(clinicalCase.caseNumber).padStart(4, '0')}/` })}
-								</div>
-							) : null}
+			<DialogContent className='sm:max-w-2xl p-0 gap-0 max-h-[90vh] overflow-hidden flex flex-col'>
+				<div className='relative bg-bg-surface px-6 py-4'>
+					<span className='absolute left-0 top-0 h-full w-1 rounded-l-lg bg-coral-500' />
+					<div className='flex items-start gap-3'>
+						<div className='rounded-xl bg-coral-50 p-2.5 text-coral-600'>
+							<FilePlus2 className='h-5 w-5' />
 						</div>
-					) : null}
+						<DialogHeader className='gap-0.5'>
+							<DialogTitle className='text-lg font-bold'>
+								{clinicalCase ? t('editCaseTitle', { name: clinicalCase.name }) : t('createDialog.title')}
+							</DialogTitle>
+							<p className='text-sm text-text-secondary'>{t('createDialog.subtitle')}</p>
+						</DialogHeader>
+					</div>
+				</div>
+				<form className='flex flex-1 min-h-0 flex-col' onSubmit={onSubmit}>
+					<div className='flex-1 overflow-y-auto bg-bg-app px-6 py-5 space-y-4'>
+						{clinicalCase ? (
+							<div className='rounded-lg border border-line bg-bg-surface p-4 text-sm'>
+								<div className='font-medium text-text-primary'>{t('dicom.caseNumber')}: {String(clinicalCase.caseNumber).padStart(4, '0')}</div>
+								{clinicalCase.examType ? (
+									<div className='text-text-secondary mt-1'>
+										{t('dicom.ftpPath', { path: `bestof/${clinicalCase.examType.name}/${String(clinicalCase.caseNumber).padStart(4, '0')}/` })}
+									</div>
+								) : null}
+							</div>
+						) : null}
 
-					<section className='space-y-3'>
-						<div className='grid md:grid-cols-2 gap-3'>
+					<section className='rounded-xl border border-line bg-bg-surface p-5'>
+						<div className='flex items-center gap-2 mb-4'>
+							<span className='h-1.5 w-1.5 rounded-full bg-coral-500' />
+							<span className='text-xs font-semibold uppercase tracking-wide text-coral-600'>{t('sectionCaseDetails')}</span>
+							<span className='h-px flex-1 bg-line ml-2' />
+						</div>
+						<div className='space-y-4'>
 							<div>
-								<label className='block text-sm mb-1'>
-									{t('fields.caseName')}
-								</label>
-								<Input required {...register('name')} />
+								<label className='block text-sm font-medium text-text-primary mb-1.5'>{t('fields.caseName')}</label>
+								<Input required placeholder={t('placeholders.caseName')} {...register('name')} />
 							</div>
-							<div>
-								<div className='flex items-center justify-between'>
-									<label className='block text-sm mb-1'>
-										{t('fields.examType')}
-									</label>
-									{isAdmin && (
-										<button
-											type='button'
-											className='text-xs text-navy-600'
-											onClick={() => setManageExamTypesOpen(true)}>
-											Manage
-										</button>
-									)}
+							<div className='grid md:grid-cols-2 gap-4'>
+								<div>
+									<div className='flex items-center justify-between mb-1.5'>
+										<label className='block text-sm font-medium text-text-primary'>{t('fields.examType')}</label>
+										{isAdmin && (
+											<button type='button' className='text-xs font-medium text-coral-600' onClick={() => setManageExamTypesOpen(true)}>
+												{t('manage')}
+											</button>
+										)}
+									</div>
+									<Controller
+										name='examType'
+										control={control}
+										render={({ field }) => (
+											<Select {...field} value={field.value ?? ''}>
+												<option value=''>{t('selectPlaceholder')}</option>
+												{examList.map((examTypeOption) => (
+													<option key={examTypeOption.id} value={examTypeOption.name}>
+														{examTypeOption.name}
+													</option>
+												))}
+											</Select>
+										)}
+									/>
 								</div>
-								<Controller
-									name='examType'
-									control={control}
-									render={({ field }) => (
-										<Select
-											{...field}
-											value={field.value ?? ''}
-										>
-										<option value=''>{t('selectPlaceholder')}</option>
-										{examList.map((examTypeOption) => (
-											<option key={examTypeOption.id} value={examTypeOption.name}>
-												{examTypeOption.name}
-											</option>
-										))}
-										</Select>
-									)}
-								/>
-							</div>
-							<div>
-								<label className='block text-sm mb-1'>
-									{t('fields.difficulty')}
-								</label>
-								<Select {...register('difficulty')}>
-									<option value='BEGINNER'>
-										{t('difficulty.beginner')}
-									</option>
-									<option value='INTERMEDIATE'>
-										{t('difficulty.intermediate')}
-									</option>
-									<option value='ADVANCED'>
-										{t('difficulty.advanced')}
-									</option>
-								</Select>
-							</div>
-							<div>
-								<div className='flex items-center justify-between'>
-									<label className='block text-sm mb-1'>
-										{t('fields.disease')}
-									</label>
-									{isAdmin && (
-										<button
-											type='button'
-											className='text-xs text-navy-600'
-											onClick={() => setManageDiseaseTagsOpen(true)}>
-											Manage
-										</button>
-									)}
+								<div>
+									<div className='flex items-center justify-between mb-1.5'>
+										<label className='block text-sm font-medium text-text-primary'>{t('fields.disease')}</label>
+										{isAdmin && (
+											<button type='button' className='text-xs font-medium text-coral-600' onClick={() => setManageDiseaseTagsOpen(true)}>
+												{t('manage')}
+											</button>
+										)}
+									</div>
+									<Controller
+										name='diseaseTag'
+										control={control}
+										render={({ field }) => (
+											<Select {...field} value={field.value ?? ''}>
+												<option value=''>{t('selectPlaceholder')}</option>
+												{diseaseList.map((diseaseTagOption) => (
+													<option key={diseaseTagOption.id} value={diseaseTagOption.name}>
+														{diseaseTagOption.name}
+													</option>
+												))}
+											</Select>
+										)}
+									/>
 								</div>
-								<Controller
-									name='diseaseTag'
-									control={control}
-									render={({ field }) => (
-										<Select
-											{...field}
-											value={field.value ?? ''}
-										>
-										<option value=''>{t('selectPlaceholder')}</option>
-										{diseaseList.map((diseaseTagOption) => (
-											<option key={diseaseTagOption.id} value={diseaseTagOption.name}>
-												{diseaseTagOption.name}
-											</option>
-										))}
-										</Select>
-									)}
-								/>
+							</div>
+							<div>
+								<label className='block text-sm font-medium text-text-primary mb-1.5'>{t('fields.difficulty')}</label>
+								<div className='grid grid-cols-3 gap-2'>
+									{DIFFICULTY_OPTIONS.map((option) => {
+										const selected = difficulty === option.value
+										return (
+											<button
+												key={option.value}
+												type='button'
+												onClick={() => setValue('difficulty', option.value, { shouldDirty: true })}
+												className={cn(
+													'flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors cursor-pointer',
+													selected
+														? 'border-navy-700 bg-navy-50 text-text-primary ring-1 ring-navy-700'
+														: 'border-line bg-bg-surface text-text-secondary hover:bg-gray-50'
+												)}
+											>
+												<span className={cn('h-2 w-2 rounded-full', option.dotClass)} />
+												{option.value === 'BEGINNER'
+													? t('difficulty.beginner')
+													: option.value === 'INTERMEDIATE'
+														? t('difficulty.intermediate')
+														: t('difficulty.advanced')}
+											</button>
+										)
+									})}
+								</div>
 							</div>
 						</div>
 					</section>
 
-					<section className='space-y-3'>
+					<section className='rounded-xl border border-line bg-bg-surface p-5'>
 						{isAdmin && adminTags ? (
 							<div>
-								<div className='flex items-center justify-between mb-1'>
-									<label className='block text-sm'>
-										Admin Tags
-									</label>
+								<div className='flex items-center gap-2 mb-4'>
+									<span className='h-1.5 w-1.5 rounded-full bg-coral-500' />
+									<span className='text-xs font-semibold uppercase tracking-wide text-coral-600'>{t('table.adminTags')}</span>
+									{selectedAdminTags.length > 0 && (
+										<span className='rounded-full bg-coral-50 text-coral-600 text-xs font-semibold px-2 py-0.5'>{t('selectedCount', { count: selectedAdminTags.length })}</span>
+									)}
+									<span className='h-px flex-1 bg-line mx-2' />
 									<Button
 										type='button'
 										size='sm'
 										variant='ghost'
+										className='text-coral-600 hover:text-coral-700'
 										onClick={() => tagsManagerTriggerRef.current?.click()}
 									>
 										<Settings className='size-4 mr-1' />
@@ -652,62 +673,63 @@ export default function CreateCaseDialog({
 									</Button>
 								</div>
 
-								<div className='border rounded p-3 space-y-2'>
-									<div className='flex flex-wrap gap-2'>
-										{selectedAdminTags.length === 0 ? (
-											<span className='text-sm text-text-secondary'>No tags selected</span>
-										) : (
-											localAdminTags
-												.filter((tag) => selectedAdminTags.includes(tag.id))
-												.map((tag) => (
-													<div
-														key={tag.id}
-														className='inline-flex items-center gap-1 rounded border px-2 py-1 text-xs font-medium'
-														style={tagChipStyle(tag.color)}
-													>
-														<span>{tag.name}</span>
-														<button
-															type='button'
-															onClick={() => {
-																setSelectedAdminTags((previous) => previous.filter((tagId) => tagId !== tag.id));
-															}}
-															className='hover:opacity-80'
-														>
-															×
-														</button>
-													</div>
-												))
-										)}
-									</div>
-									<div className='border-t pt-2'>
-										<div className='text-xs font-medium mb-2'>Available tags:</div>
-										<div className='flex flex-wrap gap-2 max-h-32 overflow-y-auto'>
-											{localAdminTags
-												.filter((tag) => !selectedAdminTags.includes(tag.id))
-												.sort((tagA, tagB) => tagA.name.localeCompare(tagB.name))
-												.map((tag) => (
+								<div className='rounded-lg border border-line bg-bg-app px-3 py-2.5 min-h-11 flex flex-wrap gap-2 items-center'>
+									{selectedAdminTags.length === 0 ? (
+										<span className='text-sm text-text-secondary'>{t('caseView.noTagsSelected')}</span>
+									) : (
+										localAdminTags
+											.filter((tag) => selectedAdminTags.includes(tag.id))
+											.map((tag) => (
+												<div
+													key={tag.id}
+													className='inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium'
+													style={tagChipStyle(tag.color)}
+												>
+													<span>{tag.name}</span>
 													<button
-														key={tag.id}
 														type='button'
 														onClick={() => {
-															setSelectedAdminTags((previous) => [...previous, tag.id]);
+															setSelectedAdminTags((previous) => previous.filter((tagId) => tagId !== tag.id));
 														}}
-														className='inline-flex items-center gap-1 rounded border px-2 py-1 text-xs font-medium hover:opacity-80'
-														style={tagChipStyle(tag.color)}
+														className='hover:opacity-70 cursor-pointer'
 													>
-														<span>{tag.name}</span>
-														<span>+</span>
+														×
 													</button>
-												))}
-										</div>
+												</div>
+											))
+									)}
+								</div>
+
+								<div className='mt-3'>
+									<div className='text-xs font-medium text-text-secondary mb-2'>{t('availableTags')}</div>
+									<div className='flex flex-wrap gap-2 max-h-32 overflow-y-auto'>
+										{localAdminTags
+											.filter((tag) => !selectedAdminTags.includes(tag.id))
+											.sort((tagA, tagB) => tagA.name.localeCompare(tagB.name))
+											.map((tag) => (
+												<button
+													key={tag.id}
+													type='button'
+													onClick={() => {
+														setSelectedAdminTags((previous) => [...previous, tag.id]);
+													}}
+													className='inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium hover:opacity-80 cursor-pointer'
+													style={tagChipStyle(tag.color)}
+												>
+													<span>{tag.name}</span>
+													<Plus className='size-3' />
+												</button>
+											))}
 									</div>
 								</div>
 							</div>
 						) : (
 							<div>
-								<label className='block text-sm mb-1'>
-									{t('fields.customTags')}
-								</label>
+								<div className='flex items-center gap-2 mb-4'>
+									<span className='h-1.5 w-1.5 rounded-full bg-coral-500' />
+									<span className='text-xs font-semibold uppercase tracking-wide text-coral-600'>{t('fields.customTags')}</span>
+									<span className='h-px flex-1 bg-line ml-2' />
+								</div>
 								<TagInput
 									value={tags}
 									onChange={(next) => setValue('tags', next)}
@@ -715,52 +737,66 @@ export default function CreateCaseDialog({
 									disabled={isExecuting}
 									max={10}
 								/>
-								<div className='text-xs text-text-secondary mt-1'>
+								<div className='text-xs text-text-secondary mt-2'>
 									{t('hints.tags')}
 								</div>
 							</div>
 						)}
 					</section>
 
-					<section className='space-y-3'>
-						<div className='text-sm font-medium'>
-							{t('content.section')}
+					<section className='rounded-xl border border-line bg-bg-surface p-5'>
+						<div className='flex items-center gap-2 mb-4'>
+							<span className='h-1.5 w-1.5 rounded-full bg-coral-500' />
+							<span className='text-xs font-semibold uppercase tracking-wide text-coral-600'>{t('content.section')}</span>
+							<span className='h-px flex-1 bg-line ml-2' />
 						</div>
-						<div className='text-sm text-text-secondary'>
-							{t('content.helper')}
+						<p className='text-sm text-text-secondary mb-3'>{t('content.helper')}</p>
+
+						<div className='grid grid-cols-2 gap-1 rounded-lg border border-line bg-bg-app p-1 mb-4'>
+							<button
+								type='button'
+								onClick={() => setReportMode('pdf')}
+								className={cn(
+									'flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors cursor-pointer',
+									reportMode === 'pdf' ? 'bg-bg-surface text-text-primary shadow-elevation-xs' : 'text-text-secondary hover:text-text-primary'
+								)}
+							>
+								<FileText className='size-4' />
+								{t('content.pdfTab')}
+							</button>
+							<button
+								type='button'
+								onClick={() => setReportMode('text')}
+								className={cn(
+									'flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors cursor-pointer',
+									reportMode === 'text' ? 'bg-bg-surface text-text-primary shadow-elevation-xs' : 'text-text-secondary hover:text-text-primary'
+								)}
+							>
+								<Type className='size-4' />
+								{t('content.text')}
+							</button>
 						</div>
 
-						<div className='border rounded-md p-4'>
-							<div className='text-sm font-medium mb-2'>
-								{t('content.pdf')}
-							</div>
-							{pdfUrl ? (
-								<div className='flex items-center justify-between bg-muted px-3 py-2 rounded'>
-									<div className='text-sm truncate mr-3'>
-										{t('content.pdfSelected')}
-									</div>
+						{reportMode === 'pdf' ? (
+							pdfUrl ? (
+								<div className='flex items-center justify-between rounded-lg border border-line bg-bg-app px-4 py-3'>
+									<div className='text-sm truncate mr-3 text-text-primary'>{t('content.pdfSelected')}</div>
 									<div className='flex gap-2 items-center'>
-										<a
-											href={pdfUrl}
-											target='_blank'
-											rel='noreferrer'
-											className='text-xs text-navy-600 underline'>
+										<a href={pdfUrl} target='_blank' rel='noreferrer' className='text-xs text-coral-600 underline'>
 											{t('view')}
 										</a>
-										<Button
-											type='button'
-											size='sm'
-											variant='ghost'
-											onClick={clearPdf}>
+										<Button type='button' size='sm' variant='ghost' onClick={clearPdf}>
 											{t('remove')}
 										</Button>
 									</div>
 								</div>
 							) : (
-								<label className='block border border-dashed rounded p-6 text-center cursor-pointer'>
-									<div className='text-sm text-text-secondary'>
-										{t('content.pdfDrop')}
-									</div>
+								<label className='flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-line bg-bg-app px-6 py-10 text-center cursor-pointer transition-colors hover:border-coral-300 hover:bg-coral-50/40'>
+									<span className='rounded-xl bg-coral-50 p-3 text-coral-600'>
+										{pdfUploading ? <Loader2 className='size-6 animate-spin' /> : <UploadCloud className='size-6' />}
+									</span>
+									<span className='text-sm font-medium text-text-primary'>{t('content.pdfDropTitle')}</span>
+									<span className='text-xs text-text-muted'>{t('content.pdfDropHint')}</span>
 									<input
 										type='file'
 										accept='application/pdf'
@@ -769,72 +805,45 @@ export default function CreateCaseDialog({
 											const f = e.target.files?.[0];
 											if (f) void uploadPdf(f);
 										}}
-										disabled={pdfUploading || hasText}
+										disabled={pdfUploading}
 									/>
 								</label>
-							)}
-							<div className='text-xs text-text-secondary mt-1'>
-								{t('content.pdfHint')}
-							</div>
-							{hasText ? (
-								<div className='mt-2 text-warn-700 bg-warn-50 border border-warn-100 text-sm rounded p-2'>
-									{t('errors.exclusivePdfDisabled')}
-								</div>
-							) : null}
-						</div>
-
-						<div>
-							<div className='text-sm font-medium mb-1'>
-								{t('content.text')}
-							</div>
+							)
+						) : (
 							<RichTextEditor
 								value={textContent}
 								onChange={(html) => setValue('textContent', html)}
 								placeholder={t('placeholders.textContent')}
 								disabled={!!pdfUrl}
 							/>
-							{!pdfUrl && !textContent ? (
-								<div className='mt-2 text-warn-700 bg-warn-50 border border-warn-100 text-sm rounded p-2'>
-									{t('errors.contentRequired')}
-								</div>
-							) : null}
-							{pdfUrl ? (
-								<div className='mt-2 text-warn-700 bg-warn-50 border border-warn-100 text-sm rounded p-2'>
-									{t('errors.exclusiveTextDisabled')}
-								</div>
-							) : null}
-						</div>
+						)}
 					</section>
 
-            <DialogFooter className='gap-2'>
-              <Button
-                type='button'
-                variant='outline'
-                onClick={() => setOpen(false)}>
-                {t('cancel')}
-              </Button>
-              {clinicalCase ? null : (
-                <Button
-                  type='submit'
-                  variant='secondary'
-                  disabled={isExecuting}
-                  onClick={() => setStatusToCreate('DRAFT')}>
-                  {isExecuting && statusToCreate === 'DRAFT' ? t('saving') : t('saveProgress')}
-                </Button>
-              )}
-              <Button
-                type='submit'
-                disabled={isExecuting}
-                onClick={() => setStatusToCreate('PUBLISHED')}>
-                {clinicalCase
-                  ? isExecuting
-                    ? t('saving')
-                    : t('update')
-                  : isExecuting
-                    ? t('creating')
-                    : t('create')}
-              </Button>
-            </DialogFooter>
+					</div>
+					<div className='flex items-center justify-between gap-3 border-t border-line bg-bg-surface px-6 py-4'>
+						<div>
+							{!pdfUrl && !hasText ? (
+								<span className='flex items-center gap-2 text-sm text-text-muted'>
+									<span className='h-1.5 w-1.5 rounded-full bg-warn-500' />
+									{t('footerHint')}
+								</span>
+							) : null}
+						</div>
+						<div className='flex items-center gap-3'>
+							<Button type='button' variant='outline' onClick={() => setOpen(false)}>
+								{t('cancel')}
+							</Button>
+							{clinicalCase ? null : (
+								<Button type='submit' variant='secondary' disabled={isExecuting} onClick={() => setStatusToCreate('DRAFT')}>
+									{isExecuting && statusToCreate === 'DRAFT' ? t('saving') : t('saveProgress')}
+								</Button>
+							)}
+							<Button type='submit' disabled={isExecuting} onClick={() => setStatusToCreate('PUBLISHED')}>
+								<Check className='size-4' />
+								{clinicalCase ? (isExecuting ? t('saving') : t('update')) : (isExecuting ? t('creating') : t('create'))}
+							</Button>
+						</div>
+					</div>
 				</form>
 			</DialogContent>
 

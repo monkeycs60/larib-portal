@@ -312,7 +312,8 @@
     },
     "placeholders": {
       "customTags": "Entrez des tags séparés par des virgules",
-      "textContent": "Saisissez le contenu du cas ici (optionnel si un PDF est fourni)..."
+      "textContent": "Saisissez le contenu du cas ici (optionnel si un PDF est fourni)...",
+      "caseName": "ex. STEMI antérieur aigu"
     },
     "hints": {
       "tags": "Jusqu'à 10 tags, séparés par des virgules."
@@ -338,7 +339,8 @@
     "deleteError": "Impossible de supprimer : utilisé par {count} cas",
     "deleteGenericError": "Échec de la suppression",
     "createDialog": {
-      "title": "Créer un nouveau cas clinique"
+      "title": "Créer un nouveau cas clinique",
+      "subtitle": "Ajouter un cas à la bibliothèque Best-of d'entraînement"
     },
     "content": {
       "section": "Compte rendu du cas",
@@ -347,7 +349,10 @@
       "text": "Contenu texte",
       "pdfDrop": "Cliquer pour téléverser un PDF (optionnel)",
       "pdfSelected": "PDF téléversé",
-      "pdfHint": "Taille maximale : 10 Mo"
+      "pdfHint": "Taille maximale : 10 Mo",
+      "pdfTab": "Fichier PDF",
+      "pdfDropTitle": "Cliquez pour importer ou glissez un PDF ici",
+      "pdfDropHint": "PDF uniquement · taille max 10 Mo"
     },
     "pdfUploaded": "PDF téléversé",
     "updated": "Cas modifié",
@@ -628,7 +633,12 @@
       "ftpPath": "Chemin FTP attendu : {path}",
       "caseNumber": "Cas n°",
       "hint": "{count} cas avec DICOMs disponibles — cochez les cas pour télécharger"
-    }
+    },
+    "sectionCaseDetails": "Détails du cas",
+    "manage": "Gérer",
+    "selectedCount": "{count} sélectionné(s)",
+    "availableTags": "Tags disponibles",
+    "footerHint": "Fournissez un PDF ou du contenu texte pour continuer"
   },
   "conges": {
     "title": "Gestion des congés",
