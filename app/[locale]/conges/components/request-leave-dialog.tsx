@@ -346,17 +346,6 @@ export function RequestLeaveDialog({
               background-color: var(--color-danger-500);
               box-shadow: 0 0 0 1px white;
             }
-            .day-range-start.day-range-end {
-              border-radius: 0.375rem !important;
-            }
-            .day-range-start:not(.day-range-end) {
-              border-top-right-radius: 0 !important;
-              border-bottom-right-radius: 0 !important;
-            }
-            .day-range-end:not(.day-range-start) {
-              border-top-left-radius: 0 !important;
-              border-bottom-left-radius: 0 !important;
-            }
           `}</style>
 
               <div className='mt-4 flex flex-wrap items-center gap-4 text-xs text-text-secondary'>

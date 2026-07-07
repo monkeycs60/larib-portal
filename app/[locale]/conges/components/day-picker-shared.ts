@@ -30,11 +30,11 @@ export const dayPickerClassNames = {
   selected:
     'bg-coral-600 text-white hover:bg-coral-700 hover:text-white focus:bg-coral-600 focus:text-white rounded-md',
   range_start:
-    'day-range-start bg-coral-600 text-white hover:bg-coral-700 rounded-l-md',
+    'day-range-start !bg-coral-500 !text-white hover:!bg-coral-600 rounded-md',
   range_end:
-    'day-range-end bg-coral-600 text-white hover:bg-coral-700 rounded-r-md',
+    'day-range-end !bg-coral-500 !text-white hover:!bg-coral-600 rounded-md',
   range_middle:
-    'bg-coral-50 text-coral-700 rounded-none',
+    '!bg-coral-100 !text-coral-700 !rounded-none',
   today: 'ring-1 ring-coral-500 rounded-md font-semibold',
   outside: 'text-text-secondary/40 aria-selected:bg-coral-50',
   disabled: 'text-text-secondary/30 cursor-not-allowed',
