@@ -34,6 +34,7 @@ model User {
   profilePhoto    String?
   profilePhotoKey String?
   congesTotalDays Int           @default(0)
+  publicationsEmailOptOut Boolean @default(false)
   applications    Application[]
   adminApplications Application[] @default([])
   createdAt       DateTime      @default(now())
@@ -52,6 +53,12 @@ model User {
   CaseAttempt      CaseAttempt[]
   UserTag          UserTag[]
 
+  //related to publications
+  authoredBy      Author[]
+  studiesLed      Study[]   @relation("StudyLead")
+  studiesCreated  Study[]   @relation("StudyCreatedBy")
+  articlesCreated Article[] @relation("ArticleCreatedBy")
+
   @@map("User")
 }
 
@@ -69,6 +76,35 @@ enum Application {
   BESTOF_LARIB
   CONGES
   CARDIOLARIB
+}
+
+// ---- Publications domain ----
+
+enum ArticleStatus {
+  IN_PREPARATION
+  UNDER_REVIEW
+  TO_RESUBMIT
+  ACCEPTED
+  PUBLISHED
+  ABANDONED
+}
+
+enum ArticleType {
+  ORIGINAL
+  REVIEW
+  CASE_REPORT
+  EDITORIAL
+  LETTER
+  META_ANALYSIS
+  OTHER
+}
+
+enum SubmissionStatus {
+  UNDER_REVIEW
+  MINOR_REVISIONS
+  MAJOR_REVISIONS
+  ACCEPTED
+  REJECTED
 }
 
 // ---- Bestof Larib domain ----
@@ -332,4 +368,164 @@ model UserTagOnCase {
 
   @@id([caseId, userTagId])
   @@map("UserTagOnCase")
+}
+
+// ---- Publications domain models ----
+
+model Study {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  leadUserId  String?
+  leadUser    User?     @relation("StudyLead", fields: [leadUserId], references: [id], onDelete: SetNull)
+  startDate   DateTime?
+  isClosed    Boolean   @default(false)
+  createdById String
+  createdBy   User      @relation("StudyCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  articles Article[]
+
+  @@map("Study")
+}
+
+model Journal {
+  id           String   @id @default(cuid())
+  name         String   @unique
+  issn         String?
+  publisher    String?
+  impactFactor Float?
+  category     String?
+  url          String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  submissions       Submission[]
+  targets           JournalTarget[]
+  publishedArticles Article[]       @relation("PublishedJournal")
+
+  @@map("Journal")
+}
+
+model Affiliation {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  institution String?
+  department  String?
+  city        String?
+  country     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  authorshipAffiliations AuthorshipAffiliation[]
+  defaultOfAuthors       Author[]                @relation("AuthorDefaultAffiliation")
+
+  @@map("Affiliation")
+}
+
+model Author {
+  id                   String       @id @default(cuid())
+  firstName            String
+  lastName             String
+  degrees              String?
+  email                String?
+  orcid                String?
+  defaultAffiliationId String?
+  defaultAffiliation   Affiliation? @relation("AuthorDefaultAffiliation", fields: [defaultAffiliationId], references: [id], onDelete: SetNull)
+  userId               String?
+  user                 User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+
+  authorships Authorship[]
+
+  @@unique([firstName, lastName])
+  @@map("Author")
+}
+
+model Article {
+  id                 String        @id @default(cuid())
+  title              String
+  type               ArticleType   @default(ORIGINAL)
+  studyId            String?
+  study              Study?        @relation(fields: [studyId], references: [id], onDelete: SetNull)
+  status             ArticleStatus @default(IN_PREPARATION)
+  abstract           String?
+  pubmedId           String?
+  doi                String?
+  publishedJournalId String?
+  publishedJournal   Journal?      @relation("PublishedJournal", fields: [publishedJournalId], references: [id], onDelete: SetNull)
+  publishedAt        DateTime?
+  pdfUrl             String?
+  pdfKey             String?
+  createdById        String
+  createdBy          User          @relation("ArticleCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  authorships    Authorship[]
+  submissions    Submission[]
+  journalTargets JournalTarget[]
+
+  @@map("Article")
+}
+
+model Authorship {
+  id              String   @id @default(cuid())
+  articleId       String
+  article         Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  authorId        String
+  author          Author   @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  order           Int
+  isCorresponding Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  affiliations AuthorshipAffiliation[]
+
+  @@unique([articleId, authorId])
+  @@unique([articleId, order])
+  @@map("Authorship")
+}
+
+model AuthorshipAffiliation {
+  authorshipId  String
+  authorship    Authorship  @relation(fields: [authorshipId], references: [id], onDelete: Cascade)
+  affiliationId String
+  affiliation   Affiliation @relation(fields: [affiliationId], references: [id], onDelete: Restrict)
+  order         Int
+
+  @@id([authorshipId, affiliationId])
+  @@map("AuthorshipAffiliation")
+}
+
+model Submission {
+  id                String           @id @default(cuid())
+  articleId         String
+  article           Article          @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  journalId         String
+  journal           Journal          @relation(fields: [journalId], references: [id], onDelete: Restrict)
+  submittedAt       DateTime
+  status            SubmissionStatus @default(UNDER_REVIEW)
+  decidedAt         DateTime?
+  invitedToResubmit Boolean          @default(false)
+  notes             String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  @@map("Submission")
+}
+
+model JournalTarget {
+  id        String   @id @default(cuid())
+  articleId String
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  journalId String
+  journal   Journal  @relation(fields: [journalId], references: [id], onDelete: Restrict)
+  rank      Int
+  createdAt DateTime @default(now())
+
+  @@unique([articleId, journalId])
+  @@map("JournalTarget")
 }
