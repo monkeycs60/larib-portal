@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, it, expect } from 'vitest'
-import { parseEfetchXml, parseEsummary } from './pubmed-parse'
+import { parseEfetchXml, parseEsummary, decodeEntities } from './pubmed-parse'
 
 const xml = readFileSync(resolve(process.cwd(), 'tests/e2e/fixtures/pubmed/efetch-sample.xml'), 'utf8')
 
@@ -29,6 +29,22 @@ describe('parseEfetchXml', () => {
       orcid: '0000-0002-1234-5678',
     })
     expect(record.authors[1].orcid).toBeNull()
+  })
+})
+
+describe('decodeEntities', () => {
+  it('decodes hex and decimal numeric character references', () => {
+    expect(decodeEntities('J&#xe9;r&#xf4;me')).toBe('Jérôme')
+    expect(decodeEntities('Val&#233;rie')).toBe('Valérie')
+    expect(decodeEntities('Sant&#xe9; &amp; Co')).toBe('Santé & Co')
+  })
+})
+
+describe('parseEfetchXml entity decoding', () => {
+  it('decodes accents in author names', () => {
+    const xml = `<?xml version="1.0"?><PubmedArticleSet><PubmedArticle><MedlineCitation><PMID>1</PMID><Article><Journal><Title>J</Title></Journal><ArticleTitle>T</ArticleTitle><AuthorList><Author><LastName>Garot</LastName><ForeName>J&#xe9;r&#xf4;me</ForeName><Initials>J</Initials></Author></AuthorList></Article></MedlineCitation></PubmedArticle></PubmedArticleSet>`
+    const record = parseEfetchXml(xml)[0]
+    expect(record.authors[0].foreName).toBe('Jérôme')
   })
 })
 

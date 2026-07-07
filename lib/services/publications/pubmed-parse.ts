@@ -8,7 +8,18 @@ function toArray<T>(value: T | T[] | undefined | null): T[] {
   return Array.isArray(value) ? value : [value]
 }
 
-function textOf(node: unknown): string | null {
+export function decodeEntities(value: string): string {
+  return value
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex: string) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec: string) => String.fromCodePoint(parseInt(dec, 10)))
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, '&')
+}
+
+function rawTextOf(node: unknown): string | null {
   if (node === undefined || node === null) return null
   if (typeof node === 'string') return node
   if (typeof node === 'number') return String(node)
@@ -17,6 +28,11 @@ function textOf(node: unknown): string | null {
     return text === undefined || text === null ? null : String(text)
   }
   return null
+}
+
+function textOf(node: unknown): string | null {
+  const raw = rawTextOf(node)
+  return raw === null ? null : decodeEntities(raw)
 }
 
 const MONTHS: Record<string, string> = {

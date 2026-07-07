@@ -39,7 +39,7 @@ const EditSchema = z.object({
 type EditValues = z.infer<typeof EditSchema>
 
 function authorLabel(author: AuthorListItem): string {
-  return `${author.lastName} ${author.firstName}`.trim()
+  return `${author.firstName} ${author.lastName.toUpperCase()}`.trim()
 }
 
 export function AuthorsManager({ authors, users }: { authors: AuthorListItem[]; users: LinkableUser[] }) {

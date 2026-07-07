@@ -15,11 +15,11 @@ test('admin browses, edits and merges authors', async ({ page }) => {
   await page.goto('/en/publications/admin/authors', { timeout: 60000 })
   await expect(page.getByRole('heading', { name: /authors bank/i })).toBeVisible()
 
-  // Two seeded authors are present
-  await expect(page.getByRole('row', { name: /Coauthor Jane/i })).toBeVisible()
+  // Two seeded authors are present (displayed as "FirstName LASTNAME")
+  await expect(page.getByRole('row', { name: /Jane COAUTHOR/i })).toBeVisible()
 
   // Edit the first-author row
-  await page.getByRole('row', { name: /User Publications/i }).getByRole('button', { name: /^edit$/i }).click()
+  await page.getByRole('row', { name: /Publications USER/i }).getByRole('button', { name: /^edit$/i }).click()
   await expect(page.getByRole('dialog')).toBeVisible()
   await page.getByRole('button', { name: /^save$/i }).click()
   await expect(page.getByText(/author updated/i)).toBeVisible()
