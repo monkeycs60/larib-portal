@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<PubmedArticleSet>
+  <PubmedArticle>
+    <MedlineCitation>
+      <PMID>39000001</PMID>
+      <Article>
+        <Journal>
+          <ISSN IssnType="Print">0195-668X</ISSN>
+          <Title>European Heart Journal</Title>
+          <ISOAbbreviation>Eur Heart J</ISOAbbreviation>
+          <JournalIssue><PubDate><Year>2023</Year><Month>Mar</Month><Day>07</Day></PubDate></JournalIssue>
+        </Journal>
+        <ArticleTitle>Multimodal imaging of the mitral valve.</ArticleTitle>
+        <Abstract><AbstractText>Background text.</AbstractText><AbstractText Label="METHODS">Methods text.</AbstractText></Abstract>
+        <AuthorList>
+          <Author>
+            <LastName>Pezel</LastName><ForeName>Theo</ForeName><Initials>T</Initials>
+            <AffiliationInfo><Affiliation>Lariboisiere Hospital, APHP, Paris, France.</Affiliation></AffiliationInfo>
+            <Identifier Source="ORCID">0000-0002-1234-5678</Identifier>
+          </Author>
+          <Author>
+            <LastName>Garot</LastName><ForeName>Jerome</ForeName><Initials>J</Initials>
+            <AffiliationInfo><Affiliation>ICPS, Massy, France.</Affiliation></AffiliationInfo>
+          </Author>
+        </AuthorList>
+        <ELocationID EIdType="doi" ValidYN="Y">10.1093/eurheartj/ehad100</ELocationID>
+      </Article>
+    </MedlineCitation>
+  </PubmedArticle>
+</PubmedArticleSet>
