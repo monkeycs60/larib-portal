@@ -24,7 +24,8 @@ export async function upsertAffiliationWithCentre(
   if (!name) return null
   const existing = await tx.affiliation.findFirst({ where: { name }, select: { id: true } })
   if (existing) return existing.id
-  const centreId = await upsertCentre(tx, guessCentre(name), report)
+  const centreName = guessCentre(name)
+  const centreId = centreName ? await upsertCentre(tx, centreName, report) : null
   const created = await tx.affiliation.create({ data: { name, raw: name, centreId }, select: { id: true } })
   report.affiliationsCreated += 1
   return created.id

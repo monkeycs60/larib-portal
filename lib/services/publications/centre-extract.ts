@@ -1,12 +1,23 @@
 type CentreRule = { match: RegExp; centre: string }
 
-// Curated keyword map for the team's known centres. Extend as curation reveals more.
+// Curated map for known hospital sites -> their canonical centre. Extend as curation reveals more.
 const CENTRE_RULES: CentreRule[] = [
   { match: /lariboisi[eè]re/i, centre: 'Lariboisière – AP-HP' },
   { match: /institut cardiovasculaire paris sud|\bICPS\b|jacques cartier|ramsay/i, centre: 'Institut Cardiovasculaire Paris Sud' },
   { match: /bichat/i, centre: 'Bichat – AP-HP' },
   { match: /piti[eé][- ]salp[eê]tri[eè]re/i, centre: 'Pitié-Salpêtrière – AP-HP' },
   { match: /pompidou|\bHEGP\b/i, centre: 'HEGP – AP-HP' },
+  { match: /\bmondor\b/i, centre: 'Henri Mondor – AP-HP' },
+  { match: /saint[- ]antoine/i, centre: 'Saint-Antoine – AP-HP' },
+  { match: /rangueil/i, centre: 'CHU de Toulouse' },
+  { match: /nouvel h[oô]pital civil|\bNHC\b/i, centre: 'CHU de Strasbourg' },
+  { match: /haut[- ]l[eé]v[eê]que/i, centre: 'CHU de Bordeaux' },
+  { match: /f[eé]lix[- ]guyon/i, centre: 'CHU de La Réunion' },
+  { match: /duffaut/i, centre: "CH d'Avignon" },
+  { match: /cochin/i, centre: 'Cochin – AP-HP' },
+  { match: /clinique[^,]{0,40}(?:ambroise|a\.?)[- ]?par[eé]/i, centre: 'Clinique Ambroise Paré' },
+  { match: /\bindependent\b/i, centre: 'Independent' },
+  { match: /montpied/i, centre: 'CHU de Clermont-Ferrand' },
 ]
 
 // A hospital always wins over a university / INSERM / research unit / department.
@@ -21,9 +32,35 @@ function matches(pattern: RegExp, segment: string): boolean {
   return pattern.test(segment) || pattern.test(stripDiacritics(segment))
 }
 
-export function guessCentre(rawAffiliation: string): string {
+// Umbrella groups / generic labels are never a centre on their own — they must name a specific hospital.
+const GENERIC_CENTRES = new Set([
+  'aphp', 'universityhospital', 'universityhospitals', 'hospital', 'hopital',
+  'university', 'chu', 'chru', 'chr', 'centrehospitalier', 'centrehospitalieruniversitaire',
+  'centrehospitalouniversitaire', 'centrehospitalouniversitairechu',
+  'medicalcenter', 'medicalcentre', 'rehabilitationcenter', 'rehabilitationcentre',
+  'childrenshospital', 'chestdiseases', 'cardiovascularsciencesdepartment',
+  'cardiologydivision', 'cardiology', 'cardiologue', 'cardiologist',
+])
+function isGenericCentre(segment: string): boolean {
+  return GENERIC_CENTRES.has(stripDiacritics(segment).toLowerCase().replace(/[^a-z]/g, ''))
+}
+
+// English/French equivalences -> canonical French form.
+function normalizeCentreName(name: string): string {
+  const uniOf = name.match(/^university hospitals? of (.+)$/i)
+  if (uniOf) return `CHU de ${uniOf[1].trim()}`
+  const uniSuffix = name.match(/^(.+?) university hospitals?$/i)
+  if (uniSuffix) return `CHU de ${uniSuffix[1].trim()}`
+  const chu = name.match(/^centre hospitalier universitaire (?:de |d'|du |des )?(.+)$/i)
+  if (chu) return `CHU de ${chu[1].trim()}`
+  const ch = name.match(/^centre hospitalier (.+)$/i)
+  if (ch) return `CH ${ch[1].trim()}`
+  return name
+}
+
+export function guessCentre(rawAffiliation: string): string | null {
   const raw = rawAffiliation.trim()
-  if (!raw) return 'Unknown'
+  if (!raw) return null
 
   // 1. Curated rules (highest priority).
   for (const rule of CENTRE_RULES) {
@@ -32,14 +69,14 @@ export function guessCentre(rawAffiliation: string): string {
 
   const segments = raw.split(',').map((segment) => segment.trim()).filter(Boolean)
 
-  // 2. Prefer the hospital segment.
-  const hospital = segments.find((segment) => matches(HOSPITAL_KW, segment))
-  if (hospital) return hospital
+  // 2. Prefer a specific hospital segment (never a bare umbrella / generic label).
+  const hospital = segments.find((segment) => matches(HOSPITAL_KW, segment) && !isGenericCentre(segment))
+  if (hospital) return normalizeCentreName(hospital)
 
-  // 3. Otherwise a university.
-  const university = segments.find((segment) => matches(UNIVERSITY_KW, segment))
-  if (university) return university
+  // 3. Otherwise a (specific) university.
+  const university = segments.find((segment) => matches(UNIVERSITY_KW, segment) && !isGenericCentre(segment))
+  if (university) return normalizeCentreName(university)
 
-  // 4. Fallback: the first segment (a department/lab — to be curated manually).
-  return segments[0] ?? 'Unknown'
+  // 4. No hospital/university identified -> no centre (a bare department is not a centre).
+  return null
 }
