@@ -14,7 +14,7 @@ export const dayPickerClassNames = {
   month: 'flex-1 max-w-sm',
   month_caption: 'flex justify-center pt-1 relative items-center mb-4',
   caption_label: 'text-sm font-medium',
-  nav: 'absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-2 pointer-events-none',
+  nav: 'absolute inset-x-0 top-0 z-20 flex justify-between px-1 pointer-events-none',
   button_previous:
     'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md border border-line hover:bg-gray-100 pointer-events-auto',
   button_next:
