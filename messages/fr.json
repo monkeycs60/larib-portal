@@ -867,6 +867,29 @@
     "subtitle": "Suivez vos articles, soumissions et co-signatures.",
     "empty": "Vous n'avez pas encore de publication.",
     "adminBanksTitle": "Gérer les banques",
-    "actionError": "Une erreur est survenue. Veuillez réessayer."
+    "actionError": "Une erreur est survenue. Veuillez réessayer.",
+    "import": {
+      "title": "Importer depuis PubMed",
+      "subtitle": "Récupérez le back-catalogue de l'équipe par auteur, curez, importez.",
+      "anchor": "Auteur ancre",
+      "anchorHint": "ex. Pezel T",
+      "search": "Rechercher",
+      "searching": "Recherche…",
+      "found": "{count} articles trouvés",
+      "none": "Aucun article trouvé pour cet auteur.",
+      "colSelect": "Importer",
+      "colTitle": "Titre",
+      "colJournal": "Journal",
+      "colYear": "Année",
+      "colAuthors": "Auteurs",
+      "selectAll": "Tout sélectionner",
+      "importSelected": "Importer la sélection ({count})",
+      "importing": "Import…",
+      "reportTitle": "Import terminé",
+      "reportBody": "{created} importés, {skipped} déjà présents, {authors} auteurs ajoutés, {journals} journaux ajoutés.",
+      "reportErrors": "{count} article(s) en échec.",
+      "searchError": "La recherche PubMed a échoué. Réessayez.",
+      "importError": "L'import a échoué. Réessayez."
+    }
   }
 }

@@ -869,6 +869,29 @@
     "subtitle": "Track your articles, submissions and co-authorship.",
     "empty": "You have no publications yet.",
     "adminBanksTitle": "Manage banks",
-    "actionError": "Something went wrong. Please try again."
+    "actionError": "Something went wrong. Please try again.",
+    "import": {
+      "title": "Import from PubMed",
+      "subtitle": "Fetch the team's back-catalogue by author, curate, and import.",
+      "anchor": "Anchor author",
+      "anchorHint": "e.g. Pezel T",
+      "search": "Search",
+      "searching": "Searching…",
+      "found": "{count} papers found",
+      "none": "No papers found for this author.",
+      "colSelect": "Import",
+      "colTitle": "Title",
+      "colJournal": "Journal",
+      "colYear": "Year",
+      "colAuthors": "Authors",
+      "selectAll": "Select all",
+      "importSelected": "Import selected ({count})",
+      "importing": "Importing…",
+      "reportTitle": "Import complete",
+      "reportBody": "{created} imported, {skipped} already present, {authors} authors added, {journals} journals added.",
+      "reportErrors": "{count} paper(s) failed.",
+      "searchError": "PubMed search failed. Please retry.",
+      "importError": "Import failed. Please retry."
+    }
   }
 }

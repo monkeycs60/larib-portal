@@ -4,6 +4,7 @@ import { requireAuth } from '@/lib/auth-guard'
 import { applicationLink } from '@/lib/application-link'
 import { canAdminApp } from '@/lib/permissions'
 import { PageHeader } from '@/app/[locale]/components/page-header'
+import { BacklogImport } from '@/app/[locale]/publications/components/backlog-import'
 
 type PageParams = {
   params: Promise<{ locale: 'en' | 'fr' }>
@@ -21,8 +22,8 @@ export default async function PublicationsAdminPage({ params }: PageParams) {
 
   return (
     <div className="space-y-6 p-4 md:p-6">
-      <PageHeader title={t('adminBanksTitle')} />
-      <p className="text-text-secondary">{t('empty')}</p>
+      <PageHeader title={t('import.title')} subtitle={t('import.subtitle')} />
+      <BacklogImport />
     </div>
   )
 }
