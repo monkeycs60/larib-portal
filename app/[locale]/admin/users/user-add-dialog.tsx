@@ -22,9 +22,10 @@ import { useState } from 'react'
 import { useAction } from 'next-safe-action/hooks'
 import { createUserInviteAction, createPositionAction, updatePositionAction, deletePositionsAction } from './actions'
 import { toast } from 'sonner'
-import { Check, UserPlus, Send, ArrowRight, Plus } from 'lucide-react'
+import { Check, UserPlus, Send, Plus } from 'lucide-react'
 import DeletableSelectManager from '@/app/[locale]/bestof-larib/components/deletable-select-manager'
 import { FileUpload } from '@/components/ui/file-upload'
+import { renderWelcomeEmail } from '@/lib/email/welcome-template'
 
 const AVAILABLE_APPLICATIONS = ['BESTOF_LARIB', 'CONGES', 'PUBLICATIONS'] as const
 type AvailableApplication = (typeof AVAILABLE_APPLICATIONS)[number]
@@ -182,17 +183,15 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
   const previewEnd = watch('departureDate')
   const emailLang = watch('emailLanguage') || 'en'
 
-  // Preview translations based on selected email language
-  const previewSubject = emailLang === 'fr'
-    ? 'Bienvenue sur le portail Cardio Larib'
-    : 'Welcome to Cardio Larib portal'
-  const previewBody = emailLang === 'fr'
-    ? 'Ceci est un message automatique pour vous inviter à rejoindre la plateforme intranet de notre équipe, le portail Cardio Larib.'
-    : 'This is an automatic message to invite you to join our team intranet platform, the Cardio Larib Portal.'
-  const previewLink = emailLang === 'fr' ? 'Lien d\'accès' : 'Set up link'
-  const previewEndDate = emailLang === 'fr'
-    ? `Votre compte sera valide jusqu'au ${previewEnd}.`
-    : `Your account will be valid until ${previewEnd}.`
+  const previewEmailContent = renderWelcomeEmail({
+    to: previewEmail,
+    locale: emailLang,
+    firstName: watch('firstName') || undefined,
+    lastName: watch('lastName') || undefined,
+    position: watch('position') || null,
+    setupLink: 'https://larib-portal.app/welcome/set-up-your-account',
+    accessEndDate: previewEnd ? new Date(previewEnd) : null,
+  })
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -396,22 +395,19 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
                 <span className="text-xs font-semibold uppercase tracking-wide text-coral-600">{t('welcomeEmailPreview')}</span>
                 <span className="h-px flex-1 bg-line ml-2" />
               </div>
-              <div className="rounded-lg border border-line bg-bg-surface p-4 text-sm">
-                <div>
-                  <span className="text-text-muted">{t('emailTo')} </span>
-                  <span className="text-text-primary">{previewEmail}</span>
+              <div className="rounded-lg border border-line overflow-hidden">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-line bg-bg-app px-4 py-2.5 text-xs">
+                  <span className="text-text-muted">{t('emailTo')}</span>
+                  <span className="text-text-primary font-medium">{previewEmail}</span>
+                  <span className="text-line">·</span>
+                  <span className="text-text-muted">{t('emailSubjectLabel')}</span>
+                  <span className="text-text-primary font-medium truncate">{previewEmailContent.subject}</span>
                 </div>
-                <div>
-                  <span className="text-text-muted">{t('emailSubjectLabel')} </span>
-                  <span className="text-text-primary">{previewSubject}</span>
-                </div>
-                <div className="my-3 h-px bg-line" />
-                <p className="text-text-secondary">{previewBody}</p>
-                {previewEnd && <p className="mt-2 text-text-secondary">{previewEndDate}</p>}
-                <span className="mt-3 inline-flex items-center gap-1 rounded-lg bg-coral-50 px-3 py-1.5 text-sm font-medium text-coral-600">
-                  {previewLink}
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </span>
+                <iframe
+                  title={t('welcomeEmailPreview')}
+                  srcDoc={previewEmailContent.html}
+                  className="block w-full h-[520px] bg-white"
+                />
               </div>
             </section>
           </div>
