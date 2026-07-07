@@ -12,7 +12,7 @@ export const dayPickerClassNames = {
   root: 'w-full relative',
   months: 'flex flex-col sm:flex-row gap-8 w-full justify-center',
   month: 'flex-1 max-w-sm',
-  month_caption: 'flex justify-center pt-1 relative items-center mb-4',
+  month_caption: 'flex justify-center pt-1 relative items-center mb-5',
   caption_label: 'text-sm font-medium',
   nav: 'absolute inset-x-0 top-0 z-20 flex justify-between px-1 pointer-events-none',
   button_previous:

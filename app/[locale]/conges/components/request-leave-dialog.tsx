@@ -358,6 +358,7 @@ export function RequestLeaveDialog({
                 </div>
               </div>
 
+          <div className='mt-6'>
           <DayPicker
             mode='range'
             numberOfMonths={2}
@@ -393,6 +394,7 @@ export function RequestLeaveDialog({
                 ),
             }}
           />
+          </div>
 
           <style jsx global>{`
             .holiday-day {
