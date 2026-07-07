@@ -60,3 +60,6 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Scimago SJR dataset (user-provided, CC BY-NC — not committed)
+data/scimago.csv
