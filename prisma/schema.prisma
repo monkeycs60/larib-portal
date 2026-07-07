@@ -411,18 +411,36 @@ model Journal {
 
 model Affiliation {
   id          String   @id @default(cuid())
-  name        String   @unique
+  name        String
+  raw         String?
   institution String?
   department  String?
   city        String?
   country     String?
+  centreId    String?
+  centre      Centre?  @relation(fields: [centreId], references: [id], onDelete: SetNull)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   authorshipAffiliations AuthorshipAffiliation[]
   defaultOfAuthors       Author[]                @relation("AuthorDefaultAffiliation")
 
+  @@index([name])
   @@map("Affiliation")
+}
+
+model Centre {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  city      String?
+  country   String?
+  isOwn     Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  affiliations Affiliation[]
+
+  @@map("Centre")
 }
 
 model Author {
