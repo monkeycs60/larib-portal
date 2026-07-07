@@ -66,9 +66,13 @@ export async function importRecords(records: PubmedRecord[], createdById: string
         continue
       }
       const publishedJournalId = await upsertJournal(record, report)
-      const authorIds: string[] = []
+      const authorships: Array<{ authorId: string; order: number }> = []
+      const seenAuthorIds = new Set<string>()
       for (const author of record.authors) {
-        authorIds.push(await upsertAuthor(author, authorCache, report))
+        const authorId = await upsertAuthor(author, authorCache, report)
+        if (seenAuthorIds.has(authorId)) continue // same person listed twice / homonym in one paper
+        seenAuthorIds.add(authorId)
+        authorships.push({ authorId, order: authorships.length + 1 })
       }
       await prisma.article.create({
         data: {
@@ -82,7 +86,7 @@ export async function importRecords(records: PubmedRecord[], createdById: string
           publishedJournalId,
           createdById,
           authorships: {
-            create: authorIds.map((authorId, index) => ({ authorId, order: index + 1 })),
+            create: authorships,
           },
         },
         select: { id: true },
