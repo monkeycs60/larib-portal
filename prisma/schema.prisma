@@ -441,6 +441,7 @@ model Centre {
   updatedAt DateTime @updatedAt
 
   affiliations Affiliation[]
+  authors      Author[]      @relation("AuthorCentre")
 
   @@map("Centre")
 }
@@ -457,6 +458,8 @@ model Author {
   defaultAffiliation   Affiliation? @relation("AuthorDefaultAffiliation", fields: [defaultAffiliationId], references: [id], onDelete: SetNull)
   userId               String?
   user                 User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  centreId             String?
+  centre               Centre?      @relation("AuthorCentre", fields: [centreId], references: [id], onDelete: SetNull)
   createdAt            DateTime     @default(now())
   updatedAt            DateTime     @updatedAt
 
