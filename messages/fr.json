@@ -984,6 +984,42 @@
         "PUBLISHED": "Publié",
         "ABANDONED": "Abandonné"
       }
+    },
+    "journals": {
+      "title": "Journaux",
+      "subtitle": "Parcourez et curez les journaux ; cherchez sur Crossref pour en ajouter.",
+      "search": "Rechercher un journal…",
+      "crossref": "Chercher sur Crossref",
+      "crossrefPlaceholder": "Nom du journal…",
+      "add": "Ajouter",
+      "refreshSjr": "Rafraîchir le SJR",
+      "refreshDone": "{count} SJR mis à jour.",
+      "refreshNoData": "Aucun dataset Scimago (ajoutez data/scimago.csv).",
+      "colName": "Journal",
+      "colIssn": "ISSN",
+      "colPublisher": "Éditeur",
+      "colImpactFactor": "IF",
+      "colSjr": "SJR",
+      "colActions": "Actions",
+      "edit": "Éditer",
+      "editTitle": "Éditer le journal",
+      "name": "Nom",
+      "issn": "ISSN",
+      "publisher": "Éditeur",
+      "impactFactor": "Impact factor (manuel)",
+      "sjr": "SJR",
+      "url": "URL",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "deleteConfirm": "Supprimer ce journal ?",
+      "deleteConfirmDesc": "Seuls les journaux sans soumission peuvent être supprimés.",
+      "created": "Journal ajouté",
+      "updated": "Journal mis à jour",
+      "deleted": "Journal supprimé",
+      "errorExists": "Un journal avec ce nom existe déjà.",
+      "errorInUse": "Ce journal est référencé et ne peut pas être supprimé.",
+      "manageLink": "Gérer les journaux"
     }
   }
 }

@@ -14,6 +14,9 @@ import { updateAuthor, deleteAuthor, mergeAuthors, isPrismaKnownError } from '@/
 import { backfillAffiliations, PUBLICATIONS_CENTRES_TAG, PUBLICATIONS_AFFILIATIONS_TAG } from '@/lib/services/publications/affiliations'
 import { renameCentre, setCentreOwn, deleteCentre, mergeCentres } from '@/lib/services/publications/centres'
 import { updateArticleStatus, ARTICLE_STATUSES } from '@/lib/services/publications/articles'
+import { createJournal, updateJournal, deleteJournal, isPrismaKnownError as isJournalError } from '@/lib/services/publications/journals'
+import { searchCrossref } from '@/lib/services/publications/journals-catalog'
+import { refreshJournalSjr } from '@/lib/services/publications/sjr'
 
 export const searchBacklogAction = appAdminAction('PUBLICATIONS')
   .inputSchema(z.object({ anchor: z.string().min(1), retmax: z.number().int().min(1).max(500).optional() }))
@@ -122,4 +125,60 @@ export const updateArticleStatusAction = appAdminAction('PUBLICATIONS')
     const updated = await updateArticleStatus(parsedInput.id, parsedInput.status)
     revalidateTag(PUBLICATIONS_ARTICLES_TAG)
     return updated
+  })
+
+const JournalInput = z.object({
+  name: z.string().min(1),
+  issn: z.string().optional().nullable(),
+  publisher: z.string().optional().nullable(),
+  impactFactor: z.number().min(0).max(1000).optional().nullable(),
+  sjr: z.number().min(0).max(1000).optional().nullable(),
+  url: z.string().optional().nullable(),
+})
+
+export const searchCrossrefAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({ query: z.string().min(1) }))
+  .action(async ({ parsedInput }) => searchCrossref(parsedInput.query))
+
+export const addJournalAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(JournalInput)
+  .action(async ({ parsedInput }) => {
+    try {
+      const created = await createJournal(parsedInput)
+      revalidateTag(PUBLICATIONS_JOURNALS_TAG)
+      return created
+    } catch (error) {
+      if (isJournalError(error, 'P2002')) throw new Error('JOURNAL_EXISTS')
+      throw error
+    }
+  })
+
+export const updateJournalAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(JournalInput.extend({ id: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    const { id, ...rest } = parsedInput
+    const updated = await updateJournal(id, rest)
+    revalidateTag(PUBLICATIONS_JOURNALS_TAG)
+    return updated
+  })
+
+export const deleteJournalAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({ id: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    try {
+      const deleted = await deleteJournal(parsedInput.id)
+      revalidateTag(PUBLICATIONS_JOURNALS_TAG)
+      return deleted
+    } catch (error) {
+      if (isJournalError(error, 'P2003')) throw new Error('JOURNAL_IN_USE')
+      throw error
+    }
+  })
+
+export const refreshSjrAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({}))
+  .action(async () => {
+    const result = await refreshJournalSjr()
+    revalidateTag(PUBLICATIONS_JOURNALS_TAG)
+    return result
   })

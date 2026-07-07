@@ -986,6 +986,42 @@
         "PUBLISHED": "Published",
         "ABANDONED": "Abandoned"
       }
+    },
+    "journals": {
+      "title": "Journals",
+      "subtitle": "Browse and curate journals; search Crossref to add new ones.",
+      "search": "Search journals…",
+      "crossref": "Search Crossref",
+      "crossrefPlaceholder": "Journal name…",
+      "add": "Add",
+      "refreshSjr": "Refresh SJR",
+      "refreshDone": "{count} SJR values updated.",
+      "refreshNoData": "No Scimago dataset found (add data/scimago.csv).",
+      "colName": "Journal",
+      "colIssn": "ISSN",
+      "colPublisher": "Publisher",
+      "colImpactFactor": "IF",
+      "colSjr": "SJR",
+      "colActions": "Actions",
+      "edit": "Edit",
+      "editTitle": "Edit journal",
+      "name": "Name",
+      "issn": "ISSN",
+      "publisher": "Publisher",
+      "impactFactor": "Impact factor (manual)",
+      "sjr": "SJR",
+      "url": "URL",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this journal?",
+      "deleteConfirmDesc": "Only journals with no submissions can be deleted.",
+      "created": "Journal added",
+      "updated": "Journal updated",
+      "deleted": "Journal deleted",
+      "errorExists": "A journal with this name already exists.",
+      "errorInUse": "This journal is referenced and cannot be deleted.",
+      "manageLink": "Manage journals"
     }
   }
 }
