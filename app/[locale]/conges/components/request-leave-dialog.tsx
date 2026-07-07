@@ -251,6 +251,11 @@ export function RequestLeaveDialog({
 
   const hasConflict = conflictDays.length > 0
 
+  const excludedHolidayDays = useMemo(
+    () => holidayDates.filter((day) => selectedDayKeys.has(format(day, 'yyyy-MM-dd'))),
+    [holidayDates, selectedDayKeys]
+  )
+
   const conflictLabel = useMemo(
     () => conflictDays.map((day) => format(day, 'd MMM yyyy', { locale: dateLocale })).join(', '),
     [conflictDays, dateLocale]
@@ -378,11 +383,13 @@ export function RequestLeaveDialog({
               holiday: holidayDates,
               approvedLeave: approvedLeaveMarkerDays,
               conflict: conflictDays,
+              excludedHoliday: excludedHolidayDays,
             }}
             modifiersClassNames={{
               holiday: 'holiday-day',
               approvedLeave: 'approved-leave-day',
               conflict: 'conflict-day',
+              excludedHoliday: 'holiday-excluded-day',
             }}
             classNames={dayPickerClassNames}
             components={{
@@ -424,6 +431,10 @@ export function RequestLeaveDialog({
             .conflict-day {
               box-shadow: inset 0 0 0 2px var(--color-danger-500);
               border-radius: 0.375rem;
+            }
+            .holiday-excluded-day button {
+              text-decoration: line-through;
+              text-decoration-thickness: 2px;
             }
           `}</style>
 
