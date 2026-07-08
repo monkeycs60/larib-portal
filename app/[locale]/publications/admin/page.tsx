@@ -37,6 +37,9 @@ export default async function PublicationsAdminPage({ params }: PageParams) {
         <Link href="/publications/admin/journals" className="text-sm font-medium text-navy-600 underline-offset-4 hover:underline">
           {t('journals.manageLink')} →
         </Link>
+        <Link href="/publications/admin/studies" className="text-sm font-medium text-navy-600 underline-offset-4 hover:underline">
+          {t('studies.manageLink')} →
+        </Link>
       </div>
       <BacklogImport />
     </div>

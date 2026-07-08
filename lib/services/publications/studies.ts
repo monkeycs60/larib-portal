@@ -10,8 +10,14 @@ export type StudyListItem = Prisma.StudyGetPayload<{
     id: true
     title: true
     acronym: true
+    description: true
+    domain: true
+    funding: true
     status: true
     startDate: true
+    endDate: true
+    investigators: { select: { authorId: true; role: true } }
+    centres: { select: { id: true } }
     _count: { select: { articles: true; investigators: true; centres: true } }
   }
 }>
@@ -23,8 +29,14 @@ export async function listStudies(): Promise<StudyListItem[]> {
       id: true,
       title: true,
       acronym: true,
+      description: true,
+      domain: true,
+      funding: true,
       status: true,
       startDate: true,
+      endDate: true,
+      investigators: { select: { authorId: true, role: true } },
+      centres: { select: { id: true } },
       _count: { select: { articles: true, investigators: true, centres: true } },
     },
   })
