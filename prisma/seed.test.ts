@@ -257,7 +257,7 @@ async function main() {
 		data: { firstName: 'Jane', lastName: 'Coauthor', degrees: 'MD, PhD', defaultAffiliation: { connect: { id: publicationsAffiliation.id } } },
 	});
 	const publicationsStudy = await prisma.study.create({
-		data: { title: 'MULTIVALVE registry', description: 'Retrospective multi-valve cohort', isClosed: false, createdBy: { connect: { id: publicationsAdmin.id } } },
+		data: { title: 'MULTIVALVE registry', description: 'Retrospective multi-valve cohort', createdBy: { connect: { id: publicationsAdmin.id } } },
 	});
 	await prisma.article.create({
 		data: {

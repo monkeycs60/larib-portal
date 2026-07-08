@@ -55,7 +55,6 @@ model User {
 
   //related to publications
   authoredBy      Author[]
-  studiesLed      Study[]   @relation("StudyLead")
   studiesCreated  Study[]   @relation("StudyCreatedBy")
   articlesCreated Article[] @relation("ArticleCreatedBy")
 
@@ -373,22 +372,49 @@ model UserTagOnCase {
 
 // ---- Publications domain models ----
 
-model Study {
-  id          String    @id @default(cuid())
-  title       String
-  description String?
-  leadUserId  String?
-  leadUser    User?     @relation("StudyLead", fields: [leadUserId], references: [id], onDelete: SetNull)
-  startDate   DateTime?
-  isClosed    Boolean   @default(false)
-  createdById String
-  createdBy   User      @relation("StudyCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+enum StudyStatus {
+  PLANNED
+  ONGOING
+  COMPLETED
+  STOPPED
+}
 
-  articles Article[]
+enum StudyRole {
+  PI
+  CO_INVESTIGATOR
+}
+
+model Study {
+  id          String      @id @default(cuid())
+  title       String
+  acronym     String?
+  description String?
+  domain      String?
+  funding     String?
+  status      StudyStatus @default(PLANNED)
+  startDate   DateTime?
+  endDate     DateTime?
+  createdById String
+  createdBy   User        @relation("StudyCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  articles      Article[]
+  investigators StudyInvestigator[]
+  centres       Centre[]    @relation("StudyCentres")
 
   @@map("Study")
+}
+
+model StudyInvestigator {
+  studyId  String
+  study    Study     @relation(fields: [studyId], references: [id], onDelete: Cascade)
+  authorId String
+  author   Author    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  role     StudyRole @default(CO_INVESTIGATOR)
+
+  @@id([studyId, authorId])
+  @@map("StudyInvestigator")
 }
 
 model Journal {
@@ -442,6 +468,7 @@ model Centre {
 
   affiliations Affiliation[]
   authors      Author[]      @relation("AuthorCentre")
+  studies      Study[]       @relation("StudyCentres")
 
   @@map("Centre")
 }
@@ -464,6 +491,7 @@ model Author {
   updatedAt            DateTime     @updatedAt
 
   authorships Authorship[]
+  studyRoles  StudyInvestigator[]
 
   @@map("Author")
 }
