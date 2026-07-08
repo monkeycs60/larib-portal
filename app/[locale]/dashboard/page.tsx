@@ -99,7 +99,7 @@ export default async function DashboardPage({
   }
 
   return (
-    <div className="min-h-screen bg-bg-app selection:bg-navy-600/10">
+    <div className="min-h-screen app-gradient selection:bg-navy-600/10">
       {/* Hero Section - Compact & Clean */}
       <div className="relative pt-16 pb-10 px-8">
         <div className="relative mx-auto max-w-7xl">

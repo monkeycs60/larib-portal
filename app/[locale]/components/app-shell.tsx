@@ -22,7 +22,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen">
       <AppSidebar user={user} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <main className="flex-1 bg-bg-app">{children}</main>
+        <main className="app-gradient flex-1">{children}</main>
       </div>
     </div>
   )

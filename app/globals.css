@@ -124,6 +124,13 @@
   --text-muted: #9aa5b3;
   --line: #dde2e9;
 
+  /* Ambient app background: soft coral/pink washes blended over the base ground */
+  --app-gradient-image:
+    radial-gradient(58% 52% at 10% 4%, rgba(214, 31, 85, 0.10), transparent 60%),
+    radial-gradient(52% 48% at 92% 12%, rgba(236, 59, 104, 0.08), transparent 62%),
+    radial-gradient(60% 60% at 84% 96%, rgba(214, 31, 85, 0.07), transparent 60%),
+    radial-gradient(48% 54% at 2% 94%, rgba(255, 182, 198, 0.12), transparent 60%);
+
   /* Research Hospital Palette - Navy/Indigo with Amber accents */
   --background: oklch(0.99 0.002 250); /* White with slight blue hint */
   --foreground: oklch(0.18 0.03 250); /* Deep navy slate */
@@ -181,6 +188,13 @@
   --text-muted: #7197c2;
   --line: #173d6e;
 
+  /* Ambient app background (dark): warmer coral glow over deep navy */
+  --app-gradient-image:
+    radial-gradient(58% 52% at 10% 4%, rgba(236, 59, 104, 0.16), transparent 60%),
+    radial-gradient(52% 48% at 92% 12%, rgba(236, 59, 104, 0.11), transparent 62%),
+    radial-gradient(60% 60% at 84% 96%, rgba(214, 31, 85, 0.13), transparent 60%),
+    radial-gradient(48% 54% at 2% 94%, rgba(255, 107, 144, 0.09), transparent 60%);
+
   /* Dark mode - Navy/Indigo theme */
   --background: oklch(0.14 0.02 250);
   --foreground: oklch(0.98 0.005 250);
@@ -232,6 +246,9 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-image: var(--app-gradient-image);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
   }
   button,
   a,
@@ -263,6 +280,14 @@
     color: oklch(0.55 0.01 250);
     opacity: 1;
   }
+}
+
+/* App content ground: base grey + soft ambient coral gradients (replaces flat bg-bg-app) */
+.app-gradient {
+  background-color: var(--bg-app);
+  background-image: var(--app-gradient-image);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
 }
 
 /* TipTap / ProseMirror baseline styles to counter Tailwind Preflight resets */

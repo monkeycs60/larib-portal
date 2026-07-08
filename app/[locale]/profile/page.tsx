@@ -58,7 +58,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ locale
   }
 
   return (
-    <div className="min-h-full bg-bg-app -mx-8 -my-6 px-8 py-6">
+    <div className="min-h-full app-gradient -mx-8 -my-6 px-8 py-6">
       <div className="max-w-3xl mx-auto space-y-4">
         <PageHeader title={t('title')} subtitle={t('welcome')} />
         <ProfileEditor

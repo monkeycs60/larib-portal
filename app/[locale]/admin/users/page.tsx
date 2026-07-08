@@ -24,7 +24,7 @@ export default async function AdminUsersPage({
   const positions = await listPositions()
 
   return (
-    <div className="min-h-full bg-[radial-gradient(60rem_40rem_at_top_right,var(--color-coral-50),transparent_70%)] bg-bg-app -mx-8 -my-6 px-8 py-6">
+    <div className="min-h-full app-gradient -mx-8 -my-6 px-8 py-6">
       <div className="space-y-4 max-w-7xl mx-auto">
         <PageHeader title={t('usersTitle')} subtitle={t('usersSubtitle')} />
         <UserTable users={users as unknown as UserRow[]} positions={positions} locale={locale} />
