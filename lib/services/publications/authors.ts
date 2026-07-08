@@ -77,6 +77,30 @@ export async function updateAuthor(data: UpdateAuthorInput) {
   })
 }
 
+export type CreateAuthorInput = { firstName: string; lastName: string; degrees?: string | null; orcid?: string | null; centreId?: string | null }
+
+export async function createAuthor(data: CreateAuthorInput) {
+  return prisma.author.create({
+    data: {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      degrees: data.degrees ?? null,
+      orcid: data.orcid ?? null,
+      centreId: data.centreId ?? null,
+    },
+    select: { id: true, firstName: true, lastName: true },
+  })
+}
+
+export type AuthorOption = { id: string; firstName: string; lastName: string; centreId: string | null }
+
+export async function listAuthorOptions(): Promise<AuthorOption[]> {
+  return prisma.author.findMany({
+    orderBy: [{ lastName: 'asc' }],
+    select: { id: true, firstName: true, lastName: true, centreId: true },
+  })
+}
+
 export async function deleteAuthor(id: string) {
   return prisma.author.delete({ where: { id }, select: { id: true } })
 }
