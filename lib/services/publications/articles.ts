@@ -42,6 +42,9 @@ export type ArticleDetail = Prisma.ArticleGetPayload<{
     type: true
     status: true
     publishedAt: true
+    receivedAt: true
+    acceptedAt: true
+    reviewDelayDays: true
     doi: true
     pubmedId: true
     publishedJournal: { select: { name: true; issn: true } }
@@ -69,6 +72,9 @@ export async function getArticle(id: string): Promise<ArticleDetail | null> {
       type: true,
       status: true,
       publishedAt: true,
+      receivedAt: true,
+      acceptedAt: true,
+      reviewDelayDays: true,
       doi: true,
       pubmedId: true,
       publishedJournal: { select: { name: true, issn: true } },

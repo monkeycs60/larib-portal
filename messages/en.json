@@ -981,6 +981,10 @@
       "abstract": "Abstract",
       "openPubmed": "PubMed",
       "openDoi": "DOI",
+      "editorialTimeline": "Editorial timeline",
+      "received": "Submitted",
+      "accepted": "Accepted",
+      "reviewDelay": "{days} d to acceptance",
       "statusSaved": "Status updated",
       "actionError": "Could not update. Please try again.",
       "status": {

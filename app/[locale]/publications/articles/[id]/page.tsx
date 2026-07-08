@@ -18,6 +18,7 @@ export default async function ArticleDetailPage({ params }: PageParams) {
   const article = await getArticle(id)
   if (!article) notFound()
   const isAdmin = canAdminApp(session.user, 'PUBLICATIONS')
+  const formatDate = (date: Date) => new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(date)
 
   return (
     <div className="space-y-6 p-4 md:p-6">
@@ -44,6 +45,18 @@ export default async function ArticleDetailPage({ params }: PageParams) {
           </a>
         )}
       </div>
+
+      {(article.receivedAt || article.acceptedAt) && (
+        <section className="space-y-2">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-coral-600">{t('articles.editorialTimeline')}</h2>
+          <p className="text-sm text-text-secondary">
+            {article.receivedAt ? `${t('articles.received')} ${formatDate(article.receivedAt)}` : null}
+            {article.receivedAt && article.acceptedAt ? ' → ' : null}
+            {article.acceptedAt ? `${t('articles.accepted')} ${formatDate(article.acceptedAt)}` : null}
+            {article.reviewDelayDays != null ? <span className="font-medium text-text"> · {t('articles.reviewDelay', { days: article.reviewDelayDays })}</span> : null}
+          </p>
+        </section>
+      )}
 
       <section className="space-y-2">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-coral-600">{t('articles.authors')}</h2>
