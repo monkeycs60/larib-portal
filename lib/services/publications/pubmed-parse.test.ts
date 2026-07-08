@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, it, expect } from 'vitest'
-import { parseEfetchXml, parseEsummary, decodeEntities } from './pubmed-parse'
+import { parseEfetchXml, parseEsummary, decodeEntities, reviewDelayDays } from './pubmed-parse'
 
 const xml = readFileSync(resolve(process.cwd(), 'tests/e2e/fixtures/pubmed/efetch-sample.xml'), 'utf8')
 
@@ -29,6 +29,22 @@ describe('parseEfetchXml', () => {
       orcid: '0000-0002-1234-5678',
     })
     expect(record.authors[1].orcid).toBeNull()
+  })
+
+  it('parses received and accepted dates from the History block', () => {
+    const record = parseEfetchXml(xml)[0]
+    expect(record.receivedAt).toBe('2022-12-15')
+    expect(record.acceptedAt).toBe('2023-02-10')
+  })
+})
+
+describe('reviewDelayDays', () => {
+  it('computes the day delta between submission and acceptance', () => {
+    expect(reviewDelayDays('2022-12-15', '2023-02-10')).toBe(57)
+  })
+  it('is null when either date is missing', () => {
+    expect(reviewDelayDays(null, '2023-02-10')).toBeNull()
+    expect(reviewDelayDays('2022-12-15', null)).toBeNull()
   })
 })
 

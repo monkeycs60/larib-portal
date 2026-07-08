@@ -509,6 +509,9 @@ model Article {
   publishedJournalId String?
   publishedJournal   Journal?      @relation("PublishedJournal", fields: [publishedJournalId], references: [id], onDelete: SetNull)
   publishedAt        DateTime?
+  receivedAt         DateTime?
+  acceptedAt         DateTime?
+  reviewDelayDays    Int?
   pdfUrl             String?
   pdfKey             String?
   createdById        String

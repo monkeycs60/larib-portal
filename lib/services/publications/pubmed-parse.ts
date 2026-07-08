@@ -51,6 +51,23 @@ function isoDateFromPubDate(pubDate: Record<string, unknown> | undefined): strin
   return `${year}-${month}-${day}`
 }
 
+function historyDate(articleNode: Record<string, unknown>, status: string): string | null {
+  const pubmedData = articleNode.PubmedData as Record<string, unknown> | undefined
+  const history = pubmedData?.History as Record<string, unknown> | undefined
+  const match = toArray(history?.PubMedPubDate).find(
+    (entry) => (entry as Record<string, unknown>)['@_PubStatus'] === status,
+  )
+  return match ? isoDateFromPubDate(match as Record<string, unknown>) : null
+}
+
+export function reviewDelayDays(receivedAt: string | null, acceptedAt: string | null): number | null {
+  if (!receivedAt || !acceptedAt) return null
+  const received = Date.parse(receivedAt)
+  const accepted = Date.parse(acceptedAt)
+  if (Number.isNaN(received) || Number.isNaN(accepted)) return null
+  return Math.round((accepted - received) / 86_400_000)
+}
+
 function abstractText(abstract: Record<string, unknown> | undefined): string | null {
   if (!abstract) return null
   const parts = toArray(abstract.AbstractText).map((part) => textOf(part)).filter((text): text is string => !!text)
@@ -85,7 +102,8 @@ export function parseEfetchXml(xml: string): PubmedRecord[] {
   const set = root.PubmedArticleSet as Record<string, unknown> | undefined
   if (!set) return []
   return toArray(set.PubmedArticle).map((articleNode) => {
-    const citation = (articleNode as Record<string, unknown>).MedlineCitation as Record<string, unknown>
+    const node = articleNode as Record<string, unknown>
+    const citation = node.MedlineCitation as Record<string, unknown>
     const article = citation.Article as Record<string, unknown>
     const journal = article.Journal as Record<string, unknown>
     const journalIssue = journal.JournalIssue as Record<string, unknown> | undefined
@@ -98,6 +116,8 @@ export function parseEfetchXml(xml: string): PubmedRecord[] {
       abstract: abstractText(article.Abstract as Record<string, unknown> | undefined),
       doi: doiOf(article),
       publishedAt: isoDateFromPubDate(journalIssue?.PubDate as Record<string, unknown> | undefined),
+      receivedAt: historyDate(node, 'received'),
+      acceptedAt: historyDate(node, 'accepted'),
       journal: {
         name: textOf(journal.Title) ?? '',
         isoAbbrev: textOf(journal.ISOAbbreviation),

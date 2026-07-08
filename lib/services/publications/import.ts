@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import type { PubmedRecord, ImportReport } from '@/types/publications'
 import { authorDedupeKey } from './import-dedupe'
 import { upsertAffiliationWithCentre } from './affiliations'
+import { reviewDelayDays } from './pubmed-parse'
 
 export const PUBLICATIONS_JOURNALS_TAG = 'publications:journals'
 export const PUBLICATIONS_AUTHORS_TAG = 'publications:authors'
@@ -90,6 +91,9 @@ export async function importRecords(records: PubmedRecord[], createdById: string
           pubmedId: record.pmid,
           doi: record.doi,
           publishedAt: record.publishedAt ? new Date(record.publishedAt) : null,
+          receivedAt: record.receivedAt ? new Date(record.receivedAt) : null,
+          acceptedAt: record.acceptedAt ? new Date(record.acceptedAt) : null,
+          reviewDelayDays: reviewDelayDays(record.receivedAt, record.acceptedAt),
           publishedJournalId,
           createdById,
           authorships: {

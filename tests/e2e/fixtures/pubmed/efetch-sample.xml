@@ -26,5 +26,12 @@
         <ELocationID EIdType="doi" ValidYN="Y">10.1093/eurheartj/ehad100</ELocationID>
       </Article>
     </MedlineCitation>
+    <PubmedData>
+      <History>
+        <PubMedPubDate PubStatus="received"><Year>2022</Year><Month>12</Month><Day>15</Day></PubMedPubDate>
+        <PubMedPubDate PubStatus="revised"><Year>2023</Year><Month>1</Month><Day>20</Day></PubMedPubDate>
+        <PubMedPubDate PubStatus="accepted"><Year>2023</Year><Month>2</Month><Day>10</Day></PubMedPubDate>
+      </History>
+    </PubmedData>
   </PubmedArticle>
 </PubmedArticleSet>
