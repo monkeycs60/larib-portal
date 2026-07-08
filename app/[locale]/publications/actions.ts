@@ -10,13 +10,14 @@ import {
   PUBLICATIONS_AUTHORS_TAG,
   PUBLICATIONS_ARTICLES_TAG,
 } from '@/lib/services/publications/import'
-import { updateAuthor, deleteAuthor, mergeAuthors, recomputeAuthorCentres, isPrismaKnownError } from '@/lib/services/publications/authors'
+import { updateAuthor, deleteAuthor, mergeAuthors, recomputeAuthorCentres, createAuthor, isPrismaKnownError } from '@/lib/services/publications/authors'
 import { backfillAffiliations, PUBLICATIONS_CENTRES_TAG, PUBLICATIONS_AFFILIATIONS_TAG } from '@/lib/services/publications/affiliations'
 import { renameCentre, setCentreOwn, deleteCentre, mergeCentres } from '@/lib/services/publications/centres'
 import { updateArticleStatus, ARTICLE_STATUSES } from '@/lib/services/publications/articles'
 import { createJournal, updateJournal, deleteJournal, isPrismaKnownError as isJournalError } from '@/lib/services/publications/journals'
 import { searchCrossref } from '@/lib/services/publications/journals-catalog'
 import { refreshJournalSjr } from '@/lib/services/publications/sjr'
+import { createStudy, updateStudy, deleteStudy, STUDY_STATUSES, PUBLICATIONS_STUDIES_TAG } from '@/lib/services/publications/studies'
 
 export const searchBacklogAction = appAdminAction('PUBLICATIONS')
   .inputSchema(z.object({ anchor: z.string().min(1), retmax: z.number().int().min(1).max(500).optional() }))
@@ -195,4 +196,57 @@ export const refreshSjrAction = appAdminAction('PUBLICATIONS')
     const result = await refreshJournalSjr()
     revalidateTag(PUBLICATIONS_JOURNALS_TAG)
     return result
+  })
+
+export const createAuthorAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({
+    firstName: z.string().min(1),
+    lastName: z.string().min(1),
+    degrees: z.string().optional().nullable(),
+    orcid: z.string().optional().nullable(),
+    centreId: z.string().optional().nullable(),
+  }))
+  .action(async ({ parsedInput }) => {
+    const created = await createAuthor(parsedInput)
+    revalidateTag(PUBLICATIONS_AUTHORS_TAG)
+    return created
+  })
+
+const StudyInputSchema = z.object({
+  title: z.string().min(1),
+  acronym: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+  domain: z.string().optional().nullable(),
+  funding: z.string().optional().nullable(),
+  status: z.enum(STUDY_STATUSES),
+  startDate: z.string().optional().nullable(),
+  endDate: z.string().optional().nullable(),
+  piIds: z.array(z.string()),
+  coInvestigatorIds: z.array(z.string()),
+  centreIds: z.array(z.string()),
+})
+
+export const createStudyAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(StudyInputSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const created = await createStudy(parsedInput, ctx.userId)
+    revalidateTag(PUBLICATIONS_STUDIES_TAG)
+    return created
+  })
+
+export const updateStudyAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(StudyInputSchema.extend({ id: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    const { id, ...rest } = parsedInput
+    const updated = await updateStudy(id, rest)
+    revalidateTag(PUBLICATIONS_STUDIES_TAG)
+    return updated
+  })
+
+export const deleteStudyAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({ id: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    const deleted = await deleteStudy(parsedInput.id)
+    revalidateTag(PUBLICATIONS_STUDIES_TAG)
+    return deleted
   })
