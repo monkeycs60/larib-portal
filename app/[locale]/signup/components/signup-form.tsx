@@ -14,7 +14,6 @@ import { AlertCircle, Mail, Eye, EyeOff } from 'lucide-react';
 import { signupAction } from '../actions';
 import Link from 'next/link';
 import { useRouter } from '@/app/i18n/navigation';
-import { applicationLink } from '@/lib/application-link';
 import { authClient } from '@/lib/auth-client';
 
 export function SignupForm() {
@@ -57,7 +56,7 @@ export function SignupForm() {
     onSuccess: ({ data }) => {
       if (data?.success) {
         refetchSession();
-        router.push(applicationLink(locale, '/dashboard'));
+        router.push('/dashboard');
         router.refresh();
       }
     },

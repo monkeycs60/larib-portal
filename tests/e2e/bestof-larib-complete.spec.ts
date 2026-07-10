@@ -546,18 +546,22 @@ test.describe('Internationalization Tests', () => {
 		await gotoBestofLarib(page);
 		await waitForTableToLoad(page);
 
-		// Vérifier texte en anglais
+		// Vérifier le contenu en anglais
 		await expect(
-			page.getByRole('heading', { name: /clinical cases/i })
+			page.getByRole('heading', { name: /training best-of/i })
 		).toBeVisible();
+		await expect(page.getByText('Browse and practice on clinical cases.')).toBeVisible();
 
 		// Naviguer vers la version française
 		await page.goto('/fr/bestof-larib');
 		await waitForTableToLoad(page);
 
-		// Vérifier texte en français
+		// Vérifier le contenu en français
 		await expect(
-			page.getByRole('heading', { name: /cas cliniques/i })
+			page.getByRole('heading', { name: /training best-of/i })
+		).toBeVisible();
+		await expect(
+			page.getByText('Consultez et entraînez-vous sur des cas cliniques.')
 		).toBeVisible();
 	});
 });

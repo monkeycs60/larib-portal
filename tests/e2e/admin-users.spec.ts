@@ -83,18 +83,20 @@ test.describe('Admin User Management - Onboarding Status Feature', () => {
 		await loginAsAdmin(page);
 		await gotoAdminUsers(page);
 
-		// Active user rows should have gradient avatar
+		// Active users should have a regular avatar
 		const adminRow = page.locator('tr', { hasText: ADMIN_USER.email });
 		const adminAvatar = adminRow.locator('.rounded-full').first();
 		await expect(adminAvatar).toBeVisible();
+		await expect(adminAvatar).not.toHaveClass(/border-dashed/);
 
-		// Placeholder user rows should have different styling (muted background)
+		// Placeholder users should have a distinct background
 		const placeholderRow = page.locator('tr', { hasText: 'placeholder@larib-portal.test' });
-		await expect(placeholderRow).toHaveClass(/bg-muted/);
+		await expect(placeholderRow).toHaveClass(/bg-gray-50\/50/);
 
-		// Placeholder avatar should have dashed border style
+		// Placeholder avatars should have a dashed border
 		const placeholderAvatar = placeholderRow.locator('.rounded-full').first();
 		await expect(placeholderAvatar).toBeVisible();
+		await expect(placeholderAvatar).toHaveClass(/border-dashed/);
 	});
 
 	test('should work correctly in French locale', async ({ page }) => {

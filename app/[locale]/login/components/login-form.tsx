@@ -56,8 +56,7 @@ export function LoginForm({ showSignupLink = true }: LoginFormProps) {
     onSuccess: ({ data }) => {
       if (data?.success) {
         refetchSession();
-        // Navigate within current locale, then refresh server components
-        router.push(applicationLink(locale, '/dashboard'));
+        router.push('/dashboard');
         router.refresh();
       } else if (data && 'error' in data) {
         // Handle authentication failure returned by the action
