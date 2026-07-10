@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { requireAuth } from '@/lib/auth-guard';
 import { redirect, notFound } from 'next/navigation';
 import { applicationLink } from '@/lib/application-link';
+import { canAdminApp } from '@/lib/permissions';
 import { Link } from '@/app/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -29,7 +30,7 @@ async function UserProfilePageContent({
   const t = await getTranslations({ locale, namespace: 'bestof.statistics.userProfile' });
   const session = await requireAuth();
 
-  if (!session || session.user.role !== 'ADMIN') {
+  if (!canAdminApp(session.user, 'BESTOF_LARIB')) {
     redirect(applicationLink(locale, '/bestof-larib'));
   }
 

@@ -227,7 +227,7 @@ export function AdminEditLeaveDialog({
           <div className='grid gap-3 md:grid-cols-2'>
             <div className='space-y-2'>
               <Label>{translations.startLabel}</Label>
-              <div className='rounded-md border bg-muted/30 p-2 text-sm'>
+              <div className='rounded-md border border-line bg-gray-50 p-2 text-sm'>
                 {selectedRange?.from
                   ? format(selectedRange.from, 'PPP', { locale: dateLocale })
                   : '—'}
@@ -235,7 +235,7 @@ export function AdminEditLeaveDialog({
             </div>
             <div className='space-y-2'>
               <Label>{translations.endLabel}</Label>
-              <div className='rounded-md border bg-muted/30 p-2 text-sm'>
+              <div className='rounded-md border border-line bg-gray-50 p-2 text-sm'>
                 {selectedRange?.to
                   ? format(selectedRange.to, 'PPP', { locale: dateLocale })
                   : '—'}
@@ -287,7 +287,7 @@ export function AdminEditLeaveDialog({
               width: 6px;
               height: 6px;
               border-radius: 50%;
-              background-color: rgb(220 38 38);
+              background-color: var(--color-danger-500);
               box-shadow: 0 0 0 1px white;
             }
             .day-range-start.day-range-end {
@@ -303,24 +303,21 @@ export function AdminEditLeaveDialog({
             }
           `}</style>
 
-          <div className='flex items-center gap-2 text-xs text-muted-foreground'>
-            <span
-              className='inline-block h-2 w-2 rounded-full'
-              style={{ backgroundColor: 'rgb(220 38 38)', boxShadow: '0 0 0 1px white' }}
-            />
+          <div className='flex items-center gap-2 text-xs text-text-secondary'>
+            <span className='inline-block h-2 w-2 rounded-full bg-danger-500 ring-1 ring-white' />
             {translations.holidayLegend}
           </div>
 
           {leaveCalculation && (
             <div className='space-y-3'>
-              <div className='rounded-lg border bg-card p-3 text-center inline-block'>
-                <div className='text-xs text-muted-foreground mb-1'>
+              <div className='rounded-lg border border-line bg-bg-surface p-3 text-center inline-block'>
+                <div className='text-xs text-text-secondary mb-1'>
                   {translations.requestedDays}
                 </div>
-                <div className='text-2xl font-semibold text-primary'>
+                <div className='text-2xl font-semibold text-text-primary'>
                   {leaveCalculation.requestedDays}
                 </div>
-                <div className='text-xs text-muted-foreground'>
+                <div className='text-xs text-text-secondary'>
                   {pluralize(
                     leaveCalculation.requestedDays,
                     translations.day,
@@ -331,8 +328,8 @@ export function AdminEditLeaveDialog({
 
               {(leaveCalculation.weekendsExcluded > 0 ||
                 leaveCalculation.holidaysExcluded.length > 0) && (
-                <div className='rounded-lg border bg-muted/30 p-3'>
-                  <div className='flex items-center gap-2 text-sm text-muted-foreground mb-2'>
+                <div className='rounded-lg border border-line bg-gray-50 p-3'>
+                  <div className='flex items-center gap-2 text-sm text-text-secondary mb-2'>
                     <Info className='h-4 w-4' />
                     {translations.excludedDays}
                   </div>
@@ -346,7 +343,7 @@ export function AdminEditLeaveDialog({
                       <Badge
                         key={holiday.date.toISOString()}
                         variant='outline'
-                        className='bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800'
+                        className='bg-coral-50 border-coral-200'
                       >
                         <CalendarIcon className='h-3 w-3 mr-1' />
                         {format(holiday.date, 'd MMM', { locale: dateLocale })} - {holiday.name}
@@ -373,7 +370,7 @@ export function AdminEditLeaveDialog({
             <Button type='button' variant='outline' onClick={handleClose}>
               {translations.cancel}
             </Button>
-            <Button type='submit' disabled={isUpdating}>
+            <Button type='submit' variant='primary' disabled={isUpdating}>
               {translations.submit}
             </Button>
           </DialogFooter>

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 // Set longer timeout for these tests due to server-side data fetching
 test.setTimeout(60000);
@@ -15,7 +15,7 @@ const REGULAR_USER = {
 };
 
 // Helper function to login
-async function loginAs(page, userType: 'admin' | 'user') {
+async function loginAs(page: Page, userType: 'admin' | 'user') {
 	const user = userType === 'admin' ? ADMIN_USER : REGULAR_USER;
 	await page.goto('/en/login', { timeout: 60000 });
 	await page.getByPlaceholder('Email').fill(user.email);
@@ -25,7 +25,7 @@ async function loginAs(page, userType: 'admin' | 'user') {
 }
 
 // Helper function to wait for table to fully load
-async function waitForTableToLoad(page) {
+async function waitForTableToLoad(page: Page) {
 	// Wait for table to appear
 	await page.waitForSelector('table', { timeout: 30000 });
 
@@ -42,7 +42,7 @@ async function waitForTableToLoad(page) {
 }
 
 // Helper function to navigate to bestof-larib with proper timeout
-async function gotoBestofLarib(page) {
+async function gotoBestofLarib(page: Page) {
 	await page.goto('/en/bestof-larib', { timeout: 60000 });
 }
 
@@ -327,8 +327,8 @@ test.describe('Sorting Tests', () => {
 			.allTextContents();
 		expect(statusesAsc.length).toBeGreaterThan(0);
 
-		const statusOrder = { 'Not Started': 0, 'In Progress': 1, Completed: 2 };
-		const statusOrderFr = { 'Non commencé': 0, 'En cours': 1, Terminé: 2 };
+		const statusOrder: Record<string, number> = { 'Not Started': 0, 'In Progress': 1, Completed: 2 };
+		const statusOrderFr: Record<string, number> = { 'Non commencé': 0, 'En cours': 1, Terminé: 2 };
 
 		const getOrder = (status: string): number => {
 			const trimmed = status.trim();
@@ -400,8 +400,8 @@ test.describe('Sorting Tests', () => {
 			.allTextContents();
 		expect(difficultiesAsc.length).toBeGreaterThan(0);
 
-		const difficultyOrder = { Beginner: 0, Intermediate: 1, Advanced: 2 };
-		const difficultyOrderFr = { Débutant: 0, Intermédiaire: 1, Avancé: 2 };
+		const difficultyOrder: Record<string, number> = { Beginner: 0, Intermediate: 1, Advanced: 2 };
+		const difficultyOrderFr: Record<string, number> = { Débutant: 0, Intermédiaire: 1, Avancé: 2 };
 
 		const getOrder = (difficulty: string): number => {
 			const trimmed = difficulty.trim();

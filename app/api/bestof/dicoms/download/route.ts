@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getTypedSession } from '@/lib/auth-helpers'
 import { prisma } from '@/lib/prisma'
 import { createSftpClient, getDicomPath } from '@/lib/services/sftp'
+import { canAdminApp } from '@/lib/permissions'
 import archiver from 'archiver'
 import { PassThrough } from 'stream'
 
@@ -18,7 +19,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'caseId_missing' }, { status: 400 })
   }
 
-  const isAdmin = session.user.role === 'ADMIN'
+  const isAdmin = canAdminApp(session.user, 'BESTOF_LARIB')
   const clinicalCase = await prisma.clinicalCase.findUnique({
     where: { id: caseId, ...(!isAdmin && { status: 'PUBLISHED' }) },
     select: { caseNumber: true, name: true, examType: { select: { name: true } } },

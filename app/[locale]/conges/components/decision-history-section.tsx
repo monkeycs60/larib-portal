@@ -83,11 +83,11 @@ type DecisionHistoryProps = {
   frenchHolidays: Record<string, string>
 }
 
-const statusBadgeVariant: Record<LeaveRequestStatus, 'secondary' | 'default' | 'destructive' | 'outline'> = {
-  PENDING: 'secondary',
-  APPROVED: 'default',
-  REJECTED: 'destructive',
-  CANCELLED: 'outline',
+const statusBadgeVariant: Record<LeaveRequestStatus, 'warning' | 'success' | 'danger' | 'neutral'> = {
+  PENDING: 'warning',
+  APPROVED: 'success',
+  REJECTED: 'danger',
+  CANCELLED: 'neutral',
 }
 
 type StatusFilter = 'ALL' | 'APPROVED' | 'REJECTED' | 'CANCELLED'
@@ -156,7 +156,7 @@ export function DecisionHistorySection({
         </CardHeader>
         <CardContent>
           {filteredEntries.length === 0 ? (
-            <p className='text-sm text-muted-foreground'>{translations.empty}</p>
+            <p className='text-sm text-text-secondary'>{translations.empty}</p>
           ) : (
             <div className='overflow-x-auto'>
               <Table>
@@ -190,11 +190,11 @@ export function DecisionHistorySection({
                           <div className='flex flex-col text-sm'>
                             <span>{new Date(entry.decisionAt).toLocaleDateString()}</span>
                             {entry.approverName && (
-                              <span className='text-xs text-muted-foreground'>{entry.approverName}</span>
+                              <span className='text-xs text-text-secondary'>{entry.approverName}</span>
                             )}
                           </div>
                         ) : (
-                          <span className='text-sm text-muted-foreground'>—</span>
+                          <span className='text-sm text-text-secondary'>—</span>
                         )}
                       </TableCell>
                       <TableCell>
@@ -216,7 +216,7 @@ export function DecisionHistorySection({
                                   title={adminActions.delete}
                                   disabled={isDeleting}
                                 >
-                                  <Trash2 className='h-4 w-4 text-destructive' />
+                                  <Trash2 className='h-4 w-4 text-danger-600' />
                                 </Button>
                               </AlertDialogTrigger>
                               <AlertDialogContent>
@@ -228,7 +228,7 @@ export function DecisionHistorySection({
                                   <AlertDialogCancel>{adminActions.deleteCancel}</AlertDialogCancel>
                                   <AlertDialogAction
                                     onClick={() => executeDelete({ requestId: entry.id })}
-                                    className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                                    className='bg-danger-600 text-white hover:bg-danger-700'
                                   >
                                     {adminActions.deleteConfirm}
                                   </AlertDialogAction>
@@ -237,7 +237,7 @@ export function DecisionHistorySection({
                             </AlertDialog>
                           </div>
                         ) : (
-                          <span className='text-sm text-muted-foreground'>—</span>
+                          <span className='text-sm text-text-secondary'>—</span>
                         )}
                       </TableCell>
                     </TableRow>

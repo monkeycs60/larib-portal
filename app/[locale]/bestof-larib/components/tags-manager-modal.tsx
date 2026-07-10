@@ -21,7 +21,7 @@ import {
   deleteAdminTagAction,
   deleteUserTagAction,
 } from '../actions'
-import { Loader2, Pencil, Plus, Settings, Trash2 } from 'lucide-react'
+import { Loader2, Pencil, Plus, Settings, Tag as TagIcon, Trash2 } from 'lucide-react'
 
 type Tag = {
 	id: string
@@ -44,6 +44,8 @@ const defaultForm: TagFormState = {
 	color: '#3b82f6',
 	description: '',
 }
+
+const TAG_COLOR_PRESETS = ['#3B82F6', '#EC4899', '#22C55E', '#F59E0B', '#8B5CF6', '#EF4444', '#14B8A6', '#1E293B']
 
 export default function TagsManagerModal({ isAdmin, trigger, onClose, disableRouterRefresh, defaultOpen = false }: { isAdmin: boolean; trigger?: ReactNode; onClose?: () => void; disableRouterRefresh?: boolean; defaultOpen?: boolean }) {
 	const t = useTranslations('bestof')
@@ -246,77 +248,118 @@ export default function TagsManagerModal({ isAdmin, trigger, onClose, disableRou
 		<>
 			<Dialog open={open} onOpenChange={(next) => void handleOpen(next)}>
 				{trigger !== null && <DialogTrigger asChild>{trigger ?? defaultTrigger}</DialogTrigger>}
-				<DialogContent className="w-[720px] max-w-[95vw] max-h-[85vh] overflow-y-auto">
-					<DialogHeader>
-						<DialogTitle>{modalTitle}</DialogTitle>
-					</DialogHeader>
-					<div className="space-y-4">
-						<div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-							{isLoading ? (
-								<div className="flex h-24 items-center justify-center text-sm text-muted-foreground">
-									<Loader2 className="mr-2 size-4 animate-spin" />
-									{t('loading')}
-								</div>
-							) : displayTags.length === 0 ? (
-								<div className="text-sm text-muted-foreground">{t('noTagsYet') || 'No tags yet.'}</div>
-							) : (
-								displayTags.map((tag) => (
-									<div key={tag.id} className="flex items-center justify-between gap-3 rounded-md border p-2">
-										<div className="flex items-center gap-2">
-											<span className="h-3 w-3 rounded-full" style={{ backgroundColor: tag.color }} />
-											<span className="text-sm font-medium">{tag.name}</span>
-											{typeof tag.caseCount === 'number' ? (
-												<span className="rounded bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">{tag.caseCount}</span>
-											) : null}
-										</div>
-										<div className="flex items-center gap-1">
-											<Button type="button" size="icon" variant="ghost" aria-label={t('edit')} onClick={() => startEdit(tag)}>
-												<Pencil className="size-4" />
-											</Button>
-											<Button type="button" size="icon" variant="ghost" aria-label={t('delete')} onClick={() => confirmDelete(tag)}>
-												<Trash2 className="size-4" />
-											</Button>
-										</div>
-									</div>
-								))
-							)}
+				<DialogContent className="sm:max-w-2xl p-0 gap-0 max-h-[90vh] overflow-hidden flex flex-col">
+					<div className="relative bg-bg-surface px-6 py-4">
+						<span className="absolute left-0 top-0 h-full w-1 rounded-l-lg bg-coral-500" />
+						<div className="flex items-start gap-3">
+							<div className="rounded-xl bg-coral-50 p-2.5 text-coral-600">
+								<TagIcon className="h-5 w-5" />
+							</div>
+							<DialogHeader className="gap-0.5">
+								<DialogTitle className="text-lg font-bold">{modalTitle}</DialogTitle>
+								<p className="text-sm text-text-secondary">{t('adminTagsSubtitle')}</p>
+							</DialogHeader>
 						</div>
-						<div className="space-y-4 border-t pt-4">
-							<div className="flex items-center justify-between">
-								<div className="text-sm font-medium">
-									{form.id ? t('editTagHeading') || 'Edit tag' : t('createNewTagLabel') || 'Create new tag'}
-								</div>
+					</div>
+
+					<div className="flex-1 overflow-y-auto bg-bg-app px-6 py-5 space-y-4">
+						<section className="rounded-xl border border-line bg-bg-surface p-5">
+							<div className="flex items-center gap-2 mb-4">
+								<span className="h-1.5 w-1.5 rounded-full bg-coral-500" />
+								<span className="text-xs font-semibold uppercase tracking-wide text-coral-600">{t('sectionExistingTags')}</span>
+								<span className="h-px flex-1 bg-line ml-2" />
+								<span className="ml-auto rounded-full bg-coral-50 text-coral-600 text-xs font-bold px-2 py-0.5">{displayTags.length}</span>
+							</div>
+							<div className="max-h-64 overflow-y-auto space-y-2 pr-1">
+								{isLoading ? (
+									<div className="flex h-24 items-center justify-center text-sm text-text-secondary">
+										<Loader2 className="mr-2 size-4 animate-spin" />
+										{t('loading')}
+									</div>
+								) : displayTags.length === 0 ? (
+									<div className="text-sm text-text-secondary">{t('noTagsYet') || 'No tags yet.'}</div>
+								) : (
+									displayTags.map((tag) => (
+										<div key={tag.id} className="flex items-center gap-3 rounded-lg border border-line bg-bg-surface px-3 py-2.5">
+											<span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: tag.color }} />
+											<span className="text-sm font-medium text-text-primary flex-1 truncate">{tag.name}</span>
+											{typeof tag.caseCount === 'number' ? (
+												<span className="rounded-full bg-gray-100 text-text-secondary text-xs font-semibold px-2 py-0.5">{tag.caseCount}</span>
+											) : null}
+											<div className="flex items-center gap-1">
+												<Button type="button" variant="outline" size="icon" className="size-8" aria-label={t('edit')} onClick={() => startEdit(tag)}>
+													<Pencil className="size-4" />
+												</Button>
+												<Button
+													type="button"
+													variant="outline"
+													size="icon"
+													className="size-8 border-danger-100 text-danger-600 hover:bg-danger-50 hover:text-danger-600"
+													aria-label={t('delete')}
+													onClick={() => confirmDelete(tag)}
+												>
+													<Trash2 className="size-4" />
+												</Button>
+											</div>
+										</div>
+									))
+								)}
+							</div>
+						</section>
+
+						<section className="rounded-xl border border-line bg-bg-surface p-5">
+							<div className="flex items-center gap-2 mb-4">
+								<span className="h-1.5 w-1.5 rounded-full bg-coral-500" />
+								<span className="text-xs font-semibold uppercase tracking-wide text-coral-600">
+									{form.id ? t('editTagHeading') || 'Edit tag' : t('sectionCreateTag')}
+								</span>
+								<span className="h-px flex-1 bg-line ml-2" />
 								{form.id ? (
 									<Button type="button" variant="ghost" size="sm" onClick={resetForm}>{t('reset') || 'Reset'}</Button>
 								) : null}
 							</div>
-							<form className="space-y-3" onSubmit={onSubmitTagForm}>
-								<div className="space-y-1">
-									<label className="text-xs font-medium" htmlFor="tag-name">{t('tagNameLabel') || 'Name'}</label>
+							<form className="space-y-4" onSubmit={onSubmitTagForm}>
+								<div>
+									<label className="block text-sm font-medium text-text-primary mb-1.5" htmlFor="tag-name">{t('tagNameLabel') || 'Name'}</label>
 									<Input id="tag-name" value={form.name} onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))} placeholder={t('tagNamePlaceholder') || 'e.g. Must-know'} />
 								</div>
-								<div className="space-y-1">
-									<label className="text-xs font-medium" htmlFor="tag-color">{t('tagColorLabel') || 'Color'}</label>
-									<div className="flex items-center gap-2">
-										<input id="tag-color" type="color" value={form.color} onChange={(event) => setForm((prev) => ({ ...prev, color: event.target.value }))} className="h-9 w-12 rounded border" />
+								<div>
+									<label className="block text-sm font-medium text-text-primary mb-1.5" htmlFor="tag-color">{t('tagColorLabel') || 'Color'}</label>
+									<div className="flex items-center gap-3">
+										<input
+											id="tag-color"
+											type="color"
+											value={form.color}
+											onChange={(event) => setForm((prev) => ({ ...prev, color: event.target.value }))}
+											className="h-10 w-12 shrink-0 cursor-pointer rounded-lg border border-line p-0"
+										/>
 										<Input value={form.color} onChange={(event) => setForm((prev) => ({ ...prev, color: event.target.value }))} className="font-mono" />
 									</div>
+									<div className="mt-2 flex flex-wrap items-center gap-2">
+										{TAG_COLOR_PRESETS.map((preset) => (
+											<button
+												key={preset}
+												type="button"
+												aria-label={preset}
+												onClick={() => setForm((prev) => ({ ...prev, color: preset }))}
+												className={`h-8 w-8 rounded-lg ${form.color.toLowerCase() === preset.toLowerCase() ? 'ring-2 ring-offset-2 ring-navy-600' : ''}`}
+												style={{ backgroundColor: preset }}
+											/>
+										))}
+									</div>
 								</div>
-								<div className="space-y-1">
-									<label className="text-xs font-medium" htmlFor="tag-description">{t('tagDescriptionLabel') || 'Description'}</label>
+								<div>
+									<label className="block text-sm font-medium text-text-primary mb-1.5" htmlFor="tag-description">{t('tagDescriptionLabel') || 'Description'}</label>
 									<Textarea id="tag-description" value={form.description} onChange={(event) => setForm((prev) => ({ ...prev, description: event.target.value }))} placeholder={t('tagDescriptionPlaceholder') || 'Optional'} rows={3} />
 								</div>
-								<div className="flex justify-end gap-2">
+								<div className="flex justify-end">
 									<Button type="submit" disabled={isSavingTag}>
 										{isSavingTag ? <Loader2 className="mr-2 size-4 animate-spin" /> : form.id ? <Pencil className="mr-2 size-4" /> : <Plus className="mr-2 size-4" />}
 										{form.id ? t('saveChanges') || 'Save changes' : t('createTag')}
 									</Button>
 								</div>
 							</form>
-						</div>
-					</div>
-					<div className="flex justify-end pt-2">
-						<Button type="button" variant="outline" onClick={() => void handleOpen(false)}>{t('close') || 'Close'}</Button>
+						</section>
 					</div>
 				</DialogContent>
 			</Dialog>

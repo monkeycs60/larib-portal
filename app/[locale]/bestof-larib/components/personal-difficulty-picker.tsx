@@ -33,30 +33,30 @@ export default function PersonalDifficultyPicker({ value, onChange, disabled, is
   const options: DifficultyOption[] = [
     {
       value: '',
-      colorClass: 'bg-muted-foreground/20',
-      borderClass: 'border-muted-foreground/40',
-      textClass: 'text-muted-foreground',
+      colorClass: 'bg-gray-300',
+      borderClass: 'border-gray-400',
+      textClass: 'text-text-secondary',
       label: menuLabel ?? t('caseView.difficultyNotSet'),
     },
     {
       value: 'BEGINNER',
-      colorClass: 'bg-emerald-500',
-      borderClass: 'border-emerald-500/70 bg-emerald-50',
-      textClass: 'text-emerald-700',
+      colorClass: 'bg-success-500',
+      borderClass: 'border-success-500/70 bg-success-50',
+      textClass: 'text-success-700',
       label: t('difficulty.beginner'),
     },
     {
       value: 'INTERMEDIATE',
-      colorClass: 'bg-rose-500',
-      borderClass: 'border-rose-500/70 bg-rose-50',
-      textClass: 'text-rose-700',
+      colorClass: 'bg-warn-500',
+      borderClass: 'border-warn-500/70 bg-warn-50',
+      textClass: 'text-warn-700',
       label: t('difficulty.intermediate'),
     },
     {
       value: 'ADVANCED',
-      colorClass: 'bg-red-500',
-      borderClass: 'border-red-500/70 bg-red-50',
-      textClass: 'text-red-700',
+      colorClass: 'bg-danger-500',
+      borderClass: 'border-danger-500/70 bg-danger-50',
+      textClass: 'text-danger-700',
       label: t('difficulty.advanced'),
     },
   ]
@@ -101,7 +101,7 @@ export default function PersonalDifficultyPicker({ value, onChange, disabled, is
               <span aria-hidden className={cn('h-2.5 w-2.5 rounded-full', current.colorClass)} />
               <span>{current.label}</span>
             </span>
-            <ChevronDown className="size-4 text-muted-foreground" />
+            <ChevronDown className="size-4 text-text-secondary" />
           </Button>
         )}
       </PopoverTrigger>

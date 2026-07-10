@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getTypedSession } from '@/lib/auth-helpers'
 import { prisma } from '@/lib/prisma'
 import { checkDicomsExist } from '@/lib/services/sftp'
+import { canAdminApp } from '@/lib/permissions'
 
 export const runtime = 'nodejs'
 
@@ -16,8 +17,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'caseId_missing' }, { status: 400 })
   }
 
-  const clinicalCase = await prisma.clinicalCase.findUnique({
-    where: { id: caseId },
+  const isAdmin = canAdminApp(session.user, 'BESTOF_LARIB')
+  const clinicalCase = await prisma.clinicalCase.findFirst({
+    where: { id: caseId, ...(!isAdmin && { status: 'PUBLISHED' }) },
     select: { caseNumber: true, examType: { select: { name: true } } },
   })
 

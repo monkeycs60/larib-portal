@@ -4,8 +4,10 @@ import { useTranslations } from 'next-intl';
 import { useRouter, usePathname } from '@/app/i18n/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { SingleSelect } from '@/components/ui/single-select';
 import { MultiSelect } from '@/components/ui/multiselect';
+import { Search, RotateCcw } from 'lucide-react';
 import { useBestofLoadingStore } from '@/lib/stores/bestof-loading';
 
 type ExamType = { id: string; name: string };
@@ -247,25 +249,31 @@ export default function FiltersBar({
 	}
 
 	return (
-		<div className='flex flex-wrap items-end gap-3'>
-            <div className='flex-1 min-w-40'>
-				<label className='block text-xs mb-1'>{t('filters.search')}</label>
-				<Input
-					value={q}
-					onChange={(e) => {
-						const next = e.target.value;
-						setQ(next);
-						if (debounceRef.current) clearTimeout(debounceRef.current);
-						debounceRef.current = setTimeout(() => {
-							pushWith({ q: next.trim() });
-						}, 400);
-					}}
-					placeholder={t('filters.searchPlaceholder')}
-				/>
-			</div>
+		<Card>
+			<CardContent className='space-y-4 p-6'>
+				<div>
+					<label className='mb-2 block text-sm font-semibold text-text-primary'>{t('filters.search')}</label>
+					<div className='relative'>
+						<Search className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary' />
+						<Input
+							className='pl-9'
+							value={q}
+							onChange={(e) => {
+								const next = e.target.value;
+								setQ(next);
+								if (debounceRef.current) clearTimeout(debounceRef.current);
+								debounceRef.current = setTimeout(() => {
+									pushWith({ q: next.trim() });
+								}, 400);
+							}}
+							placeholder={t('filters.searchPlaceholder')}
+						/>
+					</div>
+				</div>
+				<div className='flex flex-wrap items-end gap-3'>
             {isAdmin ? (
                 <div className='min-w-52'>
-                    <label className='block text-xs mb-1'>{t('filters.adminTag')}</label>
+                    <label className='block text-xs font-medium text-text-secondary mb-1'>{t('filters.adminTag')}</label>
                     <MultiSelect
                         options={adminTags.map(tag => ({ label: tag.name, value: tag.id }))}
                         defaultValue={adminTagIds}
@@ -278,7 +286,7 @@ export default function FiltersBar({
             ) : (
                 userTags.length > 0 ? (
                     <div className='min-w-52'>
-                        <label className='block text-xs mb-1'>{t('filters.userTag')}</label>
+                        <label className='block text-xs font-medium text-text-secondary mb-1'>{t('filters.userTag')}</label>
                         <MultiSelect
                             options={userTags.map(tag => ({ label: tag.name, value: tag.id }))}
                             defaultValue={userTagIds}
@@ -291,7 +299,7 @@ export default function FiltersBar({
                 ) : null
             )}
             <div className='min-w-44'>
-                <label className='block text-xs mb-1'>{t('filters.status')}</label>
+                <label className='block text-xs font-medium text-text-secondary mb-1'>{t('filters.status')}</label>
                 <SingleSelect
                     value={status}
 					onChange={(value) => {
@@ -313,7 +321,7 @@ export default function FiltersBar({
 				/>
 			</div>
             <div className='min-w-52'>
-                <label className='block text-xs mb-1'>{t('filters.exam')}</label>
+                <label className='block text-xs font-medium text-text-secondary mb-1'>{t('filters.exam')}</label>
                 <MultiSelect
                     options={examTypes.map(ex => ({ label: ex.name, value: ex.id }))}
                     defaultValue={examTypeIds}
@@ -325,7 +333,7 @@ export default function FiltersBar({
             </div>
             {isAdmin ? (
                 <div className='min-w-52'>
-                    <label className='block text-xs mb-1'>{t('filters.disease')}</label>
+                    <label className='block text-xs font-medium text-text-secondary mb-1'>{t('filters.disease')}</label>
                     <MultiSelect
                         options={diseaseTags.map(d => ({ label: d.name, value: d.id }))}
                         defaultValue={diseaseTagIds}
@@ -338,7 +346,7 @@ export default function FiltersBar({
             ) : null}
             {isAdmin ? (
                 <div className='min-w-52'>
-                    <label className='block text-xs mb-1'>
+                    <label className='block text-xs font-medium text-text-secondary mb-1'>
                         {t('filters.difficulty')}
                     </label>
                     <MultiSelect
@@ -357,13 +365,13 @@ export default function FiltersBar({
             ) : null}
 			{canUsePersonalDifficulty ? (
 				<div className='min-w-fit'>
-					<label className='block text-xs mb-1'>{t('filters.myDifficulty')}</label>
-					<div className='flex items-center gap-2 h-9 px-3 border rounded-md bg-background'>
+					<label className='block text-xs font-medium text-text-secondary mb-1'>{t('filters.myDifficulty')}</label>
+					<div className='flex items-center gap-2 h-9 px-3 border border-line rounded-md bg-bg-surface'>
 						{[
-							{ value: '', colorClass: 'bg-muted-foreground/30', label: t('filters.any') },
-							{ value: 'BEGINNER', colorClass: 'bg-emerald-500', label: t('difficulty.beginner') },
-							{ value: 'INTERMEDIATE', colorClass: 'bg-rose-500', label: t('difficulty.intermediate') },
-							{ value: 'ADVANCED', colorClass: 'bg-red-500', label: t('difficulty.advanced') },
+							{ value: '', colorClass: 'bg-gray-300', label: t('filters.any') },
+							{ value: 'BEGINNER', colorClass: 'bg-success-500', label: t('difficulty.beginner') },
+							{ value: 'INTERMEDIATE', colorClass: 'bg-warn-500', label: t('difficulty.intermediate') },
+							{ value: 'ADVANCED', colorClass: 'bg-danger-500', label: t('difficulty.advanced') },
 						].map((option) => (
 							<button
 								key={option.value || 'any'}
@@ -373,7 +381,7 @@ export default function FiltersBar({
 									pushWith({ myDifficulty: option.value });
 								}}
 								className={`h-4 w-4 rounded-full transition-all hover:scale-110 ${option.colorClass} ${
-									myDifficulty === option.value ? 'ring-2 ring-offset-2 ring-foreground' : ''
+									myDifficulty === option.value ? 'ring-2 ring-offset-2 ring-navy-600' : ''
 								}`}
 								aria-label={option.label}
 								title={option.label}
@@ -383,7 +391,7 @@ export default function FiltersBar({
 				</div>
 			) : null}
 			<div className='min-w-44'>
-				<label className='block text-xs mb-1'>
+				<label className='block text-xs font-medium text-text-secondary mb-1'>
 					{t('filters.createdAtRange')}
 				</label>
 				<SingleSelect
@@ -410,7 +418,7 @@ export default function FiltersBar({
 			{datePreset === 'custom' ? (
 				<>
 					<div className='min-w-44'>
-						<label className='block text-xs mb-1'>
+						<label className='block text-xs font-medium text-text-secondary mb-1'>
 							{t('filters.dateFrom')}
 						</label>
 						<Input
@@ -426,7 +434,7 @@ export default function FiltersBar({
 						/>
 					</div>
 					<div className='min-w-44'>
-						<label className='block text-xs mb-1'>
+						<label className='block text-xs font-medium text-text-secondary mb-1'>
 							{t('filters.dateTo')}
 						</label>
 						<Input
@@ -446,7 +454,7 @@ export default function FiltersBar({
 			{!isAdmin ? (
 				<>
 					<div className='min-w-44'>
-						<label className='block text-xs mb-1'>
+						<label className='block text-xs font-medium text-text-secondary mb-1'>
 							{t('filters.firstCompletionRange')}
 						</label>
 						<SingleSelect
@@ -473,7 +481,7 @@ export default function FiltersBar({
 					{firstCompletionPreset === 'custom' ? (
 						<>
 							<div className='min-w-44'>
-								<label className='block text-xs mb-1'>
+								<label className='block text-xs font-medium text-text-secondary mb-1'>
 									{t('filters.dateFrom')}
 								</label>
 								<Input
@@ -489,7 +497,7 @@ export default function FiltersBar({
 								/>
 							</div>
 							<div className='min-w-44'>
-								<label className='block text-xs mb-1'>
+								<label className='block text-xs font-medium text-text-secondary mb-1'>
 									{t('filters.dateTo')}
 								</label>
 								<Input
@@ -510,9 +518,12 @@ export default function FiltersBar({
 			) : null}
 			<div className='ml-auto flex gap-2'>
 				<Button variant='outline' onClick={resetFilters}>
+					<RotateCcw className='h-4 w-4' />
 					{t('filters.reset')}
 				</Button>
 			</div>
-		</div>
+			</div>
+			</CardContent>
+		</Card>
 	);
 }

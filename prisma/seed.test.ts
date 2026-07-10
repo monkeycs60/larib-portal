@@ -3,8 +3,11 @@ import { randomUUID } from 'crypto';
 import dotenv from 'dotenv';
 import path from 'path';
 
-// Load test environment variables before initializing auth
-dotenv.config({ path: path.resolve(__dirname, '..', '.env.test') });
+// Load test environment variables before initializing auth.
+// `override: true` is required: importing `../lib/auth` (hoisted above this line)
+// initializes Prisma, which auto-loads `.env` and sets DATABASE_URL to the dev db
+// first. Without override this seed would wipe/write the DEV database instead of testdb.
+dotenv.config({ path: path.resolve(__dirname, '..', '.env.test'), override: true });
 
 import { auth } from '../lib/auth';
 
@@ -169,6 +172,38 @@ async function main() {
 
 	console.log('✅ Created user without CONGES access:', userWithoutConges.email);
 
+	// Create per-app admin users for RBAC tests
+	const congesAdminPassword = await ctx.password.hash('ristifou');
+	const congesAdmin = await prisma.user.create({
+		data: {
+			id: randomUUID(),
+			name: 'Conges Admin',
+			email: 'conges-admin@larib-portal.test',
+			emailVerified: true,
+			role: 'USER',
+			applications: ['CONGES'],
+			adminApplications: ['CONGES'],
+			congesTotalDays: 30,
+			accounts: { create: { id: randomUUID(), providerId: 'credential', accountId: 'conges-admin@larib-portal.test', password: congesAdminPassword } },
+		},
+	});
+	console.log('✅ Created Conges admin:', congesAdmin.email);
+
+	const bestofAdminPassword = await ctx.password.hash('ristifou');
+	const bestofAdmin = await prisma.user.create({
+		data: {
+			id: randomUUID(),
+			name: 'Bestof Admin',
+			email: 'bestof-admin@larib-portal.test',
+			emailVerified: true,
+			role: 'USER',
+			applications: ['BESTOF_LARIB'],
+			adminApplications: ['BESTOF_LARIB'],
+			accounts: { create: { id: randomUUID(), providerId: 'credential', accountId: 'bestof-admin@larib-portal.test', password: bestofAdminPassword } },
+		},
+	});
+	console.log('✅ Created Bestof admin:', bestofAdmin.email);
+
 	// Create exam types first (using upsert to handle duplicates)
 	console.log('📦 Creating exam types...');
 	const examTypeNames = ['ECG', 'ECHO', 'HOLTER'];
@@ -327,6 +362,8 @@ async function main() {
 	console.log('  Admin: test-admin@larib-portal.test / ristifou');
 	console.log('  User:  test-user@larib-portal.test / ristifou');
 	console.log('  No Conges User: no-conges@larib-portal.test / ristifou');
+	console.log('  Conges Admin: conges-admin@larib-portal.test / ristifou');
+	console.log('  Bestof Admin: bestof-admin@larib-portal.test / ristifou');
 }
 
 main()

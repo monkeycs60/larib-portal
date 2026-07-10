@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Badge } from '@/components/ui/badge'
+import { tagChipStyle } from '@/lib/tag-color'
 import CaseTagQuickPicker, { type CaseDisplayTag } from '../components/case-tag-quick-picker'
 import TagManagerDialog from '../components/tag-manager-dialog'
 import { Button } from '@/components/ui/button'
@@ -42,7 +43,7 @@ export default function UserTagsSection({
 					<span className="text-xs text-muted-foreground">{t('caseView.noTagsSelected')}</span>
 				) : (
 					orderedTags.map((tag) => (
-						<Badge key={tag.id} className="border-transparent text-white" style={{ backgroundColor: tag.color }}>
+						<Badge key={tag.id} className="border font-medium" style={tagChipStyle(tag.color)}>
 							{tag.name}
 						</Badge>
 					))

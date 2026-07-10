@@ -31,7 +31,7 @@ export const signupAction = unauthenticatedAction
         console.log('result.error', result.error);
         return {
           success: false,
-          error: result.error.message || t('authenticationFailed'),
+          error: (result.error as { message?: string }).message || t('authenticationFailed'),
         };
       }
 

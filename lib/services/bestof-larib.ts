@@ -176,7 +176,7 @@ const fetchClinicalCases = async ({
   sort,
   includeContent,
 }: ClinicalCasesLoadInput): Promise<ClinicalCaseWithDisplayTags[]> => {
-  const where = {
+  const where: Prisma.ClinicalCaseWhereInput = {
     name: filters?.name ? { contains: filters.name, mode: 'insensitive' } : undefined,
     status: filters?.status ?? undefined,
     examTypeId: filters?.examTypeIds?.length ? { in: filters.examTypeIds } : undefined,
@@ -272,13 +272,9 @@ const fetchClinicalCases = async ({
     difficulty: row.difficulty,
     status: row.status,
     tags: row.tags,
-    ...(includeContent
-      ? {
-          pdfUrl: 'pdfUrl' in row ? row.pdfUrl ?? null : null,
-          pdfKey: 'pdfKey' in row ? row.pdfKey ?? null : null,
-          textContent: 'textContent' in row ? row.textContent ?? null : null,
-        }
-      : {}),
+    pdfUrl: includeContent && 'pdfUrl' in row ? row.pdfUrl ?? null : null,
+    pdfKey: includeContent && 'pdfKey' in row ? row.pdfKey ?? null : null,
+    textContent: includeContent && 'textContent' in row ? row.textContent ?? null : null,
     createdAt: row.createdAt,
     examType: row.examType,
     diseaseTag: row.diseaseTag,

@@ -85,7 +85,7 @@ export default function CasesTableFallback({
     return (
       <div className='rounded-md border'>
         <div
-          className='grid gap-4 border-b bg-muted/30 p-3'
+          className='grid gap-4 border-b bg-gray-50 p-3'
           style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }}
         >
           {Array.from({ length: columnCount }).map((_, index) => (
@@ -167,7 +167,7 @@ export default function CasesTableFallback({
                 colSpan={
                   6 + (isAdmin ? 2 : 0) + (isUserView ? 2 : 0) + 2
                 }
-                className='text-center text-sm text-muted-foreground'
+                className='text-center text-sm text-text-secondary'
               >
                 {translations.empty}
               </TableCell>
@@ -176,36 +176,32 @@ export default function CasesTableFallback({
             cachedCases.map((caseItem) => {
               const statusBadge = (() => {
                 if (!isUserView) {
-                  const adminBadgeClass =
-                    caseItem.status === 'PUBLISHED'
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                      : 'bg-rose-50 text-rose-700 border border-rose-200';
                   const adminLabel =
                     caseItem.status === 'PUBLISHED'
                       ? translations.status.published
                       : translations.status.draft;
                   return (
-                    <Badge className={`rounded-full px-3 py-1 text-xs font-medium ${adminBadgeClass}`}>
+                    <Badge variant={caseItem.status === 'PUBLISHED' ? 'success' : 'neutral'} className='rounded-full px-3 py-1'>
                       {adminLabel}
                     </Badge>
                   );
                 }
                 if (caseItem.userAttemptState?.hasValidatedAttempt) {
                   return (
-                    <Badge className='rounded-full px-3 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200'>
+                    <Badge variant='success' className='rounded-full px-3 py-1'>
                       {translations.status.completed}
                     </Badge>
                   );
                 }
                 if (caseItem.userAttemptState?.hasDraftAttempt) {
                   return (
-                    <Badge className='rounded-full px-3 py-1 text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200'>
+                    <Badge variant='warning' className='rounded-full px-3 py-1'>
                       {translations.status.inProgress}
                     </Badge>
                   );
                 }
                 return (
-                  <Badge className='rounded-full px-3 py-1 text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200'>
+                  <Badge variant='neutral' className='rounded-full px-3 py-1'>
                     {translations.status.notStarted}
                   </Badge>
                 );
@@ -228,14 +224,14 @@ export default function CasesTableFallback({
                   {isAdmin ? (
                     <TableCell>
                       <Badge
-                        variant='outline'
-                        className={
+                        variant={
                           caseItem.difficulty === 'BEGINNER'
-                            ? 'border-green-500 text-green-700'
+                            ? 'success'
                             : caseItem.difficulty === 'INTERMEDIATE'
-                            ? 'border-rose-500 text-rose-700'
-                            : 'border-red-500 text-red-700'
+                            ? 'warning'
+                            : 'danger'
                         }
+                        className='rounded-full px-3 py-1'
                       >
                         {translations.difficulty[
                           caseItem.difficulty === 'BEGINNER'
@@ -282,9 +278,8 @@ export default function CasesTableFallback({
                   <TableCell>
                     <div className='flex flex-wrap justify-end gap-2'>
                       <Link href={`/bestof-larib/${caseItem.id}`} prefetch className='inline-flex'>
-                        <Button size='sm' variant='secondary' className='gap-1'>
+                        <Button size='icon' variant='outline' title={translations.actions.view}>
                           <Eye />
-                          {translations.actions.view}
                         </Button>
                       </Link>
                       {isUserView ? (
@@ -318,9 +313,8 @@ export default function CasesTableFallback({
                                 adminTags: caseItem.adminTags,
                               }}
                               trigger={
-                                <Button size='sm' variant='outline' className='gap-1'>
+                                <Button size='icon' variant='outline' title={translations.actions.edit}>
                                   <Pencil />
-                                  {translations.actions.edit}
                                 </Button>
                               }
                             />

@@ -78,12 +78,12 @@ export function LoginForm({ showSignupLink = true }: LoginFormProps) {
     <div className="max-w-md mx-auto w-full">
       <Card>
         <CardHeader className="text-center space-y-4">
-          <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto">
-            <LogIn className="w-6 h-6 text-primary-foreground" />
+          <div className="w-12 h-12 bg-navy-600 rounded-full flex items-center justify-center mx-auto">
+            <LogIn className="w-6 h-6 text-white" />
           </div>
           <div>
             <CardTitle className="text-xl">{t('welcomeBack')}</CardTitle>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-text-secondary mt-2">
               {t('signInToAccount')}
             </p>
           </div>
@@ -101,7 +101,7 @@ export function LoginForm({ showSignupLink = true }: LoginFormProps) {
                 disabled={isExecuting}
               />
               {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
+                <p className="text-sm text-danger-600">{errors.email.message}</p>
               )}
             </div>
 
@@ -110,7 +110,7 @@ export function LoginForm({ showSignupLink = true }: LoginFormProps) {
                 <Label htmlFor="password">{t('password')}</Label>
                 <Link
                   href={applicationLink(locale, '/forgot-password')}
-                  className="text-sm text-primary hover:underline"
+                  className="text-sm text-navy-600 hover:underline"
                 >
                   {t('forgotPassword')}
                 </Link>
@@ -138,27 +138,27 @@ export function LoginForm({ showSignupLink = true }: LoginFormProps) {
                 </Button>
               </div>
               {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
+                <p className="text-sm text-danger-600">{errors.password.message}</p>
               )}
             </div>
 
             {errors.root && (
-              <div className="flex items-center gap-2 text-sm text-destructive">
+              <div className="flex items-center gap-2 text-sm text-danger-600">
                 <AlertCircle className="w-4 h-4" />
                 {errors.root.message}
               </div>
             )}
 
-            <Button type="submit" disabled={isExecuting} className="w-full py-6">
+            <Button type="submit" variant="primary" disabled={isExecuting} className="w-full py-6">
               {isExecuting ? t('loading') : t('signIn')}
             </Button>
           </form>
 
           {showSignupLink && (
             <div className="text-center">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-text-secondary">
                 {t('noAccount')}{' '}
-                <Link href={`/${locale}/signup`} className="font-medium text-primary hover:underline">
+                <Link href={`/${locale}/signup`} className="font-medium text-navy-600 hover:underline">
                   {t('signUp')}
                 </Link>
               </p>

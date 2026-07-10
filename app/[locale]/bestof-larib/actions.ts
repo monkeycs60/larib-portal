@@ -1,7 +1,7 @@
 "use server"
 import { z } from 'zod'
 import { revalidateTag } from 'next/cache'
-import { adminOnlyAction, authenticatedAction } from '@/actions/safe-action'
+import { appAdminAction, superAdminAction, authenticatedAction } from '@/actions/safe-action'
 import {
   CASES_TAG,
   DISEASE_TAGS_TAG,
@@ -50,7 +50,7 @@ const CreateCaseSchema = z.object({
   status: z.enum(['DRAFT','PUBLISHED']),
 })
 
-export const createCaseAction = authenticatedAction
+export const createCaseAction = appAdminAction('BESTOF_LARIB')
   .inputSchema(CreateCaseSchema)
   .action(async ({ parsedInput, ctx }) => {
     // Validation: at least one content source for published, drafts can be empty
@@ -77,7 +77,7 @@ export const createCaseAction = authenticatedAction
     return created
   })
 
-export const createExamTypeAction = adminOnlyAction
+export const createExamTypeAction = appAdminAction('BESTOF_LARIB')
   .inputSchema(z.object({ name: z.string().min(1) }))
   .action(async ({ parsedInput }) => {
     const ex = await ensureExamType(parsedInput.name)
@@ -85,7 +85,7 @@ export const createExamTypeAction = adminOnlyAction
     return ex
   })
 
-export const createDiseaseTagAction = adminOnlyAction
+export const createDiseaseTagAction = appAdminAction('BESTOF_LARIB')
   .inputSchema(z.object({ name: z.string().min(1) }))
   .action(async ({ parsedInput }) => {
     const d = await ensureDiseaseTag(parsedInput.name)
@@ -93,7 +93,7 @@ export const createDiseaseTagAction = adminOnlyAction
     return d
   })
 
-export const deleteExamTypesAction = adminOnlyAction
+export const deleteExamTypesAction = appAdminAction('BESTOF_LARIB')
   .inputSchema(z.object({ ids: z.array(z.string().min(1)).min(1) }))
   .action(async ({ parsedInput }) => {
     await deleteExamTypes(parsedInput.ids)
@@ -101,7 +101,7 @@ export const deleteExamTypesAction = adminOnlyAction
     return { deleted: parsedInput.ids.length }
   })
 
-export const deleteDiseaseTagsAction = adminOnlyAction
+export const deleteDiseaseTagsAction = appAdminAction('BESTOF_LARIB')
   .inputSchema(z.object({ ids: z.array(z.string().min(1)).min(1) }))
   .action(async ({ parsedInput }) => {
     await deleteDiseaseTags(parsedInput.ids)
@@ -109,7 +109,7 @@ export const deleteDiseaseTagsAction = adminOnlyAction
     return { deleted: parsedInput.ids.length }
   })
 
-export const updateExamTypeAction = adminOnlyAction
+export const updateExamTypeAction = appAdminAction('BESTOF_LARIB')
   .inputSchema(z.object({ id: z.string().min(1), name: z.string().min(1) }))
   .action(async ({ parsedInput }) => {
     const updated = await updateExamType(parsedInput.id, parsedInput.name)
@@ -118,7 +118,7 @@ export const updateExamTypeAction = adminOnlyAction
     return updated
   })
 
-export const updateDiseaseTagAction = adminOnlyAction
+export const updateDiseaseTagAction = appAdminAction('BESTOF_LARIB')
   .inputSchema(z.object({ id: z.string().min(1), name: z.string().min(1) }))
   .action(async ({ parsedInput }) => {
     const updated = await updateDiseaseTag(parsedInput.id, parsedInput.name)
@@ -129,7 +129,7 @@ export const updateDiseaseTagAction = adminOnlyAction
 
 const UpdateCaseSchema = CreateCaseSchema.extend({ id: z.string().min(1) })
 
-export const updateCaseAction = adminOnlyAction
+export const updateCaseAction = appAdminAction('BESTOF_LARIB')
   .inputSchema(UpdateCaseSchema)
   .action(async ({ parsedInput }) => {
     if (parsedInput.status === 'PUBLISHED') {
@@ -149,7 +149,7 @@ export const updateCaseAction = adminOnlyAction
     return updated
   })
 
-export const deleteCaseAction = adminOnlyAction
+export const deleteCaseAction = superAdminAction
   .inputSchema(z.object({ id: z.string().min(1) }))
   .action(async ({ parsedInput }) => {
     const deleted = await deleteClinicalCase(parsedInput.id)
@@ -161,18 +161,18 @@ export const deleteCaseAction = adminOnlyAction
 // --- Tagging actions ---
 
 // Shared admin tags
-export const listAdminTagsAction = adminOnlyAction
+export const listAdminTagsAction = appAdminAction('BESTOF_LARIB')
   .action(async () => {
     return await listAdminTags()
   })
 
-export const getCaseAdminTagIdsAction = adminOnlyAction
+export const getCaseAdminTagIdsAction = appAdminAction('BESTOF_LARIB')
   .inputSchema(z.object({ caseId: z.string().min(1) }))
   .action(async ({ parsedInput }) => {
     return await getCaseAdminTagIds(parsedInput.caseId)
   })
 
-export const ensureAdminTagAction = adminOnlyAction
+export const ensureAdminTagAction = appAdminAction('BESTOF_LARIB')
   .inputSchema(z.object({ name: z.string().min(1), color: z.string().min(1), description: z.string().trim().optional().nullable() }))
   .action(async ({ parsedInput }) => {
     const created = await ensureAdminTag({ name: parsedInput.name, color: parsedInput.color, description: parsedInput.description })
@@ -181,7 +181,7 @@ export const ensureAdminTagAction = adminOnlyAction
     return created
   })
 
-export const setCaseAdminTagsAction = adminOnlyAction
+export const setCaseAdminTagsAction = appAdminAction('BESTOF_LARIB')
   .inputSchema(z.object({ caseId: z.string().min(1), tagIds: z.array(z.string().min(1)).default([]) }))
   .action(async ({ parsedInput }) => {
     const result = await setCaseAdminTags(parsedInput.caseId, parsedInput.tagIds)
@@ -192,7 +192,7 @@ export const setCaseAdminTagsAction = adminOnlyAction
     return result
   })
 
-export const listCasesByAdminTagAction = adminOnlyAction
+export const listCasesByAdminTagAction = appAdminAction('BESTOF_LARIB')
   .inputSchema(z.object({ tagId: z.string().min(1) }))
   .action(async ({ parsedInput }) => {
     return await listCasesByAdminTag(parsedInput.tagId)
@@ -226,7 +226,7 @@ const UpdateTagSchema = z.object({
   description: z.string().trim().optional().nullable(),
 })
 
-export const updateAdminTagAction = adminOnlyAction
+export const updateAdminTagAction = appAdminAction('BESTOF_LARIB')
   .inputSchema(UpdateTagSchema)
   .action(async ({ parsedInput }) => {
     const updated = await updateAdminTag(parsedInput)
@@ -244,7 +244,7 @@ export const updateUserTagAction = authenticatedAction
     return updated
   })
 
-export const deleteAdminTagAction = adminOnlyAction
+export const deleteAdminTagAction = appAdminAction('BESTOF_LARIB')
   .inputSchema(z.object({ id: z.string().min(1) }))
   .action(async ({ parsedInput }) => {
     const result = await deleteAdminTag(parsedInput.id)

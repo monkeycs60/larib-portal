@@ -11,6 +11,7 @@ import { listExamTypes, listDiseaseTags } from '@/lib/services/bestof-larib';
 import { listAdminTags } from '@/lib/services/bestof-larib-tags';
 import { prisma } from '@/lib/prisma';
 import { CheckCircle2 } from 'lucide-react';
+import { PageHeader } from '@/app/[locale]/components/page-header';
 import UserExamTypeWidget from '../statistics/users/[userId]/components/user-exam-type-widget';
 import UserExamTypePieChart from '../statistics/users/[userId]/components/user-exam-type-pie-chart';
 import BestofStatsCompletionTrend from '../components/bestof-stats-completion-trend';
@@ -117,7 +118,7 @@ async function MyStatisticsPageContent({
             </Button>
           </Link>
         </div>
-        <h1 className='text-xl font-semibold mb-1'>{t('title')}</h1>
+        <PageHeader title={t('title')} />
         <div className='flex items-center gap-3 text-xs text-muted-foreground'>
           <span>{t('position')}: {user.position || '—'}</span>
           <span>•</span>

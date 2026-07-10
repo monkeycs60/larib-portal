@@ -80,7 +80,7 @@ export function SignupForm() {
           </div>
           <div>
             <CardTitle className="text-xl">{t('welcomeToTeam')}</CardTitle>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-text-secondary mt-2">
               {t('invitedByMessage')}
             </p>
           </div>
@@ -121,7 +121,7 @@ export function SignupForm() {
                 disabled={isExecuting}
               />
               {errors.name && (
-                <p className="text-sm text-destructive">{errors.name.message}</p>
+                <p className="text-sm text-danger-600">{errors.name.message}</p>
               )}
             </div>
 
@@ -135,7 +135,7 @@ export function SignupForm() {
                 disabled={isExecuting}
               />
               {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
+                <p className="text-sm text-danger-600">{errors.email.message}</p>
               )}
             </div>
 
@@ -164,7 +164,7 @@ export function SignupForm() {
                 </Button>
               </div>
               {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
+                <p className="text-sm text-danger-600">{errors.password.message}</p>
               )}
             </div>
 
@@ -193,17 +193,17 @@ export function SignupForm() {
                 </Button>
               </div>
               {errors.confirmPassword && (
-                <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
+                <p className="text-sm text-danger-600">{errors.confirmPassword.message}</p>
               )}
             </div>
 
-            <div className="flex items-start gap-2 text-sm text-muted-foreground">
+            <div className="flex items-start gap-2 text-sm text-text-secondary">
               <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
               <p>{t('passwordRequirements')}</p>
             </div>
 
             {errors.root && (
-              <div className="flex items-center gap-2 text-sm text-destructive">
+              <div className="flex items-center gap-2 text-sm text-danger-600">
                 <AlertCircle className="w-4 h-4" />
                 {errors.root.message}
               </div>
@@ -215,9 +215,9 @@ export function SignupForm() {
           </form>
 
           <div className="text-center">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-text-secondary">
               {t('alreadyHaveAccount')}{' '}
-              <Link href={`/${locale}/login`} className="font-medium text-primary hover:underline">
+              <Link href={`/${locale}/login`} className="font-medium text-navy-600 hover:underline">
                 {t('signIn')}
               </Link>
             </p>

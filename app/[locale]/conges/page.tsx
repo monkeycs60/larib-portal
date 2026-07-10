@@ -18,7 +18,9 @@ import { PendingRequestsSection } from './components/pending-requests-section'
 import { TeamLeaveOverviewSection } from './components/team-leave-overview-section'
 import { DecisionHistorySection, type DecisionEntry } from './components/decision-history-section'
 import { CalendarSkeleton } from './components/calendar-skeleton'
+import { PageHeader } from '@/app/[locale]/components/page-header'
 import { applicationLink } from '@/lib/application-link'
+import { canAccessApp, canAdminApp } from '@/lib/permissions'
 
 type PageParams = {
   params: Promise<{ locale: 'en' | 'fr' }>
@@ -44,11 +46,11 @@ function fullName(firstName: string | null, lastName: string | null, fallback?: 
   return fallback ?? '—'
 }
 
-const statusBadgeVariant: Record<'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED', 'secondary' | 'default' | 'destructive' | 'outline'> = {
-  PENDING: 'secondary',
-  APPROVED: 'default',
-  REJECTED: 'destructive',
-  CANCELLED: 'outline',
+const statusBadgeVariant: Record<'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED', 'warning' | 'success' | 'danger' | 'neutral'> = {
+  PENDING: 'warning',
+  APPROVED: 'success',
+  REJECTED: 'danger',
+  CANCELLED: 'neutral',
 }
 
 export default async function CongesPage({ params, searchParams }: PageParams) {
@@ -56,8 +58,7 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
   const sp = await searchParams
   const session = await requireAuth()
 
-  const applications = (session.user.applications ?? []) as Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB'>
-  const canAccess = session.user.role === 'ADMIN' || applications.includes('CONGES')
+  const canAccess = canAccessApp(session.user, 'CONGES')
 
   if (!canAccess) {
     redirect(applicationLink(locale, '/dashboard'))
@@ -72,10 +73,10 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
     getTranslations({ locale, namespace: 'conges' }),
     getUserLeaveDashboard(session.user.id, frenchHolidays),
     getLeaveCalendarData(activeMonth),
-    session.user.role === 'ADMIN' ? getAdminLeaveDashboard(frenchHolidays) : Promise.resolve(null),
+    canAdminApp(session.user, 'CONGES') ? getAdminLeaveDashboard(frenchHolidays) : Promise.resolve(null),
   ])
 
-  const requestTrigger = session.user.role === 'ADMIN' ? t('request.triggerAdmin') : t('request.trigger')
+  const requestTrigger = canAdminApp(session.user, 'CONGES') ? t('request.triggerAdmin') : t('request.trigger')
 
   const requestTranslations = {
     trigger: requestTrigger,
@@ -220,6 +221,7 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
           daySingular: t.raw('admin.pending.daySingular') as string,
           dayPlural: t.raw('admin.pending.dayPlural') as string,
           subtitle: t('admin.pending.subtitle', { days: adminDashboard.pendingDaysTotal }),
+          pending: t('admin.table.pending'),
         },
         toasts: {
           statusApproved: t('admin.toasts.statusApproved'),
@@ -378,24 +380,24 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
         {summaryCards.map((card) => (
           <Card key={card.label}>
             <CardHeader className='pb-2'>
-              <CardTitle className='text-sm font-medium text-muted-foreground'>{card.label}</CardTitle>
+              <CardTitle className='text-sm font-medium text-text-secondary'>{card.label}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className='text-2xl font-semibold'>{card.value}</div>
               {card.helper ? (
-                <div className='text-sm font-medium text-rose-500'>{card.helper}</div>
+                <div className='text-sm font-medium text-coral-600'>{card.helper}</div>
               ) : null}
             </CardContent>
           </Card>
         ))}
         <Card>
           <CardHeader className='pb-2'>
-            <CardTitle className='text-sm font-medium text-muted-foreground'>{t('summary.contractLabel')}</CardTitle>
+            <CardTitle className='text-sm font-medium text-text-secondary'>{t('summary.contractLabel')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className='text-sm'>{contractInfo}</div>
             {contractDatesInfo ? (
-              <div className='mt-1 text-xs text-muted-foreground'>{contractDatesInfo}</div>
+              <div className='mt-1 text-xs text-text-secondary'>{contractDatesInfo}</div>
             ) : null}
           </CardContent>
         </Card>
@@ -423,15 +425,15 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
         </CardHeader>
         <CardContent>
           {calendarData.todaysAbsences.length === 0 ? (
-            <p className='text-sm text-muted-foreground'>{t('today.none')}</p>
+            <p className='text-sm text-text-secondary'>{t('today.none')}</p>
           ) : (
             <ul className='space-y-2'>
               {calendarData.todaysAbsences.map((absence) => (
-                <li key={absence.userId} className='flex items-center justify-between rounded-md border p-3'>
+                <li key={absence.userId} className='flex items-center justify-between rounded-md border border-line p-3'>
                   <div>
                     <div className='font-medium'>{fullName(absence.firstName, absence.lastName)}</div>
                     {absence.position ? (
-                      <p className='text-xs text-muted-foreground'>{absence.position}</p>
+                      <p className='text-xs text-text-secondary'>{absence.position}</p>
                     ) : null}
                   </div>
                   <Badge variant='outline'>{roleLabels[absence.role]}</Badge>
@@ -464,7 +466,7 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
 
   const pendingRequestsSection = pendingRequestsData && adminActionTranslations && adminEditDialogTranslations ? (
     <section className='px-6'>
-      <Suspense fallback={<div className='text-sm text-muted-foreground'>{t('admin.loading')}</div>}>
+      <Suspense fallback={<div className='text-sm text-text-secondary'>{t('admin.loading')}</div>}>
         <PendingRequestsSection
           pendingRequests={pendingRequestsData.pendingRequests}
           labels={pendingRequestsData.labels}
@@ -497,22 +499,19 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
 
   const teamLeaveOverviewSection = teamLeaveOverviewData ? (
     <section className='px-6'>
-      <Suspense fallback={<div className='text-sm text-muted-foreground'>{t('admin.loading')}</div>}>
+      <Suspense fallback={<div className='text-sm text-text-secondary'>{t('admin.loading')}</div>}>
         <TeamLeaveOverviewSection data={teamLeaveOverviewData} />
       </Suspense>
     </section>
   ) : null
 
-  const isAdmin = session.user.role === 'ADMIN'
+  const isAdmin = canAdminApp(session.user, 'CONGES')
 
   return (
     <div className='space-y-8 py-6'>
       <header className='px-6'>
         <div className='flex flex-col gap-4 md:flex-row md:items-center md:justify-between'>
-          <div>
-            <h1 className='text-2xl font-semibold'>{t('title')}</h1>
-            <p className='text-sm text-muted-foreground'>{t('subtitle')}</p>
-          </div>
+          <PageHeader title={t('title')} subtitle={t('subtitle')} />
           {!isAdmin && (
             <RequestLeaveDialog translations={requestTranslations} defaultMonthIso={activeMonth.toISOString()} userContext={userLeaveContext} />
           )}
@@ -522,8 +521,8 @@ export default async function CongesPage({ params, searchParams }: PageParams) {
       {isAdmin ? (
         <>
           {pendingRequestsSection}
-          {decisionHistorySection}
           {calendarSection}
+          {decisionHistorySection}
           {teamLeaveOverviewSection}
         </>
       ) : (

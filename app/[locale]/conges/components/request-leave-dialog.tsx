@@ -322,7 +322,7 @@ export function RequestLeaveDialog({
               width: 6px;
               height: 6px;
               border-radius: 50%;
-              background-color: rgb(220 38 38);
+              background-color: var(--color-danger-500);
               box-shadow: 0 0 0 1px white;
             }
             .day-range-start.day-range-end {
@@ -338,51 +338,48 @@ export function RequestLeaveDialog({
             }
           `}</style>
 
-          <div className='flex items-center gap-2 text-xs text-muted-foreground'>
-            <span
-              className='inline-block h-2 w-2 rounded-full'
-              style={{ backgroundColor: 'rgb(220 38 38)', boxShadow: '0 0 0 1px white' }}
-            />
+          <div className='flex items-center gap-2 text-xs text-text-secondary'>
+            <span className='inline-block h-2 w-2 rounded-full bg-danger-500 ring-1 ring-white' />
             {translations.holidayLegend}
           </div>
 
           {leaveCalculation && (
             <div className='space-y-3'>
               <div className='grid grid-cols-3 gap-3'>
-                <div className='rounded-lg border bg-card p-3 text-center'>
-                  <div className='text-xs text-muted-foreground mb-1'>
+                <div className='rounded-lg border border-line bg-bg-surface p-3 text-center'>
+                  <div className='text-xs text-text-secondary mb-1'>
                     {translations.requestedDays}
                   </div>
                   <div className='text-2xl font-semibold text-primary'>
                     {leaveCalculation.requestedDays}
                   </div>
-                  <div className='text-xs text-muted-foreground'>
+                  <div className='text-xs text-text-secondary'>
                     {pluralize(leaveCalculation.requestedDays, translations.day, translations.days)}
                   </div>
                 </div>
-                <div className='rounded-lg border bg-card p-3 text-center'>
-                  <div className='text-xs text-muted-foreground mb-1'>
+                <div className='rounded-lg border border-line bg-bg-surface p-3 text-center'>
+                  <div className='text-xs text-text-secondary mb-1'>
                     {translations.currentRemaining}
                   </div>
                   <div className='text-2xl font-semibold'>
                     {leaveCalculation.currentRemaining}
                   </div>
-                  <div className='text-xs text-muted-foreground'>
+                  <div className='text-xs text-text-secondary'>
                     {pluralize(leaveCalculation.currentRemaining, translations.day, translations.days)}
                   </div>
                 </div>
-                <div className='rounded-lg border bg-card p-3 text-center'>
-                  <div className='text-xs text-muted-foreground mb-1'>
+                <div className='rounded-lg border border-line bg-bg-surface p-3 text-center'>
+                  <div className='text-xs text-text-secondary mb-1'>
                     {translations.afterRequest}
                   </div>
                   <div
                     className={`text-2xl font-semibold ${
-                      leaveCalculation.isNegative ? 'text-destructive' : 'text-green-600'
+                      leaveCalculation.isNegative ? 'text-danger-600' : 'text-success-600'
                     }`}
                   >
                     {leaveCalculation.remainingAfter}
                   </div>
-                  <div className='text-xs text-muted-foreground'>
+                  <div className='text-xs text-text-secondary'>
                     {pluralize(Math.abs(leaveCalculation.remainingAfter), translations.day, translations.days)}
                   </div>
                 </div>
@@ -391,7 +388,7 @@ export function RequestLeaveDialog({
               {(leaveCalculation.weekendsExcluded > 0 ||
                 leaveCalculation.holidaysExcluded.length > 0) && (
                 <div className='rounded-lg border bg-muted/30 p-3'>
-                  <div className='flex items-center gap-2 text-sm text-muted-foreground mb-2'>
+                  <div className='flex items-center gap-2 text-sm text-text-secondary mb-2'>
                     <Info className='h-4 w-4' />
                     {translations.excludedDays}
                   </div>
@@ -405,7 +402,7 @@ export function RequestLeaveDialog({
                       <Badge
                         key={holiday.date.toISOString()}
                         variant='outline'
-                        className='bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800'
+                        className='bg-coral-50 border-coral-200'
                       >
                         <CalendarIcon className='h-3 w-3 mr-1' />
                         {format(holiday.date, 'd MMM', { locale: dateLocale })} - {holiday.name}
@@ -456,6 +453,7 @@ export function RequestLeaveDialog({
             </Button>
             <Button
               type='submit'
+              variant='primary'
               disabled={
                 isExecuting ||
                 Boolean(leaveCalculation?.isNegative) ||

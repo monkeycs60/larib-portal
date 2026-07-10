@@ -3,6 +3,7 @@ import { z } from "zod"
 import { revalidatePath } from "next/cache"
 import { authenticatedAction } from "@/actions/safe-action"
 import { updateUser } from "@/lib/services/users"
+import { isSuperAdmin } from "@/lib/permissions"
 
 const UpdateSelfSchema = z.object({
   // Admin can optionally change role and applications; regular users cannot.
@@ -23,7 +24,7 @@ const UpdateSelfSchema = z.object({
 export const updateSelfProfileAction = authenticatedAction
   .inputSchema(UpdateSelfSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const isAdmin = ctx.user.role === 'ADMIN'
+    const isAdmin = isSuperAdmin(ctx.user)
     const birthDate = parsedInput.birthDate ? new Date(parsedInput.birthDate) : null
     const language = parsedInput.language ?? (parsedInput.locale === 'fr' ? 'FR' : 'EN')
 

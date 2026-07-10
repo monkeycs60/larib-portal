@@ -9,6 +9,7 @@ import {
 } from '@/lib/services/bestof-larib';
 import { listAdminTags, listUserTags } from '@/lib/services/bestof-larib-tags';
 import { requireAuth } from '@/lib/auth-guard';
+import { redirect } from 'next/navigation';
 import { Link } from '@/app/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { ChartBar } from 'lucide-react';
@@ -18,8 +19,11 @@ import CasesTable from './components/cases-table';
 import { DicomSelectionBar } from './components/dicom-cases-table-wrapper';
 import { type CasesTableTranslations } from './components/cases-table-fallback';
 import TagsManagerModal from './components/tags-manager-modal';
+import { PageHeader } from '@/app/[locale]/components/page-header';
 import type { BestofCacheKey } from '@/lib/bestof-cache-key';
 import { serialiseBestofCacheKey } from '@/lib/bestof-cache-key';
+import { applicationLink } from '@/lib/application-link';
+import { canAccessApp, canAdminApp } from '@/lib/permissions';
 
 export default async function BestofLaribPage({
 	params,
@@ -31,6 +35,11 @@ export default async function BestofLaribPage({
 	const { locale } = await params;
 	const t = await getTranslations({ locale, namespace: 'bestof' });
 	const session = await requireAuth();
+
+	if (!canAccessApp(session.user, 'BESTOF_LARIB')) {
+		redirect(applicationLink(locale, '/dashboard'));
+	}
+
 	const sp = await searchParams;
 
 	const asArray = (
@@ -56,7 +65,7 @@ export default async function BestofLaribPage({
 		return filtered as (typeof validDifficulties)[number][];
 	};
 
-	const isAdmin = session?.user?.role === 'ADMIN';
+	const isAdmin = canAdminApp(session.user, 'BESTOF_LARIB');
 	const rawStatus = typeof sp?.status === 'string' ? sp.status : undefined;
 	const statusFilter: 'PUBLISHED' | 'DRAFT' | undefined =
 		isAdmin && rawStatus && ['PUBLISHED', 'DRAFT'].includes(rawStatus)
@@ -205,10 +214,7 @@ export default async function BestofLaribPage({
 	return (
 		<div className='space-y-4 py-6 px-8 mx-auto'>
 			<div className='flex items-center justify-between'>
-				<div>
-					<h1 className='text-2xl font-semibold'>{t('title')}</h1>
-					<p className='text-sm text-muted-foreground'>{t('subtitle')}</p>
-				</div>
+				<PageHeader title={t('title')} subtitle={t('subtitle')} />
 				<div className='flex items-center gap-3'>
 					<TagsManagerModal isAdmin={isAdmin} />
 					{isAdmin ? (

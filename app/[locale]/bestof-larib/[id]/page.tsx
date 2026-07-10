@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { getCaseById } from '@/lib/services/bestof-larib';
 import { Badge } from '@/components/ui/badge';
 import { requireAuth } from '@/lib/auth-guard';
+import { canAdminApp } from '@/lib/permissions';
 import WorkArea, { PrefillState } from './work-area';
 import type { CaseAttemptSummary } from '@/lib/services/bestof-larib-attempts';
 import { getUserCaseState, listUserCaseAttempts } from '@/lib/services/bestof-larib-attempts';
@@ -38,7 +39,7 @@ async function CaseViewPageContent({
 			: c.difficulty === 'INTERMEDIATE'
 			? 'intermediate'
 			: 'advanced';
-	const isAdmin = (session?.user?.role ?? 'USER') === 'ADMIN';
+	const isAdmin = canAdminApp(session.user, 'BESTOF_LARIB');
 
 	const userId = session?.user?.id;
 	const [prefillState, attempts, userTags, userTagIds] = userId
@@ -50,7 +51,8 @@ async function CaseViewPageContent({
 				analysis: {
 					lvef: s.lastAttempt?.lvef ?? undefined,
 					kinetic: s.lastAttempt?.kinetic ?? undefined,
-					lge: s.lastAttempt?.lge ?? undefined,
+					lgePresent: s.lastAttempt?.lgePresent ?? undefined,
+					lgeDetails: s.lastAttempt?.lgeDetails ?? undefined,
 					finalDx: s.lastAttempt?.finalDx ?? undefined,
 				},
 				report: s.lastAttempt?.report ?? null,
@@ -67,7 +69,7 @@ async function CaseViewPageContent({
 		if (!shouldStartNewAttempt) return prefillState;
 		return {
 			...prefillState,
-			analysis: { lvef: '', kinetic: '', lge: '', finalDx: '' },
+			analysis: { lvef: '', kinetic: '', lgePresent: false, lgeDetails: '', finalDx: '' },
 			report: '',
 			validatedAt: null,
 		} satisfies PrefillState;
@@ -84,14 +86,14 @@ async function CaseViewPageContent({
                     ) : null}
                     {isAdmin ? (
                         <Badge
-                            variant='outline'
-                            className={
+                            variant={
                                 c.difficulty === 'BEGINNER'
-                                    ? 'border-green-500 text-green-700'
+                                    ? 'success'
                                     : c.difficulty === 'INTERMEDIATE'
-                                    ? 'border-rose-500 text-rose-700'
-                                    : 'border-red-500 text-red-700'
-                            }>
+                                    ? 'warning'
+                                    : 'danger'
+                            }
+                            className='rounded-full px-3 py-1'>
                             {t(`difficulty.${difficultyLabel}`)}
                         </Badge>
                     ) : null}

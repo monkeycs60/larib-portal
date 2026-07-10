@@ -312,7 +312,7 @@ export function EditLeaveDialog({
           <div className='grid gap-3 md:grid-cols-2'>
             <div className='space-y-2'>
               <Label>{translations.startLabel}</Label>
-              <div className='rounded-md border bg-muted/30 p-2 text-sm'>
+              <div className='rounded-md border border-line bg-gray-50 p-2 text-sm'>
                 {editSelectedRange?.from
                   ? format(editSelectedRange.from, 'PPP', { locale: dateLocale })
                   : '—'}
@@ -320,7 +320,7 @@ export function EditLeaveDialog({
             </div>
             <div className='space-y-2'>
               <Label>{translations.endLabel}</Label>
-              <div className='rounded-md border bg-muted/30 p-2 text-sm'>
+              <div className='rounded-md border border-line bg-gray-50 p-2 text-sm'>
                 {editSelectedRange?.to
                   ? format(editSelectedRange.to, 'PPP', { locale: dateLocale })
                   : '—'}
@@ -372,7 +372,7 @@ export function EditLeaveDialog({
               width: 6px;
               height: 6px;
               border-radius: 50%;
-              background-color: rgb(220 38 38);
+              background-color: var(--color-danger-500);
               box-shadow: 0 0 0 1px white;
             }
             .day-range-start.day-range-end {
@@ -388,25 +388,22 @@ export function EditLeaveDialog({
             }
           `}</style>
 
-          <div className='flex items-center gap-2 text-xs text-muted-foreground'>
-            <span
-              className='inline-block h-2 w-2 rounded-full'
-              style={{ backgroundColor: 'rgb(220 38 38)', boxShadow: '0 0 0 1px white' }}
-            />
+          <div className='flex items-center gap-2 text-xs text-text-secondary'>
+            <span className='inline-block h-2 w-2 rounded-full bg-danger-500 ring-1 ring-white' />
             {translations.holidayLegend}
           </div>
 
           {editLeaveCalculation && (
             <div className='space-y-3'>
               <div className='grid grid-cols-3 gap-3'>
-                <div className='rounded-lg border bg-card p-3 text-center'>
-                  <div className='text-xs text-muted-foreground mb-1'>
+                <div className='rounded-lg border border-line bg-bg-surface p-3 text-center'>
+                  <div className='text-xs text-text-secondary mb-1'>
                     {translations.requestedDays}
                   </div>
-                  <div className='text-2xl font-semibold text-primary'>
+                  <div className='text-2xl font-semibold text-text-primary'>
                     {editLeaveCalculation.requestedDays}
                   </div>
-                  <div className='text-xs text-muted-foreground'>
+                  <div className='text-xs text-text-secondary'>
                     {pluralize(
                       editLeaveCalculation.requestedDays,
                       translations.day,
@@ -414,14 +411,14 @@ export function EditLeaveDialog({
                     )}
                   </div>
                 </div>
-                <div className='rounded-lg border bg-card p-3 text-center'>
-                  <div className='text-xs text-muted-foreground mb-1'>
+                <div className='rounded-lg border border-line bg-bg-surface p-3 text-center'>
+                  <div className='text-xs text-text-secondary mb-1'>
                     {translations.currentRemaining}
                   </div>
                   <div className='text-2xl font-semibold'>
                     {editLeaveCalculation.currentRemaining}
                   </div>
-                  <div className='text-xs text-muted-foreground'>
+                  <div className='text-xs text-text-secondary'>
                     {pluralize(
                       editLeaveCalculation.currentRemaining,
                       translations.day,
@@ -429,18 +426,18 @@ export function EditLeaveDialog({
                     )}
                   </div>
                 </div>
-                <div className='rounded-lg border bg-card p-3 text-center'>
-                  <div className='text-xs text-muted-foreground mb-1'>
+                <div className='rounded-lg border border-line bg-bg-surface p-3 text-center'>
+                  <div className='text-xs text-text-secondary mb-1'>
                     {translations.afterRequest}
                   </div>
                   <div
                     className={`text-2xl font-semibold ${
-                      editLeaveCalculation.isNegative ? 'text-destructive' : 'text-green-600'
+                      editLeaveCalculation.isNegative ? 'text-danger-600' : 'text-success-600'
                     }`}
                   >
                     {editLeaveCalculation.remainingAfter}
                   </div>
-                  <div className='text-xs text-muted-foreground'>
+                  <div className='text-xs text-text-secondary'>
                     {pluralize(
                       Math.abs(editLeaveCalculation.remainingAfter),
                       translations.day,
@@ -452,8 +449,8 @@ export function EditLeaveDialog({
 
               {(editLeaveCalculation.weekendsExcluded > 0 ||
                 editLeaveCalculation.holidaysExcluded.length > 0) && (
-                <div className='rounded-lg border bg-muted/30 p-3'>
-                  <div className='flex items-center gap-2 text-sm text-muted-foreground mb-2'>
+                <div className='rounded-lg border border-line bg-gray-50 p-3'>
+                  <div className='flex items-center gap-2 text-sm text-text-secondary mb-2'>
                     <Info className='h-4 w-4' />
                     {translations.excludedDays}
                   </div>
@@ -467,7 +464,7 @@ export function EditLeaveDialog({
                       <Badge
                         key={holiday.date.toISOString()}
                         variant='outline'
-                        className='bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800'
+                        className='bg-coral-50 border-coral-200'
                       >
                         <CalendarIcon className='h-3 w-3 mr-1' />
                         {format(holiday.date, 'd MMM', { locale: dateLocale })} - {holiday.name}
@@ -510,6 +507,7 @@ export function EditLeaveDialog({
             </Button>
             <Button
               type='submit'
+              variant='primary'
               disabled={
                 isUpdating ||
                 Boolean(editLeaveCalculation?.isNegative) ||

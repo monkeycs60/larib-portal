@@ -13,6 +13,8 @@ import {
 import { listExamTypes, listDiseaseTags } from '@/lib/services/bestof-larib';
 import { listAdminTags } from '@/lib/services/bestof-larib-tags';
 import { applicationLink } from '@/lib/application-link';
+import { canAdminApp } from '@/lib/permissions';
+import { PageHeader } from '@/app/[locale]/components/page-header';
 import { Link } from '@/app/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -34,7 +36,7 @@ async function BestofStatisticsPageContent({
   const t = await getTranslations({ locale, namespace: 'bestof.statistics' });
   const session = await requireAuth();
 
-  if (!session || session.user.role !== 'ADMIN') {
+  if (!canAdminApp(session.user, 'BESTOF_LARIB')) {
     redirect(applicationLink(locale, '/bestof-larib'));
   }
 
@@ -156,8 +158,7 @@ async function BestofStatisticsPageContent({
               </Button>
             </Link>
           </div>
-          <h1 className='text-2xl font-semibold'>{t('title')}</h1>
-          <p className='text-sm text-muted-foreground'>{t('subtitle')}</p>
+          <PageHeader title={t('title')} subtitle={t('subtitle')} />
         </div>
       </div>
 

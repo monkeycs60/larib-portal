@@ -17,15 +17,22 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 import { useState } from 'react'
 import { useAction } from 'next-safe-action/hooks'
 import { createUserInviteAction, createPositionAction, updatePositionAction, deletePositionsAction } from './actions'
 import { toast } from 'sonner'
-import { Check } from 'lucide-react'
+import { Check, UserPlus, Send, ArrowRight, Plus } from 'lucide-react'
 import DeletableSelectManager from '@/app/[locale]/bestof-larib/components/deletable-select-manager'
+import { FileUpload } from '@/components/ui/file-upload'
 
 const AVAILABLE_APPLICATIONS = ['BESTOF_LARIB', 'CONGES'] as const
 type AvailableApplication = (typeof AVAILABLE_APPLICATIONS)[number]
+
+const APP_DOT: Record<AvailableApplication, string> = {
+  BESTOF_LARIB: '#ec3b68',
+  CONGES: '#6366f1',
+}
 
 const AddUserSchema = z.object({
   email: z.string().email(),
@@ -36,8 +43,10 @@ const AddUserSchema = z.object({
   arrivalDate: z.string().min(1),
   departureDate: z.string().min(1),
   applications: z.array(z.enum(["BESTOF_LARIB","CONGES"])),
+  adminApplications: z.array(z.enum(["BESTOF_LARIB","CONGES"])),
   emailLanguage: z.enum(['en','fr']),
-  congesTotalDays: z.number().int().min(0).max(365).optional()
+  congesTotalDays: z.number().int().min(0).max(365).optional(),
+  profilePhoto: z.string().url().optional().nullable(),
 })
 
 type AddUserValues = z.infer<typeof AddUserSchema>
@@ -123,13 +132,22 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
 
   const { register, handleSubmit, setValue, watch, reset } = useForm<AddUserValues>({
     resolver: zodResolver(AddUserSchema),
-    defaultValues: { role: 'USER', applications: [], emailLanguage: (locale as 'en' | 'fr') },
+    defaultValues: { role: 'USER', applications: [], adminApplications: [], emailLanguage: (locale as 'en' | 'fr'), profilePhoto: null },
   })
 
   const apps = new Set(watch('applications'))
+  const adminApps = new Set(watch('adminApplications'))
   function toggleApp(app: AvailableApplication) {
-    if (apps.has(app)) apps.delete(app); else apps.add(app)
+    if (apps.has(app)) {
+      apps.delete(app)
+    } else {
+      apps.add(app)
+    }
     setValue('applications', Array.from(apps))
+  }
+  function toggleAdminApp(app: AvailableApplication) {
+    if (adminApps.has(app)) adminApps.delete(app); else adminApps.add(app)
+    setValue('adminApplications', Array.from(adminApps))
   }
 
   async function submitUser(values: AddUserValues) {
@@ -160,7 +178,6 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
 
   // Email preview values
   const previewEmail = watch('email') || 'user@example.com'
-  const previewPos = watch('position')
   const previewEnd = watch('departureDate')
   const emailLang = watch('emailLanguage') || 'en'
 
@@ -179,142 +196,234 @@ export function AddUserDialog({ positions, locale }: { positions: Array<{ id: st
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm">{t('addUser')}</Button>
+        <Button size="sm"><Plus className="size-4" />{t('addUser')}</Button>
       </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t('addNewUser')}</DialogTitle>
-        </DialogHeader>
-        <form className="space-y-3" onSubmit={onSubmit}>
-          <div className="grid md:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm mb-1">{t('firstName')}</label>
-              <Input {...register('firstName')} />
-            </div>
-            <div>
-              <label className="block text-sm mb-1">{t('lastName')}</label>
-              <Input {...register('lastName')} />
-            </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm mb-1">{t('email')}</label>
-              <Input type="email" required {...register('email')} />
-            </div>
-            <div>
-              <label className="block text-sm mb-1">{t('role')}</label>
-              <Select {...register('role')}>
-                <option value="USER">{t('roleUser')}</option>
-                <option value="ADMIN">{t('roleAdmin')}</option>
-              </Select>
-            </div>
-            <div>
-              <div className="flex items-center justify-between">
-                <label className="block text-sm mb-1">{t('position')}</label>
-                <button type="button" className="text-xs text-blue-600" onClick={() => setManagePositionsOpen(true)}>
-                  {t('manage')}
-                </button>
+      <DialogContent className="sm:max-w-2xl p-0 gap-0 max-h-[90vh] overflow-hidden flex flex-col">
+        <form className="flex flex-1 min-h-0 flex-col" onSubmit={onSubmit}>
+          <div className="relative bg-bg-surface px-6 py-4">
+            <span className="absolute left-0 top-0 h-full w-1 rounded-l-lg bg-coral-500" />
+            <div className="flex items-start gap-3">
+              <div className="rounded-xl bg-coral-50 p-2.5 text-coral-600">
+                <UserPlus className="h-5 w-5" />
               </div>
-              <Select {...register('position')}>
-                <option value="">{t('selectPlaceholder')}</option>
-                {posList.map((position) => (
-                  <option key={position.id} value={position.name}>{position.name}</option>
-                ))}
-              </Select>
-            </div>
-            <div>
-              <label className="block text-sm mb-1">{t('arrivalDate')}</label>
-              <Input type="date" required {...register('arrivalDate')} />
-            </div>
-            <div>
-              <label className="block text-sm mb-1">{t('departureDate')}</label>
-              <Input type="date" required {...register('departureDate')} />
-            </div>
-            <div>
-              <label className="block text-sm mb-1">{t('emailLanguage')}</label>
-              <Select {...register('emailLanguage')}>
-                <option value="en">{t('emailLanguageEn')}</option>
-                <option value="fr">{t('emailLanguageFr')}</option>
-              </Select>
+              <DialogHeader className="gap-0.5">
+                <DialogTitle className="text-lg font-bold">{t('addNewUser')}</DialogTitle>
+                <p className="text-sm text-text-secondary">{t('addUserSubtitle')}</p>
+              </DialogHeader>
             </div>
           </div>
 
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <div className="text-sm font-medium">{t('applications')}</div>
-              <div className="text-xs font-medium px-2 py-1 rounded-full bg-muted">
-                {apps.size} / {AVAILABLE_APPLICATIONS.length} {t('applicationsSelected')}
+          <div className="flex-1 overflow-y-auto bg-bg-app px-6 py-5 space-y-4">
+            <section className="rounded-xl border border-line bg-bg-surface p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="h-1.5 w-1.5 rounded-full bg-coral-500" />
+                <span className="text-xs font-semibold uppercase tracking-wide text-coral-600">{t('sectionIdentity')}</span>
+                <span className="h-px flex-1 bg-line ml-2" />
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              {AVAILABLE_APPLICATIONS.map((app) => {
-                const isSelected = apps.has(app)
-                return (
-                  <button
-                    type="button"
-                    key={app}
-                    onClick={() => toggleApp(app)}
-                    className={`
-                      relative flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left
-                      ${isSelected
-                        ? 'border-primary bg-primary/5 shadow-sm'
-                        : 'border-muted hover:border-muted-foreground/50 hover:bg-muted/50'
-                      }
-                    `}
-                  >
-                    <div className={`
-                      flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors
-                      ${isSelected
-                        ? 'border-primary bg-primary text-primary-foreground'
-                        : 'border-muted-foreground/30'
-                      }
-                    `}>
-                      {isSelected && <Check className="h-3 w-3" />}
-                    </div>
-                    <span className={`text-sm font-medium ${isSelected ? 'text-foreground' : 'text-muted-foreground'}`}>
-                      {t(`app_${app}`)}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-1.5">{t('firstName')}</label>
+                  <Input {...register('firstName')} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-1.5">{t('lastName')}</label>
+                  <Input {...register('lastName')} />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-text-primary mb-1.5">{t('email')}</label>
+                  <Input type="email" required {...register('email')} />
+                </div>
+              </div>
+            </section>
 
-          {apps.has('CONGES') && (
-            <div>
-              <label className="block text-sm mb-1">{t('leaveDaysLabel')}</label>
-              <Input
-                type="number"
-                min="0"
-                max="365"
-                placeholder="0"
-                onChange={(e) => {
-                  const value = e.target.value
-                  setValue('congesTotalDays', value === '' ? undefined : parseInt(value, 10))
-                }}
+            <section className="rounded-xl border border-line bg-bg-surface p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="h-1.5 w-1.5 rounded-full bg-coral-500" />
+                <span className="text-xs font-semibold uppercase tracking-wide text-coral-600">{t('sectionRoleSchedule')}</span>
+                <span className="h-px flex-1 bg-line ml-2" />
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-1.5">{t('role')}</label>
+                  <Select {...register('role')}>
+                    <option value="USER">{t('roleUser')}</option>
+                    <option value="ADMIN">{t('roleAdmin')}</option>
+                  </Select>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-sm font-medium text-text-primary">{t('position')}</label>
+                    <button type="button" className="text-xs font-medium text-coral-600" onClick={() => setManagePositionsOpen(true)}>
+                      {t('manage')}
+                    </button>
+                  </div>
+                  <Select {...register('position')}>
+                    <option value="">{t('selectPlaceholder')}</option>
+                    {posList.map((position) => (
+                      <option key={position.id} value={position.name}>{position.name}</option>
+                    ))}
+                  </Select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-1.5">{t('arrivalDate')}</label>
+                  <Input type="date" required {...register('arrivalDate')} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-1.5">{t('departureDate')}</label>
+                  <Input type="date" required {...register('departureDate')} />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-text-primary mb-1.5">{t('emailLanguage')}</label>
+                  <Select {...register('emailLanguage')}>
+                    <option value="en">{t('emailLanguageEn')}</option>
+                    <option value="fr">{t('emailLanguageFr')}</option>
+                  </Select>
+                </div>
+              </div>
+            </section>
+
+            <section className="rounded-xl border border-line bg-bg-surface p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="h-1.5 w-1.5 rounded-full bg-coral-500" />
+                <span className="text-xs font-semibold uppercase tracking-wide text-coral-600">{t('sectionProfilePhoto')}</span>
+                <span className="h-px flex-1 bg-line ml-2" />
+              </div>
+              <FileUpload
+                accept="image/*"
+                maxSize={5 * 1024 * 1024}
+                valueUrl={watch('profilePhoto') ?? null}
+                onUploaded={({ url }) => setValue('profilePhoto', url)}
+                onDeleted={() => setValue('profilePhoto', null)}
+                labels={{ select: t('selectImage'), helper: t('profilePhotoHelp') }}
               />
-            </div>
-          )}
+              <input type="hidden" {...register('profilePhoto')} />
+            </section>
 
-          <div className="rounded-md border p-3">
-            <div className="text-sm font-medium mb-2">{t('welcomeEmailPreview')}</div>
-            <div className="text-sm text-muted-foreground">
-              <div><strong>To:</strong> {previewEmail}</div>
-              <div><strong>Subject:</strong> {previewSubject}</div>
-            </div>
-            <div className="mt-2 text-sm bg-gray-50 rounded p-3 border">
-              <p>{previewBody}</p>
-              <p className="mt-2">[{previewLink}]</p>
-              {previewEnd && <p className="mt-2">{previewEndDate}</p>}
-            </div>
+            <section className="rounded-xl border border-line bg-bg-surface p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="h-1.5 w-1.5 rounded-full bg-coral-500" />
+                <span className="text-xs font-semibold uppercase tracking-wide text-coral-600">{t('sectionAllowedApps')}</span>
+                <span className="ml-auto text-xs font-semibold px-2.5 py-1 rounded-full bg-coral-50 text-coral-600">
+                  {apps.size} / {AVAILABLE_APPLICATIONS.length} {t('applicationsSelected')}
+                </span>
+              </div>
+              <div className="rounded-lg border border-line overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-xs uppercase tracking-wide text-text-secondary">{t('appColApp')}</TableHead>
+                      <TableHead className="text-center text-xs uppercase tracking-wide text-text-secondary">{t('appColUser')}</TableHead>
+                      <TableHead className="text-center text-xs uppercase tracking-wide text-text-secondary">{t('appColAdmin')}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {AVAILABLE_APPLICATIONS.map((app) => {
+                      const isSelected = apps.has(app)
+                      const isAdminSelected = adminApps.has(app)
+                      const appLabel = t(`app_${app}`)
+                      return (
+                        <TableRow key={app} className={isSelected || isAdminSelected ? 'bg-coral-50/60' : undefined}>
+                          <TableCell className="text-sm font-medium text-text-primary">
+                            <span className="inline-block h-2 w-2 rounded-full mr-2" style={{ backgroundColor: APP_DOT[app] }} />
+                            {appLabel}
+                          </TableCell>
+                          <TableCell className="p-0 text-center">
+                            <button
+                              type="button"
+                              onClick={() => toggleApp(app)}
+                              aria-pressed={isSelected}
+                              aria-label={`${t('appColUser')} - ${appLabel}`}
+                              className="flex w-full items-center justify-center py-3"
+                            >
+                              <div className={`
+                                flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors
+                                ${isSelected
+                                  ? 'border-coral-500 bg-coral-500 text-white'
+                                  : 'border-gray-300 bg-white'
+                                }
+                              `}>
+                                {isSelected && <Check className="h-3 w-3" />}
+                              </div>
+                            </button>
+                          </TableCell>
+                          <TableCell className="p-0 text-center">
+                            <button
+                              type="button"
+                              onClick={() => toggleAdminApp(app)}
+                              aria-pressed={isAdminSelected}
+                              aria-label={`${t('appColAdmin')} - ${appLabel}`}
+                              className="flex w-full items-center justify-center py-3"
+                            >
+                              <div className={`
+                                flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors
+                                ${isAdminSelected
+                                  ? 'border-coral-500 bg-coral-500 text-white'
+                                  : 'border-gray-300 bg-white'
+                                }
+                              `}>
+                                {isAdminSelected && <Check className="h-3 w-3" />}
+                              </div>
+                            </button>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {apps.has('CONGES') && (
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-text-primary mb-1.5">{t('leaveDaysLabel')}</label>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="365"
+                    placeholder="0"
+                    onChange={(e) => {
+                      const value = e.target.value
+                      setValue('congesTotalDays', value === '' ? undefined : parseInt(value, 10))
+                    }}
+                  />
+                </div>
+              )}
+            </section>
+
+            <section className="rounded-xl border border-line bg-bg-surface p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="h-1.5 w-1.5 rounded-full bg-coral-500" />
+                <span className="text-xs font-semibold uppercase tracking-wide text-coral-600">{t('welcomeEmailPreview')}</span>
+                <span className="h-px flex-1 bg-line ml-2" />
+              </div>
+              <div className="rounded-lg border border-line bg-bg-surface p-4 text-sm">
+                <div>
+                  <span className="text-text-muted">{t('emailTo')} </span>
+                  <span className="text-text-primary">{previewEmail}</span>
+                </div>
+                <div>
+                  <span className="text-text-muted">{t('emailSubjectLabel')} </span>
+                  <span className="text-text-primary">{previewSubject}</span>
+                </div>
+                <div className="my-3 h-px bg-line" />
+                <p className="text-text-secondary">{previewBody}</p>
+                {previewEnd && <p className="mt-2 text-text-secondary">{previewEndDate}</p>}
+                <span className="mt-3 inline-flex items-center gap-1 rounded-lg bg-coral-50 px-3 py-1.5 text-sm font-medium text-coral-600">
+                  {previewLink}
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </span>
+              </div>
+            </section>
           </div>
 
-          <DialogFooter>
+          <div className="flex items-center justify-end gap-3 border-t border-line bg-bg-surface px-6 py-4">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               {t('cancel')}
             </Button>
             <Button type="submit" disabled={isExecuting}>
+              <Send className="h-4 w-4" />
               {isExecuting ? t('creating') : t('createAndSend')}
             </Button>
-          </DialogFooter>
+          </div>
         </form>
       </DialogContent>
 

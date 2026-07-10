@@ -10,11 +10,11 @@ export default function DicomAdminBadge({ caseId }: { caseId: string }) {
   const hasDicoms = casesWithDicoms.has(caseId)
 
   return hasDicoms ? (
-    <Badge className='bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs'>
+    <Badge variant='success' className='text-xs'>
       {t('available')}
     </Badge>
   ) : (
-    <Badge className='bg-red-50 text-red-700 border border-red-200 text-xs'>
+    <Badge variant='danger' className='text-xs'>
       {t('notAvailable')}
     </Badge>
   )

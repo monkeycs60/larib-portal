@@ -1,5 +1,7 @@
 import { createSafeActionClient, DEFAULT_SERVER_ERROR_MESSAGE } from "next-safe-action";
 import { getTypedSession } from "../lib/auth-helpers";
+import type { Application } from '@/app/generated/prisma'
+import { canAdminApp, isSuperAdmin } from '@/lib/permissions'
 // role is now hydrated on session.user in getTypedSession
 
 export const actionClient = createSafeActionClient({
@@ -28,10 +30,17 @@ export const authenticatedAction = actionClient.use(async ({ next }) => {
 
 export const unauthenticatedAction = actionClient;
 
-export const adminOnlyAction = authenticatedAction.use(async ({ next, ctx }) => {
-  const role = ctx.user.role as 'ADMIN' | 'USER' | undefined
-  if (role !== 'ADMIN') {
+export const superAdminAction = authenticatedAction.use(async ({ next, ctx }) => {
+  if (!isSuperAdmin(ctx.user)) {
     throw new Error('Forbidden')
   }
   return next({ ctx })
-});
+})
+
+export const appAdminAction = (app: Application) =>
+  authenticatedAction.use(async ({ next, ctx }) => {
+    if (!canAdminApp(ctx.user, app)) {
+      throw new Error('Forbidden')
+    }
+    return next({ ctx })
+  })
