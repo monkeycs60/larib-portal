@@ -42,6 +42,16 @@ export async function listStudies(): Promise<StudyListItem[]> {
   })
 }
 
+export type StudyOption = { id: string; label: string }
+
+export async function listStudyOptions(): Promise<StudyOption[]> {
+  const studies = await prisma.study.findMany({
+    orderBy: [{ acronym: 'asc' }, { title: 'asc' }],
+    select: { id: true, title: true, acronym: true },
+  })
+  return studies.map((study) => ({ id: study.id, label: study.acronym ?? study.title }))
+}
+
 export type StudyInput = {
   title: string
   acronym?: string | null

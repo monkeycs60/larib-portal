@@ -328,3 +328,30 @@ export async function sendLeaveNotificationEmail(
   const json = await res.json() as { id?: string }
   return { id: json.id ?? '' }
 }
+
+export type AuthorListRequestEmailParams = {
+  recipients: string[]
+  articleTitle: string
+  requesterName: string
+  note: string | null
+}
+
+export async function sendAuthorListRequestEmail(
+  params: AuthorListRequestEmailParams,
+): Promise<{ ok: boolean }> {
+  if (params.recipients.length === 0) return { ok: true }
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) return { ok: false }
+  const from = process.env.RESEND_FROM || 'noreply@your-domain.com'
+  const title = params.articleTitle || 'Untitled publication'
+  const subject = `Author list request — ${title}`
+  const body =
+    `${params.requesterName} requested the author list for "${title}".` +
+    (params.note ? `\n\nContributors reported:\n${params.note}` : '')
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from, to: params.recipients, subject, text: body }),
+  })
+  return { ok: res.ok }
+}
