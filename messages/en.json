@@ -983,6 +983,7 @@
       "linkedStudy": "Linked study",
       "selectStudy": "Select a study",
       "submissionsTitle": "Submissions",
+      "addSubmission": "Add a submission",
       "submissionsHint": "Update a status or log a new submission below.",
       "noSubmission": "No submission yet — add the first one below.",
       "submissionAdded": "Submission added",
