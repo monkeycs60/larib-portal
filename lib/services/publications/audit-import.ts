@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@/app/generated/prisma'
 import type { SubmissionStatusValue } from '@/lib/publications/status-display'
 import type { ArticleStatusValue } from './articles'
 
@@ -46,15 +47,15 @@ export function planAuditWrite(existingTitles: string[], papers: AuditPaper[]): 
 
 export type AuditReport = { createdArticleIds: string[]; skippedTitles: string[]; authorsCreated: number }
 
-async function upsertJournalId(journalName: string): Promise<string> {
+async function upsertJournalId(tx: Prisma.TransactionClient, journalName: string): Promise<string> {
   const name = journalName.trim()
-  const journal = await prisma.journal.upsert({ where: { name }, update: {}, create: { name }, select: { id: true } })
+  const journal = await tx.journal.upsert({ where: { name }, update: {}, create: { name }, select: { id: true } })
   return journal.id
 }
 
-async function findOrCreateAuthorId(input: AuditAuthorInput, counter: { created: number }): Promise<string> {
+async function findOrCreateAuthorId(tx: Prisma.TransactionClient, input: AuditAuthorInput, counter: { created: number }): Promise<string> {
   const { firstName, lastName } = splitAuthorName(input.name)
-  const found = await prisma.author.findFirst({
+  const found = await tx.author.findFirst({
     where: {
       firstName: { equals: firstName, mode: 'insensitive' },
       lastName: { equals: lastName, mode: 'insensitive' },
@@ -62,7 +63,7 @@ async function findOrCreateAuthorId(input: AuditAuthorInput, counter: { created:
     select: { id: true },
   })
   if (found) return found.id
-  const created = await prisma.author.create({ data: { firstName, lastName }, select: { id: true } })
+  const created = await tx.author.create({ data: { firstName, lastName }, select: { id: true } })
   counter.created += 1
   return created.id
 }
@@ -74,32 +75,36 @@ export async function importAuditPapers(papers: AuditPaper[], createdById: strin
   const counter = { created: 0 }
 
   for (const paper of plan.toCreate) {
-    const article = await prisma.article.create({
-      data: { title: paper.title, status: paper.articleStatus, createdById },
-      select: { id: true },
+    const articleId = await prisma.$transaction(async (tx) => {
+      const article = await tx.article.create({
+        data: { title: paper.title, status: paper.articleStatus, createdById },
+        select: { id: true },
+      })
+
+      for (const [index, author] of paper.authors.entries()) {
+        const authorId = await findOrCreateAuthorId(tx, author, counter)
+        await tx.authorship.create({
+          data: { articleId: article.id, authorId, order: index + 1, isCorresponding: author.isCorresponding ?? false },
+        })
+      }
+
+      for (const submission of paper.submissions) {
+        const journalId = await upsertJournalId(tx, submission.journalName)
+        await tx.submission.create({
+          data: {
+            articleId: article.id,
+            journalId,
+            submittedAt: new Date(submission.submittedAt),
+            status: submission.status,
+            notes: paper.notes ?? null,
+          },
+        })
+      }
+
+      return article.id
     })
 
-    for (const [index, author] of paper.authors.entries()) {
-      const authorId = await findOrCreateAuthorId(author, counter)
-      await prisma.authorship.create({
-        data: { articleId: article.id, authorId, order: index + 1, isCorresponding: author.isCorresponding ?? false },
-      })
-    }
-
-    for (const submission of paper.submissions) {
-      const journalId = await upsertJournalId(submission.journalName)
-      await prisma.submission.create({
-        data: {
-          articleId: article.id,
-          journalId,
-          submittedAt: new Date(submission.submittedAt),
-          status: submission.status,
-          notes: paper.notes ?? null,
-        },
-      })
-    }
-
-    createdArticleIds.push(article.id)
+    createdArticleIds.push(articleId)
   }
 
   return { createdArticleIds, skippedTitles: plan.skipped.map((entry) => entry.title), authorsCreated: counter.created }
