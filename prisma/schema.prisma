@@ -57,6 +57,8 @@ model User {
   authoredBy      Author[]
   studiesCreated  Study[]   @relation("StudyCreatedBy")
   articlesCreated Article[] @relation("ArticleCreatedBy")
+  authorRequestsMade     AuthorListRequest[] @relation("AuthorListRequestedBy")
+  authorRequestsResolved AuthorListRequest[] @relation("AuthorListResolvedBy")
 
   @@map("User")
 }
@@ -105,6 +107,13 @@ enum SubmissionStatus {
   MAJOR_REVISIONS
   ACCEPTED
   REJECTED
+  SUBMITTED
+}
+
+enum AuthorListRequestStatus {
+  PENDING
+  RESOLVED
+  DISMISSED
 }
 
 // ---- Bestof Larib domain ----
@@ -420,6 +429,7 @@ model StudyInvestigator {
 model Journal {
   id           String   @id @default(cuid())
   name         String   @unique
+  abbreviation String?
   issn         String?
   publisher    String?
   impactFactor Float?
@@ -504,6 +514,7 @@ model Article {
   study              Study?        @relation(fields: [studyId], references: [id], onDelete: SetNull)
   status             ArticleStatus @default(IN_PREPARATION)
   abstract           String?
+  contributorsNote   String?
   pubmedId           String?
   doi                String?
   publishedJournalId String?
@@ -522,8 +533,26 @@ model Article {
   authorships    Authorship[]
   submissions    Submission[]
   journalTargets JournalTarget[]
+  authorRequests AuthorListRequest[]
 
   @@map("Article")
+}
+
+model AuthorListRequest {
+  id            String                  @id @default(cuid())
+  articleId     String
+  article       Article                 @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  requestedById String
+  requestedBy   User                    @relation("AuthorListRequestedBy", fields: [requestedById], references: [id], onDelete: Cascade)
+  note          String?
+  status        AuthorListRequestStatus @default(PENDING)
+  createdAt     DateTime                @default(now())
+  resolvedAt    DateTime?
+  resolvedById  String?
+  resolvedBy    User?                   @relation("AuthorListResolvedBy", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  @@index([articleId, status])
+  @@map("AuthorListRequest")
 }
 
 model Authorship {
@@ -562,7 +591,7 @@ model Submission {
   journalId         String
   journal           Journal          @relation(fields: [journalId], references: [id], onDelete: Restrict)
   submittedAt       DateTime
-  status            SubmissionStatus @default(UNDER_REVIEW)
+  status            SubmissionStatus @default(SUBMITTED)
   decidedAt         DateTime?
   invitedToResubmit Boolean          @default(false)
   notes             String?
