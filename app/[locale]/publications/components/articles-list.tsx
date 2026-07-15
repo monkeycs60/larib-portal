@@ -20,7 +20,8 @@ export function ArticlesList({ articles }: { articles: ArticleListItem[] }) {
     return articles.filter((article) => {
       if (status && article.status !== status) return false
       if (!needle) return true
-      return article.title.toLowerCase().includes(needle) || (article.publishedJournal?.name ?? '').toLowerCase().includes(needle)
+      const journalName = article.publishedJournal?.name ?? article.submissions[0]?.journal.name ?? ''
+      return article.title.toLowerCase().includes(needle) || journalName.toLowerCase().includes(needle)
     })
   }, [articles, query, status])
 
@@ -55,8 +56,14 @@ export function ArticlesList({ articles }: { articles: ArticleListItem[] }) {
                   {article.title}
                 </Link>
               </TableCell>
-              <TableCell>{article.publishedJournal?.name ?? '—'}</TableCell>
-              <TableCell>{article.publishedAt ? new Date(article.publishedAt).getFullYear() : '—'}</TableCell>
+              <TableCell>{article.publishedJournal?.name ?? article.submissions[0]?.journal.name ?? '—'}</TableCell>
+              <TableCell>
+                {article.publishedAt
+                  ? new Date(article.publishedAt).getFullYear()
+                  : article.submissions[0]?.submittedAt
+                    ? new Date(article.submissions[0].submittedAt).getFullYear()
+                    : '—'}
+              </TableCell>
               <TableCell><Badge variant="secondary">{t(`articles.status.${article.status}`)}</Badge></TableCell>
               <TableCell>{article._count.authorships}</TableCell>
             </TableRow>
