@@ -48,6 +48,10 @@ export function SubmissionHistory({
   const activePrior = activePriorSubmission
     ? { journalName: activePriorSubmission.journalName, status: activePriorSubmission.status }
     : null
+  const latestSubmittedAt = submissions.reduce<string | null>(
+    (latest, submission) => (!latest || submission.submittedAt > latest ? submission.submittedAt : latest),
+    null,
+  )
 
   const statusAction = useAction(updateSubmissionStatusAction, {
     onSuccess() {
@@ -206,6 +210,7 @@ export function SubmissionHistory({
             articleId={articleId}
             journalNames={journalNames}
             activePrior={activePrior}
+            latestSubmittedAt={latestSubmittedAt}
             onAdded={() => {
               setAddOpen(false)
               router.refresh()

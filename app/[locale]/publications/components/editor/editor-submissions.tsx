@@ -74,6 +74,10 @@ export function EditorSubmissions({
         status: activePriorSubmission.status as SubmissionStatusValue,
       }
     : null
+  const latestSubmittedAt = submissions.reduce<string | null>((latest, row) => {
+    const iso = row.submittedAt.toISOString()
+    return !latest || iso > latest ? iso : latest
+  }, null)
   const setStatus = useAction(updateSubmissionStatusAction, {
     onSuccess() { toast.success(t('editor.statusSaved')); setMenuId(null); setPickStatus(null); done() },
     onError() { toast.error(t('editor.actionError')) },
@@ -131,6 +135,7 @@ export function EditorSubmissions({
               articleId={articleId}
               journalNames={journalNames}
               activePrior={activePrior}
+              latestSubmittedAt={latestSubmittedAt}
               onAdded={() => {
                 setAddOpen(false)
                 done()

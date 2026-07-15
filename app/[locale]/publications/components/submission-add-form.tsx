@@ -25,11 +25,13 @@ export function SubmissionAddForm({
   articleId,
   journalNames,
   activePrior,
+  latestSubmittedAt,
   onAdded,
 }: {
   articleId: string
   journalNames: string[]
   activePrior: ActivePrior | null
+  latestSubmittedAt: string | null
   onAdded: () => void
 }) {
   const t = useTranslations('publications')
@@ -54,9 +56,17 @@ export function SubmissionAddForm({
     add.execute({ articleId, journalName: journal.trim(), submittedAt: date })
   }
 
+  // A backfilled (older) submission never supersedes the active one — it is
+  // logged as rejected server-side — so only the most recent submission needs
+  // the "this will reject the current one" confirmation.
+  function isNewLatest() {
+    if (!latestSubmittedAt) return true
+    return new Date(date).getTime() >= new Date(latestSubmittedAt).getTime()
+  }
+
   function attemptAdd() {
     if (!journal.trim() || !date) return
-    if (activePrior) setConfirmOpen(true)
+    if (activePrior && isNewLatest()) setConfirmOpen(true)
     else doAdd()
   }
 

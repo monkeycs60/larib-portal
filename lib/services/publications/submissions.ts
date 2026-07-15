@@ -28,13 +28,33 @@ export type AddSubmissionInput = {
   submittedAt: Date
 }
 
-// A new submission is always logged as SUBMITTED (a paper can only be actively
-// under review at one journal at a time, so any prior active submissions are
-// marked rejected as of the new submission date). The decision + its date are
-// captured later via updateSubmissionStatus.
+// The active (under-review) submission is always the most recent one. So:
+// - if a later submission already exists, the new one is a historical backfill and
+//   is logged as REJECTED (superseded as of that later submission);
+// - otherwise the new one is the most recent → logged as SUBMITTED (active), and any
+//   still-active prior submission is rejected as of this new submission date.
+// The decision + its date are captured later via updateSubmissionStatus.
 export async function addSubmission(input: AddSubmissionInput): Promise<{ id: string }> {
   const journalId = await findOrCreateJournalId(input.journalName)
   return prisma.$transaction(async (tx) => {
+    const later = await tx.submission.findFirst({
+      where: { articleId: input.articleId, submittedAt: { gt: input.submittedAt } },
+      orderBy: { submittedAt: 'asc' },
+      select: { submittedAt: true },
+    })
+    if (later) {
+      return tx.submission.create({
+        data: {
+          articleId: input.articleId,
+          journalId,
+          submittedAt: input.submittedAt,
+          status: 'REJECTED',
+          decidedAt: later.submittedAt,
+        },
+        select: { id: true },
+      })
+    }
+
     const priorActive = await tx.submission.findMany({
       where: { articleId: input.articleId, status: { not: 'REJECTED' } },
       select: { id: true },
