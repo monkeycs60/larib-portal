@@ -114,7 +114,7 @@ function PublicationRow({
             >
               {t(`myPub.type.${item.type}`)}
             </span>
-            <span className="block text-sm font-bold leading-snug text-text-primary">{item.title}</span>
+            <span className="block text-sm font-bold leading-snug text-text-primary">{item.title || t('myPub.untitled')}</span>
             <AuthorLine authors={item.authors} />
           </div>
         </div>
