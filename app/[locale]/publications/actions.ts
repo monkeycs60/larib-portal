@@ -2,7 +2,12 @@
 
 import { z } from 'zod'
 import { revalidateTag } from 'next/cache'
-import { appAdminAction } from '@/actions/safe-action'
+import { appAdminAction, authenticatedAction } from '@/actions/safe-action'
+import { canAccessApp, canAdminApp } from '@/lib/permissions'
+import { addSubmission, updateSubmissionStatus, updateSubmission, deleteSubmission, userOwnsSubmission, SUBMISSION_STATUSES } from '@/lib/services/publications/submissions'
+import { userIsAuthorOfArticle } from '@/lib/services/publications/my-publications'
+import { createDraftArticle, updateArticleCore, deleteDraft, userIsFirstAuthor } from '@/lib/services/publications/publication-editor'
+import { createAuthorListRequest, resolveAuthorRequest, PUBLICATIONS_REQUESTS_TAG } from '@/lib/services/publications/author-requests'
 import { searchByAuthor, fetchByPmids } from '@/lib/services/publications/pubmed'
 import {
   importRecords,
@@ -13,7 +18,8 @@ import {
 import { updateAuthor, deleteAuthor, mergeAuthors, recomputeAuthorCentres, createAuthor, isPrismaKnownError } from '@/lib/services/publications/authors'
 import { backfillAffiliations, PUBLICATIONS_CENTRES_TAG, PUBLICATIONS_AFFILIATIONS_TAG } from '@/lib/services/publications/affiliations'
 import { renameCentre, setCentreOwn, deleteCentre, mergeCentres } from '@/lib/services/publications/centres'
-import { updateArticleStatus, ARTICLE_STATUSES } from '@/lib/services/publications/articles'
+import { updateArticleStatus, updateArticleType, ARTICLE_STATUSES } from '@/lib/services/publications/articles'
+import { ARTICLE_TYPE_VALUES } from '@/lib/publications/article-type'
 import { createJournal, updateJournal, deleteJournal, isPrismaKnownError as isJournalError } from '@/lib/services/publications/journals'
 import { searchCrossref } from '@/lib/services/publications/journals-catalog'
 import { refreshJournalSjr } from '@/lib/services/publications/sjr'
@@ -142,6 +148,14 @@ export const updateArticleStatusAction = appAdminAction('PUBLICATIONS')
     return updated
   })
 
+export const updateArticleTypeAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({ id: z.string().min(1), type: z.enum(ARTICLE_TYPE_VALUES) }))
+  .action(async ({ parsedInput }) => {
+    const updated = await updateArticleType(parsedInput.id, parsedInput.type)
+    revalidateTag(PUBLICATIONS_ARTICLES_TAG)
+    return updated
+  })
+
 const JournalInput = z.object({
   name: z.string().min(1),
   issn: z.string().optional().nullable(),
@@ -249,4 +263,131 @@ export const deleteStudyAction = appAdminAction('PUBLICATIONS')
     const deleted = await deleteStudy(parsedInput.id)
     revalidateTag(PUBLICATIONS_STUDIES_TAG)
     return deleted
+  })
+
+// ---- My Publications: submission tracking (user-owned) ----
+
+export const addSubmissionAction = authenticatedAction
+  .inputSchema(
+    z.object({
+      articleId: z.string().min(1),
+      journalName: z.string().min(1),
+      submittedAt: z.string().min(1),
+      status: z.enum(SUBMISSION_STATUSES),
+    }),
+  )
+  .action(async ({ parsedInput, ctx }) => {
+    if (!canAccessApp(ctx.user, 'PUBLICATIONS')) throw new Error('Forbidden')
+    if (!(await userIsAuthorOfArticle(ctx.userId, parsedInput.articleId))) throw new Error('Forbidden')
+    return addSubmission({
+      articleId: parsedInput.articleId,
+      journalName: parsedInput.journalName,
+      submittedAt: new Date(parsedInput.submittedAt),
+      status: parsedInput.status,
+    })
+  })
+
+export const updateSubmissionStatusAction = authenticatedAction
+  .inputSchema(
+    z.object({
+      submissionId: z.string().min(1),
+      status: z.enum(SUBMISSION_STATUSES),
+      decidedAt: z.string().min(1).nullable(),
+    }),
+  )
+  .action(async ({ parsedInput, ctx }) => {
+    if (!canAccessApp(ctx.user, 'PUBLICATIONS')) throw new Error('Forbidden')
+    if (!(await userOwnsSubmission(ctx.userId, parsedInput.submissionId))) throw new Error('Forbidden')
+    return updateSubmissionStatus({
+      submissionId: parsedInput.submissionId,
+      status: parsedInput.status,
+      decidedAt: parsedInput.decidedAt ? new Date(parsedInput.decidedAt) : null,
+    })
+  })
+
+// ---- User publication editor ----
+
+export const createDraftArticleAction = authenticatedAction
+  .inputSchema(z.object({}))
+  .action(async ({ ctx }) => {
+    if (!canAccessApp(ctx.user, 'PUBLICATIONS')) throw new Error('Forbidden')
+    return createDraftArticle(ctx.userId)
+  })
+
+export const updateArticleCoreAction = authenticatedAction
+  .inputSchema(
+    z.object({
+      id: z.string().min(1),
+      title: z.string(),
+      type: z.enum(ARTICLE_TYPE_VALUES),
+      status: z.enum(ARTICLE_STATUSES),
+      studyId: z.string().nullable(),
+      pubmedId: z.string().nullable(),
+      doi: z.string().nullable(),
+      contributorsNote: z.string().nullable(),
+    }),
+  )
+  .action(async ({ parsedInput, ctx }) => {
+    const canEdit = canAdminApp(ctx.user, 'PUBLICATIONS') || (await userIsFirstAuthor(ctx.userId, parsedInput.id))
+    if (!canEdit) throw new Error('Forbidden')
+    const { id, ...rest } = parsedInput
+    const updated = await updateArticleCore(id, {
+      title: rest.title,
+      type: rest.type,
+      status: rest.status,
+      studyId: rest.studyId || null,
+      pubmedId: rest.pubmedId || null,
+      doi: rest.doi || null,
+      contributorsNote: rest.contributorsNote || null,
+    })
+    revalidateTag(PUBLICATIONS_ARTICLES_TAG)
+    return updated
+  })
+
+export const deleteDraftArticleAction = authenticatedAction
+  .inputSchema(z.object({ id: z.string().min(1) }))
+  .action(async ({ parsedInput, ctx }) => {
+    const canEdit = canAdminApp(ctx.user, 'PUBLICATIONS') || (await userIsFirstAuthor(ctx.userId, parsedInput.id))
+    if (!canEdit) throw new Error('Forbidden')
+    return deleteDraft(parsedInput.id)
+  })
+
+export const updateSubmissionAction = authenticatedAction
+  .inputSchema(z.object({ submissionId: z.string().min(1), journalName: z.string().min(1), submittedAt: z.string().min(1) }))
+  .action(async ({ parsedInput, ctx }) => {
+    if (!canAccessApp(ctx.user, 'PUBLICATIONS')) throw new Error('Forbidden')
+    if (!(await userOwnsSubmission(ctx.userId, parsedInput.submissionId))) throw new Error('Forbidden')
+    return updateSubmission({
+      submissionId: parsedInput.submissionId,
+      journalName: parsedInput.journalName,
+      submittedAt: new Date(parsedInput.submittedAt),
+    })
+  })
+
+export const deleteSubmissionAction = authenticatedAction
+  .inputSchema(z.object({ submissionId: z.string().min(1) }))
+  .action(async ({ parsedInput, ctx }) => {
+    if (!canAccessApp(ctx.user, 'PUBLICATIONS')) throw new Error('Forbidden')
+    if (!(await userOwnsSubmission(ctx.userId, parsedInput.submissionId))) throw new Error('Forbidden')
+    return deleteSubmission(parsedInput.submissionId)
+  })
+
+export const requestAuthorListAction = authenticatedAction
+  .inputSchema(z.object({ articleId: z.string().min(1), note: z.string().nullable() }))
+  .action(async ({ parsedInput, ctx }) => {
+    if (!(await userIsAuthorOfArticle(ctx.userId, parsedInput.articleId))) throw new Error('Forbidden')
+    try {
+      return await createAuthorListRequest(parsedInput.articleId, ctx.userId, parsedInput.note || null)
+    } catch (error) {
+      if (error instanceof Error && error.message === 'REQUEST_EXISTS') throw new Error('REQUEST_EXISTS')
+      throw error
+    }
+  })
+
+export const resolveAuthorRequestAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({ id: z.string().min(1), outcome: z.enum(['RESOLVED', 'DISMISSED']) }))
+  .action(async ({ parsedInput, ctx }) => {
+    const result = await resolveAuthorRequest(parsedInput.id, ctx.userId, parsedInput.outcome)
+    revalidateTag(PUBLICATIONS_REQUESTS_TAG)
+    return result
   })
