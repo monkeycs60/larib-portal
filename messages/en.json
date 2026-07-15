@@ -995,6 +995,9 @@
       "deleteSubmissionConfirm": "This permanently removes this submission from the history.",
       "saveSubmission": "Save",
       "cancel": "Cancel",
+      "confirmRejectTitle": "Only one active submission",
+      "confirmRejectBody": "This paper is currently under review at {journal} ({status}). Adding this submission will mark that one as rejected.",
+      "confirmReject": "Confirm & reject previous",
       "journalListTitle": "Journal list",
       "journalQueueSubtitle": "Submission queue proposed by the admin · read-only.",
       "journalQueueEmpty": "No target journals proposed yet."

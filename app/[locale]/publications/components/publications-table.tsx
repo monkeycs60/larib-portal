@@ -77,11 +77,13 @@ function DateTag({ label, accepted }: { label: string; accepted?: boolean }) {
 function PublicationRow({
   item,
   locale,
+  journalNames,
   expanded,
   onToggle,
 }: {
   item: MyPublicationItem
   locale: string
+  journalNames: string[]
   expanded: boolean
   onToggle: () => void
 }) {
@@ -200,7 +202,7 @@ function PublicationRow({
 
       {expanded && (
         <div className="px-5 pb-4">
-          <SubmissionHistory articleId={item.id} submissions={item.submissions} locale={locale} />
+          <SubmissionHistory articleId={item.id} submissions={item.submissions} locale={locale} journalNames={journalNames} />
         </div>
       )}
     </div>
@@ -210,11 +212,13 @@ function PublicationRow({
 export function PublicationsTable({
   rows,
   locale,
+  journalNames,
   expansion,
   sort,
 }: {
   rows: MyPublicationItem[]
   locale: string
+  journalNames: string[]
   expansion: Expansion
   sort: Sort
 }) {
@@ -252,6 +256,7 @@ export function PublicationsTable({
             key={item.id}
             item={item}
             locale={locale}
+            journalNames={journalNames}
             expanded={expansion.isOpen(item.id)}
             onToggle={() => expansion.toggle(item.id)}
           />

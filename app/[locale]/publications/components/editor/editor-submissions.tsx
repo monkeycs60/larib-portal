@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useAction } from 'next-safe-action/hooks'
 import { toast } from 'sonner'
-import { Plus, Pencil, Trash2, ChevronDown, Check, X } from 'lucide-react'
+import { Plus, Pencil, Trash2, ChevronDown, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import {
@@ -27,41 +27,18 @@ import {
 } from '@/lib/publications/status-display'
 import type { PublicationEditData } from '@/lib/services/publications/publication-editor'
 import {
-  addSubmissionAction,
   updateSubmissionAction,
   updateSubmissionStatusAction,
   deleteSubmissionAction,
 } from '../../actions'
 import { CollapsibleCard } from './collapsible-card'
+import { JournalField } from '../journal-field'
+import { SubmissionAddForm } from '../submission-add-form'
 
 type SubmissionRow = PublicationEditData['submissions'][number]
 
 function isPending(status: SubmissionStatusValue): boolean {
   return status === 'SUBMITTED' || status === 'UNDER_REVIEW'
-}
-
-function JournalField({ value, onChange, placeholder }: { value: string; onChange: (value: string) => void; placeholder?: string }) {
-  return (
-    <div className="relative w-full">
-      <Input
-        list="submission-journals"
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder={placeholder}
-        className="h-9 w-full pr-8"
-      />
-      {value && (
-        <button
-          type="button"
-          aria-label="Clear"
-          onClick={() => onChange('')}
-          className="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted transition hover:text-text-primary"
-        >
-          <X className="h-4 w-4" strokeWidth={2.2} />
-        </button>
-      )}
-    </div>
-  )
 }
 
 export function EditorSubmissions({
@@ -81,8 +58,6 @@ export function EditorSubmissions({
   const formatIso = (value: string | null) => (value ? fmt.format(new Date(value)) : '')
 
   const [addOpen, setAddOpen] = useState(false)
-  const [newJournal, setNewJournal] = useState('')
-  const [newDate, setNewDate] = useState('')
   const [menuId, setMenuId] = useState<string | null>(null)
   const [pickStatus, setPickStatus] = useState<SubmissionStatusValue | null>(null)
   const [pickDate, setPickDate] = useState('')
@@ -92,10 +67,13 @@ export function EditorSubmissions({
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const done = () => router.refresh()
-  const add = useAction(addSubmissionAction, {
-    onSuccess() { toast.success(t('editor.submissionAdded')); setAddOpen(false); setNewJournal(''); setNewDate(''); done() },
-    onError() { toast.error(t('editor.actionError')) },
-  })
+  const activePriorSubmission = submissions.filter((row) => row.status !== 'REJECTED').at(-1) ?? null
+  const activePrior = activePriorSubmission
+    ? {
+        journalName: activePriorSubmission.journal.abbreviation ?? activePriorSubmission.journal.name,
+        status: activePriorSubmission.status as SubmissionStatusValue,
+      }
+    : null
   const setStatus = useAction(updateSubmissionStatusAction, {
     onSuccess() { toast.success(t('editor.statusSaved')); setMenuId(null); setPickStatus(null); done() },
     onError() { toast.error(t('editor.actionError')) },
@@ -145,36 +123,19 @@ export function EditorSubmissions({
           </button>
         }
       >
-        <datalist id="submission-journals">
-          {journalNames.map((name) => (
-            <option key={name} value={name} />
-          ))}
-        </datalist>
         <p className="text-sm text-text-secondary">{t('editor.submissionsHint')}</p>
 
         {addOpen && (
-          <div className="mt-3 rounded-xl border border-dashed border-coral-200 bg-coral-50/40 p-3.5 dark:border-coral-500/30 dark:bg-coral-500/[0.05]">
-            <p className="mb-3 text-[11.5px] font-semibold text-text-muted">{t('myPub.addNote')}</p>
-            <div className="space-y-2.5">
-              <label className="flex flex-col gap-1.5">
-                <span className="text-[11px] font-semibold text-text-secondary">{t('myPub.col.journal')}</span>
-                <JournalField value={newJournal} onChange={setNewJournal} placeholder={t('myPub.journalPlaceholder')} />
-              </label>
-              <div className="flex flex-wrap items-end gap-2.5">
-                <label className="flex min-w-[160px] flex-1 flex-col gap-1.5">
-                  <span className="text-[11px] font-semibold text-text-secondary">{t('myPub.date')}</span>
-                  <Input type="date" value={newDate} onChange={(event) => setNewDate(event.target.value)} className="h-9 w-full" />
-                </label>
-                <button
-                  type="button"
-                  disabled={!newJournal.trim() || !newDate || add.isExecuting}
-                  onClick={() => add.execute({ articleId, journalName: newJournal.trim(), submittedAt: newDate })}
-                  className="h-9 shrink-0 rounded-lg bg-gradient-to-b from-navy-600 to-navy-700 px-5 text-[13px] font-bold text-white transition hover:brightness-110 disabled:opacity-50"
-                >
-                  {t('myPub.add')}
-                </button>
-              </div>
-            </div>
+          <div className="mt-3">
+            <SubmissionAddForm
+              articleId={articleId}
+              journalNames={journalNames}
+              activePrior={activePrior}
+              onAdded={() => {
+                setAddOpen(false)
+                done()
+              }}
+            />
           </div>
         )}
 
@@ -196,7 +157,7 @@ export function EditorSubmissions({
                     {editId === row.id ? (
                       <div className="flex flex-wrap items-end gap-2">
                         <div className="min-w-[150px] flex-[2]">
-                          <JournalField value={editJournal} onChange={setEditJournal} />
+                          <JournalField value={editJournal} onChange={setEditJournal} journalNames={journalNames} />
                         </div>
                         <Input type="date" value={editDate} onChange={(event) => setEditDate(event.target.value)} className="h-9 min-w-[130px] flex-1" />
                         <button type="button" disabled={!editJournal.trim() || !editDate || edit.isExecuting} onClick={() => edit.execute({ submissionId: row.id, journalName: editJournal.trim(), submittedAt: editDate })} className="h-9 rounded-lg bg-gradient-to-b from-navy-600 to-navy-700 px-3 text-[12.5px] font-bold text-white disabled:opacity-50">{t('editor.saveSubmission')}</button>

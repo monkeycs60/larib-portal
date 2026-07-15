@@ -43,7 +43,15 @@ function compareText(a: string | null, b: string | null, direction: number): num
   return left.localeCompare(right) * direction
 }
 
-export function MyPublications({ items, locale }: { items: MyPublicationItem[]; locale: string }) {
+export function MyPublications({
+  items,
+  locale,
+  journalNames,
+}: {
+  items: MyPublicationItem[]
+  locale: string
+  journalNames: string[]
+}) {
   const t = useTranslations('publications')
   const [filter, setFilter] = useState<Filter>('all')
   const [filters, setFilters] = useState<FiltersValue>({
@@ -176,6 +184,7 @@ export function MyPublications({ items, locale }: { items: MyPublicationItem[]; 
       <PublicationsTable
         rows={rows}
         locale={locale}
+        journalNames={journalNames}
         expansion={{ isOpen: (id: string) => expanded.has(id), toggle: toggleExpanded }}
         sort={{ key: sortKey, dir: sortDir, onSort }}
       />

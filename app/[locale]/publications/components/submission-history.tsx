@@ -16,7 +16,8 @@ import {
   type SubmissionStatusValue,
 } from '@/lib/publications/status-display'
 import type { MyPublicationSubmission } from '@/lib/services/publications/my-publications'
-import { addSubmissionAction, updateSubmissionStatusAction } from '../actions'
+import { updateSubmissionStatusAction } from '../actions'
+import { SubmissionAddForm } from './submission-add-form'
 
 function isPending(status: SubmissionStatusValue): boolean {
   return status === 'SUBMITTED' || status === 'UNDER_REVIEW'
@@ -26,10 +27,12 @@ export function SubmissionHistory({
   articleId,
   submissions,
   locale,
+  journalNames,
 }: {
   articleId: string
   submissions: MyPublicationSubmission[]
   locale: string
+  journalNames: string[]
 }) {
   const t = useTranslations('publications')
   const router = useRouter()
@@ -37,24 +40,14 @@ export function SubmissionHistory({
   const formatIso = (iso: string | null) => (iso ? fmt.format(new Date(iso)) : '')
 
   const [addOpen, setAddOpen] = useState(false)
-  const [newJournal, setNewJournal] = useState('')
-  const [newDate, setNewDate] = useState('')
   const [menuId, setMenuId] = useState<string | null>(null)
   const [pickStatus, setPickStatus] = useState<SubmissionStatusValue | null>(null)
   const [pickDate, setPickDate] = useState('')
 
-  const addAction = useAction(addSubmissionAction, {
-    onSuccess() {
-      toast.success(t('myPub.submissionAdded'))
-      setAddOpen(false)
-      setNewJournal('')
-      setNewDate('')
-      router.refresh()
-    },
-    onError() {
-      toast.error(t('actionError'))
-    },
-  })
+  const activePriorSubmission = submissions.filter((submission) => submission.status !== 'REJECTED').at(-1) ?? null
+  const activePrior = activePriorSubmission
+    ? { journalName: activePriorSubmission.journalName, status: activePriorSubmission.status }
+    : null
 
   const statusAction = useAction(updateSubmissionStatusAction, {
     onSuccess() {
@@ -76,11 +69,6 @@ export function SubmissionHistory({
       setPickStatus(status)
       setPickDate(submission.decidedAt ? submission.decidedAt.slice(0, 10) : '')
     }
-  }
-
-  function submitAdd() {
-    if (!newJournal.trim() || !newDate) return
-    addAction.execute({ articleId, journalName: newJournal.trim(), submittedAt: newDate })
   }
 
   return (
@@ -213,26 +201,16 @@ export function SubmissionHistory({
       )}
 
       {addOpen && (
-        <div className="mb-3 mt-1.5 rounded-xl border border-dashed border-coral-200 bg-coral-50/40 p-3.5 dark:border-coral-500/30 dark:bg-coral-500/[0.05]">
-          <p className="mb-3 text-[11.5px] font-semibold text-text-muted">{t('myPub.addNote')}</p>
-          <div className="flex flex-wrap items-end gap-2.5">
-            <label className="flex min-w-[150px] flex-[2] flex-col gap-1.5">
-              <span className="text-[11px] font-semibold text-text-secondary">{t('myPub.col.journal')}</span>
-              <Input value={newJournal} onChange={(event) => setNewJournal(event.target.value)} placeholder={t('myPub.journalPlaceholder')} className="h-[38px]" />
-            </label>
-            <label className="flex min-w-[120px] flex-1 flex-col gap-1.5">
-              <span className="text-[11px] font-semibold text-text-secondary">{t('myPub.date')}</span>
-              <Input type="date" value={newDate} onChange={(event) => setNewDate(event.target.value)} className="h-[38px]" />
-            </label>
-            <button
-              type="button"
-              disabled={!newJournal.trim() || !newDate || addAction.isExecuting}
-              onClick={submitAdd}
-              className="h-[38px] rounded-lg bg-gradient-to-b from-navy-600 to-navy-700 px-4 text-[13px] font-bold text-white shadow-[0_6px_14px_-6px_rgba(19,44,74,0.5)] transition hover:brightness-110 disabled:opacity-50"
-            >
-              {t('myPub.add')}
-            </button>
-          </div>
+        <div className="mb-3 mt-1.5">
+          <SubmissionAddForm
+            articleId={articleId}
+            journalNames={journalNames}
+            activePrior={activePrior}
+            onAdded={() => {
+              setAddOpen(false)
+              router.refresh()
+            }}
+          />
         </div>
       )}
     </div>

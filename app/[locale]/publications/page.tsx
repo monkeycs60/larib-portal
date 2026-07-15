@@ -4,6 +4,7 @@ import { requireAuth } from '@/lib/auth-guard'
 import { applicationLink } from '@/lib/application-link'
 import { canAccessApp } from '@/lib/permissions'
 import { listMyPublications } from '@/lib/services/publications/my-publications'
+import { listJournalNames } from '@/lib/services/publications/journals'
 import { MyPublications } from './components/my-publications'
 import { NewPublicationButton } from './components/new-publication-button'
 
@@ -15,7 +16,7 @@ export default async function PublicationsPage({ params }: PageParams) {
   if (!canAccessApp(session.user, 'PUBLICATIONS')) redirect(applicationLink(locale, '/dashboard'))
 
   const t = await getTranslations({ locale, namespace: 'publications' })
-  const items = await listMyPublications(session.user.id)
+  const [items, journalNames] = await Promise.all([listMyPublications(session.user.id), listJournalNames()])
 
   return (
     <div className="app-gradient min-h-full px-4 py-8 md:px-8">
@@ -31,7 +32,7 @@ export default async function PublicationsPage({ params }: PageParams) {
           <NewPublicationButton />
         </header>
 
-        <MyPublications items={items} locale={locale} />
+        <MyPublications items={items} locale={locale} journalNames={journalNames} />
       </div>
     </div>
   )

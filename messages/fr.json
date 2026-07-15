@@ -993,6 +993,9 @@
       "deleteSubmissionConfirm": "Cela retire définitivement cette soumission de l'historique.",
       "saveSubmission": "Enregistrer",
       "cancel": "Annuler",
+      "confirmRejectTitle": "Une seule soumission active",
+      "confirmRejectBody": "Cet article est actuellement en revue à {journal} ({status}). Ajouter cette soumission marquera la précédente comme refusée.",
+      "confirmReject": "Confirmer et rejeter la précédente",
       "journalListTitle": "Liste de journaux",
       "journalQueueSubtitle": "File de soumission proposée par l'admin · lecture seule.",
       "journalQueueEmpty": "Aucun journal cible proposé pour l'instant."
