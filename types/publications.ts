@@ -25,6 +25,7 @@ export type PubmedRecord = {
   receivedAt: string | null // ISO date or null (PubMed History PubStatus="received")
   acceptedAt: string | null // ISO date or null (PubMed History PubStatus="accepted")
   journal: { name: string; isoAbbrev: string | null; issn: string | null; publisher: string | null }
+  publicationTypes: string[]
   authors: PubmedAuthor[]
 }
 

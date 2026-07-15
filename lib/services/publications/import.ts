@@ -3,6 +3,7 @@ import type { PubmedRecord, ImportReport } from '@/types/publications'
 import { authorDedupeKey } from './import-dedupe'
 import { upsertAffiliationWithCentre } from './affiliations'
 import { reviewDelayDays } from './pubmed-parse'
+import { classifyArticleType } from '@/lib/publications/article-type'
 
 export const PUBLICATIONS_JOURNALS_TAG = 'publications:journals'
 export const PUBLICATIONS_AUTHORS_TAG = 'publications:authors'
@@ -14,10 +15,18 @@ async function upsertJournal(record: PubmedRecord, report: ImportReport): Promis
   if (!journalName) return null
   const existing = await prisma.journal.findFirst({
     where: { OR: [...(issn ? [{ issn }] : []), { name: journalName }] },
+    select: { id: true, abbreviation: true },
+  })
+  if (existing) {
+    if (!existing.abbreviation && isoAbbrev) {
+      await prisma.journal.update({ where: { id: existing.id }, data: { abbreviation: isoAbbrev } })
+    }
+    return existing.id
+  }
+  const created = await prisma.journal.create({
+    data: { name: journalName, issn: issn ?? null, abbreviation: isoAbbrev ?? null },
     select: { id: true },
   })
-  if (existing) return existing.id
-  const created = await prisma.journal.create({ data: { name: journalName, issn: issn ?? null }, select: { id: true } })
   report.journalsCreated += 1
   return created.id
 }
@@ -85,7 +94,7 @@ export async function importRecords(records: PubmedRecord[], createdById: string
       await prisma.article.create({
         data: {
           title: record.title || '(untitled)',
-          type: 'ORIGINAL',
+          type: classifyArticleType(record.publicationTypes),
           status: 'PUBLISHED',
           abstract: record.abstract,
           pubmedId: record.pmid,

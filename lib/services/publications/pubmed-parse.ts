@@ -124,6 +124,9 @@ export function parseEfetchXml(xml: string): PubmedRecord[] {
         issn: textOf(journal.ISSN),
         publisher: null,
       },
+      publicationTypes: toArray((article.PublicationTypeList as Record<string, unknown> | undefined)?.PublicationType)
+        .map((typeNode) => textOf(typeNode))
+        .filter((value): value is string => value !== null),
       authors,
     }
   })

@@ -6,6 +6,8 @@ import { canAdminApp } from '@/lib/permissions'
 import { PageHeader } from '@/app/[locale]/components/page-header'
 import { Link } from '@/app/i18n/navigation'
 import { BacklogImport } from '@/app/[locale]/publications/components/backlog-import'
+import { AdminAuthorRequests } from '@/app/[locale]/publications/components/admin-author-requests'
+import { listPendingAuthorRequests } from '@/lib/services/publications/author-requests'
 
 type PageParams = {
   params: Promise<{ locale: 'en' | 'fr' }>
@@ -20,10 +22,12 @@ export default async function PublicationsAdminPage({ params }: PageParams) {
   }
 
   const t = await getTranslations({ locale, namespace: 'publications' })
+  const authorRequests = await listPendingAuthorRequests()
 
   return (
     <div className="space-y-6 p-4 md:p-6">
       <PageHeader title={t('import.title')} subtitle={t('import.subtitle')} />
+      <AdminAuthorRequests requests={authorRequests} />
       <div className="flex gap-4">
         <Link href="/publications/admin/authors" className="text-sm font-medium text-navy-600 underline-offset-4 hover:underline">
           {t('authors.manageLink')} →

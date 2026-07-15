@@ -7,6 +7,8 @@ import { Link } from '@/app/i18n/navigation'
 import { PageHeader } from '@/app/[locale]/components/page-header'
 import { getArticle } from '@/lib/services/publications/articles'
 import { ArticleStatusSelect } from '@/app/[locale]/publications/components/article-status-select'
+import { ArticleTypeSelect } from '@/app/[locale]/publications/components/article-type-select'
+import { normalizeArticleType } from '@/lib/publications/article-type'
 
 type PageParams = { params: Promise<{ locale: 'en' | 'fr'; id: string }> }
 
@@ -33,6 +35,11 @@ export default async function ArticleDetailPage({ params }: PageParams) {
           <ArticleStatusSelect id={article.id} status={article.status} />
         ) : (
           <span className="text-sm text-text-secondary">{t(`articles.status.${article.status}`)}</span>
+        )}
+        {isAdmin ? (
+          <ArticleTypeSelect id={article.id} type={article.type} />
+        ) : (
+          <span className="text-sm text-text-secondary">{t(`myPub.type.${normalizeArticleType(article.type)}`)}</span>
         )}
         {article.pubmedId && (
           <a className="text-sm text-navy-600 hover:underline" href={`https://pubmed.ncbi.nlm.nih.gov/${article.pubmedId}/`} target="_blank" rel="noreferrer">

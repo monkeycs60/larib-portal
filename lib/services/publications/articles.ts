@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@/app/generated/prisma'
 import { PUBLICATIONS_ARTICLES_TAG } from './import'
+import type { ArticleTypeValue } from '@/lib/publications/article-type'
 
 export const ARTICLE_STATUSES = ['IN_PREPARATION', 'UNDER_REVIEW', 'TO_RESUBMIT', 'ACCEPTED', 'PUBLISHED', 'ABANDONED'] as const
 export type ArticleStatusValue = (typeof ARTICLE_STATUSES)[number]
@@ -97,6 +98,10 @@ export async function getArticle(id: string): Promise<ArticleDetail | null> {
 
 export async function updateArticleStatus(id: string, status: ArticleStatusValue) {
   return prisma.article.update({ where: { id }, data: { status }, select: { id: true } })
+}
+
+export async function updateArticleType(id: string, type: ArticleTypeValue) {
+  return prisma.article.update({ where: { id }, data: { type }, select: { id: true } })
 }
 
 export { PUBLICATIONS_ARTICLES_TAG }
