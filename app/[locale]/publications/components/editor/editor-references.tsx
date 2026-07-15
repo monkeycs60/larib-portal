@@ -11,7 +11,7 @@ export function EditorReferences({ form, studyOptions }: { form: EditorForm; stu
   return (
     <CollapsibleCard
       title={
-        <span className="inline-flex items-center gap-2 text-[10.5px] font-extrabold uppercase tracking-[0.07em] text-coral-600">
+        <span className="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] text-coral-600">
           <span className="h-2 w-2 rounded-full bg-coral-500" />
           {t('editor.referencesTitle')}
         </span>
