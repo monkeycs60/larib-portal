@@ -41,12 +41,14 @@ export function PublicationEditor({
   article,
   journalTargets,
   studyOptions,
+  journalNames,
   viewer,
 }: {
   locale: string
   article: PublicationEditData
   journalTargets: JournalTargetItem[]
   studyOptions: StudyOption[]
+  journalNames: string[]
   viewer: EditorViewer
 }) {
   const t = useTranslations('publications')
@@ -156,7 +158,7 @@ export function PublicationEditor({
             <EditorReferences form={form} studyOptions={studyOptions} />
           </div>
           <div className="space-y-5">
-            <EditorSubmissions articleId={article.id} submissions={article.submissions} locale={locale} />
+            <EditorSubmissions articleId={article.id} submissions={article.submissions} locale={locale} journalNames={journalNames} />
             <EditorJournalQueue targets={journalTargets} />
           </div>
         </div>

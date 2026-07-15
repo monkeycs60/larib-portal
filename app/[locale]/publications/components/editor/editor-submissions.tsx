@@ -43,10 +43,12 @@ export function EditorSubmissions({
   articleId,
   submissions,
   locale,
+  journalNames,
 }: {
   articleId: string
   submissions: SubmissionRow[]
   locale: string
+  journalNames: string[]
 }) {
   const t = useTranslations('publications')
   const router = useRouter()
@@ -96,6 +98,11 @@ export function EditorSubmissions({
 
   return (
     <div className="rounded-2xl border border-line bg-bg-surface p-5 shadow-elevation-xs">
+      <datalist id="submission-journals">
+        {journalNames.map((name) => (
+          <option key={name} value={name} />
+        ))}
+      </datalist>
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <span className="inline-flex items-center gap-2 text-[10.5px] font-extrabold uppercase tracking-[0.07em] text-coral-600">
@@ -119,31 +126,33 @@ export function EditorSubmissions({
 
       {addOpen && (
         <div className="mt-3 rounded-xl border border-dashed border-coral-200 bg-coral-50/40 p-3.5 dark:border-coral-500/30 dark:bg-coral-500/[0.05]">
-          <div className="flex flex-wrap items-end gap-2.5">
-            <label className="flex min-w-[140px] flex-[2] flex-col gap-1.5">
+          <div className="space-y-2.5">
+            <label className="flex flex-col gap-1.5">
               <span className="text-[11px] font-semibold text-text-secondary">{t('myPub.col.journal')}</span>
-              <Input value={newJournal} onChange={(event) => setNewJournal(event.target.value)} placeholder={t('myPub.journalPlaceholder')} className="h-9" />
+              <Input list="submission-journals" value={newJournal} onChange={(event) => setNewJournal(event.target.value)} placeholder={t('myPub.journalPlaceholder')} className="h-9" />
             </label>
-            <label className="flex min-w-[120px] flex-1 flex-col gap-1.5">
-              <span className="text-[11px] font-semibold text-text-secondary">{t('myPub.date')}</span>
-              <Input type="date" value={newDate} onChange={(event) => setNewDate(event.target.value)} className="h-9" />
-            </label>
-            <label className="flex min-w-[130px] flex-1 flex-col gap-1.5">
-              <span className="text-[11px] font-semibold text-text-secondary">{t('myPub.col.status')}</span>
-              <select value={newStatus} onChange={(event) => setNewStatus(event.target.value as SubmissionStatusValue)} className="h-9 rounded-lg border border-line bg-bg-surface px-2.5 text-[13px] font-semibold text-text-primary outline-none focus:border-coral-400">
-                {SUBMISSION_STATUSES.map((option) => (
-                  <option key={option} value={option}>{t(`myPub.subStatus.${option}`)}</option>
-                ))}
-              </select>
-            </label>
-            <button
-              type="button"
-              disabled={!newJournal.trim() || !newDate || add.isExecuting}
-              onClick={() => add.execute({ articleId, journalName: newJournal.trim(), submittedAt: newDate, status: newStatus })}
-              className="h-9 rounded-lg bg-gradient-to-b from-navy-600 to-navy-700 px-4 text-[13px] font-bold text-white transition hover:brightness-110 disabled:opacity-50"
-            >
-              {t('myPub.add')}
-            </button>
+            <div className="flex flex-wrap items-end gap-2.5">
+              <label className="flex min-w-[160px] flex-1 flex-col gap-1.5">
+                <span className="text-[11px] font-semibold text-text-secondary">{t('myPub.date')}</span>
+                <Input type="date" value={newDate} onChange={(event) => setNewDate(event.target.value)} className="h-9 w-full" />
+              </label>
+              <label className="flex min-w-[140px] flex-1 flex-col gap-1.5">
+                <span className="text-[11px] font-semibold text-text-secondary">{t('myPub.col.status')}</span>
+                <select value={newStatus} onChange={(event) => setNewStatus(event.target.value as SubmissionStatusValue)} className="h-9 rounded-lg border border-line bg-bg-surface px-2.5 text-[13px] font-semibold text-text-primary outline-none focus:border-coral-400">
+                  {SUBMISSION_STATUSES.map((option) => (
+                    <option key={option} value={option}>{t(`myPub.subStatus.${option}`)}</option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="button"
+                disabled={!newJournal.trim() || !newDate || add.isExecuting}
+                onClick={() => add.execute({ articleId, journalName: newJournal.trim(), submittedAt: newDate, status: newStatus })}
+                className="h-9 shrink-0 rounded-lg bg-gradient-to-b from-navy-600 to-navy-700 px-5 text-[13px] font-bold text-white transition hover:brightness-110 disabled:opacity-50"
+              >
+                {t('myPub.add')}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -165,7 +174,7 @@ export function EditorSubmissions({
                 <div className="flex flex-1 flex-col gap-2 pb-4">
                   {editId === row.id ? (
                     <div className="flex flex-wrap items-end gap-2">
-                      <Input value={editJournal} onChange={(event) => setEditJournal(event.target.value)} className="h-9 min-w-[150px] flex-[2]" />
+                      <Input list="submission-journals" value={editJournal} onChange={(event) => setEditJournal(event.target.value)} className="h-9 min-w-[150px] flex-[2]" />
                       <Input type="date" value={editDate} onChange={(event) => setEditDate(event.target.value)} className="h-9 min-w-[130px] flex-1" />
                       <button type="button" disabled={!editJournal.trim() || !editDate || edit.isExecuting} onClick={() => edit.execute({ submissionId: row.id, journalName: editJournal.trim(), submittedAt: editDate })} className="h-9 rounded-lg bg-gradient-to-b from-navy-600 to-navy-700 px-3 text-[12.5px] font-bold text-white disabled:opacity-50">{t('editor.saveSubmission')}</button>
                       <button type="button" onClick={() => setEditId(null)} className="h-9 rounded-lg border border-line px-3 text-[12.5px] font-bold text-text-secondary">{t('editor.cancel')}</button>

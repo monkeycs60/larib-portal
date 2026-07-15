@@ -31,6 +31,11 @@ export async function listJournals(): Promise<JournalListItem[]> {
   })
 }
 
+export async function listJournalNames(): Promise<string[]> {
+  const journals = await prisma.journal.findMany({ orderBy: { name: 'asc' }, select: { name: true } })
+  return journals.map((journal) => journal.name)
+}
+
 export type UpsertJournalInput = {
   name: string
   issn?: string | null
