@@ -77,17 +77,36 @@ outils auteurs existants.
 
 Fichier : `scripts/audit-in-submission.ts`
 
-- Contient le **dataset validé en dur** (tableau typé, pas de `any`).
+- Contient le **dataset validé en dur** (tableau typé, pas de `any`) : ~24 papiers issus de
+  l'audit Gmail (`scratchpad/audit-inventory.md`).
 - Pour chaque papier :
-  1. `Article` créé avec statut `UNDER_REVIEW` (ou `TO_RESUBMIT`), `createdById` = utilisateur admin.
+  1. `Article` créé avec le statut adéquat (`UNDER_REVIEW`, `TO_RESUBMIT`, `ACCEPTED`,
+     `PUBLISHED`, `ABANDONED`), `createdById` = utilisateur admin.
   2. `Author` + `Authorship` : find-or-create par nom (match `firstName`+`lastName` insensible à la casse,
-     sinon création), `order` séquentiel, `isCorresponding` posé quand détecté.
-  3. `Submission` via `addSubmission` (service existant) ; puis `updateSubmissionStatus`
-     si une décision est déjà connue. Noms d'auteurs bruts conservés dans `Submission.notes`
-     pour ne rien perdre en cas d'échec de matching.
-- **Idempotent** : skip si un `Article` de titre équivalent + même journal existe déjà.
+     sinon création), `order` séquentiel selon la chaîne de la soumission, `isCorresponding` posé.
+  3. **Chaîne de soumissions** : chaque journal traversé = une `Submission` ordonnée par date.
+     La plus récente porte le statut courant ; les journaux antérieurs (rejetés) sont `REJECTED`.
+     Écrit via `addSubmission` (service existant, applique la règle « un seul actif à la fois »),
+     puis `updateSubmissionStatus` pour poser le statut/décision réel de chaque soumission.
+- **Mapping des statuts** (décisions validées) :
+  - Rejet d'une soumission → `Submission.status = REJECTED` ; si le papier n'a pas de soumission
+    active plus récente, `Article.status = TO_RESUBMIT` (le schéma `ArticleStatus` n'a pas de
+    valeur `REJECTED` — le rejet vit au niveau `Submission`). Cf. papier #26 (rejeté JCMR, sans suite).
+  - Accepté → `ACCEPTED` ; publié → `PUBLISHED` (le papier #24 publié est **inclus**).
+- **Auteurs partiels** : pour les papiers sans liste ordonnée complète (emails EHJ-CVI/OUP ne
+  listant que le corresponding), on ne crée que corresponding + 1er auteur ; les noms bruts
+  connus vont dans `Submission.notes`. Enrichissement ultérieur via les outils auteurs.
+- **Idempotent** : skip si un `Article` de titre équivalent (titre normalisé) existe déjà.
 - **Additif uniquement** : aucun reset, aucune suppression (`prisma migrate reset` interdit).
 - Sortie : liste des IDs créés (articles, submissions, authors) pour traçabilité/réversibilité manuelle.
+
+### Résultat de l'audit Gmail (source du dataset)
+
+L'audit a été réalisé sur `solenn.toupin@gmail.com` (janv.→juil. 2026) : **24 papiers distincts**,
+chaînes de resoumission reconstituées (ex. #1 : EHJ-CVI → Circulation → Radiology), listes
+d'auteurs ordonnées pour 18 papiers. Détail complet et validé dans `scratchpad/audit-inventory.md`
+(à recopier dans le dataset du script). Répartition : 16 `UNDER_REVIEW`, 3 `TO_RESUBMIT`,
+2 `ACCEPTED`, 1 `PUBLISHED`, 1 rejeté sans suite (#26), 1 review publiée incluse (#24).
 
 ### 4. Saisie continue (existant, quasi aucun code)
 
@@ -115,6 +134,37 @@ papier directement en `UNDER_REVIEW` sans friction ; micro-ajustement seulement 
   - création/réutilisation des auteurs et de l'authorship,
   - pose correcte du statut de soumission (décision déjà reçue vs non).
 - Pas de test E2E dédié : l'extraction est hors app et one-shot ; le browse est déjà couvert.
+
+## Règles d'extraction (validées sur échantillon Gmail)
+
+**Emails à inclure** (nos soumissions) — sujet/corps :
+`Manuscript Submitted`, `Acknowledgment of Submission`, `listed as co-author`,
+`Confirm co-authorship`, `manuscript number has been assigned`, `Decision on submission`,
+`verify your contribution`, `Co-author confirmation`, formulaires `rights`/`copyright`.
+Expéditeurs : `manuscriptcentral.com`, `editorialmanager.com`, `msubmit.net`,
+`aha-journals.org`, `springernature.com`, `researchexchange.com`.
+
+**Emails à exclure** (bruit) :
+`Invitation to review` / `Reminder of Invitation` / `Withdrawal of Invitation` (rôle relecteur,
+pas auteur), newsletters/marketing, `Call for Abstracts`, propositions d'étude
+(`cardiolarib-research.com`, EACVI-MMVD/INFLAME), contrats, threads de discussion internes.
+
+**Déduplication** : 1 titre normalisé (insensible casse/espaces/ponctuation) = 1 `Article`.
+Chaque journal distinct = 1 `Submission` (date + ID manuscrit dans `notes` + statut).
+Un rejet suivi d'une resoumission ailleurs → l'ancienne `Submission` passe `REJECTED`,
+la nouvelle devient active. **Dédup par titre, jamais par journal** (un papier traverse
+plusieurs journaux : ex. Circulation → Radiology, Eur Radiology → JMRI).
+
+**Mapping statut** :
+- `Manuscript Submitted` / `Acknowledgment` / `number assigned` → Submission `UNDER_REVIEW`, Article `UNDER_REVIEW`
+- `Decision` (minor/major revision) ou suffixe `Rx` (ex. `R2`) → `TO_RESUBMIT`
+- formulaire copyright/rights ou « accepté » → Article `ACCEPTED` (inclus dans l'audit)
+
+**Auteurs** : liste ordonnée extraite du **corps** de l'email (fallback entêtes To/Cc) ;
+1er nommé / « Dear Dr X » = corresponding. Noms bruts conservés dans `Submission.notes`.
+
+**Date de soumission** : date de l'email de soumission/acknowledgment, ou date « received »
+mentionnée dans le corps.
 
 ## Hors périmètre
 
