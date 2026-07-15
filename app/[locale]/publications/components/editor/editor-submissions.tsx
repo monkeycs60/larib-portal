@@ -83,7 +83,6 @@ export function EditorSubmissions({
   const [addOpen, setAddOpen] = useState(false)
   const [newJournal, setNewJournal] = useState('')
   const [newDate, setNewDate] = useState('')
-  const [newStatus, setNewStatus] = useState<SubmissionStatusValue>('SUBMITTED')
   const [menuId, setMenuId] = useState<string | null>(null)
   const [pickStatus, setPickStatus] = useState<SubmissionStatusValue | null>(null)
   const [pickDate, setPickDate] = useState('')
@@ -94,7 +93,7 @@ export function EditorSubmissions({
 
   const done = () => router.refresh()
   const add = useAction(addSubmissionAction, {
-    onSuccess() { toast.success(t('editor.submissionAdded')); setAddOpen(false); setNewJournal(''); setNewDate(''); setNewStatus('SUBMITTED'); done() },
+    onSuccess() { toast.success(t('editor.submissionAdded')); setAddOpen(false); setNewJournal(''); setNewDate(''); done() },
     onError() { toast.error(t('editor.actionError')) },
   })
   const setStatus = useAction(updateSubmissionStatusAction, {
@@ -166,18 +165,10 @@ export function EditorSubmissions({
                   <span className="text-[11px] font-semibold text-text-secondary">{t('myPub.date')}</span>
                   <Input type="date" value={newDate} onChange={(event) => setNewDate(event.target.value)} className="h-9 w-full" />
                 </label>
-                <label className="flex min-w-[140px] flex-1 flex-col gap-1.5">
-                  <span className="text-[11px] font-semibold text-text-secondary">{t('myPub.col.status')}</span>
-                  <select value={newStatus} onChange={(event) => setNewStatus(event.target.value as SubmissionStatusValue)} className="h-9 rounded-lg border border-line bg-bg-surface px-2.5 text-[13px] font-semibold text-text-primary outline-none focus:border-coral-400">
-                    {SUBMISSION_STATUSES.map((option) => (
-                      <option key={option} value={option}>{t(`myPub.subStatus.${option}`)}</option>
-                    ))}
-                  </select>
-                </label>
                 <button
                   type="button"
                   disabled={!newJournal.trim() || !newDate || add.isExecuting}
-                  onClick={() => add.execute({ articleId, journalName: newJournal.trim(), submittedAt: newDate, status: newStatus })}
+                  onClick={() => add.execute({ articleId, journalName: newJournal.trim(), submittedAt: newDate })}
                   className="h-9 shrink-0 rounded-lg bg-gradient-to-b from-navy-600 to-navy-700 px-5 text-[13px] font-bold text-white transition hover:brightness-110 disabled:opacity-50"
                 >
                   {t('myPub.add')}

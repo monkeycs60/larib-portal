@@ -273,7 +273,6 @@ export const addSubmissionAction = authenticatedAction
       articleId: z.string().min(1),
       journalName: z.string().min(1),
       submittedAt: z.string().min(1),
-      status: z.enum(SUBMISSION_STATUSES),
     }),
   )
   .action(async ({ parsedInput, ctx }) => {
@@ -283,7 +282,6 @@ export const addSubmissionAction = authenticatedAction
       articleId: parsedInput.articleId,
       journalName: parsedInput.journalName,
       submittedAt: new Date(parsedInput.submittedAt),
-      status: parsedInput.status,
     })
   })
 

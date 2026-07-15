@@ -11,10 +11,6 @@ function isPending(status: SubmissionStatusValue): boolean {
   return status === 'SUBMITTED' || status === 'UNDER_REVIEW'
 }
 
-function decisionDate(status: SubmissionStatusValue, at: Date): Date | null {
-  return isPending(status) ? null : at
-}
-
 async function findOrCreateJournalId(journalName: string): Promise<string> {
   const name = journalName.trim()
   const journal = await prisma.journal.upsert({
@@ -30,27 +26,30 @@ export type AddSubmissionInput = {
   articleId: string
   journalName: string
   submittedAt: Date
-  status: SubmissionStatusValue
 }
 
+// A new submission is always logged as SUBMITTED (a paper can only be actively
+// under review at one journal at a time, so any prior active submissions are
+// marked rejected as of the new submission date). The decision + its date are
+// captured later via updateSubmissionStatus.
 export async function addSubmission(input: AddSubmissionInput): Promise<{ id: string }> {
   const journalId = await findOrCreateJournalId(input.journalName)
   return prisma.$transaction(async (tx) => {
     const priorActive = await tx.submission.findMany({
       where: { articleId: input.articleId, status: { not: 'REJECTED' } },
-      select: { id: true, status: true },
+      select: { id: true },
     })
     const created = await tx.submission.create({
       data: {
         articleId: input.articleId,
         journalId,
         submittedAt: input.submittedAt,
-        status: input.status,
-        decidedAt: decisionDate(input.status, input.submittedAt),
+        status: 'SUBMITTED',
+        decidedAt: null,
       },
       select: { id: true },
     })
-    if (!isRejected(input.status) && priorActive.length > 0) {
+    if (priorActive.length > 0) {
       await tx.submission.updateMany({
         where: { id: { in: priorActive.map((submission) => submission.id) } },
         data: { status: 'REJECTED', decidedAt: input.submittedAt },
