@@ -94,7 +94,7 @@ export function isFirstAuthor(bucket: PositionBucket): boolean {
 }
 
 export const PILL_BASE =
-  'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11.5px] font-bold leading-none whitespace-nowrap'
+  'inline-flex h-7 items-center gap-1.5 rounded-full border px-3 text-[11.5px] font-bold leading-none whitespace-nowrap'
 
 export function pillClassName(tone: StatusTone): string {
   return `${PILL_BASE} ${TONE_PILL_CLASS[tone]}`
