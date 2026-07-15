@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import type { PublicationEditData } from '@/lib/services/publications/publication-editor'
 import { requestAuthorListAction } from '../../actions'
 import type { EditorForm, EditorViewer } from './publication-editor'
+import { CollapsibleCard } from './collapsible-card'
 
 function degreeBadges(degrees: string | null): string[] {
   if (!degrees) return []
@@ -43,17 +44,20 @@ export function EditorAuthors({
   })
 
   return (
-    <div className="rounded-2xl border border-line bg-bg-surface p-5 shadow-elevation-xs">
-      <div className="flex items-center gap-2.5">
-        <span className="inline-flex items-center gap-2 text-[10.5px] font-extrabold uppercase tracking-[0.07em] text-coral-600">
-          <span className="h-2 w-2 rounded-full bg-coral-500" />
-          {t('editor.authorsTitle')}
-        </span>
-        <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-extrabold text-text-secondary tabular-nums dark:bg-white/10">
-          {article.authorships.length}
-        </span>
-      </div>
-      <p className="mt-2 text-sm text-text-secondary">{t('editor.authorsManagedByAdmin')}</p>
+    <CollapsibleCard
+      title={
+        <>
+          <span className="inline-flex items-center gap-2 text-[10.5px] font-extrabold uppercase tracking-[0.07em] text-coral-600">
+            <span className="h-2 w-2 rounded-full bg-coral-500" />
+            {t('editor.authorsTitle')}
+          </span>
+          <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-extrabold text-text-secondary tabular-nums dark:bg-white/10">
+            {article.authorships.length}
+          </span>
+        </>
+      }
+    >
+      <p className="text-sm text-text-secondary">{t('editor.authorsManagedByAdmin')}</p>
 
       <ol className="mt-4 space-y-3">
         {article.authorships.map((authorship) => {
@@ -125,6 +129,6 @@ export function EditorAuthors({
         <Send className="h-4 w-4" strokeWidth={2.2} />
         {alreadyRequested ? t('editor.alreadyRequested') : t('editor.requestAuthorList')}
       </button>
-    </div>
+    </CollapsibleCard>
   )
 }

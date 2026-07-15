@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl'
 import type { JournalTargetItem } from '@/lib/services/publications/journal-targets'
+import { CollapsibleCard } from './collapsible-card'
 
 function metricsLine(target: JournalTargetItem): string {
   const parts: string[] = []
@@ -13,12 +14,15 @@ function metricsLine(target: JournalTargetItem): string {
 export function EditorJournalQueue({ targets }: { targets: JournalTargetItem[] }) {
   const t = useTranslations('publications')
   return (
-    <div className="rounded-2xl border border-line bg-bg-surface p-5 shadow-elevation-xs">
-      <span className="inline-flex items-center gap-2 text-[10.5px] font-extrabold uppercase tracking-[0.07em] text-coral-600">
-        <span className="h-2 w-2 rounded-full bg-coral-500" />
-        {t('editor.journalListTitle')}
-      </span>
-      <p className="mt-2 text-sm text-text-secondary">{t('editor.journalQueueSubtitle')}</p>
+    <CollapsibleCard
+      title={
+        <span className="inline-flex items-center gap-2 text-[10.5px] font-extrabold uppercase tracking-[0.07em] text-coral-600">
+          <span className="h-2 w-2 rounded-full bg-coral-500" />
+          {t('editor.journalListTitle')}
+        </span>
+      }
+    >
+      <p className="text-sm text-text-secondary">{t('editor.journalQueueSubtitle')}</p>
 
       {targets.length === 0 ? (
         <p className="mt-4 rounded-xl border border-dashed border-line px-4 py-6 text-center text-[13px] text-text-muted">
@@ -42,6 +46,6 @@ export function EditorJournalQueue({ targets }: { targets: JournalTargetItem[] }
           })}
         </ol>
       )}
-    </div>
+    </CollapsibleCard>
   )
 }

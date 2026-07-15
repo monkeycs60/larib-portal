@@ -32,7 +32,7 @@ export async function createDraftArticle(userId: string): Promise<{ id: string }
       status: 'IN_PREPARATION',
       type: 'ORIGINAL',
       createdById: userId,
-      authorships: { create: { authorId, order: 1, isCorresponding: true } },
+      authorships: { create: { authorId, order: 1, isCorresponding: false } },
     },
     select: { id: true },
   })
