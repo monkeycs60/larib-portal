@@ -4,9 +4,8 @@ import { useTranslations, useLocale } from 'next-intl'
 import { Star, GraduationCap, Clock, Pencil } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ARTICLE_STATUSES } from '@/lib/services/publications/articles'
-import { ARTICLE_STATUS_TONE, TONE_DOT_HEX } from '@/lib/publications/status-display'
+import { ARTICLE_STATUS_TONE, SUBMISSION_STATUS_TONE, TONE_DOT_HEX, type SubmissionStatusValue } from '@/lib/publications/status-display'
 import { ARTICLE_TYPE_VALUES } from '@/lib/publications/article-type'
-import { deriveHeaderContext } from '@/lib/publications/editor-logic'
 import type { PublicationEditData } from '@/lib/services/publications/publication-editor'
 import type { StudyOption } from '@/lib/services/publications/studies'
 import type { EditorForm, EditorViewer } from './publication-editor'
@@ -29,23 +28,24 @@ export function EditorHeader({
 }) {
   const t = useTranslations('publications')
   const locale = useLocale()
-  const status = form.watch('status')
+  const manualStatus = form.watch('status')
   const studyId = form.watch('studyId')
   const studyLabel = studyOptions.find((option) => option.id === studyId)?.label ?? null
 
-  const header = deriveHeaderContext({
-    submissions: article.submissions.map((submission) => ({
-      journalName: submission.journal.abbreviation ?? submission.journal.name,
-      submittedAt: submission.submittedAt.toISOString(),
-    })),
-    publishedJournal: article.publishedJournal
+  // The header pill is driven by the latest submission (status + journal + date),
+  // so it always matches the submissions card. With no submission it falls back to
+  // the article's own (manual) status and the published journal, if any.
+  const latest = article.submissions.at(-1) ?? null
+  const latestStatus = latest ? (latest.status as SubmissionStatusValue) : null
+  const pillLabel = latestStatus ? t(`myPub.subStatus.${latestStatus}`) : t(`articles.status.${manualStatus}`)
+  const tone = latestStatus ? SUBMISSION_STATUS_TONE[latestStatus] : ARTICLE_STATUS_TONE[manualStatus]
+  const pillJournal = latest
+    ? latest.journal.abbreviation ?? latest.journal.name
+    : article.publishedJournal
       ? article.publishedJournal.abbreviation ?? article.publishedJournal.name
-      : null,
-    publishedAt: article.publishedAt ? article.publishedAt.toISOString() : null,
-  })
-  const headerDate = header.at ? new Date(header.at) : null
+      : null
+  const headerDate = latest ? latest.submittedAt : article.publishedAt ?? null
   const year = headerDate ? headerDate.getUTCFullYear() : null
-  const tone = ARTICLE_STATUS_TONE[status]
 
   return (
     <div className="rounded-2xl border border-line bg-bg-surface p-6 shadow-elevation-xs">
@@ -108,11 +108,9 @@ export function EditorHeader({
           <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5">
             <span className="inline-flex items-center gap-2 text-sm font-semibold" style={{ color: TONE_DOT_HEX[tone] }}>
               <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: TONE_DOT_HEX[tone] }} />
-              {t(`articles.status.${status}`)}
-              {header.journal && (
-                <span className="text-text-secondary">
-                  {t('editor.atJournal', { journal: header.journal })}
-                </span>
+              {pillLabel}
+              {pillJournal && (
+                <span className="text-text-secondary">{t('editor.atJournal', { journal: pillJournal })}</span>
               )}
             </span>
             {headerDate && (

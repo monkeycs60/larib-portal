@@ -1,19 +1,5 @@
 import type { ArticleStatusValue } from '@/lib/services/publications/articles'
 
-type HeaderInput = {
-  submissions: Array<{ journalName: string; submittedAt: string }>
-  publishedJournal: string | null
-  publishedAt: string | null
-}
-
-// The header pill journal + date are derived from the latest submission, falling
-// back to the published journal — never edited directly.
-export function deriveHeaderContext(input: HeaderInput): { journal: string | null; at: string | null } {
-  const latest = input.submissions.at(-1)
-  if (latest) return { journal: latest.journalName, at: latest.submittedAt }
-  return { journal: input.publishedJournal, at: input.publishedAt }
-}
-
 export function isDraftDeletable(title: string, status: ArticleStatusValue): boolean {
   return title.trim() === '' && status === 'IN_PREPARATION'
 }

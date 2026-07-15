@@ -1,33 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { deriveHeaderContext, isDraftDeletable, pickAuthorRequestRecipients } from './editor-logic'
-
-describe('deriveHeaderContext', () => {
-  it('uses the latest submission journal + date', () => {
-    const ctx = deriveHeaderContext({
-      submissions: [
-        { journalName: 'N Engl J Med', submittedAt: '2025-01-12T00:00:00.000Z' },
-        { journalName: 'European Heart Journal', submittedAt: '2025-05-18T00:00:00.000Z' },
-      ],
-      publishedJournal: null,
-      publishedAt: null,
-    })
-    expect(ctx).toEqual({ journal: 'European Heart Journal', at: '2025-05-18T00:00:00.000Z' })
-  })
-  it('falls back to the published journal when there are no submissions', () => {
-    const ctx = deriveHeaderContext({
-      submissions: [],
-      publishedJournal: 'Circulation',
-      publishedAt: '2024-02-01T00:00:00.000Z',
-    })
-    expect(ctx).toEqual({ journal: 'Circulation', at: '2024-02-01T00:00:00.000Z' })
-  })
-  it('returns nulls when nothing is available', () => {
-    expect(deriveHeaderContext({ submissions: [], publishedJournal: null, publishedAt: null })).toEqual({
-      journal: null,
-      at: null,
-    })
-  })
-})
+import { isDraftDeletable, pickAuthorRequestRecipients } from './editor-logic'
 
 describe('isDraftDeletable', () => {
   it('is deletable only when empty title and IN_PREPARATION', () => {
