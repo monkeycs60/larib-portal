@@ -15,6 +15,7 @@ export type ArticleListItem = Prisma.ArticleGetPayload<{
     doi: true
     pubmedId: true
     publishedJournal: { select: { name: true } }
+    submissions: { select: { submittedAt: true; journal: { select: { name: true } } } }
     _count: { select: { authorships: true } }
   }
 }>
@@ -30,6 +31,11 @@ export async function listArticles(): Promise<ArticleListItem[]> {
       doi: true,
       pubmedId: true,
       publishedJournal: { select: { name: true } },
+      submissions: {
+        orderBy: { submittedAt: 'desc' },
+        take: 1,
+        select: { submittedAt: true, journal: { select: { name: true } } },
+      },
       _count: { select: { authorships: true } },
     },
   })
