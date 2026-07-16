@@ -872,7 +872,12 @@
       "subtitle": "All the articles where you're listed as an author, with their status and your role.",
       "newPublication": "New publication",
       "untitled": "(Untitled)",
-      "tabs": { "all": "All", "inProgress": "In progress", "draft": "Draft", "published": "Published" },
+      "tabs": {
+        "all": "All",
+        "inProgress": "In progress",
+        "draft": "Draft",
+        "published": "Published"
+      },
       "filters": {
         "allRoles": "All",
         "allStatuses": "All",
@@ -891,7 +896,8 @@
         "byJournal": "By journal",
         "byType": "By type",
         "noYear": "No year yet",
-        "noJournal": "No journal yet"
+        "noJournal": "No journal yet",
+        "inSubmission": "Pending"
       },
       "position": {
         "first": "1st author",
