@@ -124,7 +124,7 @@ export function PublicationsStats({
               </div>
             )}
             {stats.undated > 0 && (
-              <div className="mt-3 border-t border-line pt-3">
+              <div className="mt-3 max-w-[260px] border-t border-line pt-3">
                 <StatBar
                   label={t('myPub.stats.inSubmission')}
                   count={stats.undated}
