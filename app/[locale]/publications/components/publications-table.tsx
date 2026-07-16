@@ -116,7 +116,13 @@ function PublicationRow({
             >
               {t(`myPub.type.${item.type}`)}
             </span>
-            <span className="block text-sm font-bold leading-snug text-text-primary">{item.title || t('myPub.untitled')}</span>
+            <Link
+              href={item.isFirst ? `/publications/articles/${item.id}/edit` : `/publications/articles/${item.id}`}
+              title={item.isFirst ? t('myPub.edit') : t('myPub.view')}
+              className="block text-sm font-bold leading-snug text-text-primary underline-offset-2 transition-colors hover:text-coral-600 hover:underline dark:hover:text-coral-300"
+            >
+              {item.title || t('myPub.untitled')}
+            </Link>
             <AuthorLine authors={item.authors} />
           </div>
         </div>
