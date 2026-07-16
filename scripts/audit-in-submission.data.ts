@@ -222,6 +222,7 @@ export const AUDIT_PAPERS: AuditPaper[] = [
     title: 'MIRACL.ai Design Blueprint for a Centralized Multimodality Cardiovascular Imaging Core Laboratory and Artificial Intelligence: A State-of-the-Art Review',
     articleStatus: 'UNDER_REVIEW',
     authors: [
+      { name: 'Theo Pezel', isCorresponding: true },
       { name: 'Solenn Toupin' },
       { name: 'Jean-Nicolas Dacher' },
       { name: 'Augustin Coisne' },
@@ -243,7 +244,6 @@ export const AUDIT_PAPERS: AuditPaper[] = [
       { name: 'Fabien Hyafil' },
       { name: 'Eric Vicaut' },
       { name: 'Gilles Soulat' },
-      { name: 'Theo Pezel', isCorresponding: true },
     ],
     submissions: [{ journalName: 'Archives of Cardiovascular Diseases', submittedAt: '2026-07-02', status: 'UNDER_REVIEW' }],
   },
@@ -629,6 +629,7 @@ export const AUDIT_PAPERS: AuditPaper[] = [
     title: 'The MULTIVALVE Study: Rationale, Objectives, and Design of a French Registry on Multiple and Mixed Valvular Heart Disease',
     articleStatus: 'UNDER_REVIEW',
     authors: [
+      { name: 'Theo Pezel', isCorresponding: true },
       { name: 'Gilles Soulat' },
       { name: 'Solenn Toupin' },
       { name: 'Yohann Bohbot' },
@@ -664,7 +665,6 @@ export const AUDIT_PAPERS: AuditPaper[] = [
       { name: 'Bernard Iung' },
       { name: 'Eric Vicaut' },
       { name: 'Augustin Coisne' },
-      { name: 'Theo Pezel', isCorresponding: true },
     ],
     submissions: [{ journalName: 'Archives of Cardiovascular Diseases', submittedAt: '2026-04-11', status: 'UNDER_REVIEW' }],
   },
