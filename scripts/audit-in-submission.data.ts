@@ -100,7 +100,6 @@ export const AUDIT_PAPERS: AuditPaper[] = [
     title: 'Incremental Prognostic Value of Cardiovascular Magnetic Resonance Late Gadolinium Enhancement Granularity in Hypertrophic Cardiomyopathy',
     articleStatus: 'UNDER_REVIEW',
     authors: [
-      { name: 'Jerome Garot', isCorresponding: true },
       { name: 'Jeremy Florence' },
       { name: 'Philippe Garot' },
       { name: 'Solenn Toupin' },
@@ -127,6 +126,7 @@ export const AUDIT_PAPERS: AuditPaper[] = [
       { name: 'Guillaume Clerfond' },
       { name: 'Romain Eschalier' },
       { name: 'Theo Pezel' },
+      { name: 'Jerome Garot', isCorresponding: true },
     ],
     submissions: [
       { journalName: 'European Heart Journal - Cardiovascular Imaging', submittedAt: '2026-04-30', status: 'REJECTED' },
@@ -165,7 +165,6 @@ export const AUDIT_PAPERS: AuditPaper[] = [
     title: 'Machine learning models for prediction of 5-year all-cause mortality after hospital discharge following ST-elevation myocardial infarction: insight from the FAST-MI registries',
     articleStatus: 'UNDER_REVIEW',
     authors: [
-      { name: 'Theo Pezel', isCorresponding: true },
       { name: 'Manveer Singh' },
       { name: 'Emmanuel Gall' },
       { name: 'Kenza Hamzi' },
@@ -182,6 +181,7 @@ export const AUDIT_PAPERS: AuditPaper[] = [
       { name: 'Jean Ferrieres' },
       { name: 'Tabassome Simon' },
       { name: 'Nicolas Danchin' },
+      { name: 'Theo Pezel', isCorresponding: true },
     ],
     submissions: [{ journalName: 'European Heart Journal', submittedAt: '2026-06-01', status: 'UNDER_REVIEW' }],
     notes:
@@ -193,7 +193,6 @@ export const AUDIT_PAPERS: AuditPaper[] = [
     title: 'Machine learning-based prediction of cardiovascular events using stress cardiovascular magnetic resonance in asymptomatic patients with known CAD: a multicentre study with 10-year follow-up',
     articleStatus: 'UNDER_REVIEW',
     authors: [
-      { name: 'Theo Pezel', isCorresponding: true },
       { name: 'Jonas Amar' },
       { name: 'Trecy Goncalves' },
       { name: 'Suzanne Duhamel' },
@@ -212,6 +211,7 @@ export const AUDIT_PAPERS: AuditPaper[] = [
       { name: 'Philippe Garot' },
       { name: 'Jerome Garot' },
       { name: 'Solenn Toupin' },
+      { name: 'Theo Pezel', isCorresponding: true },
     ],
     submissions: [{ journalName: 'European Heart Journal - Digital Health', submittedAt: '2026-05-31', status: 'UNDER_REVIEW' }],
     notes: 'Manuscript ID EHJ-DH-00337.',
@@ -222,7 +222,6 @@ export const AUDIT_PAPERS: AuditPaper[] = [
     title: 'MIRACL.ai Design Blueprint for a Centralized Multimodality Cardiovascular Imaging Core Laboratory and Artificial Intelligence: A State-of-the-Art Review',
     articleStatus: 'UNDER_REVIEW',
     authors: [
-      { name: 'Theo Pezel', isCorresponding: true },
       { name: 'Solenn Toupin' },
       { name: 'Jean-Nicolas Dacher' },
       { name: 'Augustin Coisne' },
@@ -244,6 +243,7 @@ export const AUDIT_PAPERS: AuditPaper[] = [
       { name: 'Fabien Hyafil' },
       { name: 'Eric Vicaut' },
       { name: 'Gilles Soulat' },
+      { name: 'Theo Pezel', isCorresponding: true },
     ],
     submissions: [{ journalName: 'Archives of Cardiovascular Diseases', submittedAt: '2026-07-02', status: 'UNDER_REVIEW' }],
   },
@@ -253,7 +253,6 @@ export const AUDIT_PAPERS: AuditPaper[] = [
     title: 'Machine Learning-Derived Semi-quantitative Late Gadolinium Enhancement Threshold and All-Cause Mortality in Hypertrophic Cardiomyopathy: Multicentre Derivation and External Validation',
     articleStatus: 'UNDER_REVIEW',
     authors: [
-      { name: 'Theo Pezel', isCorresponding: true },
       { name: 'Jeremy Florence' },
       { name: 'Jerome Garot' },
       { name: 'Solenn Toupin' },
@@ -276,6 +275,7 @@ export const AUDIT_PAPERS: AuditPaper[] = [
       { name: 'Alexis Hermida' },
       { name: 'Valerie Bousson' },
       { name: 'Yohann Bohbot' },
+      { name: 'Theo Pezel', isCorresponding: true },
     ],
     submissions: [{ journalName: 'Archives of Cardiovascular Diseases', submittedAt: '2026-06-30', status: 'UNDER_REVIEW' }],
   },
@@ -508,7 +508,6 @@ export const AUDIT_PAPERS: AuditPaper[] = [
     title: 'Nuclear Imaging in Cardio-Rheumatology: Why a Global Initiative Like the EACVI-INFLAME Study Is Needed?',
     articleStatus: 'UNDER_REVIEW',
     authors: [
-      { name: 'Theo Pezel', isCorresponding: true },
       { name: 'Aicha Kante' },
       { name: 'Marc R Dweck' },
       { name: 'Andreas A Giannopoulos' },
@@ -524,6 +523,7 @@ export const AUDIT_PAPERS: AuditPaper[] = [
       { name: 'Riemer H J A Slart' },
       { name: 'Paola Anna Erba' },
       { name: 'Maya H Buch' },
+      { name: 'Theo Pezel', isCorresponding: true },
     ],
     submissions: [{ journalName: 'EANM Innovation', submittedAt: '2026-03-03', status: 'UNDER_REVIEW' }],
     notes: 'Manuscript ID EANMI-00017.',
@@ -543,7 +543,10 @@ export const AUDIT_PAPERS: AuditPaper[] = [
   {
     title: 'Derivation and internal Validation of A Novel Cardiac Magnetic Resonance Risk Score for Prophylactic Implantable-Cardioverter Defibrillator Therapy in Ischemic Cardiomyopathy',
     articleStatus: 'UNDER_REVIEW',
-    authors: [{ name: 'Alexandre Unger', isCorresponding: true }],
+    authors: [
+      { name: 'Alexandre Unger' },
+      { name: 'Gianluca Pontone', isCorresponding: true },
+    ],
     submissions: [{ journalName: 'European Heart Journal', submittedAt: '2026-02-09', status: 'UNDER_REVIEW' }],
     notes:
       'Manuscript ID EURHEARTJ-00644. This is a multicentre Italian study (PI Gianluca Pontone); the true corresponding author is Gianluca Pontone (probably last author), but he does not appear in the only names available to this transcription (first author Alexandre Unger). Per transcription rule 4, Alexandre Unger (first author) is set as a placeholder corresponding author instead. The full ~60-author list referenced in the audit source ("cf. JSON sous-agent") was not available for this transcription — only Alexandre Unger is transcribed pending that list.',
@@ -564,7 +567,6 @@ export const AUDIT_PAPERS: AuditPaper[] = [
     title: 'A Visual LGE Extent Threshold for Mortality Risk Stratification in Ischemic Cardiomyopathy',
     articleStatus: 'UNDER_REVIEW',
     authors: [
-      { name: 'Jerome Garot', isCorresponding: true },
       { name: 'Alexandre Unger' },
       { name: 'Suzanne Duhamel' },
       { name: 'Philippe Garot' },
@@ -583,6 +585,7 @@ export const AUDIT_PAPERS: AuditPaper[] = [
       { name: 'Valerie Bousson' },
       { name: 'Solenn Toupin' },
       { name: 'Theo Pezel' },
+      { name: 'Jerome Garot', isCorresponding: true },
     ],
     submissions: [
       { journalName: 'Circulation: Cardiovascular Imaging', submittedAt: '2026-02-12', status: 'REJECTED' },
@@ -626,7 +629,6 @@ export const AUDIT_PAPERS: AuditPaper[] = [
     title: 'The MULTIVALVE Study: Rationale, Objectives, and Design of a French Registry on Multiple and Mixed Valvular Heart Disease',
     articleStatus: 'UNDER_REVIEW',
     authors: [
-      { name: 'Theo Pezel', isCorresponding: true },
       { name: 'Gilles Soulat' },
       { name: 'Solenn Toupin' },
       { name: 'Yohann Bohbot' },
@@ -662,6 +664,7 @@ export const AUDIT_PAPERS: AuditPaper[] = [
       { name: 'Bernard Iung' },
       { name: 'Eric Vicaut' },
       { name: 'Augustin Coisne' },
+      { name: 'Theo Pezel', isCorresponding: true },
     ],
     submissions: [{ journalName: 'Archives of Cardiovascular Diseases', submittedAt: '2026-04-11', status: 'UNDER_REVIEW' }],
   },
@@ -671,7 +674,6 @@ export const AUDIT_PAPERS: AuditPaper[] = [
     title: 'Hemodynamic forces: a novel non-contrast CMR parameter to detect early cardiac involvement in Sarcoidosis patients',
     articleStatus: 'UNDER_REVIEW',
     authors: [
-      { name: 'Theo Pezel', isCorresponding: true },
       { name: 'Aicha Kante' },
       { name: 'Andreea Sorina Afana' },
       { name: 'Raphael Mirailles' },
@@ -696,6 +698,7 @@ export const AUDIT_PAPERS: AuditPaper[] = [
       { name: 'Patrick Henry' },
       { name: 'Valerie Bousson' },
       { name: 'Cloe Comarmond' },
+      { name: 'Theo Pezel', isCorresponding: true },
     ],
     submissions: [{ journalName: 'Archives of Cardiovascular Diseases', submittedAt: '2026-04-11', status: 'UNDER_REVIEW' }],
   },
