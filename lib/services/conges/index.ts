@@ -120,7 +120,7 @@ export type PendingLeaveRequestAdmin = {
 
 export function normaliseRange(start: Date, end: Date): { start: Date; end: Date } {
   const startDay = startOfDay(start)
-  const endDay = endOfDay(end)
+  const endDay = startOfDay(end)
   if (endDay < startDay) {
     return { start: startDay, end: startDay }
   }

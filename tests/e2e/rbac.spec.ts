@@ -7,7 +7,7 @@ async function login(page: Page, email: string) {
   await page.getByPlaceholder('Email').fill(email)
   await page.getByPlaceholder('Password').fill('ristifou')
   await page.getByRole('button', { name: /sign in/i }).click()
-  await page.waitForURL('**/dashboard', { timeout: 60000 })
+  await page.waitForURL((url) => url.pathname === '/en/dashboard', { timeout: 60000 })
 }
 
 test('Congés admin: manages leave, blocked from portal admin and Bestof stats', async ({ page }) => {

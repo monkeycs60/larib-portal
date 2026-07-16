@@ -5,9 +5,11 @@ import { BetterAuthSession } from '@/types/session';
 import { prisma } from '@/lib/prisma';
 
 export const getTypedSession = cache(async (): Promise<BetterAuthSession | null> => {
+	const requestHeaders = await headers();
+
 	try {
 		const session = await auth.api.getSession({
-			headers: await headers(),
+			headers: requestHeaders,
 		});
 
 		if (!session || !session.user) {

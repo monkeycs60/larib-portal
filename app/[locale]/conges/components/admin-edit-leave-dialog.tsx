@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAction } from 'next-safe-action/hooks'
 import { toast } from 'sonner'
-import { format, startOfDay, getYear } from 'date-fns'
+import { format, getYear } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
 import { DayPicker } from 'react-day-picker'
 import {
@@ -104,8 +104,8 @@ export function AdminEditLeaveDialog({
   const form = useForm<AdminEditFormValues>({
     resolver: zodResolver(adminEditFormSchema),
     defaultValues: {
-      startDate: entry ? startOfDay(new Date(entry.startDate)).toISOString() : '',
-      endDate: entry ? startOfDay(new Date(entry.endDate)).toISOString() : '',
+      startDate: entry ? getIso(new Date(entry.startDate)) ?? '' : '',
+      endDate: entry ? getIso(new Date(entry.endDate)) ?? '' : '',
       reason: entry?.reason ?? '',
     },
   })
@@ -205,8 +205,8 @@ export function AdminEditLeaveDialog({
       const endDate = new Date(entry.endDate)
       setSelectedRange({ from: startDate, to: endDate })
       form.reset({
-        startDate: startOfDay(startDate).toISOString(),
-        endDate: startOfDay(endDate).toISOString(),
+        startDate: getIso(startDate) ?? '',
+        endDate: getIso(endDate) ?? '',
         reason: entry.reason ?? '',
       })
     }

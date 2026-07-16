@@ -1,7 +1,9 @@
-import { startOfDay } from 'date-fns'
+import { setHours, startOfDay } from 'date-fns'
+
+const STABLE_DAY_HOUR = 9
 
 export function getIso(date: Date | undefined): string | undefined {
-  return date ? startOfDay(date).toISOString() : undefined
+  return date ? setHours(startOfDay(date), STABLE_DAY_HOUR).toISOString() : undefined
 }
 
 export function pluralize(count: number, singular: string, plural: string): string {
