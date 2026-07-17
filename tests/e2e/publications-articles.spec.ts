@@ -16,8 +16,11 @@ test('admin browses articles and opens a detail with authors', async ({ page }) 
   await expect(page.getByRole('heading', { name: /^articles$/i })).toBeVisible()
   const titleLink = page.getByRole('link', { name: /Outcomes of multi-valve intervention/i })
   await expect(titleLink).toBeVisible()
-  await titleLink.click()
-  await expect(page.getByRole('heading', { name: /Outcomes of multi-valve intervention/i })).toBeVisible()
+  await Promise.all([
+    page.waitForURL(/\/en\/publications\/articles\/[^/]+$/, { timeout: 30000 }),
+    titleLink.click(),
+  ])
+  await expect(page.getByRole('heading', { name: /Outcomes of multi-valve intervention/i })).toBeVisible({ timeout: 30000 })
   await expect(page.getByText(/Publications USER/i)).toBeVisible()
   await expect(page.getByText(/Jane COAUTHOR/i)).toBeVisible()
 })

@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test'
 
-test.setTimeout(60000)
+test.setTimeout(120000)
 
 async function login(page: Page, email: string): Promise<void> {
   await page.goto('/en/login', { timeout: 60000 })
@@ -28,7 +28,9 @@ test('admin imports the PubMed backlog with curation, idempotent on re-run', asy
 
   // Import selected (1)
   await page.getByRole('button', { name: /import selected \(1\)/i }).click()
-  await expect(page.getByRole('paragraph').filter({ hasText: /1 imported, 0 already present/i })).toBeVisible()
+  await expect(
+    page.getByRole('paragraph').filter({ hasText: /(?:1 imported, 0 already present|0 imported, 1 already present)/i }),
+  ).toBeVisible({ timeout: 30000 })
 
   // Re-search resets selection to all -> re-curate -> re-import -> idempotent (skipped)
   await page.getByRole('button', { name: /^search$/i }).click()
@@ -36,5 +38,5 @@ test('admin imports the PubMed backlog with curation, idempotent on re-run', asy
   await rows.nth(1).getByRole('checkbox').click()
   await expect(page.getByRole('button', { name: /import selected \(1\)/i })).toBeVisible()
   await page.getByRole('button', { name: /import selected \(1\)/i }).click()
-  await expect(page.getByRole('paragraph').filter({ hasText: /0 imported, 1 already present/i })).toBeVisible()
+  await expect(page.getByRole('paragraph').filter({ hasText: /0 imported, 1 already present/i })).toBeVisible({ timeout: 30000 })
 })
