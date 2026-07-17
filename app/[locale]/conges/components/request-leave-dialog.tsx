@@ -563,7 +563,7 @@ export function RequestLeaveDialog({
             <section className='rounded-xl border border-line bg-bg-surface p-5'>
               <div className='flex items-center gap-2 mb-4'>
                 <span className='h-1.5 w-1.5 rounded-full bg-coral-500' />
-                <span className='text-xs font-semibold uppercase tracking-wide text-coral-600'>{translations.reasonLabel}</span>
+                <label htmlFor='reason' className='text-xs font-semibold uppercase tracking-wide text-coral-600'>{translations.reasonLabel}</label>
                 <span className='text-xs text-text-muted'>{translations.optionalTag}</span>
                 <span className='h-px flex-1 bg-line ml-2' />
               </div>

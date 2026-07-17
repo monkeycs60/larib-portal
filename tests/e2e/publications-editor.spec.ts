@@ -26,11 +26,12 @@ test('user creates + edits a publication and requests the author list; admin res
   await expect(page.getByText('Changes saved')).toBeVisible({ timeout: 15000 })
 
   // Add a submission
+  const journalName = `E2E Journal ${Date.now()}`
   await page.getByRole('button', { name: 'Add a submission' }).click()
-  await page.getByPlaceholder('e.g. Circulation').fill('European Heart Journal')
+  await page.getByPlaceholder('e.g. Circulation').fill(journalName)
   await page.locator('input[type="date"]').first().fill('2025-05-18')
   await page.getByRole('button', { name: 'Add', exact: true }).click()
-  await expect(page.getByText('European Heart Journal').first()).toBeVisible({ timeout: 15000 })
+  await expect(page.getByText(journalName).first()).toBeVisible({ timeout: 15000 })
 
   // Request the author list to the admin
   await page.getByPlaceholder(/Marie Lambert/).fill('Dr. Test helped with imaging analysis')

@@ -36,6 +36,7 @@ async function main() {
 	await prisma.study.deleteMany();
 	await prisma.author.deleteMany();
 	await prisma.affiliation.deleteMany();
+	await prisma.centre.deleteMany();
 	await prisma.journal.deleteMany();
 	await prisma.user.deleteMany();
 
@@ -247,8 +248,17 @@ async function main() {
 	const publicationsJournal = await prisma.journal.create({
 		data: { name: 'European Heart Journal', publisher: 'Oxford University Press', impactFactor: 39.3 },
 	});
+	const publicationsCentre = await prisma.centre.create({
+		data: { name: 'Lariboisière Hospital', city: 'Paris', country: 'France' },
+	});
 	const publicationsAffiliation = await prisma.affiliation.create({
-		data: { name: 'Lariboisière Hospital, APHP, Paris, France', institution: 'APHP', city: 'Paris', country: 'France' },
+		data: {
+			name: 'Lariboisière Hospital, APHP, Paris, France',
+			institution: 'APHP',
+			city: 'Paris',
+			country: 'France',
+			centre: { connect: { id: publicationsCentre.id } },
+		},
 	});
 	const publicationsFirstAuthor = await prisma.author.create({
 		data: { firstName: 'Publications', lastName: 'User', degrees: 'MD', user: { connect: { id: publicationsUser.id } }, defaultAffiliation: { connect: { id: publicationsAffiliation.id } } },

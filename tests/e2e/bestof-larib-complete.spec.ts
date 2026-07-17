@@ -42,8 +42,9 @@ async function waitForTableToLoad(page: Page) {
 }
 
 // Helper function to navigate to bestof-larib with proper timeout
-async function gotoBestofLarib(page: Page) {
-	await page.goto('/en/bestof-larib', { timeout: 60000 });
+async function gotoBestofLarib(page: Page, view: 'user' | 'admin' = 'user') {
+	const path = view === 'admin' ? '/en/bestof-larib/admin' : '/en/bestof-larib';
+	await page.goto(path, { timeout: 60000 });
 }
 
 // ============================================
@@ -101,7 +102,7 @@ test.describe('Structure & Display Tests', () => {
 		page,
 	}) => {
 		await loginAs(page, 'admin');
-		await gotoBestofLarib(page);
+		await gotoBestofLarib(page, 'admin');
 		await waitForTableToLoad(page);
 
 		// Vérifier les colonnes admin (sortables)
@@ -265,7 +266,7 @@ test.describe('Filter Tests', () => {
 		page,
 	}) => {
 		await loginAs(page, 'admin');
-		await gotoBestofLarib(page);
+		await gotoBestofLarib(page, 'admin');
 		await waitForTableToLoad(page);
 
 		// Vérifier la présence des filtres admin
@@ -384,7 +385,7 @@ test.describe('Sorting Tests', () => {
 		page,
 	}) => {
 		await loginAs(page, 'admin');
-		await gotoBestofLarib(page);
+		await gotoBestofLarib(page, 'admin');
 		await waitForTableToLoad(page);
 
 		const difficultyHeader = page.getByRole('button', {
@@ -433,7 +434,7 @@ test.describe('Sorting Tests', () => {
 		page,
 	}) => {
 		await loginAs(page, 'admin');
-		await gotoBestofLarib(page);
+		await gotoBestofLarib(page, 'admin');
 		await waitForTableToLoad(page);
 
 		const statusHeader = page.getByRole('button', { name: /sort by status/i });
@@ -502,7 +503,7 @@ test.describe('Action Tests', () => {
 		page,
 	}) => {
 		await loginAs(page, 'admin');
-		await gotoBestofLarib(page);
+		await gotoBestofLarib(page, 'admin');
 		await waitForTableToLoad(page);
 
 		// Cliquer sur Edit
@@ -517,7 +518,7 @@ test.describe('Action Tests', () => {
 		page,
 	}) => {
 		await loginAs(page, 'admin');
-		await gotoBestofLarib(page);
+		await gotoBestofLarib(page, 'admin');
 		await waitForTableToLoad(page);
 
 		// Cliquer sur Delete
@@ -614,7 +615,7 @@ test.describe('Permission & Authorization Tests', () => {
 
 	test('should show admin actions for admin users', async ({ page }) => {
 		await loginAs(page, 'admin');
-		await gotoBestofLarib(page);
+		await gotoBestofLarib(page, 'admin');
 		await waitForTableToLoad(page);
 
 		// Vérifier que les boutons admin sont visibles
@@ -689,7 +690,7 @@ test.describe('Navigation & Header Buttons Tests', () => {
 		page,
 	}) => {
 		await loginAs(page, 'admin');
-		await gotoBestofLarib(page);
+		await gotoBestofLarib(page, 'admin');
 		await waitForTableToLoad(page);
 
 		// Cliquer sur Statistics
@@ -706,7 +707,7 @@ test.describe('Navigation & Header Buttons Tests', () => {
 		page,
 	}) => {
 		await loginAs(page, 'admin');
-		await gotoBestofLarib(page);
+		await gotoBestofLarib(page, 'admin');
 		await waitForTableToLoad(page);
 
 		// Cliquer sur Create Case

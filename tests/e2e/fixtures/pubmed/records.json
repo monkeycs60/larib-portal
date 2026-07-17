@@ -5,7 +5,10 @@
     "abstract": "Background text.",
     "doi": "10.1093/eurheartj/ehad100",
     "publishedAt": "2023-03-07",
+    "receivedAt": null,
+    "acceptedAt": null,
     "journal": { "name": "European Heart Journal", "isoAbbrev": "Eur Heart J", "issn": "0195-668X", "publisher": null },
+    "publicationTypes": ["Journal Article"],
     "authors": [
       { "lastName": "Pezel", "foreName": "Theo", "initials": "T", "affiliation": "Lariboisiere Hospital, APHP, Paris, France.", "orcid": "0000-0002-1234-5678" },
       { "lastName": "Garot", "foreName": "Jerome", "initials": "J", "affiliation": "ICPS, Massy, France.", "orcid": null }
@@ -17,7 +20,10 @@
     "abstract": null,
     "doi": null,
     "publishedAt": "2019-01-01",
+    "receivedAt": null,
+    "acceptedAt": null,
     "journal": { "name": "Some Journal", "isoAbbrev": "Some J", "issn": "1111-2222", "publisher": null },
+    "publicationTypes": ["Editorial"],
     "authors": [ { "lastName": "Pezel", "foreName": "Theo", "initials": "T", "affiliation": null, "orcid": "0000-0002-1234-5678" } ]
   }
 ]

@@ -20,8 +20,13 @@ async function loginAs(page: Page, user: { email: string; password: string }): P
 	await page.waitForURL('**/dashboard', { timeout: 60000 });
 }
 
-async function gotoConges(page: Page, locale: 'en' | 'fr' = 'en'): Promise<void> {
-	await page.goto(`/${locale}/conges`, { timeout: 60000 });
+async function gotoConges(
+	page: Page,
+	locale: 'en' | 'fr' = 'en',
+	view: 'user' | 'admin' = 'user'
+): Promise<void> {
+	const path = view === 'admin' ? `/${locale}/conges/admin` : `/${locale}/conges`;
+	await page.goto(path, { timeout: 60000 });
 	await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
 }
 
@@ -111,7 +116,7 @@ test.describe('Conges - Leave Management', () => {
 			page,
 		}) => {
 			await loginAs(page, ADMIN_USER);
-			await gotoConges(page);
+			await gotoConges(page, 'en', 'admin');
 
 			// Admin should NOT see "Request leave" button (admins don't request leave for themselves)
 			// Instead they see the pending requests section
@@ -139,7 +144,7 @@ test.describe('Conges - Leave Management', () => {
 			}
 
 			// Test French locale
-			await gotoConges(page, 'fr');
+			await gotoConges(page, 'fr', 'admin');
 			await expect(page.getByText(/vue d'ensemble/i)).toBeVisible({
 				timeout: 10000,
 			});
@@ -147,7 +152,7 @@ test.describe('Conges - Leave Management', () => {
 
 		test('should only display users with CONGES access in admin dashboard', async ({ page }) => {
 			await loginAs(page, ADMIN_USER);
-			await gotoConges(page);
+			await gotoConges(page, 'en', 'admin');
 
 			// Wait for the team overview table
 			const adminTableTitle = page.getByText(/team leave overview/i);
@@ -179,7 +184,7 @@ test.describe('Conges - Leave Management', () => {
 			}
 
 			// Test French locale maintains filtering
-			await gotoConges(page, 'fr');
+			await gotoConges(page, 'fr', 'admin');
 			const tableFr = page.locator('table').first();
 			await expect(tableFr).toBeVisible({ timeout: 10000 });
 
