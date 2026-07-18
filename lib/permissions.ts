@@ -1,5 +1,14 @@
 import type { Application, Role } from '@/app/generated/prisma'
 
+export const ACTIVE_APPLICATIONS = ['BESTOF_LARIB', 'CONGES', 'PUBLICATIONS'] as const
+export type ActiveApplication = (typeof ACTIVE_APPLICATIONS)[number]
+
+export function toActiveApplications(
+  apps: Application[] | null | undefined,
+): ActiveApplication[] {
+  return (apps ?? []).filter((app): app is ActiveApplication => app !== 'CARDIOLARIB')
+}
+
 // Tolerant of optional/null fields: session.user always has them, but some UI
 // prop types (e.g. SidebarUser) declare role/applications as optional.
 type WithRole = { role?: Role | null }

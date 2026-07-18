@@ -42,8 +42,8 @@ type SidebarUser = {
   image?: string | null
   position?: string | null
   role?: 'ADMIN' | 'USER'
-  applications?: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB' | 'PUBLICATIONS'> | null
-  adminApplications?: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB' | 'PUBLICATIONS'> | null
+  applications?: Array<'BESTOF_LARIB' | 'CONGES' | 'PUBLICATIONS'> | null
+  adminApplications?: Array<'BESTOF_LARIB' | 'CONGES' | 'PUBLICATIONS'> | null
 }
 
 type SidebarItem = {

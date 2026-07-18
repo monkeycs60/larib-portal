@@ -18,21 +18,19 @@ export default async function DashboardPage({
   const t = await getTranslations({ locale, namespace: 'dashboard' })
   const adminT = await getTranslations({ locale, namespace: 'admin' })
 
-  const allApps = accessibleApplications(session.user) as Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB' | 'PUBLICATIONS'>
-  const appOrder: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB' | 'PUBLICATIONS'> = ['BESTOF_LARIB', 'CONGES', 'PUBLICATIONS', 'CARDIOLARIB']
-  const apps = appOrder.filter(app => app !== 'CARDIOLARIB' && allApps.includes(app))
+  const allApps = accessibleApplications(session.user) as Array<'BESTOF_LARIB' | 'CONGES' | 'PUBLICATIONS'>
+  const appOrder: Array<'BESTOF_LARIB' | 'CONGES' | 'PUBLICATIONS'> = ['BESTOF_LARIB', 'CONGES', 'PUBLICATIONS']
+  const apps = appOrder.filter(app => allApps.includes(app))
 
-  function appSlug(app: 'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB' | 'PUBLICATIONS'): string {
+  function appSlug(app: 'BESTOF_LARIB' | 'CONGES' | 'PUBLICATIONS'): string {
     return app === 'BESTOF_LARIB'
       ? '/bestof-larib'
       : app === 'CONGES'
         ? '/conges'
-        : app === 'PUBLICATIONS'
-          ? '/publications'
-          : '/cardiolarib'
+        : '/publications'
   }
 
-  function getAppIcon(app: 'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB' | 'PUBLICATIONS') {
+  function getAppIcon(app: 'BESTOF_LARIB' | 'CONGES' | 'PUBLICATIONS') {
     switch (app) {
       case 'BESTOF_LARIB':
         return (
@@ -53,12 +51,6 @@ export default async function DashboardPage({
             <circle cx="18" cy="28" r="2" fill="currentColor"/>
             <circle cx="30" cy="28" r="2" fill="currentColor"/>
             <circle cx="18" cy="34" r="2" fill="currentColor"/>
-          </svg>
-        );
-      case 'CARDIOLARIB':
-        return (
-          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-            <path d="M24 38s-12-8-12-18c0-5 4-9 8-9 2.5 0 4 1.5 4 1.5s1.5-1.5 4-1.5c4 0 8 4 8 9 0 10-12 18-12 18z" stroke="currentColor" strokeWidth="2" fill="none"/>
           </svg>
         );
       case 'PUBLICATIONS':

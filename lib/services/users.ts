@@ -81,8 +81,8 @@ export type UpdateUserInput = {
   profilePhoto?: string | null
   profilePhotoKey?: string | null
   congesTotalDays?: number
-  applications?: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB' | 'PUBLICATIONS'>
-  adminApplications?: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB' | 'PUBLICATIONS'>
+  applications?: Array<'BESTOF_LARIB' | 'CONGES' | 'PUBLICATIONS'>
+  adminApplications?: Array<'BESTOF_LARIB' | 'CONGES' | 'PUBLICATIONS'>
 }
 
 export async function updateUser(data: UpdateUserInput): Promise<UserWithAdminFields> {
@@ -123,8 +123,8 @@ export type CreatePlaceholderUserInput = {
   lastName?: string | null
   language?: 'EN' | 'FR'
   position?: string | null
-  applications?: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB' | 'PUBLICATIONS'>
-  adminApplications?: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB' | 'PUBLICATIONS'>
+  applications?: Array<'BESTOF_LARIB' | 'CONGES' | 'PUBLICATIONS'>
+  adminApplications?: Array<'BESTOF_LARIB' | 'CONGES' | 'PUBLICATIONS'>
   arrivalDate?: Date | null
   departureDate?: Date | null
   congesTotalDays?: number

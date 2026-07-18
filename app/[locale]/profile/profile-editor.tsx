@@ -28,16 +28,15 @@ const Schema = z.object({
   country: z.string().optional().nullable(),
   profilePhoto: z.string().url().optional().nullable(),
   role: z.enum(["ADMIN","USER"]).optional(),
-  applications: z.array(z.enum(["BESTOF_LARIB","CONGES","CARDIOLARIB","PUBLICATIONS"]))
+  applications: z.array(z.enum(["BESTOF_LARIB","CONGES","PUBLICATIONS"]))
     .optional(),
 })
 
 export type ProfileEditorValues = z.infer<typeof Schema>
 
-const APP_DOT: Record<Application, string> = {
+const APP_DOT: Record<string, string> = {
   BESTOF_LARIB: '#ec3b68',
   CONGES: '#6366f1',
-  CARDIOLARIB: '#0ea5e9',
   PUBLICATIONS: '#0d9488',
 }
 
@@ -138,7 +137,7 @@ export function ProfileEditor({ initial, positions = [] }: Props) {
   const allowedApplications = accessibleApplications({
     applications: initial.applications ?? [],
     adminApplications: initial.adminApplications ?? [],
-  })
+  }).filter((app) => app !== 'CARDIOLARIB')
 
   return (
     <div className="space-y-4">

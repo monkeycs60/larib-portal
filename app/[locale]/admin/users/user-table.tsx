@@ -22,8 +22,7 @@ import {
 import { toast } from 'sonner'
 import type { InvitationStatus } from '@/lib/services/invitations'
 import { Mail, Shield, Trash2, UserIcon } from 'lucide-react'
-import { accessibleApplications, canAdminApp } from '@/lib/permissions'
-import type { Application } from '@/app/generated/prisma'
+import { accessibleApplications, canAdminApp, toActiveApplications, type ActiveApplication } from '@/lib/permissions'
 
 export type UserRow = UserFormValues & {
   name?: string | null
@@ -35,7 +34,6 @@ export type UserRow = UserFormValues & {
 const APP_DOT: Record<string, string> = {
   BESTOF_LARIB: '#ec3b68',
   CONGES: '#6366f1',
-  CARDIOLARIB: '#0ea5e9',
   PUBLICATIONS: '#0d9488',
 }
 
@@ -180,7 +178,7 @@ export function UserTable({ users, positions, locale }: { users: UserRow[]; posi
                 const placeholder = isPlaceholderUser(user)
                 const tint = avatarTint(user.id)
                 const initials = (user.firstName?.[0] || user.name?.[0] || user.email[0]).toUpperCase()
-                const apps = accessibleApplications(user)
+                const apps = toActiveApplications(accessibleApplications(user))
 
                 return (
                   <TableRow key={user.id} className={placeholder ? 'bg-gray-50/50' : ''}>
@@ -213,7 +211,7 @@ export function UserTable({ users, positions, locale }: { users: UserRow[]; posi
                         <span className="text-text-muted">—</span>
                       ) : (
                         <div className="flex flex-col items-start gap-1.5">
-                          {apps.map((app: Application) => (
+                          {apps.map((app: ActiveApplication) => (
                             <span key={app} className="inline-flex items-center gap-2 rounded-full border border-line bg-gray-50 py-1 pl-2.5 pr-1.5">
                               <span className="h-2 w-2 rounded-full" style={{ backgroundColor: APP_DOT[app] }} />
                               <span className="text-sm font-medium text-text-primary">{t(`app_${app}`)}</span>

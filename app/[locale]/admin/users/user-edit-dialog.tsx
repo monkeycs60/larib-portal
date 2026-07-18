@@ -46,8 +46,8 @@ const FormSchema = z.object({
 	position: z.string().optional(),
 	arrivalDate: z.string().optional(),
 	departureDate: z.string().optional(),
-	applications: z.array(z.enum(['BESTOF_LARIB', 'CONGES', 'CARDIOLARIB', 'PUBLICATIONS'])),
-	adminApplications: z.array(z.enum(['BESTOF_LARIB', 'CONGES', 'CARDIOLARIB', 'PUBLICATIONS'])),
+	applications: z.array(z.enum(['BESTOF_LARIB', 'CONGES', 'PUBLICATIONS'])),
+	adminApplications: z.array(z.enum(['BESTOF_LARIB', 'CONGES', 'PUBLICATIONS'])),
 	congesTotalDays: z.number().int().min(0).max(365).optional(),
 	profilePhoto: z.string().url().optional().nullable(),
 });

@@ -31,8 +31,8 @@ type NavbarUser = {
     role?: 'ADMIN' | 'USER';
     firstName?: string | null;
     lastName?: string | null;
-    applications?: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB' | 'PUBLICATIONS'> | null;
-    adminApplications?: Array<'BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB' | 'PUBLICATIONS'> | null;
+    applications?: Array<'BESTOF_LARIB' | 'CONGES' | 'PUBLICATIONS'> | null;
+    adminApplications?: Array<'BESTOF_LARIB' | 'CONGES' | 'PUBLICATIONS'> | null;
 };
 
 export function NavbarClient({ user }: { user?: NavbarUser | null }) {

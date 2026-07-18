@@ -3,7 +3,7 @@ import { z } from "zod"
 import { revalidatePath } from "next/cache"
 import { authenticatedAction } from "@/actions/safe-action"
 import { updateUser } from "@/lib/services/users"
-import { isSuperAdmin } from "@/lib/permissions"
+import { isSuperAdmin, toActiveApplications } from "@/lib/permissions"
 
 const UpdateSelfSchema = z.object({
   // Admin can optionally change role and applications; regular users cannot.
@@ -16,7 +16,7 @@ const UpdateSelfSchema = z.object({
   position: z.string().trim().optional().nullable(),
   profilePhoto: z.string().url().optional().nullable(),
   role: z.enum(["ADMIN","USER"]).optional(),
-  applications: z.array(z.enum(["BESTOF_LARIB","CONGES","CARDIOLARIB","PUBLICATIONS"]))
+  applications: z.array(z.enum(["BESTOF_LARIB","CONGES","PUBLICATIONS"]))
     .optional(),
   locale: z.enum(["en","fr"]).optional(),
 })
@@ -45,7 +45,7 @@ export const updateSelfProfileAction = authenticatedAction
       const result = await updateUser({
         ...basePayload,
         role: parsedInput.role ?? ctx.user.role,
-        applications: parsedInput.applications ?? ctx.user.applications ?? [],
+        applications: parsedInput.applications ?? toActiveApplications(ctx.user.applications),
       })
 
       revalidatePath('/en', 'layout')

@@ -53,7 +53,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ locale
     country: user.country ?? undefined,
     profilePhoto: user.profilePhoto ?? undefined,
     role: user.role,
-    applications: (user.applications ?? []) as ['BESTOF_LARIB' | 'CONGES' | 'CARDIOLARIB' | 'PUBLICATIONS'] | undefined,
+    applications: (user.applications ?? []) as ['BESTOF_LARIB' | 'CONGES' | 'PUBLICATIONS'] | undefined,
     adminApplications: user.adminApplications ?? [],
   }
 
