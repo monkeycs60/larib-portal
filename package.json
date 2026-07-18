@@ -6,6 +6,7 @@
 		"dev": "next dev --turbopack",
 		"build": "next build",
 		"start": "next start",
+		"prepare": "git config core.hooksPath .githooks || true",
 		"postinstall": "prisma migrate deploy && prisma generate",
 		"lint": "next lint",
 		"test:e2e": "playwright test",
@@ -13,6 +14,8 @@
 		"test:e2e:ui": "playwright test --ui",
 		"test:seed": "tsx prisma/seed.test.ts",
 		"test:setup": "npm run test:seed && playwright test",
+		"test:push": "npm run test:seed && PLAYWRIGHT_PORT=3100 playwright test --workers=1 --retries=2 --forbid-only",
+		"verify:push": "npm run test:unit && npm run build && npm run test:push",
 		"test:setup ui": "npm run test:seed && playwright test --ui",
 		"test:check-passwords": "tsx scripts/check-test-passwords.ts",
 		"audit:submissions": "tsx scripts/audit-in-submission.ts"

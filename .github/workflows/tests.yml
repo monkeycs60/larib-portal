@@ -85,8 +85,8 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Run test setup and E2E tests
-        run: npm run test:setup
+      - name: Run complete push validation
+        run: npm run verify:push
         env:
           CI: true
 

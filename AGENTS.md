@@ -1,5 +1,13 @@
 # Repository Guidelines
 
+## FIRST PRIORITY: Tests must pass before every push
+
+- Every feature and bug fix must include appropriate automated tests.
+- Before pushing any code, run `npm run verify:push` and keep fixing the implementation or tests, then rerun the command until it passes completely.
+- Never bypass the pre-push hook with `--no-verify`. A failing validation must block the push.
+- If the agentic stop hook reports a failed push validation, inspect the failure, fix its root cause, and retry the push. Do not end the task while the failure marker remains.
+- Do not weaken, skip, or delete a test just to make validation pass. Fix the root cause.
+
 ### Prohibited Practices
 
 -  **No useEffect**: Use fetch in server components via services, or handle side effects via event handlers
