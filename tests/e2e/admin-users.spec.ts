@@ -137,4 +137,28 @@ test.describe('Admin User Management - Onboarding Status Feature', () => {
 		await expect(page.getByText('Changes saved')).toBeVisible({ timeout: 15000 });
 		await expect(dialog).toBeHidden();
 	});
+
+	test('should save a CONGES user after editing dates, apps and leave days', async ({ page }) => {
+		await loginAsAdmin(page);
+		await gotoAdminUsers(page);
+
+		const row = page.locator('tr', { hasText: 'conges-admin@larib-portal.test' });
+		await row.getByRole('button', { name: 'Edit' }).click();
+
+		const dialog = page.getByRole('dialog');
+		await expect(dialog.getByText('Edit user')).toBeVisible();
+
+		await dialog.locator('input[type="date"]').first().fill('2026-05-11');
+		await dialog.locator('input[type="date"]').nth(1).fill('2027-06-01');
+		await dialog.locator('input[type="number"]').fill('30');
+
+		await dialog.getByRole('button', { name: /save/i }).click();
+
+		await expect(page.getByText('Changes saved')).toBeVisible({ timeout: 15000 });
+		await expect(dialog).toBeHidden();
+
+		// Leave days must round-trip from the DB into the form (no mismatch).
+		await row.getByRole('button', { name: 'Edit' }).click();
+		await expect(dialog.locator('input[type="number"]')).toHaveValue('30');
+	});
 });
