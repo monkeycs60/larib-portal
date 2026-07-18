@@ -14,7 +14,7 @@ const UpdateSelfSchema = z.object({
   birthDate: z.string().optional().nullable(),
   language: z.enum(["EN", "FR"]).optional(),
   position: z.string().trim().optional().nullable(),
-  profilePhoto: z.string().url().optional().nullable(),
+  profilePhoto: z.string().url().or(z.literal('')).optional().nullable(),
   role: z.enum(["ADMIN","USER"]).optional(),
   applications: z.array(z.enum(["BESTOF_LARIB","CONGES","PUBLICATIONS"]))
     .optional(),
@@ -38,7 +38,7 @@ export const updateSelfProfileAction = authenticatedAction
       birthDate,
       language,
       position: parsedInput.position ?? null,
-      profilePhoto: parsedInput.profilePhoto ?? null,
+      profilePhoto: parsedInput.profilePhoto || null,
     } as const
 
     if (isAdmin) {

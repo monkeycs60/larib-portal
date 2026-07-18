@@ -49,7 +49,7 @@ const FormSchema = z.object({
 	applications: z.array(z.enum(['BESTOF_LARIB', 'CONGES', 'PUBLICATIONS'])),
 	adminApplications: z.array(z.enum(['BESTOF_LARIB', 'CONGES', 'PUBLICATIONS'])),
 	congesTotalDays: z.number().int().min(0).max(365).optional(),
-	profilePhoto: z.string().url().optional().nullable(),
+	profilePhoto: z.string().url().or(z.literal('')).optional().nullable(),
 });
 
 export type UserFormValues = z.infer<typeof FormSchema>;
@@ -170,10 +170,16 @@ export function UserEditDialog({
 		setValue('adminApplications', Array.from(adminApps));
 	}
 
-	const onSubmit = handleSubmit((values) => {
-		const country = values.country?.trim() ? values.country : undefined;
-		executeUpdate({ ...values, country, locale: locale as 'en' | 'fr' });
-	});
+	const onSubmit = handleSubmit(
+		(values) => {
+			const country = values.country?.trim() ? values.country : undefined;
+			executeUpdate({ ...values, country, locale: locale as 'en' | 'fr' });
+		},
+		(errors) => {
+			const firstField = Object.keys(errors)[0];
+			toast.error(firstField ? `${t('actionError')}: ${firstField}` : t('actionError'));
+		},
+	);
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>

@@ -119,4 +119,22 @@ test.describe('Admin User Management - Onboarding Status Feature', () => {
 		const placeholderRow = page.locator('tr', { hasText: 'placeholder@larib-portal.test' });
 		await expect(placeholderRow.getByRole('button', { name: /renvoyer l'invitation/i })).toBeVisible();
 	});
+
+	test('should save an edited user who has no profile photo', async ({ page }) => {
+		await loginAsAdmin(page);
+		await gotoAdminUsers(page);
+
+		const row = page.locator('tr', { hasText: 'test-user@larib-portal.test' });
+		await row.getByRole('button', { name: 'Edit' }).click();
+
+		const dialog = page.getByRole('dialog');
+		await expect(dialog.getByText('Edit user')).toBeVisible();
+
+		await dialog.getByRole('button', { name: /save/i }).click();
+
+		// Regression: users without a profile photo previously failed silent
+		// zod validation (empty string vs url()), so Save did nothing.
+		await expect(page.getByText('Changes saved')).toBeVisible({ timeout: 15000 });
+		await expect(dialog).toBeHidden();
+	});
 });

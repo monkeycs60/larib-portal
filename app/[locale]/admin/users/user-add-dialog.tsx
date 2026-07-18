@@ -48,7 +48,7 @@ const AddUserSchema = z.object({
   adminApplications: z.array(z.enum(["BESTOF_LARIB","CONGES","PUBLICATIONS"])),
   emailLanguage: z.enum(['en','fr']),
   congesTotalDays: z.number().int().min(0).max(365).optional(),
-  profilePhoto: z.string().url().optional().nullable(),
+  profilePhoto: z.string().url().or(z.literal('')).optional().nullable(),
 })
 
 type AddUserValues = z.infer<typeof AddUserSchema>

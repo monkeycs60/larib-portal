@@ -26,7 +26,7 @@ const Schema = z.object({
   language: z.enum(["EN","FR"]).optional(),
   position: z.string().optional().nullable(),
   country: z.string().optional().nullable(),
-  profilePhoto: z.string().url().optional().nullable(),
+  profilePhoto: z.string().url().or(z.literal('')).optional().nullable(),
   role: z.enum(["ADMIN","USER"]).optional(),
   applications: z.array(z.enum(["BESTOF_LARIB","CONGES","PUBLICATIONS"]))
     .optional(),
