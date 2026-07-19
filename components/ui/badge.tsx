@@ -21,6 +21,8 @@ const badgeVariants = cva(
           "border-[#A7F3D0] bg-[#ECFDF5] text-[#047857] [a&]:hover:bg-[#D1FAE5]",
         warning:
           "border-[#FDBA74] bg-[#FFF3E9] text-[#EA580C] [a&]:hover:bg-[#FFE9D5]",
+        info:
+          "border-[#BFDBFE] bg-[#EFF6FF] text-[#2563EB] [a&]:hover:bg-[#DBEAFE]",
         danger:
           "border-[#FECACA] bg-[#FEF2F2] text-[#DC2626] [a&]:hover:bg-[#FEE2E2]",
         neutral:

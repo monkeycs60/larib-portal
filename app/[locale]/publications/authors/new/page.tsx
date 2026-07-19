@@ -18,14 +18,18 @@ export default async function NewAuthorPage({ params }: PageParams) {
   const [centres, users] = await Promise.all([listCentres(), listLinkableUsers()])
 
   return (
-    <div className="mx-auto max-w-4xl p-6 space-y-6">
-      <div className="space-y-1">
-        <nav className="text-sm text-text-secondary">
-          <Link href="/publications/authors">{t('breadcrumbRoot')}</Link>
-          <span> › {t('title')}</span>
-        </nav>
-        <h1 className="text-3xl font-bold">{t('title')}</h1>
-        <p className="text-text-secondary">{t('subtitle')}</p>
+    <div className="mx-auto max-w-4xl space-y-6 p-4 md:p-6">
+      <div className="flex gap-4">
+        <span aria-hidden className="mt-1 w-[5px] shrink-0 rounded bg-gradient-to-b from-coral-500 to-coral-600" />
+        <div className="space-y-1">
+          <nav className="text-sm text-text-muted">
+            <Link href="/publications/authors" className="hover:text-coral-600">{t('breadcrumbRoot')}</Link>
+            <span className="text-text-muted"> › </span>
+            <span className="text-text-secondary">{t('title')}</span>
+          </nav>
+          <h1 className="text-3xl font-extrabold tracking-tight text-text-primary">{t('title')}</h1>
+          <p className="text-sm text-text-secondary">{t('subtitle')}</p>
+        </div>
       </div>
       <AddAuthorForm
         centres={centres.map((centre) => ({ value: centre.id, label: centre.name }))}

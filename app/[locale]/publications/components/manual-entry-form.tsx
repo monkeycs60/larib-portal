@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useAction } from 'next-safe-action/hooks'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
+import { UserPlus, UserRoundCheck, Globe, Plus, X } from 'lucide-react'
 import { useRouter } from '@/app/i18n/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -27,6 +28,26 @@ import {
 import { createAuthorAction } from '@/app/[locale]/publications/actions'
 
 const DEGREE_OPTIONS = ['MD', 'PhD', 'MSc', 'PharmD'] as const
+
+const CARD_CLASS = 'space-y-5 rounded-2xl border border-line bg-bg-surface p-6 shadow-sm'
+const DEGREE_CHIP_CLASS =
+  'flex-none rounded-lg border border-line px-4 py-2 text-sm font-semibold text-text-secondary transition ' +
+  'data-[state=on]:border-coral-500 data-[state=on]:bg-coral-50 data-[state=on]:text-coral-600'
+const TYPE_ITEM_CLASS =
+  'flex-none gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-text-secondary transition ' +
+  'data-[state=on]:bg-bg-surface data-[state=on]:text-coral-600 data-[state=on]:shadow-sm'
+const SUBMIT_CLASS =
+  'gap-2 bg-gradient-to-b from-coral-500 to-coral-600 text-white shadow-[0_10px_22px_-8px_rgba(214,31,85,0.6)] hover:brightness-105'
+
+function SectionHeader({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="h-2 w-2 shrink-0 rounded-full bg-coral-500" />
+      <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-coral-600">{children}</h2>
+      <span className="h-px flex-1 bg-line" />
+    </div>
+  )
+}
 
 const manualEntrySchema = z.object({
   firstName: z.string().min(1),
@@ -90,103 +111,112 @@ export function ManualEntryForm({ centres, users }: Props) {
   const availableCentres = centres.filter((centre) => !centreIds.includes(centre.value))
 
   return (
-    <form onSubmit={handleSubmit((values) => submit(values))} className="space-y-8">
-      <section className="space-y-4 rounded-xl border p-6">
-        <h2 className="text-sm font-semibold text-primary">{t('identity')}</h2>
+    <form onSubmit={handleSubmit((values) => submit(values))} className="space-y-6">
+      <section className={CARD_CLASS}>
+        <SectionHeader>{t('identity')}</SectionHeader>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="space-y-1">
-            <Label>{t('firstName')}</Label>
+          <div className="space-y-1.5">
+            <Label className="text-text-primary">{t('firstName')}</Label>
             <Input placeholder="Pierre" {...register('firstName')} />
-            {errors.firstName && <p className="text-xs text-destructive">{t('requiredField')}</p>}
+            {errors.firstName && <p className="text-xs text-coral-600">{t('requiredField')}</p>}
           </div>
-          <div className="space-y-1">
-            <Label>{t('lastName')}</Label>
+          <div className="space-y-1.5">
+            <Label className="text-text-primary">{t('lastName')}</Label>
             <Input placeholder="Lefèvre" {...register('lastName')} />
-            {errors.lastName && <p className="text-xs text-destructive">{t('requiredField')}</p>}
+            {errors.lastName && <p className="text-xs text-coral-600">{t('requiredField')}</p>}
           </div>
         </div>
-        <div className="space-y-1">
-          <Label>{t('degrees')}</Label>
-          <ToggleGroup type="multiple" value={degrees} onValueChange={setDegrees} className="justify-start gap-2">
+        <div className="space-y-1.5">
+          <Label className="text-text-primary">{t('degrees')}</Label>
+          <ToggleGroup type="multiple" value={degrees} onValueChange={setDegrees} className="flex-wrap justify-start gap-2">
             {DEGREE_OPTIONS.map((degree) => (
-              <ToggleGroupItem key={degree} value={degree}>
+              <ToggleGroupItem key={degree} value={degree} className={DEGREE_CHIP_CLASS}>
                 {degree}
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
         </div>
-        <div className="space-y-1">
-          <Label>
-            {t('orcid')} <span className="text-text-secondary">({t('orcidOptional')})</span>
+        <div className="space-y-1.5">
+          <Label className="text-text-primary">
+            {t('orcid')} <span className="font-normal text-text-muted">({t('orcidOptional')})</span>
           </Label>
-          <Input placeholder="0000-0000-0000-0000" {...register('orcid')} />
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full bg-[#A6CE39] text-[9px] font-bold text-white">
+              iD
+            </span>
+            <Input className="pl-11" placeholder="0000-0000-0000-0000" {...register('orcid')} />
+          </div>
         </div>
-        <div className="space-y-1">
-          <Label>{t('emails')}</Label>
+        <div className="space-y-1.5">
+          <Label className="text-text-primary">{t('emails')}</Label>
           <TagInput value={emails} onChange={setEmails} placeholder="name@hospital.org" />
         </div>
       </section>
 
-      <section className="space-y-4 rounded-xl border p-6">
-        <h2 className="text-sm font-semibold text-primary">{t('typeCentreAffiliations')}</h2>
-        <div className="space-y-1">
-          <Label>{t('authorType')}</Label>
+      <section className={CARD_CLASS}>
+        <SectionHeader>{t('typeCentreAffiliations')}</SectionHeader>
+        <div className="space-y-1.5">
+          <Label className="text-text-primary">{t('authorType')}</Label>
           <ToggleGroup
             type="single"
             value={authorType}
             onValueChange={(value) => value && setAuthorType(value as 'OUR_TEAM' | 'EXTERNAL')}
-            className="justify-start gap-2"
+            className="w-fit gap-1 rounded-xl bg-gray-100 p-1 dark:bg-white/5"
           >
-            <ToggleGroupItem value="OUR_TEAM">{t('ourTeam')}</ToggleGroupItem>
-            <ToggleGroupItem value="EXTERNAL">{t('external')}</ToggleGroupItem>
+            <ToggleGroupItem value="OUR_TEAM" className={TYPE_ITEM_CLASS}>
+              <UserRoundCheck className="h-4 w-4" />
+              {t('ourTeam')}
+            </ToggleGroupItem>
+            <ToggleGroupItem value="EXTERNAL" className={TYPE_ITEM_CLASS}>
+              <Globe className="h-4 w-4" />
+              {t('external')}
+            </ToggleGroupItem>
           </ToggleGroup>
         </div>
         <div className="space-y-2">
-          <Label>
-            {t('centre')} <span className="text-text-secondary">— {t('centreHint')}</span>
+          <Label className="text-text-primary">
+            {t('centre')} <span className="font-normal text-text-muted">— {t('centreHint')}</span>
           </Label>
-          <ul className="space-y-1">
+          <ul className="space-y-1.5">
             {centreIds.map((centreId, index) => {
               const centre = centres.find((option) => option.value === centreId)
               return (
-                <li key={centreId} className="flex items-center justify-between rounded-md border px-3 py-2 text-sm">
-                  <span>
+                <li key={centreId} className="flex items-center justify-between rounded-lg border border-line bg-gray-25 px-3 py-2 text-sm dark:bg-white/5">
+                  <span className="flex items-center gap-2 text-text-primary">
                     {centre?.label}
-                    {index === 0 ? ` · ${t('primary')}` : ''}
+                    {index === 0 && (
+                      <span className="rounded-full bg-coral-50 px-2 py-0.5 text-[11px] font-semibold text-coral-600">{t('primary')}</span>
+                    )}
                   </span>
-                  <button
-                    type="button"
-                    aria-label="remove"
-                    onClick={() => setCentreIds(centreIds.filter((id) => id !== centreId))}
-                  >
-                    ×
+                  <button type="button" aria-label="remove" className="text-text-muted hover:text-coral-600" onClick={() => setCentreIds(centreIds.filter((id) => id !== centreId))}>
+                    <X className="h-4 w-4" />
                   </button>
                 </li>
               )
             })}
           </ul>
           {availableCentres.length > 0 && (
-            <SingleSelect
-              options={availableCentres}
-              value=""
-              onChange={(value) => value && setCentreIds([...centreIds, value])}
-              placeholder={t('addCentre')}
-            />
+            <div className="flex items-center gap-2 text-text-muted">
+              <Plus className="h-4 w-4 shrink-0 text-coral-500" />
+              <SingleSelect
+                options={availableCentres}
+                value=""
+                onChange={(value) => value && setCentreIds([...centreIds, value])}
+                placeholder={t('addCentre')}
+                className="border-dashed"
+              />
+            </div>
           )}
         </div>
-        <div className="space-y-1">
-          <Label>
-            {t('affiliations')} <span className="text-text-secondary">— {t('affiliationsHint')}</span>
+        <div className="space-y-1.5">
+          <Label className="text-text-primary">
+            {t('affiliations')} <span className="font-normal text-text-muted">— {t('affiliationsHint')}</span>
           </Label>
-          <TagInput
-            value={affiliations}
-            onChange={setAffiliations}
-            placeholder="Department of Cardiology, Hôpital Lariboisière, 75010 Paris, France"
-          />
+          <TagInput value={affiliations} onChange={setAffiliations} placeholder="Department of Cardiology, Hôpital Lariboisière, 75010 Paris, France" />
         </div>
-        <div className="space-y-1">
-          <Label>
-            {t('linkedUser')} <span className="text-text-secondary">({t('linkedUserHint')})</span>
+        <div className="space-y-1.5">
+          <Label className="text-text-primary">
+            {t('linkedUser')} <span className="font-normal text-text-muted">({t('linkedUserHint')})</span>
           </Label>
           <SingleSelect options={users} value={userId} onChange={setUserId} placeholder="—" />
         </div>
@@ -196,7 +226,8 @@ export function ManualEntryForm({ centres, users }: Props) {
         <Button type="button" variant="outline" onClick={() => router.push('/publications/authors')}>
           {t('cancel')}
         </Button>
-        <Button type="submit" disabled={action.isPending}>
+        <Button type="submit" disabled={action.isPending} className={SUBMIT_CLASS}>
+          <UserPlus className="h-4 w-4" />
           {t('submit')}
         </Button>
       </div>
@@ -210,6 +241,7 @@ export function ManualEntryForm({ centres, users }: Props) {
           <AlertDialogFooter>
             <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction
+              className={SUBMIT_CLASS}
               onClick={() => {
                 setDuplicateNames([])
                 if (pendingValues) submit(pendingValues, true)
