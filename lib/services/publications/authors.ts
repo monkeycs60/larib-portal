@@ -41,6 +41,10 @@ export async function listAuthors(): Promise<AuthorListItem[]> {
   })
 }
 
+export async function countAuthors(): Promise<number> {
+  return prisma.author.count()
+}
+
 export type LinkableUser = { id: string; firstName: string | null; lastName: string | null; email: string }
 
 export async function listLinkableUsers(): Promise<LinkableUser[]> {

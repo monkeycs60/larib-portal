@@ -1128,7 +1128,9 @@
           "empty": "Aucun auteur pour l'instant."
         },
         "selectAll": "Tout sélectionner"
-      }
+      },
+      "hubDescription": "Auteurs internes et externes, ORCID, centres et fusion des doublons.",
+      "viewAuthors": "Voir les auteurs"
     },
     "centres": {
       "title": "Centres",

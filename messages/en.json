@@ -1130,7 +1130,9 @@
           "empty": "No authors yet."
         },
         "selectAll": "Select all"
-      }
+      },
+      "hubDescription": "Internal and external authors, ORCID, centres and duplicate merging.",
+      "viewAuthors": "View authors"
     },
     "centres": {
       "title": "Centres",
