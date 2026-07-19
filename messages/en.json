@@ -1128,7 +1128,8 @@
           "title": "Authors",
           "addButton": "Add author",
           "empty": "No authors yet."
-        }
+        },
+        "selectAll": "Select all"
       }
     },
     "centres": {

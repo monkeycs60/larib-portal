@@ -1126,7 +1126,8 @@
           "title": "Auteurs",
           "addButton": "Ajouter un auteur",
           "empty": "Aucun auteur pour l'instant."
-        }
+        },
+        "selectAll": "Tout sélectionner"
       }
     },
     "centres": {

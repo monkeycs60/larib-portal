@@ -27,11 +27,19 @@ function stripOrcid(value: string | undefined): string | null {
   return match ? match[1] : null
 }
 
+function extractYear(message: Record<string, unknown>): number | null {
+  const dateFields = ['published', 'issued', 'published-print', 'published-online']
+  for (const field of dateFields) {
+    const year = (message[field] as { 'date-parts'?: number[][] } | undefined)?.['date-parts']?.[0]?.[0]
+    if (typeof year === 'number') return year
+  }
+  return null
+}
+
 export function parseCrossrefWork(json: unknown): FetchedPublication {
   const message = (json as { message?: Record<string, unknown> }).message ?? {}
   const authorsRaw = (message['author'] as Array<Record<string, unknown>> | undefined) ?? []
-  const dateParts = (message['published'] as { 'date-parts'?: number[][] } | undefined)?.['date-parts']
-  const year = dateParts?.[0]?.[0] ?? null
+  const year = extractYear(message)
   const title = ((message['title'] as string[] | undefined) ?? [])[0] ?? ''
   const journal = ((message['container-title'] as string[] | undefined) ?? [])[0] ?? null
   const authors: FetchedAuthor[] = authorsRaw.map((author) => {

@@ -17,7 +17,7 @@ import {
   PUBLICATIONS_ARTICLES_TAG,
 } from '@/lib/services/publications/import'
 import { updateAuthor, deleteAuthor, mergeAuthors, recomputeAuthorCentres, createAuthor, isPrismaKnownError } from '@/lib/services/publications/authors'
-import { findAuthorDuplicates, matchAuthorsAgainstBank } from '@/lib/services/publications/author-dedup'
+import { findAuthorDuplicates, matchAuthorsAgainstBank, normalizeName } from '@/lib/services/publications/author-dedup'
 import { fetchPublicationByIdentifier } from '@/lib/services/publications/publication-lookup'
 import { backfillAffiliations, PUBLICATIONS_CENTRES_TAG, PUBLICATIONS_AFFILIATIONS_TAG } from '@/lib/services/publications/affiliations'
 import { renameCentre, setCentreOwn, deleteCentre, mergeCentres } from '@/lib/services/publications/centres'
@@ -280,8 +280,15 @@ export const addAuthorsFromPublicationAction = appMemberAction('PUBLICATIONS')
     const bank = await prisma.author.findMany({ select: { id: true, firstName: true, lastName: true, orcid: true } })
     const rows = matchAuthorsAgainstBank(bank, parsedInput.authors)
     const toCreate = rows.filter((row) => row.status === 'new')
+    const seenKeys = new Set<string>()
     let created = 0
     for (const author of toCreate) {
+      const orcid = author.orcid?.trim()
+      const dedupKey = orcid
+        ? `orcid:${orcid}`
+        : `name:${normalizeName(author.firstName)}|${normalizeName(author.lastName)}`
+      if (seenKeys.has(dedupKey)) continue
+      seenKeys.add(dedupKey)
       await createAuthor({ firstName: author.firstName, lastName: author.lastName, type: AuthorType.EXTERNAL, orcid: author.orcid ?? null, affiliations: author.affiliationRaw ? [author.affiliationRaw] : [] })
       created += 1
     }
