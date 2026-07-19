@@ -1,5 +1,8 @@
 import { addDays, endOfDay, endOfMonth, startOfDay, startOfMonth, startOfWeek } from 'date-fns'
 import { countWorkingDays } from './french-holidays'
+import { prisma } from '@/lib/prisma'
+import { LeaveRequestStatus } from '@/app/generated/prisma'
+import { fetchFrenchHolidays } from './french-holidays'
 
 export type DateRange = { start: Date; end: Date }
 export type RecapPeriod = 'weekly' | 'monthly'
@@ -81,4 +84,46 @@ export function groupEmailsByLanguage(recipients: RecapRecipient[]): Map<'EN' | 
     grouped.set(recipient.language, existing)
   }
   return grouped
+}
+
+export async function getLeaveRecap(range: DateRange): Promise<RecapRow[]> {
+  const leaves = await prisma.leaveRequest.findMany({
+    where: {
+      status: { in: [LeaveRequestStatus.APPROVED, LeaveRequestStatus.PENDING] },
+      startDate: { lte: range.end },
+      endDate: { gte: range.start },
+      user: {
+        role: 'USER',
+        applications: { has: 'CONGES' },
+      },
+    },
+    include: {
+      user: {
+        select: { firstName: true, lastName: true, email: true, position: true },
+      },
+    },
+  })
+
+  const frenchHolidays = await fetchFrenchHolidays()
+
+  const inputs: RecapLeaveInput[] = leaves.map((leave) => ({
+    userId: leave.userId,
+    firstName: leave.user.firstName,
+    lastName: leave.user.lastName,
+    email: leave.user.email,
+    position: leave.user.position,
+    startDate: leave.startDate,
+    endDate: leave.endDate,
+    status: leave.status === LeaveRequestStatus.APPROVED ? 'APPROVED' : 'PENDING',
+  }))
+
+  return buildRecapRows(inputs, range, frenchHolidays)
+}
+
+export async function getCongesAdminRecipients(): Promise<RecapRecipient[]> {
+  const admins = await prisma.user.findMany({
+    where: { adminApplications: { has: 'CONGES' } },
+    select: { email: true, language: true },
+  })
+  return admins.map((admin) => ({ email: admin.email, language: admin.language }))
 }
