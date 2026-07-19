@@ -68,6 +68,7 @@ export type UpdateAuthorInput = {
 }
 
 export async function updateAuthor(data: UpdateAuthorInput) {
+  const type = await resolveAuthorType(data.centreId ?? null)
   return prisma.author.update({
     where: { id: data.id },
     data: {
@@ -78,6 +79,7 @@ export async function updateAuthor(data: UpdateAuthorInput) {
       orcid: data.orcid ?? null,
       userId: data.userId ?? null,
       centreId: data.centreId ?? null,
+      type,
     },
     select: { id: true },
   })
@@ -123,9 +125,17 @@ export function buildAuthorCreateData(input: CreateAuthorInput): Prisma.AuthorUn
   }
 }
 
+export async function resolveAuthorType(centreId: string | null | undefined): Promise<AuthorType> {
+  if (!centreId) return 'EXTERNAL'
+  const centre = await prisma.centre.findUnique({ where: { id: centreId }, select: { isOwn: true } })
+  return centre?.isOwn ? 'OUR_TEAM' : 'EXTERNAL'
+}
+
 export async function createAuthor(input: CreateAuthorInput) {
+  const primaryCentreId = input.centreIds?.[0] ?? input.centreId ?? null
+  const type = await resolveAuthorType(primaryCentreId)
   return prisma.author.create({
-    data: buildAuthorCreateData(input),
+    data: buildAuthorCreateData({ ...input, type }),
     select: { id: true, firstName: true, lastName: true },
   })
 }

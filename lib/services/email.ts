@@ -1,6 +1,6 @@
 import { COLORS, FONT_SERIF, FONT_SANS, emailLayout } from '@/lib/email/layout'
 import { renderWelcomeEmail, type WelcomeEmailParams } from '@/lib/email/welcome-template'
-import { format } from 'date-fns'
+import { eachDayOfInterval, endOfDay, endOfWeek, format, isWithinInterval, startOfDay, startOfWeek } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
 import type { RecapPeriod, RecapRow, RecapStatus } from '@/lib/services/conges/recap'
 
@@ -414,36 +414,58 @@ export function renderLeaveRecapEmail({
 
   const preheader = `${title} — ${rangeLabel}`
 
-  const rowsHtml = rows.length
-    ? rows
-        .map((row) => {
-          const style = RECAP_STATUS_STYLE[row.status]
-          const dates = `${format(row.startDate, 'd MMM', { locale: dateLocale })} → ${format(row.endDate, 'd MMM', { locale: dateLocale })}`
-          const positionLine = row.position
-            ? `<div style="font-size:12px;color:${COLORS.mutedForeground};">${row.position}</div>`
-            : ''
-          return `
-    <tr>
-      <td style="padding:12px 16px;font-family:${FONT_SANS};font-size:14px;color:${COLORS.foreground};border-top:1px solid ${COLORS.secondary};">
-        <strong>${row.name}</strong>${positionLine}
-      </td>
-      <td style="padding:12px 16px;font-family:${FONT_SANS};font-size:14px;color:${COLORS.foreground};border-top:1px solid ${COLORS.secondary};white-space:nowrap;">${dates}</td>
-      <td style="padding:12px 16px;font-family:${FONT_SANS};font-size:14px;color:${COLORS.foreground};border-top:1px solid ${COLORS.secondary};white-space:nowrap;">${row.daysInRange} ${daysWord(row.daysInRange)}</td>
-      <td style="padding:12px 16px;border-top:1px solid ${COLORS.secondary};text-align:right;">
-        <span style="display:inline-block;background-color:${style.bgColor};border-radius:6px;padding:4px 10px;font-family:${FONT_SANS};font-size:12px;font-weight:600;color:#ffffff;white-space:nowrap;">${style.label[locale]}</span>
-      </td>
-    </tr>`
+  const gridStart = startOfWeek(rangeStart, { weekStartsOn: 1 })
+  const gridEnd = endOfWeek(rangeEnd, { weekStartsOn: 1 })
+  const weekdayLabels = locale === 'fr'
+    ? ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
+    : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
+  const headerCells = weekdayLabels
+    .map((label) => `<th style="padding:6px 2px;font-family:${FONT_SANS};font-size:11px;font-weight:600;color:${COLORS.mutedForeground};text-transform:uppercase;letter-spacing:0.4px;text-align:center;border-bottom:1px solid ${COLORS.border};">${label}</th>`)
+    .join('')
+
+  const allDays = eachDayOfInterval({ start: gridStart, end: gridEnd })
+  const weeks: Date[][] = []
+  for (let index = 0; index < allDays.length; index += 7) {
+    weeks.push(allDays.slice(index, index + 7))
+  }
+
+  const weekRows = weeks
+    .map((week) => {
+      const cells = week
+        .map((day) => {
+          const isActive = isWithinInterval(day, { start: rangeStart, end: rangeEnd })
+          const absentees = isActive
+            ? rows.filter((row) => day >= startOfDay(row.startDate) && day <= endOfDay(row.endDate))
+            : []
+          const pills = absentees
+            .map((row) => `<div style="margin:2px 0;background-color:${RECAP_STATUS_STYLE[row.status].bgColor};border-radius:4px;padding:2px 5px;font-family:${FONT_SANS};font-size:10px;line-height:13px;color:#ffffff;">${row.name}</div>`)
+            .join('')
+          const dayColor = isActive ? COLORS.foreground : '#c2cad6'
+          const cellBg = isActive ? '#ffffff' : COLORS.secondary
+          return `<td valign="top" style="width:14.28%;height:66px;padding:4px;border:1px solid ${COLORS.secondary};background-color:${cellBg};">
+            <div style="font-family:${FONT_SANS};font-size:12px;font-weight:600;color:${dayColor};margin-bottom:2px;">${format(day, 'd')}</div>
+            ${pills}
+          </td>`
         })
         .join('')
-    : `
+      return `<tr>${cells}</tr>`
+    })
+    .join('')
+
+  const legend = `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-top:14px;">
     <tr>
-      <td colspan="4" style="padding:20px 16px;font-family:${FONT_SANS};font-size:14px;color:${COLORS.mutedForeground};text-align:center;border-top:1px solid ${COLORS.secondary};">
-        ${emptyStates[period][locale]}
-      </td>
-    </tr>`
+      <td style="padding-right:18px;font-family:${FONT_SANS};font-size:12px;color:${COLORS.mutedForeground};"><span style="display:inline-block;width:10px;height:10px;background-color:${RECAP_STATUS_STYLE.APPROVED.bgColor};border-radius:2px;margin-right:6px;"></span>${RECAP_STATUS_STYLE.APPROVED.label[locale]}</td>
+      <td style="font-family:${FONT_SANS};font-size:12px;color:${COLORS.mutedForeground};"><span style="display:inline-block;width:10px;height:10px;background-color:${RECAP_STATUS_STYLE.PENDING.bgColor};border-radius:2px;margin-right:6px;"></span>${RECAP_STATUS_STYLE.PENDING.label[locale]}</td>
+    </tr>
+  </table>`
+
+  const emptyNote = rows.length === 0
+    ? `<p style="margin:0 0 16px 0;font-family:${FONT_SANS};font-size:14px;color:${COLORS.mutedForeground};">${emptyStates[period][locale]}</p>`
+    : ''
 
   const body = `
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;">
       <tr>
         <td>
           <p style="margin:0 0 4px 0;font-family:${FONT_SERIF};font-size:22px;line-height:30px;color:${COLORS.primary};font-weight:700;">${title}</p>
@@ -451,9 +473,12 @@ export function renderLeaveRecapEmail({
         </td>
       </tr>
     </table>
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid ${COLORS.border};border-radius:8px;overflow:hidden;">
-      ${rowsHtml}
-    </table>`
+    ${emptyNote}
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;table-layout:fixed;border:1px solid ${COLORS.border};border-radius:8px;overflow:hidden;">
+      <thead><tr>${headerCells}</tr></thead>
+      <tbody>${weekRows}</tbody>
+    </table>
+    ${legend}`
 
   const html = emailLayout(body, preheader)
   return { subject, text, html }
@@ -465,7 +490,8 @@ export async function sendLeaveRecapEmail(
   const { subject, text, html } = renderLeaveRecapEmail(params)
   const apiKey = process.env.RESEND_API_KEY
   if (!apiKey) return { error: 'RESEND_API_KEY missing' }
-  const from = process.env.RESEND_FROM || 'noreply@your-domain.com'
+  const fromEmail = process.env.RESEND_FROM || 'noreply@your-domain.com'
+  const from = `Larib Portal <${fromEmail}>`
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },

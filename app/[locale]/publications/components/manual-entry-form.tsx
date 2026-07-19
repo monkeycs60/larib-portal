@@ -7,7 +7,7 @@ import { z } from 'zod'
 import { useAction } from 'next-safe-action/hooks'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
-import { UserPlus, UserRoundCheck, Globe, Plus, X } from 'lucide-react'
+import { UserPlus, Plus, X } from 'lucide-react'
 import { useRouter } from '@/app/i18n/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -33,9 +33,6 @@ const CARD_CLASS = 'space-y-5 rounded-2xl border border-line bg-bg-surface p-6 s
 const DEGREE_CHIP_CLASS =
   'flex-none rounded-lg border border-line px-4 py-2 text-sm font-semibold text-text-secondary transition ' +
   'data-[state=on]:border-coral-500 data-[state=on]:bg-coral-50 data-[state=on]:text-coral-600'
-const TYPE_ITEM_CLASS =
-  'flex-none gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-text-secondary transition ' +
-  'data-[state=on]:bg-bg-surface data-[state=on]:text-coral-600 data-[state=on]:shadow-sm'
 const SUBMIT_CLASS =
   'gap-2 bg-gradient-to-b from-coral-500 to-coral-600 text-white shadow-[0_10px_22px_-8px_rgba(214,31,85,0.6)] hover:brightness-105'
 
@@ -67,7 +64,6 @@ export function ManualEntryForm({ centres, users }: Props) {
     formState: { errors },
   } = useForm<ManualEntryValues>({ resolver: zodResolver(manualEntrySchema) })
   const [degrees, setDegrees] = useState<string[]>([])
-  const [authorType, setAuthorType] = useState<'OUR_TEAM' | 'EXTERNAL'>('OUR_TEAM')
   const [emails, setEmails] = useState<string[]>([])
   const [affiliations, setAffiliations] = useState<string[]>([])
   const [centreIds, setCentreIds] = useState<string[]>([])
@@ -97,7 +93,6 @@ export function ManualEntryForm({ centres, users }: Props) {
     action.execute({
       firstName: values.firstName,
       lastName: values.lastName,
-      type: authorType,
       degrees,
       emails,
       orcid: values.orcid || null,
@@ -155,24 +150,6 @@ export function ManualEntryForm({ centres, users }: Props) {
 
       <section className={CARD_CLASS}>
         <SectionHeader>{t('typeCentreAffiliations')}</SectionHeader>
-        <div className="space-y-1.5">
-          <Label className="text-text-primary">{t('authorType')}</Label>
-          <ToggleGroup
-            type="single"
-            value={authorType}
-            onValueChange={(value) => value && setAuthorType(value as 'OUR_TEAM' | 'EXTERNAL')}
-            className="w-fit gap-1 rounded-xl bg-gray-100 p-1 dark:bg-white/5"
-          >
-            <ToggleGroupItem value="OUR_TEAM" className={TYPE_ITEM_CLASS}>
-              <UserRoundCheck className="h-4 w-4" />
-              {t('ourTeam')}
-            </ToggleGroupItem>
-            <ToggleGroupItem value="EXTERNAL" className={TYPE_ITEM_CLASS}>
-              <Globe className="h-4 w-4" />
-              {t('external')}
-            </ToggleGroupItem>
-          </ToggleGroup>
-        </div>
         <div className="space-y-2">
           <Label className="text-text-primary">
             {t('centre')} <span className="font-normal text-text-muted">— {t('centreHint')}</span>

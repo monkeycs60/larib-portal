@@ -27,7 +27,6 @@ import { createJournal, updateJournal, deleteJournal, isPrismaKnownError as isJo
 import { searchCrossref } from '@/lib/services/publications/journals-catalog'
 import { refreshJournalSjr } from '@/lib/services/publications/sjr'
 import { createStudy, updateStudy, deleteStudy, STUDY_STATUSES, PUBLICATIONS_STUDIES_TAG } from '@/lib/services/publications/studies'
-import { AuthorType } from '@/app/generated/prisma'
 
 export const searchBacklogAction = appAdminAction('PUBLICATIONS')
   .inputSchema(z.object({ anchor: z.string().min(1), retmax: z.number().int().min(1).max(500).optional() }))
@@ -219,7 +218,6 @@ export const refreshSjrAction = appAdminAction('PUBLICATIONS')
 const CreateAuthorSchema = z.object({
   firstName: z.string().min(1),
   lastName: z.string().min(1),
-  type: z.nativeEnum(AuthorType).default(AuthorType.OUR_TEAM),
   degrees: z.array(z.string()).default([]),
   emails: z.array(z.string().email()).default([]),
   orcid: z.string().trim().optional().nullable(),
@@ -246,7 +244,6 @@ export const createAuthorAction = appMemberAction('PUBLICATIONS')
     const created = await createAuthor({
       firstName: parsedInput.firstName,
       lastName: parsedInput.lastName,
-      type: parsedInput.type,
       degrees: parsedInput.degrees.length ? parsedInput.degrees.join(', ') : null,
       emails: parsedInput.emails,
       orcid: parsedInput.orcid ?? null,
@@ -289,7 +286,7 @@ export const addAuthorsFromPublicationAction = appMemberAction('PUBLICATIONS')
         : `name:${normalizeName(author.firstName)}|${normalizeName(author.lastName)}`
       if (seenKeys.has(dedupKey)) continue
       seenKeys.add(dedupKey)
-      await createAuthor({ firstName: author.firstName, lastName: author.lastName, type: AuthorType.EXTERNAL, orcid: author.orcid ?? null, affiliations: author.affiliationRaw ? [author.affiliationRaw] : [] })
+      await createAuthor({ firstName: author.firstName, lastName: author.lastName, orcid: author.orcid ?? null, affiliations: author.affiliationRaw ? [author.affiliationRaw] : [] })
       created += 1
     }
     if (created > 0) revalidateTag(PUBLICATIONS_AUTHORS_TAG)
