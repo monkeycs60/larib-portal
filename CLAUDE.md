@@ -1,5 +1,13 @@
 # Repository Guidelines
 
+## FIRST PRIORITY: Tests must pass before every push
+
+- Every feature and bug fix must include appropriate automated tests.
+- Before pushing any code, run `npm run verify:push` and keep fixing the implementation or tests, then rerun the command until it passes completely.
+- Never bypass the pre-push hook with `--no-verify`. A failing validation must block the push.
+- If the agentic stop hook reports a failed push validation, inspect the failure, fix its root cause, and retry the push. Do not end the task while the failure marker remains.
+- Do not weaken, skip, or delete a test just to make validation pass. Fix the root cause.
+
 - Use postgres mcp to debug database issues and test new features
 - NEVER use prisma migrate reset / do not reset db even if user asks for it
 
@@ -64,7 +72,8 @@
 ### Testing Requirements
 
 -  **Add tests** for any new functionality or bug fix
--  **Run tests** before committing: `npm run test:setup`
+-  **Run the complete validation** before pushing: `npm run verify:push`
+-  **Fix and rerun until green** whenever the validation fails
 -  **Never weaken tests** to make them pass - fix the code instead
 -  **Cover edge cases** in addition to happy path scenarios
 
@@ -121,6 +130,7 @@ test('can click new project button', async ({ page }) => {
 
 ```bash
 npm run test:setup                                     # Seed DB + run all tests
+npm run test:push                                      # Deterministic pre-push E2E gate (1 worker + retries)
 npm run test:e2e                                       # Run tests only (no seed)
 npm run test:e2e tests/e2e/bestof-larib-complete.spec.ts  # Specific file
 npm run test:e2e:ui                                    # UI mode with seed
@@ -135,7 +145,7 @@ npm run test:e2e:ui                                    # UI mode with seed
 
 ### CI/CD
 
-Tests run automatically on push/PR via `.github/workflows/tests.yml`
+The complete push validation runs locally through the versioned pre-push hook and automatically on push/PR via `.github/workflows/tests.yml`.
 
 ## Quality Assurance
 

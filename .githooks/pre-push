@@ -1,0 +1,16 @@
+#!/bin/sh
+set -e
+
+validation_failure_marker="$(git rev-parse --git-path agent-push-validation-failed)"
+
+echo "Running the required pre-push validation..."
+printf 'validation_started_at=%s\nhead=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(git rev-parse HEAD)" > "$validation_failure_marker"
+
+if npm run verify:push; then
+	rm -f "$validation_failure_marker"
+	exit 0
+fi
+
+printf 'validation_failed_at=%s\nhead=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(git rev-parse HEAD)" > "$validation_failure_marker"
+echo "Push blocked. Fix the validation failure and retry the push."
+exit 1
