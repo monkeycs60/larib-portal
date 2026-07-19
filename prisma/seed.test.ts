@@ -252,9 +252,9 @@ async function main() {
 		data: { name: 'Lariboisière Hospital', city: 'Paris', country: 'France' },
 	});
 	await prisma.centre.upsert({
-		where: { name: 'Hôpital Lariboisière, AP-HP' },
+		where: { name: 'Hôpital Européen Georges-Pompidou, AP-HP' },
 		update: {},
-		create: { name: 'Hôpital Lariboisière, AP-HP', city: 'Paris', country: 'France', isOwn: true },
+		create: { name: 'Hôpital Européen Georges-Pompidou, AP-HP', city: 'Paris', country: 'France', isOwn: true },
 	});
 	await prisma.centre.upsert({
 		where: { name: 'Università degli Studi di Milano' },
