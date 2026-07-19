@@ -1130,7 +1130,20 @@
         "selectAll": "Tout sélectionner"
       },
       "hubDescription": "Auteurs internes et externes, ORCID, centres et fusion des doublons.",
-      "viewAuthors": "Voir les auteurs"
+      "viewAuthors": "Voir les auteurs",
+      "tabAll": "Tous",
+      "tabOurTeam": "Notre équipe",
+      "tabExternal": "Externe",
+      "colType": "Type",
+      "colPortal": "Larib Portal",
+      "typeOurTeam": "Notre équipe",
+      "typeExternal": "Externe",
+      "portalActive": "Actif",
+      "portalInvited": "Invitation envoyée",
+      "portalNone": "Non lié",
+      "filterAllCentres": "Centre : Tous",
+      "filterAllPortal": "Portail : Tous",
+      "count": "{count} auteurs"
     },
     "centres": {
       "title": "Centres",
