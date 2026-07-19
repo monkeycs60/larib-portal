@@ -21,7 +21,7 @@ export default async function AuthorsPage({ params }: PageParams) {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">{t('title')}</h1>
         <Button asChild>
-          <Link href={applicationLink(locale, '/publications/authors/new')}>{t('addButton')}</Link>
+          <Link href="/publications/authors/new">{t('addButton')}</Link>
         </Button>
       </div>
       {authors.length === 0 ? (

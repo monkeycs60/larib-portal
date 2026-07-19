@@ -33,7 +33,7 @@ export default async function PublicationsPage({ params }: PageParams) {
           </div>
           <div className="flex items-center gap-3">
             <Button asChild variant="outline">
-              <Link href={applicationLink(locale, '/publications/authors')}>
+              <Link href="/publications/authors">
                 {t('authors.add.list.title')}
               </Link>
             </Button>

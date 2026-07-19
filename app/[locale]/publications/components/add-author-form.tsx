@@ -7,9 +7,9 @@ import { ManualEntryForm } from './manual-entry-form'
 import { DoiImportPanel } from './doi-import-panel'
 
 type Option = { value: string; label: string }
-type Props = { locale: string; centres: Option[]; users: Option[] }
+type Props = { centres: Option[]; users: Option[] }
 
-export function AddAuthorForm({ locale, centres, users }: Props) {
+export function AddAuthorForm({ centres, users }: Props) {
   const t = useTranslations('publications.authors.add')
   const [tab, setTab] = useState<'manual' | 'doi'>('manual')
 
@@ -25,9 +25,9 @@ export function AddAuthorForm({ locale, centres, users }: Props) {
         <ToggleGroupItem value="doi">{t('tabDoi')}</ToggleGroupItem>
       </ToggleGroup>
       {tab === 'manual' ? (
-        <ManualEntryForm locale={locale} centres={centres} users={users} />
+        <ManualEntryForm centres={centres} users={users} />
       ) : (
-        <DoiImportPanel locale={locale} />
+        <DoiImportPanel />
       )}
     </div>
   )

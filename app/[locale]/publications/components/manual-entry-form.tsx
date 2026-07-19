@@ -8,7 +8,6 @@ import { useAction } from 'next-safe-action/hooks'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { useRouter } from '@/app/i18n/navigation'
-import { applicationLink } from '@/lib/application-link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -36,9 +35,9 @@ const manualEntrySchema = z.object({
 })
 type ManualEntryValues = z.infer<typeof manualEntrySchema>
 type Option = { value: string; label: string }
-type Props = { locale: string; centres: Option[]; users: Option[] }
+type Props = { centres: Option[]; users: Option[] }
 
-export function ManualEntryForm({ locale, centres, users }: Props) {
+export function ManualEntryForm({ centres, users }: Props) {
   const t = useTranslations('publications.authors.add')
   const router = useRouter()
   const {
@@ -67,7 +66,7 @@ export function ManualEntryForm({ locale, centres, users }: Props) {
         return
       }
       toast.success(t('created'))
-      router.push(applicationLink(locale, '/publications/authors'))
+      router.push('/publications/authors')
     },
     onError: () => toast.error(t('fetchError')),
   })
@@ -194,7 +193,7 @@ export function ManualEntryForm({ locale, centres, users }: Props) {
       </section>
 
       <div className="flex justify-end gap-3">
-        <Button type="button" variant="outline" onClick={() => router.push(applicationLink(locale, '/publications/authors'))}>
+        <Button type="button" variant="outline" onClick={() => router.push('/publications/authors')}>
           {t('cancel')}
         </Button>
         <Button type="submit" disabled={action.isPending}>

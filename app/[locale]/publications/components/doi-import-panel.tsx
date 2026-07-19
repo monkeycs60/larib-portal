@@ -5,7 +5,6 @@ import { useAction } from 'next-safe-action/hooks'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { useRouter } from '@/app/i18n/navigation'
-import { applicationLink } from '@/lib/application-link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -13,9 +12,8 @@ import { fetchPublicationAuthorsAction, addAuthorsFromPublicationAction } from '
 import { AuthorDedupList, type FetchedRow } from './author-dedup-list'
 
 type PublicationMeta = { title: string; journal: string | null; year: number | null; doi: string | null }
-type Props = { locale: string }
 
-export function DoiImportPanel({ locale }: Props) {
+export function DoiImportPanel() {
   const t = useTranslations('publications.authors.add')
   const router = useRouter()
   const [identifier, setIdentifier] = useState('')
@@ -35,7 +33,7 @@ export function DoiImportPanel({ locale }: Props) {
     onSuccess: ({ data }) => {
       if (!data) return
       toast.success(t('importedToast', { count: data.created }))
-      router.push(applicationLink(locale, '/publications/authors'))
+      router.push('/publications/authors')
     },
     onError: () => toast.error(t('fetchError')),
   })

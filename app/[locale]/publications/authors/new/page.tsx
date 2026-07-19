@@ -21,14 +21,13 @@ export default async function NewAuthorPage({ params }: PageParams) {
     <div className="mx-auto max-w-4xl p-6 space-y-6">
       <div className="space-y-1">
         <nav className="text-sm text-text-secondary">
-          <Link href={applicationLink(locale, '/publications/authors')}>{t('breadcrumbRoot')}</Link>
+          <Link href="/publications/authors">{t('breadcrumbRoot')}</Link>
           <span> › {t('title')}</span>
         </nav>
         <h1 className="text-3xl font-bold">{t('title')}</h1>
         <p className="text-text-secondary">{t('subtitle')}</p>
       </div>
       <AddAuthorForm
-        locale={locale}
         centres={centres.map((centre) => ({ value: centre.id, label: centre.name }))}
         users={users.map((user) => ({
           value: user.id,
