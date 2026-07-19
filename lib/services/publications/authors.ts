@@ -182,6 +182,16 @@ export async function mergeAuthors(
       reassigned += plan.reassignIds.length
       dropped += plan.dropIds.length
     }
+    const keeper = await tx.author.findUnique({ where: { id: keepId }, select: { orcid: true } })
+    if (!keeper?.orcid) {
+      const sourceWithOrcid = await tx.author.findFirst({
+        where: { id: { in: sources }, NOT: { orcid: null } },
+        select: { orcid: true },
+      })
+      if (sourceWithOrcid?.orcid) {
+        await tx.author.update({ where: { id: keepId }, data: { orcid: sourceWithOrcid.orcid } })
+      }
+    }
     await tx.author.deleteMany({ where: { id: { in: sources } } })
     return { reassigned, dropped, deleted: sources.length }
   })

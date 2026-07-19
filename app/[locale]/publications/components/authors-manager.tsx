@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useAction } from 'next-safe-action/hooks'
 import { toast } from 'sonner'
-import { Pencil, Trash2, GitMerge, FileText } from 'lucide-react'
+import { Pencil, Trash2, GitMerge, FileText, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -77,6 +77,23 @@ const TYPE_TABS = [
   { value: 'EXTERNAL' as const, key: 'tabExternal' },
 ]
 
+type SortKey = 'name' | 'type' | 'centre' | 'papers' | 'portal'
+
+function sortValue(author: AuthorListItem, key: SortKey): string | number {
+  switch (key) {
+    case 'name':
+      return author.lastName.toLowerCase()
+    case 'type':
+      return author.type
+    case 'centre':
+      return author.centre?.name?.toLowerCase() ?? ''
+    case 'papers':
+      return author._count.authorships
+    case 'portal':
+      return portalStatus(author)
+  }
+}
+
 export function AuthorsManager({ authors, users, centres }: { authors: AuthorListItem[]; users: LinkableUser[]; centres: { id: string; name: string }[] }) {
   const t = useTranslations('publications')
   const router = useRouter()
@@ -84,6 +101,8 @@ export function AuthorsManager({ authors, users, centres }: { authors: AuthorLis
   const [typeFilter, setTypeFilter] = useState<'ALL' | 'OUR_TEAM' | 'EXTERNAL'>('ALL')
   const [centreFilter, setCentreFilter] = useState('')
   const [portalFilter, setPortalFilter] = useState<'ALL' | PortalStatus>('ALL')
+  const [sortKey, setSortKey] = useState<SortKey>('papers')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [editing, setEditing] = useState<AuthorListItem | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<AuthorListItem | null>(null)
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -109,8 +128,42 @@ export function AuthorsManager({ authors, users, centres }: { authors: AuthorLis
         if (needle && !authorLabel(author).toLowerCase().includes(needle) && !(author.orcid ?? '').toLowerCase().includes(needle)) return false
         return true
       })
-      .slice(0, 200)
   }, [authors, query, typeFilter, centreFilter, portalFilter])
+
+  const sorted = useMemo(() => {
+    const direction = sortDir === 'asc' ? 1 : -1
+    return [...filtered].sort((first, second) => {
+      const firstValue = sortValue(first, sortKey)
+      const secondValue = sortValue(second, sortKey)
+      if (firstValue < secondValue) return -1 * direction
+      if (firstValue > secondValue) return 1 * direction
+      return first.lastName.toLowerCase() < second.lastName.toLowerCase() ? -1 : 1
+    })
+  }, [filtered, sortKey, sortDir])
+
+  function toggleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir((direction) => (direction === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortKey(key)
+      setSortDir('asc')
+    }
+  }
+
+  function SortHead({ sortKey: key, label, align }: { sortKey: SortKey; label: string; align?: 'right' }) {
+    return (
+      <TableHead className={align === 'right' ? 'text-right' : undefined}>
+        <button type="button" onClick={() => toggleSort(key)} className={cn('inline-flex items-center gap-1 hover:text-text-primary', align === 'right' && 'flex-row-reverse')}>
+          {label}
+          {sortKey === key ? (
+            sortDir === 'asc' ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />
+          ) : (
+            <ChevronsUpDown className="size-3.5 opacity-40" />
+          )}
+        </button>
+      </TableHead>
+    )
+  }
 
   const { register, handleSubmit, reset } = useForm<EditValues>({ resolver: zodResolver(EditSchema) })
 
@@ -249,16 +302,16 @@ export function AuthorsManager({ authors, users, centres }: { authors: AuthorLis
           <TableHeader>
             <TableRow>
               <TableHead className="w-10" />
-              <TableHead>{t('authors.colName')}</TableHead>
-              <TableHead>{t('authors.colType')}</TableHead>
-              <TableHead>{t('authors.colCentre')}</TableHead>
-              <TableHead>{t('authors.colPapers')}</TableHead>
-              <TableHead>{t('authors.colPortal')}</TableHead>
+              <SortHead sortKey="name" label={t('authors.colName')} />
+              <SortHead sortKey="type" label={t('authors.colType')} />
+              <SortHead sortKey="centre" label={t('authors.colCentre')} />
+              <SortHead sortKey="papers" label={t('authors.colPapers')} />
+              <SortHead sortKey="portal" label={t('authors.colPortal')} />
               <TableHead className="text-right">{t('authors.colActions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.map((author) => {
+            {sorted.map((author) => {
               const status = portalStatus(author)
               return (
                 <TableRow key={author.id}>
