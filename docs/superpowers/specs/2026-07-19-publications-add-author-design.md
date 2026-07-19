@@ -45,7 +45,9 @@ enum AuthorType {
 model Author {
   // ... existing fields ...
   type      AuthorType @default(OUR_TEAM)   // NEW
-  degrees   String[]   @default([])         // CHANGED: was String? (free text)
+  // degrees String?   KEPT as-is: comma-joined free text ("MD, PhD"); UI shows chips.
+  //                   Not migrated to String[] to avoid rippling through 6 existing consumers
+  //                   (editor-authors.degreeBadges already splits on comma).
   emails    String[]   @default([])         // NEW: multiple emails (email String? kept, see below)
   // centreId String?  kept = denormalized PRIMARY centre (in sync with AuthorCentre.isPrimary)
   centres        AuthorCentre[]             // NEW relation
@@ -74,7 +76,8 @@ model AuthorAffiliation {
 ```
 
 Migration data steps:
-- `degrees` `String?` → `String[]`: split the existing value on commas, trim, drop empties.
+- `degrees`: unchanged (`String?`, comma-joined). The new form joins chips with `", "` on save
+  and splits on read; existing consumers keep working untouched.
 - `emails` `String[]`: seed from the existing `email String?` (single → array of 0/1). Keep the
   legacy `email` column for backward compatibility (existing edit dialog / reads); on save,
   `email` mirrors `emails[0]` (or null).
@@ -116,7 +119,8 @@ disabled and excluded from the bulk add.
 ## Services (`lib/services/publications/`)
 
 - `authors.ts` (extend):
-  - `createAuthor` input → `{ firstName, lastName, type, degrees[], emails[], orcid?, centreIds[], affiliations[], userId? }`.
+  - `createAuthor` input → `{ firstName, lastName, type, degrees?(joined string), emails[], orcid?, centreIds[], affiliations[], userId? }`
+    (the action joins the degree chips array into the comma string before calling the service).
     Writes the Author (incl. optional `userId` link), the `AuthorCentre` rows (first = primary,
     mirrored to `centreId`), and the `AuthorAffiliation` rows. Mirrors `email = emails[0] ?? null`.
     Existing callers that pass only `firstName/lastName` (e.g. `study-form.tsx`) keep working via
