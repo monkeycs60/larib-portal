@@ -22,6 +22,7 @@ marqués). L'email est envoyé **même si personne n'est en congé** sur la pér
 | Statuts inclus | **APPROVED + PENDING** (PENDING = pastille orange) |
 | Récap vide | **Envoyer quand même** (« Personne en congé … ») |
 | Localisation | **Un mail par langue** (groupé sur `User.language`) |
+| Destinataires | **Admins congés uniquement** : `adminApplications has 'CONGES'` (⚠️ pas les `ADMIN` globaux) |
 | Périmètre semaine | **Lundi → vendredi** (semaine ouvrée) |
 | Périmètre mois | 1er → dernier jour du mois |
 
@@ -36,7 +37,7 @@ Vercel Cron (UTC)
   route: vérifie Bearer CRON_SECRET
        → calcule le range (semaine ou mois) depuis la date serveur
        → getLeaveRecap(range)                (congés APPROVED+PENDING chevauchant)
-       → getCongesAdminRecipients()          ({ email, language }[])
+       → getCongesAdminRecipients()          (admins CONGES uniquement, { email, language }[])
        → groupe les destinataires par langue
        → pour chaque langue : sendLeaveRecapEmail(...)
        → renvoie { period, count, recipients, sent } (JSON, observabilité Vercel)
@@ -118,8 +119,8 @@ export function buildRecapRows(leaves: RecapLeave[], range: DateRange): RecapRow
 // users role:'USER' + applications has 'CONGES' (même filtre que getLeaveCalendarData)
 export async function getLeaveRecap(range: DateRange): Promise<RecapRow[]>
 
-// Miroir de getAdminEmails() mais avec la langue.
-// where: OR[ role:'ADMIN', adminApplications has 'CONGES' ]
+// Admins congés UNIQUEMENT (pas les ADMIN globaux).
+// where: { adminApplications: { has: 'CONGES' } }
 export async function getCongesAdminRecipients(): Promise<
   { email: string; language: 'EN' | 'FR' }[]
 >
