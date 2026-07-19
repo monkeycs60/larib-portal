@@ -8,10 +8,12 @@ import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useAction } from 'next-safe-action/hooks'
 import { toast } from 'sonner'
-import { Pencil, Trash2, GitMerge } from 'lucide-react'
+import { Pencil, Trash2, GitMerge, FileText } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
+import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import {
@@ -43,21 +45,72 @@ function authorLabel(author: AuthorListItem): string {
   return `${author.firstName} ${author.lastName.toUpperCase()}`.trim()
 }
 
+const AVATAR_PALETTE = [
+  'bg-[#FFE4EC] text-[#D61F55]',
+  'bg-[#E0EAFF] text-[#3B5BDB]',
+  'bg-[#EDE4FF] text-[#7048E8]',
+  'bg-[#E3FBEA] text-[#188A42]',
+  'bg-[#D8F5F0] text-[#0C8577]',
+  'bg-[#FFF0D6] text-[#B7791F]',
+]
+
+function avatarClass(seed: string): string {
+  let hash = 0
+  for (const character of seed) hash = (hash + character.charCodeAt(0)) % AVATAR_PALETTE.length
+  return AVATAR_PALETTE[hash]
+}
+
+function authorInitials(author: AuthorListItem): string {
+  return `${author.firstName.charAt(0)}${author.lastName.charAt(0)}`.toUpperCase()
+}
+
+type PortalStatus = 'active' | 'invited' | 'none'
+
+function portalStatus(author: AuthorListItem): PortalStatus {
+  if (!author.user) return 'none'
+  return author.user.emailVerified ? 'active' : 'invited'
+}
+
+const TYPE_TABS = [
+  { value: 'ALL' as const, key: 'tabAll' },
+  { value: 'OUR_TEAM' as const, key: 'tabOurTeam' },
+  { value: 'EXTERNAL' as const, key: 'tabExternal' },
+]
+
 export function AuthorsManager({ authors, users, centres }: { authors: AuthorListItem[]; users: LinkableUser[]; centres: { id: string; name: string }[] }) {
   const t = useTranslations('publications')
   const router = useRouter()
   const [query, setQuery] = useState('')
+  const [typeFilter, setTypeFilter] = useState<'ALL' | 'OUR_TEAM' | 'EXTERNAL'>('ALL')
+  const [centreFilter, setCentreFilter] = useState('')
+  const [portalFilter, setPortalFilter] = useState<'ALL' | PortalStatus>('ALL')
   const [editing, setEditing] = useState<AuthorListItem | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<AuthorListItem | null>(null)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [mergeOpen, setMergeOpen] = useState(false)
   const [keepId, setKeepId] = useState<string>('')
 
+  const typeCounts = useMemo(
+    () => ({
+      ALL: authors.length,
+      OUR_TEAM: authors.filter((author) => author.type === 'OUR_TEAM').length,
+      EXTERNAL: authors.filter((author) => author.type === 'EXTERNAL').length,
+    }),
+    [authors],
+  )
+
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase()
-    const list = needle ? authors.filter((author) => authorLabel(author).toLowerCase().includes(needle)) : authors
-    return list.slice(0, 200)
-  }, [authors, query])
+    return authors
+      .filter((author) => {
+        if (typeFilter !== 'ALL' && author.type !== typeFilter) return false
+        if (centreFilter && author.centreId !== centreFilter) return false
+        if (portalFilter !== 'ALL' && portalStatus(author) !== portalFilter) return false
+        if (needle && !authorLabel(author).toLowerCase().includes(needle) && !(author.orcid ?? '').toLowerCase().includes(needle)) return false
+        return true
+      })
+      .slice(0, 200)
+  }, [authors, query, typeFilter, centreFilter, portalFilter])
 
   const { register, handleSubmit, reset } = useForm<EditValues>({ resolver: zodResolver(EditSchema) })
 
@@ -139,60 +192,138 @@ export function AuthorsManager({ authors, users, centres }: { authors: AuthorLis
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-2">
-        <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t('authors.search')} className="max-w-sm" />
-        <div className="flex items-center gap-2">
-          {selected.size > 0 && <span className="text-sm text-text-secondary">{t('authors.selected', { count: selected.size })}</span>}
-          <Button variant="outline" size="sm" onClick={() => runDerive({})} disabled={deriving}>
-            {t('authors.derive')}
-          </Button>
-          <Button variant="outline" size="sm" onClick={openMerge} disabled={selected.size < 2}>
-            <GitMerge className="size-4" />
-            {t('authors.merge')}
-          </Button>
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t('authors.search')} className="w-full sm:max-w-xs" />
+          <div className="inline-flex rounded-xl bg-gray-100 p-1 dark:bg-white/5">
+            {TYPE_TABS.map((tab) => (
+              <button
+                key={tab.value}
+                type="button"
+                onClick={() => setTypeFilter(tab.value)}
+                className={cn(
+                  'flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-semibold text-text-secondary transition',
+                  typeFilter === tab.value && 'bg-bg-surface text-coral-600 shadow-sm',
+                )}
+              >
+                {t(`authors.${tab.key}`)}
+                <span className={cn('rounded-full px-1.5 text-xs', typeFilter === tab.value ? 'bg-coral-100 text-coral-700' : 'bg-gray-200 text-gray-600')}>
+                  {typeCounts[tab.value]}
+                </span>
+              </button>
+            ))}
+          </div>
+          <div className="ml-auto flex items-center gap-2">
+            <Select value={centreFilter} onChange={(event) => setCentreFilter(event.target.value)} className="w-auto">
+              <option value="">{t('authors.filterAllCentres')}</option>
+              {centres.map((centre) => (
+                <option key={centre.id} value={centre.id}>{centre.name}</option>
+              ))}
+            </Select>
+            <Select value={portalFilter} onChange={(event) => setPortalFilter(event.target.value as 'ALL' | PortalStatus)} className="w-auto">
+              <option value="ALL">{t('authors.filterAllPortal')}</option>
+              <option value="active">{t('authors.portalActive')}</option>
+              <option value="invited">{t('authors.portalInvited')}</option>
+              <option value="none">{t('authors.portalNone')}</option>
+            </Select>
+          </div>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-text-secondary">
+            {selected.size > 0 ? t('authors.selected', { count: selected.size }) : t('authors.count', { count: filtered.length })}
+          </span>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => runDerive({})} disabled={deriving}>
+              {t('authors.derive')}
+            </Button>
+            <Button variant="outline" size="sm" onClick={openMerge} disabled={selected.size < 2}>
+              <GitMerge className="size-4" />
+              {t('authors.merge')}
+            </Button>
+          </div>
         </div>
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-10" />
-            <TableHead>{t('authors.colName')}</TableHead>
-            <TableHead>{t('authors.colPapers')}</TableHead>
-            <TableHead>{t('authors.colOrcid')}</TableHead>
-            <TableHead>{t('authors.colCentre')}</TableHead>
-            <TableHead>{t('authors.colUser')}</TableHead>
-            <TableHead className="text-right">{t('authors.colActions')}</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filtered.map((author) => (
-            <TableRow key={author.id}>
-              <TableCell>
-                <Checkbox checked={selected.has(author.id)} onCheckedChange={() => toggle(author.id)} aria-label={authorLabel(author)} />
-              </TableCell>
-              <TableCell className="font-medium">
-                {authorLabel(author)}
-                {author.degrees ? `, ${author.degrees}` : ''}
-              </TableCell>
-              <TableCell>{author._count.authorships}</TableCell>
-              <TableCell>{author.orcid ?? '—'}</TableCell>
-              <TableCell>{author.centre?.name ?? '—'}</TableCell>
-              <TableCell>{author.user ? author.user.email : '—'}</TableCell>
-              <TableCell className="text-right">
-                <div className="flex justify-end gap-1">
-                  <Button variant="ghost" size="icon" onClick={() => openEdit(author)} aria-label={t('authors.edit')}>
-                    <Pencil className="size-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(author)} aria-label={t('authors.delete')}>
-                    <Trash2 className="size-4" />
-                  </Button>
-                </div>
-              </TableCell>
+      <div className="overflow-hidden rounded-2xl border border-line bg-bg-surface shadow-sm">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-10" />
+              <TableHead>{t('authors.colName')}</TableHead>
+              <TableHead>{t('authors.colType')}</TableHead>
+              <TableHead>{t('authors.colCentre')}</TableHead>
+              <TableHead>{t('authors.colPapers')}</TableHead>
+              <TableHead>{t('authors.colPortal')}</TableHead>
+              <TableHead className="text-right">{t('authors.colActions')}</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {filtered.map((author) => {
+              const status = portalStatus(author)
+              return (
+                <TableRow key={author.id}>
+                  <TableCell>
+                    <Checkbox
+                      checked={selected.has(author.id)}
+                      onCheckedChange={() => toggle(author.id)}
+                      aria-label={authorLabel(author)}
+                      className="data-[state=checked]:border-coral-600 data-[state=checked]:bg-coral-600"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <span className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold', avatarClass(author.lastName))}>
+                        {authorInitials(author)}
+                      </span>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-text-primary">{authorLabel(author)}</span>
+                          {author.degrees && <span className="text-xs text-text-muted">{author.degrees}</span>}
+                        </div>
+                        {author.orcid && (
+                          <span className="flex items-center gap-1.5 text-xs text-text-secondary">
+                            <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#A6CE39] text-[7px] font-bold text-white">iD</span>
+                            {author.orcid}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {author.type === 'OUR_TEAM' ? (
+                      <span className="rounded-full border border-coral-200 bg-coral-50 px-2.5 py-0.5 text-xs font-semibold text-coral-600">{t('authors.typeOurTeam')}</span>
+                    ) : (
+                      <span className="rounded-full border border-line bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-600">{t('authors.typeExternal')}</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-text-primary">{author.centre?.name ?? '—'}</TableCell>
+                  <TableCell>
+                    <span className="inline-flex items-center gap-1.5 text-text-primary">
+                      <FileText className="size-4 text-text-muted" />
+                      {author._count.authorships}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    {status === 'active' && <Badge variant="success">{t('authors.portalActive')}</Badge>}
+                    {status === 'invited' && <Badge variant="warning">{t('authors.portalInvited')}</Badge>}
+                    {status === 'none' && <span className="text-text-muted">—</span>}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => openEdit(author)} aria-label={t('authors.edit')}>
+                        <Pencil className="size-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(author)} aria-label={t('authors.delete')}>
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )
+            })}
+          </TableBody>
+        </Table>
+      </div>
 
       <Dialog open={editing !== null} onOpenChange={(open) => { if (!open) setEditing(null) }}>
         <DialogContent>

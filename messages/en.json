@@ -1132,7 +1132,20 @@
         "selectAll": "Select all"
       },
       "hubDescription": "Internal and external authors, ORCID, centres and duplicate merging.",
-      "viewAuthors": "View authors"
+      "viewAuthors": "View authors",
+      "tabAll": "All",
+      "tabOurTeam": "Our team",
+      "tabExternal": "External",
+      "colType": "Type",
+      "colPortal": "Larib Portal",
+      "typeOurTeam": "Our team",
+      "typeExternal": "External",
+      "portalActive": "Active",
+      "portalInvited": "Invitation sent",
+      "portalNone": "Not linked",
+      "filterAllCentres": "Centre: All",
+      "filterAllPortal": "Portal: All",
+      "count": "{count} authors"
     },
     "centres": {
       "title": "Centres",

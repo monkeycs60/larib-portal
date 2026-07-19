@@ -13,9 +13,10 @@ export type AuthorListItem = Prisma.AuthorGetPayload<{
     degrees: true
     email: true
     orcid: true
+    type: true
     userId: true
     centreId: true
-    user: { select: { id: true; firstName: true; lastName: true; email: true } }
+    user: { select: { id: true; firstName: true; lastName: true; email: true; emailVerified: true } }
     centre: { select: { id: true; name: true } }
     _count: { select: { authorships: true } }
   }
@@ -32,9 +33,10 @@ export async function listAuthors(): Promise<AuthorListItem[]> {
       degrees: true,
       email: true,
       orcid: true,
+      type: true,
       userId: true,
       centreId: true,
-      user: { select: { id: true, firstName: true, lastName: true, email: true } },
+      user: { select: { id: true, firstName: true, lastName: true, email: true, emailVerified: true } },
       centre: { select: { id: true, name: true } },
       _count: { select: { authorships: true } },
     },
