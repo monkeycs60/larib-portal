@@ -1041,9 +1041,9 @@
       "importError": "Import failed. Please retry."
     },
     "authors": {
-      "title": "Authors bank",
-      "subtitle": "Browse, edit, link to a user, and merge duplicate authors.",
-      "search": "Search authors…",
+      "title": "Authors",
+      "subtitle": "Author database — centres, affiliations, linked publications and Larib Portal accounts.",
+      "search": "Search author or ORCID…",
       "colName": "Author",
       "colPapers": "Papers",
       "colOrcid": "ORCID",
@@ -1068,7 +1068,7 @@
       "delete": "Delete",
       "deleteConfirm": "Delete this author?",
       "deleteConfirmDesc": "Only authors with no papers can be deleted.",
-      "merge": "Merge selected",
+      "merge": "Merge duplicates",
       "mergeTitle": "Merge authors",
       "mergeChooseKeeper": "Choose the author to keep; the others are merged into it.",
       "mergeConfirm": "Merge",
@@ -1145,7 +1145,10 @@
       "portalNone": "Not linked",
       "filterAllCentres": "Centre: All",
       "filterAllPortal": "Portal: All",
-      "count": "{count} authors"
+      "count": "{count} authors",
+      "filterCentre": "Centre",
+      "filterPortal": "Portal",
+      "filterAll": "All"
     },
     "centres": {
       "title": "Centres",

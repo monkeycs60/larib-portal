@@ -8,7 +8,8 @@ import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useAction } from 'next-safe-action/hooks'
 import { toast } from 'sonner'
-import { Pencil, Trash2, GitMerge, FileText, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
+import { Pencil, Trash2, GitMerge, FileText, ChevronUp, ChevronDown, ChevronsUpDown, Search, UserPlus } from 'lucide-react'
+import { Link } from '@/app/i18n/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -27,7 +28,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
-import { updateAuthorAction, deleteAuthorAction, mergeAuthorsAction, recomputeAuthorCentresAction } from '../actions'
+import { updateAuthorAction, deleteAuthorAction, mergeAuthorsAction } from '../actions'
 import type { AuthorListItem, LinkableUser } from '@/lib/services/publications/authors'
 
 const EditSchema = z.object({
@@ -185,10 +186,6 @@ export function AuthorsManager({ authors, users, centres }: { authors: AuthorLis
     onError({ error }) { toast.error(error?.serverError === 'AUTHOR_IN_USE' ? t('authors.errorInUse') : t('actionError')) },
   })
   const { executeAsync: execMerge, isExecuting: merging } = useAction(mergeAuthorsAction, { onError() { toast.error(t('actionError')) } })
-  const { execute: runDerive, isExecuting: deriving } = useAction(recomputeAuthorCentresAction, {
-    onSuccess({ data }) { if (data) { toast.success(t('authors.derived', { count: data.updated })); router.refresh() } },
-    onError() { toast.error(t('actionError')) },
-  })
 
   const onSubmit = handleSubmit(async (values) => {
     if (!editing) return
@@ -245,55 +242,67 @@ export function AuthorsManager({ authors, users, centres }: { authors: AuthorLis
 
   return (
     <div className="space-y-4">
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-center gap-3">
-          <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t('authors.search')} className="w-full sm:max-w-xs" />
-          <div className="inline-flex rounded-xl bg-gray-100 p-1 dark:bg-white/5">
-            {TYPE_TABS.map((tab) => (
-              <button
-                key={tab.value}
-                type="button"
-                onClick={() => setTypeFilter(tab.value)}
-                className={cn(
-                  'flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-semibold text-text-secondary transition',
-                  typeFilter === tab.value && 'bg-bg-surface text-coral-600 shadow-sm',
-                )}
-              >
-                {t(`authors.${tab.key}`)}
-                <span className={cn('rounded-full px-1.5 text-xs', typeFilter === tab.value ? 'bg-coral-100 text-coral-700' : 'bg-gray-200 text-gray-600')}>
-                  {typeCounts[tab.value]}
-                </span>
-              </button>
-            ))}
-          </div>
-          <div className="ml-auto flex items-center gap-2">
-            <Select value={centreFilter} onChange={(event) => setCentreFilter(event.target.value)} className="w-auto">
-              <option value="">{t('authors.filterAllCentres')}</option>
-              {centres.map((centre) => (
-                <option key={centre.id} value={centre.id}>{centre.name}</option>
-              ))}
-            </Select>
-            <Select value={portalFilter} onChange={(event) => setPortalFilter(event.target.value as 'ALL' | PortalStatus)} className="w-auto">
-              <option value="ALL">{t('authors.filterAllPortal')}</option>
-              <option value="active">{t('authors.portalActive')}</option>
-              <option value="invited">{t('authors.portalInvited')}</option>
-              <option value="none">{t('authors.portalNone')}</option>
-            </Select>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex gap-4">
+          <span aria-hidden className="mt-1 w-[5px] shrink-0 rounded bg-gradient-to-b from-coral-500 to-coral-600" />
+          <div className="space-y-1">
+            <h1 className="text-3xl font-extrabold tracking-tight text-text-primary">{t('authors.title')}</h1>
+            <p className="text-sm text-text-secondary">{t('authors.subtitle')}</p>
           </div>
         </div>
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-text-secondary">
-            {selected.size > 0 ? t('authors.selected', { count: selected.size }) : t('authors.count', { count: filtered.length })}
-          </span>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => runDerive({})} disabled={deriving}>
-              {t('authors.derive')}
-            </Button>
-            <Button variant="outline" size="sm" onClick={openMerge} disabled={selected.size < 2}>
-              <GitMerge className="size-4" />
-              {t('authors.merge')}
-            </Button>
-          </div>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" onClick={openMerge} disabled={selected.size < 2} className="gap-2">
+            <GitMerge className="size-4" />
+            {t('authors.merge')}
+          </Button>
+          <Button asChild className="gap-2 bg-gradient-to-b from-coral-500 to-coral-600 text-white shadow-[0_10px_22px_-8px_rgba(214,31,85,0.6)] hover:brightness-105">
+            <Link href="/publications/authors/new">
+              <UserPlus className="size-4" />
+              {t('authors.add.list.addButton')}
+            </Link>
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative w-full sm:max-w-xs">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-muted" />
+          <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t('authors.search')} className="rounded-2xl bg-bg-surface pl-9 shadow-sm" />
+        </div>
+        <div className="inline-flex rounded-2xl border border-line bg-bg-surface p-1 shadow-sm">
+          {TYPE_TABS.map((tab) => (
+            <button
+              key={tab.value}
+              type="button"
+              onClick={() => setTypeFilter(tab.value)}
+              className={cn(
+                'flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-text-secondary transition',
+                typeFilter === tab.value && 'bg-gradient-to-b from-coral-500 to-coral-600 text-white shadow-[0_8px_18px_-8px_rgba(214,31,85,0.6)]',
+              )}
+            >
+              {t(`authors.${tab.key}`)}
+              <span className={cn('rounded-full px-2 py-0.5 text-xs font-bold', typeFilter === tab.value ? 'bg-white/25 text-white' : 'bg-gray-100 text-gray-600')}>
+                {typeCounts[tab.value]}
+              </span>
+            </button>
+          ))}
+        </div>
+        <div className="ml-auto flex items-center gap-1 rounded-2xl border border-line bg-bg-surface px-3 py-1.5 shadow-sm">
+          <span className="text-sm font-bold text-text-primary">{t('authors.filterCentre')}</span>
+          <Select value={centreFilter} onChange={(event) => setCentreFilter(event.target.value)} className="w-auto border-0 shadow-none">
+            <option value="">{t('authors.filterAll')}</option>
+            {centres.map((centre) => (
+              <option key={centre.id} value={centre.id}>{centre.name}</option>
+            ))}
+          </Select>
+          <span className="mx-1 h-5 w-px bg-line" />
+          <span className="text-sm font-bold text-text-primary">{t('authors.filterPortal')}</span>
+          <Select value={portalFilter} onChange={(event) => setPortalFilter(event.target.value as 'ALL' | PortalStatus)} className="w-auto border-0 shadow-none">
+            <option value="ALL">{t('authors.filterAll')}</option>
+            <option value="active">{t('authors.portalActive')}</option>
+            <option value="invited">{t('authors.portalInvited')}</option>
+            <option value="none">{t('authors.portalNone')}</option>
+          </Select>
         </div>
       </div>
 

@@ -13,7 +13,7 @@ async function login(page: Page, email: string): Promise<void> {
 test('admin browses, edits and merges authors', async ({ page }) => {
   await login(page, 'publications-admin@larib-portal.test')
   await page.goto('/en/publications/admin/authors', { timeout: 60000 })
-  await expect(page.getByRole('heading', { name: /authors bank/i })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Authors', exact: true })).toBeVisible()
 
   // Two seeded authors are present (displayed as "FirstName LASTNAME")
   await expect(page.getByRole('row', { name: /Jane COAUTHOR/i })).toBeVisible()
@@ -28,7 +28,7 @@ test('admin browses, edits and merges authors', async ({ page }) => {
   const rows = page.locator('tbody tr')
   await rows.nth(0).getByRole('checkbox').click()
   await rows.nth(1).getByRole('checkbox').click()
-  await page.getByRole('button', { name: /merge selected/i }).click()
+  await page.getByRole('button', { name: /merge duplicates/i }).click()
   await expect(page.getByRole('dialog')).toBeVisible()
   await page.getByRole('button', { name: /^merge$/i }).click()
   await expect(page.getByText(/merged:/i)).toBeVisible()
