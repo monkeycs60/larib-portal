@@ -1,0 +1,13 @@
+{
+  "message": {
+    "DOI": "10.1056/nejmoa2501144",
+    "title": ["Transcatheter aortic-valve replacement in low-risk patients: 5-year outcomes of a randomized trial"],
+    "container-title": ["N Engl J Med"],
+    "published": { "date-parts": [[2025, 3, 1]] },
+    "author": [
+      { "given": "Pierre", "family": "Lefèvre", "ORCID": "https://orcid.org/0000-0002-1825-0097", "affiliation": [{ "name": "Hôpital Lariboisière, AP-HP, Paris" }] },
+      { "given": "Sofia", "family": "Marino", "ORCID": "https://orcid.org/0000-0002-9931-5522", "affiliation": [{ "name": "Università degli Studi di Milano, Italy" }] },
+      { "given": "James", "family": "O'Connor", "affiliation": [{ "name": "Cleveland Clinic, Ohio, USA" }] }
+    ]
+  }
+}

@@ -1,5 +1,8 @@
 import { COLORS, FONT_SERIF, FONT_SANS, emailLayout } from '@/lib/email/layout'
 import { renderWelcomeEmail, type WelcomeEmailParams } from '@/lib/email/welcome-template'
+import { format } from 'date-fns'
+import { fr, enUS } from 'date-fns/locale'
+import type { RecapPeriod, RecapRow, RecapStatus } from '@/lib/services/conges/recap'
 
 export async function sendWelcomeEmail(params: WelcomeEmailParams): Promise<{ id: string } | { error: string }>
 {
@@ -354,4 +357,123 @@ export async function sendAuthorListRequestEmail(
     body: JSON.stringify({ from, to: params.recipients, subject, text: body }),
   })
   return { ok: res.ok }
+}
+
+export type LeaveRecapEmailParams = {
+  to: string[]
+  locale: 'en' | 'fr'
+  period: RecapPeriod
+  rangeStart: Date
+  rangeEnd: Date
+  rows: RecapRow[]
+}
+
+const RECAP_STATUS_STYLE: Record<RecapStatus, { bgColor: string; label: Record<'fr' | 'en', string> }> = {
+  APPROVED: { bgColor: '#10b981', label: { fr: 'Approuvé', en: 'Approved' } },
+  PENDING: { bgColor: '#f59e0b', label: { fr: 'En attente', en: 'Pending' } },
+}
+
+export function renderLeaveRecapEmail({
+  locale,
+  period,
+  rangeStart,
+  rangeEnd,
+  rows,
+}: LeaveRecapEmailParams): { subject: string; text: string; html: string } {
+  const dateLocale = locale === 'fr' ? fr : enUS
+
+  const subjects: Record<RecapPeriod, Record<'fr' | 'en', string>> = {
+    weekly: { fr: 'Récap congés — semaine en cours', en: 'Leave recap — current week' },
+    monthly: { fr: 'Récap congés — mois en cours', en: 'Leave recap — current month' },
+  }
+  const titles: Record<RecapPeriod, Record<'fr' | 'en', string>> = {
+    weekly: { fr: 'Congés de la semaine', en: "This week's leave" },
+    monthly: { fr: 'Congés du mois', en: "This month's leave" },
+  }
+  const emptyStates: Record<RecapPeriod, Record<'fr' | 'en', string>> = {
+    weekly: { fr: 'Personne en congé cette semaine.', en: 'No one is on leave this week.' },
+    monthly: { fr: 'Personne en congé ce mois-ci.', en: 'No one is on leave this month.' },
+  }
+
+  const subject = subjects[period][locale]
+  const title = titles[period][locale]
+  const rangeLabel = `${format(rangeStart, 'd MMM', { locale: dateLocale })} → ${format(rangeEnd, 'd MMM yyyy', { locale: dateLocale })}`
+
+  const daysWord = (count: number) =>
+    locale === 'fr' ? (count > 1 ? 'jours' : 'jour') : count > 1 ? 'days' : 'day'
+
+  const textLines = rows.length
+    ? rows.map((row) => {
+        const dates = `${format(row.startDate, 'd MMM', { locale: dateLocale })} → ${format(row.endDate, 'd MMM', { locale: dateLocale })}`
+        const statusLabel = RECAP_STATUS_STYLE[row.status].label[locale]
+        const positionPart = row.position ? ` (${row.position})` : ''
+        return `- ${row.name}${positionPart} : ${dates}, ${row.daysInRange} ${daysWord(row.daysInRange)} [${statusLabel}]`
+      })
+    : [emptyStates[period][locale]]
+  const text = `${title}\n${rangeLabel}\n\n${textLines.join('\n')}`
+
+  const preheader = `${title} — ${rangeLabel}`
+
+  const rowsHtml = rows.length
+    ? rows
+        .map((row) => {
+          const style = RECAP_STATUS_STYLE[row.status]
+          const dates = `${format(row.startDate, 'd MMM', { locale: dateLocale })} → ${format(row.endDate, 'd MMM', { locale: dateLocale })}`
+          const positionLine = row.position
+            ? `<div style="font-size:12px;color:${COLORS.mutedForeground};">${row.position}</div>`
+            : ''
+          return `
+    <tr>
+      <td style="padding:12px 16px;font-family:${FONT_SANS};font-size:14px;color:${COLORS.foreground};border-top:1px solid ${COLORS.secondary};">
+        <strong>${row.name}</strong>${positionLine}
+      </td>
+      <td style="padding:12px 16px;font-family:${FONT_SANS};font-size:14px;color:${COLORS.foreground};border-top:1px solid ${COLORS.secondary};white-space:nowrap;">${dates}</td>
+      <td style="padding:12px 16px;font-family:${FONT_SANS};font-size:14px;color:${COLORS.foreground};border-top:1px solid ${COLORS.secondary};white-space:nowrap;">${row.daysInRange} ${daysWord(row.daysInRange)}</td>
+      <td style="padding:12px 16px;border-top:1px solid ${COLORS.secondary};text-align:right;">
+        <span style="display:inline-block;background-color:${style.bgColor};border-radius:6px;padding:4px 10px;font-family:${FONT_SANS};font-size:12px;font-weight:600;color:#ffffff;white-space:nowrap;">${style.label[locale]}</span>
+      </td>
+    </tr>`
+        })
+        .join('')
+    : `
+    <tr>
+      <td colspan="4" style="padding:20px 16px;font-family:${FONT_SANS};font-size:14px;color:${COLORS.mutedForeground};text-align:center;border-top:1px solid ${COLORS.secondary};">
+        ${emptyStates[period][locale]}
+      </td>
+    </tr>`
+
+  const body = `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;">
+      <tr>
+        <td>
+          <p style="margin:0 0 4px 0;font-family:${FONT_SERIF};font-size:22px;line-height:30px;color:${COLORS.primary};font-weight:700;">${title}</p>
+          <p style="margin:0;font-family:${FONT_SANS};font-size:14px;line-height:22px;color:${COLORS.mutedForeground};">${rangeLabel}</p>
+        </td>
+      </tr>
+    </table>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid ${COLORS.border};border-radius:8px;overflow:hidden;">
+      ${rowsHtml}
+    </table>`
+
+  const html = emailLayout(body, preheader)
+  return { subject, text, html }
+}
+
+export async function sendLeaveRecapEmail(
+  params: LeaveRecapEmailParams,
+): Promise<{ id: string } | { error: string }> {
+  const { subject, text, html } = renderLeaveRecapEmail(params)
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) return { error: 'RESEND_API_KEY missing' }
+  const from = process.env.RESEND_FROM || 'noreply@your-domain.com'
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from, to: params.to, subject, text, html }),
+  })
+  if (!res.ok) {
+    return { error: `RESEND_REQUEST_FAILED_${res.status}` }
+  }
+  const json = (await res.json()) as { id?: string }
+  return { id: json.id ?? '' }
 }

@@ -91,9 +91,9 @@ export function StudyForm({
 
   async function addNewAuthor() {
     if (!newFirst.trim() || !newLast.trim()) return
-    const res = await execAddAuthor({ firstName: newFirst.trim(), lastName: newLast.trim() })
-    if (!res?.data) return
-    const created = res.data
+    const res = await execAddAuthor({ firstName: newFirst.trim(), lastName: newLast.trim(), confirmDuplicate: true })
+    if (!res?.data || res.data.status !== 'created') return
+    const created = res.data.author
     setAuthorOptions((prev) => [...prev, { id: created.id, firstName: created.firstName, lastName: created.lastName, centreId: null }])
     setCoIds((prev) => [...prev, created.id])
     setNewFirst('')

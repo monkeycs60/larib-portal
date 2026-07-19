@@ -2,8 +2,9 @@
 
 import { z } from 'zod'
 import { revalidateTag } from 'next/cache'
-import { appAdminAction, authenticatedAction } from '@/actions/safe-action'
+import { appAdminAction, appMemberAction, authenticatedAction } from '@/actions/safe-action'
 import { canAccessApp, canAdminApp } from '@/lib/permissions'
+import { prisma } from '@/lib/prisma'
 import { addSubmission, updateSubmissionStatus, updateSubmission, deleteSubmission, userOwnsSubmission, SUBMISSION_STATUSES } from '@/lib/services/publications/submissions'
 import { userIsAuthorOfArticle } from '@/lib/services/publications/my-publications'
 import { createDraftArticle, updateArticleCore, deleteDraft, userIsFirstAuthor } from '@/lib/services/publications/publication-editor'
@@ -16,6 +17,8 @@ import {
   PUBLICATIONS_ARTICLES_TAG,
 } from '@/lib/services/publications/import'
 import { updateAuthor, deleteAuthor, mergeAuthors, recomputeAuthorCentres, createAuthor, isPrismaKnownError } from '@/lib/services/publications/authors'
+import { findAuthorDuplicates, matchAuthorsAgainstBank, normalizeName } from '@/lib/services/publications/author-dedup'
+import { fetchPublicationByIdentifier } from '@/lib/services/publications/publication-lookup'
 import { backfillAffiliations, PUBLICATIONS_CENTRES_TAG, PUBLICATIONS_AFFILIATIONS_TAG } from '@/lib/services/publications/affiliations'
 import { renameCentre, setCentreOwn, deleteCentre, mergeCentres } from '@/lib/services/publications/centres'
 import { updateArticleStatus, updateArticleType, ARTICLE_STATUSES } from '@/lib/services/publications/articles'
@@ -24,6 +27,7 @@ import { createJournal, updateJournal, deleteJournal, isPrismaKnownError as isJo
 import { searchCrossref } from '@/lib/services/publications/journals-catalog'
 import { refreshJournalSjr } from '@/lib/services/publications/sjr'
 import { createStudy, updateStudy, deleteStudy, STUDY_STATUSES, PUBLICATIONS_STUDIES_TAG } from '@/lib/services/publications/studies'
+import { AuthorType } from '@/app/generated/prisma'
 
 export const searchBacklogAction = appAdminAction('PUBLICATIONS')
   .inputSchema(z.object({ anchor: z.string().min(1), retmax: z.number().int().min(1).max(500).optional() }))
@@ -212,18 +216,84 @@ export const refreshSjrAction = appAdminAction('PUBLICATIONS')
     return result
   })
 
-export const createAuthorAction = appAdminAction('PUBLICATIONS')
+const CreateAuthorSchema = z.object({
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  type: z.nativeEnum(AuthorType).default(AuthorType.OUR_TEAM),
+  degrees: z.array(z.string()).default([]),
+  emails: z.array(z.string().email()).default([]),
+  orcid: z.string().trim().optional().nullable(),
+  centreIds: z.array(z.string()).default([]),
+  affiliations: z.array(z.string()).default([]),
+  userId: z.string().optional().nullable(),
+  confirmDuplicate: z.boolean().default(false),
+})
+
+export const createAuthorAction = appMemberAction('PUBLICATIONS')
+  .inputSchema(CreateAuthorSchema)
+  .action(async ({ parsedInput }) => {
+    const { orcidMatch, nameMatches } = await findAuthorDuplicates({
+      orcid: parsedInput.orcid ?? null,
+      firstName: parsedInput.firstName,
+      lastName: parsedInput.lastName,
+    })
+    if (orcidMatch) {
+      return { status: 'blocked' as const, reason: 'ORCID' as const, match: { id: orcidMatch.id, firstName: orcidMatch.firstName, lastName: orcidMatch.lastName } }
+    }
+    if (nameMatches.length > 0 && !parsedInput.confirmDuplicate) {
+      return { status: 'warning' as const, reason: 'NAME' as const, matches: nameMatches.map((match) => ({ id: match.id, firstName: match.firstName, lastName: match.lastName })) }
+    }
+    const created = await createAuthor({
+      firstName: parsedInput.firstName,
+      lastName: parsedInput.lastName,
+      type: parsedInput.type,
+      degrees: parsedInput.degrees.length ? parsedInput.degrees.join(', ') : null,
+      emails: parsedInput.emails,
+      orcid: parsedInput.orcid ?? null,
+      centreIds: parsedInput.centreIds,
+      affiliations: parsedInput.affiliations,
+      userId: parsedInput.userId ?? null,
+    })
+    revalidateTag(PUBLICATIONS_AUTHORS_TAG)
+    return { status: 'created' as const, author: created }
+  })
+
+export const fetchPublicationAuthorsAction = appMemberAction('PUBLICATIONS')
+  .inputSchema(z.object({ identifier: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    const publication = await fetchPublicationByIdentifier(parsedInput.identifier)
+    const bank = await prisma.author.findMany({ select: { id: true, firstName: true, lastName: true, orcid: true } })
+    const authors = matchAuthorsAgainstBank(bank, publication.authors)
+    return { publication: { title: publication.title, journal: publication.journal, year: publication.year, doi: publication.doi }, authors }
+  })
+
+export const addAuthorsFromPublicationAction = appMemberAction('PUBLICATIONS')
   .inputSchema(z.object({
-    firstName: z.string().min(1),
-    lastName: z.string().min(1),
-    degrees: z.string().optional().nullable(),
-    orcid: z.string().optional().nullable(),
-    centreId: z.string().optional().nullable(),
+    authors: z.array(z.object({
+      firstName: z.string().min(1),
+      lastName: z.string().min(1),
+      orcid: z.string().nullable().optional(),
+      affiliationRaw: z.string().nullable().optional(),
+    })).min(1),
   }))
   .action(async ({ parsedInput }) => {
-    const created = await createAuthor(parsedInput)
-    revalidateTag(PUBLICATIONS_AUTHORS_TAG)
-    return created
+    const bank = await prisma.author.findMany({ select: { id: true, firstName: true, lastName: true, orcid: true } })
+    const rows = matchAuthorsAgainstBank(bank, parsedInput.authors)
+    const toCreate = rows.filter((row) => row.status === 'new')
+    const seenKeys = new Set<string>()
+    let created = 0
+    for (const author of toCreate) {
+      const orcid = author.orcid?.trim()
+      const dedupKey = orcid
+        ? `orcid:${orcid}`
+        : `name:${normalizeName(author.firstName)}|${normalizeName(author.lastName)}`
+      if (seenKeys.has(dedupKey)) continue
+      seenKeys.add(dedupKey)
+      await createAuthor({ firstName: author.firstName, lastName: author.lastName, type: AuthorType.EXTERNAL, orcid: author.orcid ?? null, affiliations: author.affiliationRaw ? [author.affiliationRaw] : [] })
+      created += 1
+    }
+    if (created > 0) revalidateTag(PUBLICATIONS_AUTHORS_TAG)
+    return { created, skipped: rows.length - created }
   })
 
 const StudyInputSchema = z.object({

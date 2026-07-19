@@ -16,36 +16,36 @@ datasource db {
 }
 
 model User {
-  id              String        @id
-  email           String        @unique
-  emailVerified   Boolean       @default(false)
-  name            String?
+  id                      String        @id
+  email                   String        @unique
+  emailVerified           Boolean       @default(false)
+  name                    String?
   // Admin/user management fields
-  firstName       String?
-  lastName        String?
-  phoneNumber     String?
-  role            Role          @default(USER)
-  country         String?
-  birthDate       DateTime?
-  language        Language      @default(EN)
-  position        String?
-  arrivalDate     DateTime?
-  departureDate   DateTime?
-  profilePhoto    String?
-  profilePhotoKey String?
-  congesTotalDays Int           @default(0)
-  publicationsEmailOptOut Boolean @default(false)
-  applications    Application[]
-  adminApplications Application[] @default([])
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  image           String?
+  firstName               String?
+  lastName                String?
+  phoneNumber             String?
+  role                    Role          @default(USER)
+  country                 String?
+  birthDate               DateTime?
+  language                Language      @default(EN)
+  position                String?
+  arrivalDate             DateTime?
+  departureDate           DateTime?
+  profilePhoto            String?
+  profilePhotoKey         String?
+  congesTotalDays         Int           @default(0)
+  publicationsEmailOptOut Boolean       @default(false)
+  applications            Application[]
+  adminApplications       Application[] @default([])
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+  image                   String?
 
-  sessions Session[]
-  accounts Account[]
-  leaveRequests      LeaveRequest[]
-  leaveApprovals     LeaveRequest[] @relation("LeaveRequestApprover")
-  leavePeriods       LeavePeriod[]
+  sessions       Session[]
+  accounts       Account[]
+  leaveRequests  LeaveRequest[]
+  leaveApprovals LeaveRequest[] @relation("LeaveRequestApprover")
+  leavePeriods   LeavePeriod[]
 
   //related to bestof larib
   ClinicalCase     ClinicalCase[]
@@ -54,9 +54,9 @@ model User {
   UserTag          UserTag[]
 
   //related to publications
-  authoredBy      Author[]
-  studiesCreated  Study[]   @relation("StudyCreatedBy")
-  articlesCreated Article[] @relation("ArticleCreatedBy")
+  authoredBy             Author[]
+  studiesCreated         Study[]             @relation("StudyCreatedBy")
+  articlesCreated        Article[]           @relation("ArticleCreatedBy")
   authorRequestsMade     AuthorListRequest[] @relation("AuthorListRequestedBy")
   authorRequestsResolved AuthorListRequest[] @relation("AuthorListResolvedBy")
 
@@ -78,6 +78,11 @@ enum Application {
   CONGES
   CARDIOLARIB
   PUBLICATIONS
+}
+
+enum AuthorType {
+  OUR_TEAM
+  EXTERNAL
 }
 
 // ---- Publications domain ----
@@ -298,7 +303,7 @@ model LeaveRequest {
   createdAt  DateTime           @default(now())
   updatedAt  DateTime           @updatedAt
 
-  user     User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   approver User? @relation("LeaveRequestApprover", fields: [approverId], references: [id])
 
   @@index([userId])
@@ -410,7 +415,7 @@ model Study {
 
   articles      Article[]
   investigators StudyInvestigator[]
-  centres       Centre[]    @relation("StudyCentres")
+  centres       Centre[]            @relation("StudyCentres")
 
   @@map("Study")
 }
@@ -477,8 +482,9 @@ model Centre {
   updatedAt DateTime @updatedAt
 
   affiliations Affiliation[]
-  authors      Author[]      @relation("AuthorCentre")
-  studies      Study[]       @relation("StudyCentres")
+  authors      Author[]       @relation("AuthorCentre")
+  studies      Study[]        @relation("StudyCentres")
+  authorLinks  AuthorCentre[] @relation("CentreAuthorLinks")
 
   @@map("Centre")
 }
@@ -500,10 +506,39 @@ model Author {
   createdAt            DateTime     @default(now())
   updatedAt            DateTime     @updatedAt
 
+  type              AuthorType          @default(OUR_TEAM)
+  emails            String[]            @default([])
+  centres           AuthorCentre[]
+  paperAffiliations AuthorAffiliation[]
+
   authorships Authorship[]
   studyRoles  StudyInvestigator[]
 
   @@map("Author")
+}
+
+model AuthorCentre {
+  id        String   @id @default(cuid())
+  authorId  String
+  author    Author   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  centreId  String
+  centre    Centre   @relation("CentreAuthorLinks", fields: [centreId], references: [id], onDelete: Cascade)
+  isPrimary Boolean  @default(false)
+  order     Int
+  createdAt DateTime @default(now())
+
+  @@unique([authorId, centreId])
+  @@index([centreId])
+}
+
+model AuthorAffiliation {
+  id       String @id @default(cuid())
+  authorId String
+  author   Author @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  raw      String
+  order    Int
+
+  @@index([authorId])
 }
 
 model Article {

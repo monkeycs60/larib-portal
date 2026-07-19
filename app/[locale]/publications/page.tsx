@@ -5,6 +5,8 @@ import { applicationLink } from '@/lib/application-link'
 import { canAccessApp } from '@/lib/permissions'
 import { listMyPublications } from '@/lib/services/publications/my-publications'
 import { listJournalNames } from '@/lib/services/publications/journals'
+import { Link } from '@/app/i18n/navigation'
+import { Button } from '@/components/ui/button'
 import { MyPublications } from './components/my-publications'
 import { NewPublicationButton } from './components/new-publication-button'
 
@@ -29,7 +31,14 @@ export default async function PublicationsPage({ params }: PageParams) {
               <p className="mt-1.5 max-w-lg text-sm leading-relaxed text-text-secondary">{t('myPub.subtitle')}</p>
             </div>
           </div>
-          <NewPublicationButton />
+          <div className="flex items-center gap-3">
+            <Button asChild variant="outline">
+              <Link href="/publications/authors">
+                {t('authors.add.list.title')}
+              </Link>
+            </Button>
+            <NewPublicationButton />
+          </div>
         </header>
 
         <MyPublications items={items} locale={locale} journalNames={journalNames} />

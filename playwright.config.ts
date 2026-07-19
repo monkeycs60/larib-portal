@@ -87,6 +87,7 @@ export default defineConfig({
       BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET ?? '',
       BETTER_AUTH_URL: process.env.BETTER_AUTH_URL ?? '',
       PUBMED_FIXTURE_DIR: path.resolve(__dirname, 'tests/e2e/fixtures/pubmed'),
+      CROSSREF_FIXTURE_DIR: path.resolve(__dirname, 'tests/e2e/fixtures/crossref'),
     },
   },
 });
