@@ -194,7 +194,7 @@ export async function mergeAuthors(
     }
     await tx.author.deleteMany({ where: { id: { in: sources } } })
     return { reassigned, dropped, deleted: sources.length }
-  })
+  }, { timeout: 20000, maxWait: 5000 })
 }
 
 export async function recomputeAuthorCentres(): Promise<{ updated: number }> {
