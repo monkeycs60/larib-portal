@@ -344,9 +344,9 @@ export function AuthorsManager({ authors, users, centres }: { authors: AuthorLis
                   </TableCell>
                   <TableCell>
                     {author.type === 'OUR_TEAM' ? (
-                      <span className="rounded-full border border-coral-200 bg-coral-50 px-2.5 py-0.5 text-xs font-semibold text-coral-600">{t('authors.typeOurTeam')}</span>
+                      <span className="inline-block whitespace-nowrap rounded-full border border-coral-200 bg-coral-50 px-2.5 py-0.5 text-xs font-semibold text-coral-600">{t('authors.typeOurTeam')}</span>
                     ) : (
-                      <span className="rounded-full border border-line bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-600">{t('authors.typeExternal')}</span>
+                      <span className="inline-block whitespace-nowrap rounded-full border border-line bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-600">{t('authors.typeExternal')}</span>
                     )}
                   </TableCell>
                   <TableCell className="text-text-primary">{author.centre?.name ?? '—'}</TableCell>
@@ -425,7 +425,7 @@ export function AuthorsManager({ authors, users, centres }: { authors: AuthorLis
           <p className="text-sm text-text-secondary">{t('authors.mergeChooseKeeper')}</p>
           <Select value={keepId} onChange={(event) => setKeepId(event.target.value)}>
             {selectedAuthors.map((author) => (
-              <option key={author.id} value={author.id}>{`${authorLabel(author)} (${author._count.authorships})`}</option>
+              <option key={author.id} value={author.id}>{`${authorLabel(author)}${author.centre ? ` · ${author.centre.name}` : ''} (${author._count.authorships})`}</option>
             ))}
           </Select>
           <DialogFooter>
