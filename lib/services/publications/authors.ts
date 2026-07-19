@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { Prisma } from '@/app/generated/prisma'
+import { Prisma, type AuthorType } from '@/app/generated/prisma'
 import { planAuthorshipMerge } from './authors-merge'
 import { pickPrimaryCentre } from './author-centre'
 import { PUBLICATIONS_AUTHORS_TAG, PUBLICATIONS_ARTICLES_TAG } from './import'
@@ -77,17 +77,49 @@ export async function updateAuthor(data: UpdateAuthorInput) {
   })
 }
 
-export type CreateAuthorInput = { firstName: string; lastName: string; degrees?: string | null; orcid?: string | null; centreId?: string | null }
+export type CreateAuthorInput = {
+  firstName: string
+  lastName: string
+  type?: AuthorType
+  degrees?: string | null
+  emails?: string[]
+  orcid?: string | null
+  centreId?: string | null
+  centreIds?: string[]
+  affiliations?: string[]
+  userId?: string | null
+}
 
-export async function createAuthor(data: CreateAuthorInput) {
-  return prisma.author.create({
-    data: {
-      firstName: data.firstName,
-      lastName: data.lastName,
-      degrees: data.degrees ?? null,
-      orcid: data.orcid ?? null,
-      centreId: data.centreId ?? null,
+export function buildAuthorCreateData(input: CreateAuthorInput): Prisma.AuthorUncheckedCreateInput {
+  const emails = (input.emails ?? []).map((email) => email.trim()).filter(Boolean)
+  const centreIds = input.centreIds ?? (input.centreId ? [input.centreId] : [])
+  const affiliations = (input.affiliations ?? []).map((raw) => raw.trim()).filter(Boolean)
+  return {
+    firstName: input.firstName,
+    lastName: input.lastName,
+    type: input.type ?? 'OUR_TEAM',
+    degrees: input.degrees ?? null,
+    emails,
+    email: emails[0] ?? null,
+    orcid: input.orcid ?? null,
+    centreId: centreIds[0] ?? null,
+    userId: input.userId ?? null,
+    centres: {
+      create: centreIds.map((centreId, index) => ({
+        centreId,
+        isPrimary: index === 0,
+        order: index,
+      })),
     },
+    paperAffiliations: {
+      create: affiliations.map((raw, index) => ({ raw, order: index })),
+    },
+  }
+}
+
+export async function createAuthor(input: CreateAuthorInput) {
+  return prisma.author.create({
+    data: buildAuthorCreateData(input),
     select: { id: true, firstName: true, lastName: true },
   })
 }
