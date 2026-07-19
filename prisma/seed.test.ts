@@ -251,6 +251,16 @@ async function main() {
 	const publicationsCentre = await prisma.centre.create({
 		data: { name: 'Lariboisière Hospital', city: 'Paris', country: 'France' },
 	});
+	await prisma.centre.upsert({
+		where: { name: 'Hôpital Lariboisière, AP-HP' },
+		update: {},
+		create: { name: 'Hôpital Lariboisière, AP-HP', city: 'Paris', country: 'France', isOwn: true },
+	});
+	await prisma.centre.upsert({
+		where: { name: 'Università degli Studi di Milano' },
+		update: {},
+		create: { name: 'Università degli Studi di Milano', city: 'Milano', country: 'Italy', isOwn: false },
+	});
 	const publicationsAffiliation = await prisma.affiliation.create({
 		data: {
 			name: 'Lariboisière Hospital, APHP, Paris, France',
@@ -261,10 +271,23 @@ async function main() {
 		},
 	});
 	const publicationsFirstAuthor = await prisma.author.create({
-		data: { firstName: 'Publications', lastName: 'User', degrees: 'MD', user: { connect: { id: publicationsUser.id } }, defaultAffiliation: { connect: { id: publicationsAffiliation.id } } },
+		data: {
+			firstName: 'Publications',
+			lastName: 'User',
+			degrees: 'MD',
+			emails: [publicationsUser.email],
+			user: { connect: { id: publicationsUser.id } },
+			defaultAffiliation: { connect: { id: publicationsAffiliation.id } },
+		},
 	});
 	const publicationsCoAuthor = await prisma.author.create({
-		data: { firstName: 'Jane', lastName: 'Coauthor', degrees: 'MD, PhD', defaultAffiliation: { connect: { id: publicationsAffiliation.id } } },
+		data: {
+			firstName: 'Jane',
+			lastName: 'Coauthor',
+			degrees: 'MD, PhD',
+			emails: ['jane.coauthor@larib-portal.test'],
+			defaultAffiliation: { connect: { id: publicationsAffiliation.id } },
+		},
 	});
 	const publicationsStudy = await prisma.study.create({
 		data: { title: 'MULTIVALVE registry', description: 'Retrospective multi-valve cohort', createdBy: { connect: { id: publicationsAdmin.id } } },
