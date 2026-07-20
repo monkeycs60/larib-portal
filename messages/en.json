@@ -1148,7 +1148,19 @@
       "count": "{count} authors",
       "filterCentre": "Centre",
       "filterPortal": "Portal",
-      "filterAll": "All"
+      "filterAll": "All",
+      "findDuplicates": "Duplicates ({count})",
+      "duplicates": {
+        "title": "Review duplicates ({count} groups)",
+        "none": "No more duplicate groups to review.",
+        "orcidConflict": "Different ORCIDs",
+        "sameOrcid": "Same ORCID",
+        "nameOnly": "Same name",
+        "papers": "papers",
+        "keep": "Keep",
+        "skip": "Skip",
+        "merge": "Merge"
+      }
     },
     "centres": {
       "title": "Centres",

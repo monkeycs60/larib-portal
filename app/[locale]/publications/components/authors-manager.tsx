@@ -8,8 +8,9 @@ import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useAction } from 'next-safe-action/hooks'
 import { toast } from 'sonner'
-import { Pencil, Trash2, GitMerge, FileText, ChevronUp, ChevronDown, ChevronsUpDown, Search, UserPlus } from 'lucide-react'
+import { Pencil, Trash2, GitMerge, FileText, ChevronUp, ChevronDown, ChevronsUpDown, Search, UserPlus, CopyCheck } from 'lucide-react'
 import { Link } from '@/app/i18n/navigation'
+import { DuplicateReviewDialog } from './duplicate-review-dialog'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -69,6 +70,11 @@ function truncateName(name: string, max = 30): string {
   return name.length > max ? `${name.slice(0, max).trimEnd()}…` : name
 }
 
+function normalizeNameKey(author: AuthorListItem): string {
+  const normalize = (value: string) => value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim()
+  return `${normalize(author.firstName)}|${normalize(author.lastName)}`
+}
+
 type PortalStatus = 'active' | 'invited' | 'none'
 
 function portalStatus(author: AuthorListItem): PortalStatus {
@@ -113,6 +119,21 @@ export function AuthorsManager({ authors, users, centres }: { authors: AuthorLis
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [mergeOpen, setMergeOpen] = useState(false)
   const [keepId, setKeepId] = useState<string>('')
+  const [dupOpen, setDupOpen] = useState(false)
+
+  const duplicateGroups = useMemo(() => {
+    const byKey = new Map<string, AuthorListItem[]>()
+    for (const author of authors) {
+      const key = normalizeNameKey(author)
+      const list = byKey.get(key) ?? []
+      list.push(author)
+      byKey.set(key, list)
+    }
+    return [...byKey.entries()]
+      .filter(([, members]) => members.length > 1)
+      .map(([key, members]) => ({ key, members }))
+      .sort((first, second) => second.members.length - first.members.length)
+  }, [authors])
 
   const typeCounts = useMemo(
     () => ({
@@ -242,6 +263,14 @@ export function AuthorsManager({ authors, users, centres }: { authors: AuthorLis
     router.refresh()
   }
 
+  async function mergeDuplicate(keepId: string, mergeIds: string[]): Promise<boolean> {
+    const res = await execMerge({ keepId, mergeIds })
+    if (!res?.data) return false
+    toast.success(t('authors.merged', { reassigned: res.data.reassigned, deleted: res.data.deleted }))
+    router.refresh()
+    return true
+  }
+
   const selectedAuthors = authors.filter((author) => selected.has(author.id))
 
   return (
@@ -255,6 +284,12 @@ export function AuthorsManager({ authors, users, centres }: { authors: AuthorLis
           </div>
         </div>
         <div className="flex items-center gap-3">
+          {duplicateGroups.length > 0 && (
+            <Button variant="outline" onClick={() => setDupOpen(true)} className="gap-2">
+              <CopyCheck className="size-4" />
+              {t('authors.findDuplicates', { count: duplicateGroups.length })}
+            </Button>
+          )}
           <Button variant="outline" onClick={openMerge} disabled={selected.size < 2} className="gap-2">
             <GitMerge className="size-4" />
             {t('authors.merge')}
@@ -460,6 +495,8 @@ export function AuthorsManager({ authors, users, centres }: { authors: AuthorLis
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <DuplicateReviewDialog open={dupOpen} onOpenChange={setDupOpen} groups={duplicateGroups} onMerge={mergeDuplicate} />
     </div>
   )
 }

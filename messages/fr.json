@@ -1146,7 +1146,19 @@
       "count": "{count} auteurs",
       "filterCentre": "Centre",
       "filterPortal": "Portail",
-      "filterAll": "Tous"
+      "filterAll": "Tous",
+      "findDuplicates": "Doublons ({count})",
+      "duplicates": {
+        "title": "Vérifier les doublons ({count} groupes)",
+        "none": "Plus aucun groupe de doublons à vérifier.",
+        "orcidConflict": "ORCID différents",
+        "sameOrcid": "Même ORCID",
+        "nameOnly": "Même nom",
+        "papers": "publications",
+        "keep": "Garder",
+        "skip": "Ignorer",
+        "merge": "Fusionner"
+      }
     },
     "centres": {
       "title": "Centres",
