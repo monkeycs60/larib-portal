@@ -21,7 +21,7 @@ test('admin browses, edits and merges authors', async ({ page }) => {
   // Edit the first-author row
   await page.getByRole('row', { name: /Publications USER/i }).getByRole('button', { name: /^edit$/i }).click()
   await expect(page.getByRole('dialog')).toBeVisible()
-  await page.getByRole('button', { name: /^save$/i }).click()
+  await page.getByRole('button', { name: /save changes/i }).click()
   await expect(page.getByText(/author updated/i)).toBeVisible()
 
   // Merge the two seeded authors (same single article -> keeper keeps 1 authorship)

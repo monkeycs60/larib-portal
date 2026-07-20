@@ -1,9 +1,6 @@
 'use client'
 
 import { Fragment, useMemo, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useAction } from 'next-safe-action/hooks'
@@ -30,19 +27,9 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
-import { updateAuthorAction, deleteAuthorAction, mergeAuthorsAction, getAuthorDetailAction } from '../actions'
-import type { AuthorListItem, LinkableUser, AuthorDetail } from '@/lib/services/publications/authors'
-
-const EditSchema = z.object({
-  firstName: z.string().min(1),
-  lastName: z.string().min(1),
-  degrees: z.string().optional(),
-  email: z.string().optional(),
-  orcid: z.string().optional(),
-  userId: z.string().optional(),
-  centreId: z.string().optional(),
-})
-type EditValues = z.infer<typeof EditSchema>
+import { deleteAuthorAction, mergeAuthorsAction, getAuthorDetailAction, getAuthorForEditAction } from '../actions'
+import type { AuthorListItem, LinkableUser, AuthorDetail, AuthorEditData } from '@/lib/services/publications/authors'
+import { EditAuthorDialog } from './edit-author-dialog'
 
 function authorLabel(author: AuthorListItem): string {
   return `${author.firstName} ${author.lastName.toUpperCase()}`.trim()
@@ -106,7 +93,7 @@ function sortValue(author: AuthorListItem, key: SortKey): string | number {
   }
 }
 
-export function AuthorsManager({ authors, users, centres }: { authors: AuthorListItem[]; users: LinkableUser[]; centres: { id: string; name: string }[] }) {
+export function AuthorsManager({ authors, users, centres }: { authors: AuthorListItem[]; users: LinkableUser[]; centres: { id: string; name: string; isOwn?: boolean }[] }) {
   const t = useTranslations('publications')
   const router = useRouter()
   const [query, setQuery] = useState('')
@@ -115,7 +102,7 @@ export function AuthorsManager({ authors, users, centres }: { authors: AuthorLis
   const [portalFilter, setPortalFilter] = useState<'ALL' | PortalStatus>('ALL')
   const [sortKey, setSortKey] = useState<SortKey>('papers')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
-  const [editing, setEditing] = useState<AuthorListItem | null>(null)
+  const [editData, setEditData] = useState<AuthorEditData | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<AuthorListItem | null>(null)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [mergeOpen, setMergeOpen] = useState(false)
@@ -194,22 +181,13 @@ export function AuthorsManager({ authors, users, centres }: { authors: AuthorLis
     )
   }
 
-  const { register, handleSubmit, reset } = useForm<EditValues>({ resolver: zodResolver(EditSchema) })
+  const { executeAsync: execEditFetch } = useAction(getAuthorForEditAction, { onError() { toast.error(t('actionError')) } })
 
-  function openEdit(author: AuthorListItem) {
-    setEditing(author)
-    reset({
-      firstName: author.firstName,
-      lastName: author.lastName,
-      degrees: author.degrees ?? '',
-      email: author.email ?? '',
-      orcid: author.orcid ?? '',
-      userId: author.userId ?? '',
-      centreId: author.centreId ?? '',
-    })
+  async function openEdit(author: AuthorListItem) {
+    const res = await execEditFetch({ id: author.id })
+    if (res?.data) setEditData(res.data)
   }
 
-  const { executeAsync: execUpdate, isExecuting: saving } = useAction(updateAuthorAction, { onError() { toast.error(t('actionError')) } })
   const { executeAsync: execDelete, isExecuting: deleting } = useAction(deleteAuthorAction, {
     onError({ error }) { toast.error(error?.serverError === 'AUTHOR_IN_USE' ? t('authors.errorInUse') : t('actionError')) },
   })
@@ -229,23 +207,6 @@ export function AuthorsManager({ authors, users, centres }: { authors: AuthorLis
       if (res?.data) setDetails((previous) => ({ ...previous, [id]: res.data as AuthorDetail }))
     }
   }
-
-  const onSubmit = handleSubmit(async (values) => {
-    if (!editing) return
-    const res = await execUpdate({
-      id: editing.id,
-      firstName: values.firstName,
-      lastName: values.lastName,
-      degrees: values.degrees || null,
-      email: values.email || null,
-      orcid: values.orcid || null,
-      userId: values.userId || null,
-    })
-    if (!res?.data) return
-    toast.success(t('authors.saved'))
-    setEditing(null)
-    router.refresh()
-  })
 
   async function confirmDelete() {
     if (!deleteTarget) return
@@ -462,44 +423,13 @@ export function AuthorsManager({ authors, users, centres }: { authors: AuthorLis
         </Table>
       </div>
 
-      <Dialog open={editing !== null} onOpenChange={(open) => { if (!open) setEditing(null) }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('authors.editTitle')}</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={onSubmit} className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1"><label className="text-sm text-text-secondary">{t('authors.firstName')}</label><Input {...register('firstName')} /></div>
-              <div className="space-y-1"><label className="text-sm text-text-secondary">{t('authors.lastName')}</label><Input {...register('lastName')} /></div>
-              <div className="space-y-1"><label className="text-sm text-text-secondary">{t('authors.degrees')}</label><Input {...register('degrees')} /></div>
-              <div className="space-y-1"><label className="text-sm text-text-secondary">{t('authors.orcid')}</label><Input {...register('orcid')} /></div>
-            </div>
-            <div className="space-y-1"><label className="text-sm text-text-secondary">{t('authors.email')}</label><Input {...register('email')} /></div>
-            <div className="space-y-1">
-              <label className="text-sm text-text-secondary">{t('authors.linkUser')}</label>
-              <Select {...register('userId')}>
-                <option value="">{t('authors.noUser')}</option>
-                {users.map((user) => (
-                  <option key={user.id} value={user.id}>{`${user.lastName ?? ''} ${user.firstName ?? ''}`.trim() || user.email}</option>
-                ))}
-              </Select>
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm text-text-secondary">{t('authors.centre')}</label>
-              <Select {...register('centreId')}>
-                <option value="">{t('authors.noCentre')}</option>
-                {centres.map((centre) => (
-                  <option key={centre.id} value={centre.id}>{centre.name}</option>
-                ))}
-              </Select>
-            </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setEditing(null)}>{t('authors.cancel')}</Button>
-              <Button type="submit" disabled={saving}>{t('authors.save')}</Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <EditAuthorDialog
+        data={editData}
+        centres={centres}
+        users={users.map((user) => ({ value: user.id, label: `${user.firstName ?? ''} ${user.lastName ?? ''} (${user.email})`.trim() }))}
+        onClose={() => setEditData(null)}
+        onSaved={() => setEditData(null)}
+      />
 
       <Dialog open={mergeOpen} onOpenChange={setMergeOpen}>
         <DialogContent>

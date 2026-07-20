@@ -1181,6 +1181,13 @@
         "derivedFromRecent": "derived from publications",
         "lastAuthor": "Last author",
         "authorRole": "author"
+      },
+      "editModal": {
+        "title": "Edit author",
+        "linkedPublications": "{count} linked publications",
+        "typeCentre": "Type & centre",
+        "save": "Save changes",
+        "add": "Add"
       }
     },
     "centres": {

@@ -185,28 +185,86 @@ export type UpdateAuthorInput = {
   firstName: string
   lastName: string
   degrees?: string | null
-  email?: string | null
   orcid?: string | null
   userId?: string | null
-  centreId?: string | null
+  emails?: string[]
+  centreIds?: string[]
+  affiliations?: string[]
 }
 
 export async function updateAuthor(data: UpdateAuthorInput) {
-  const type = await resolveAuthorType(data.centreId ?? null)
-  return prisma.author.update({
-    where: { id: data.id },
-    data: {
-      firstName: data.firstName,
-      lastName: data.lastName,
-      degrees: data.degrees ?? null,
-      email: data.email ?? null,
-      orcid: data.orcid ?? null,
-      userId: data.userId ?? null,
-      centreId: data.centreId ?? null,
-      type,
-    },
-    select: { id: true },
+  const centreIds = data.centreIds ?? []
+  const type = await resolveAuthorType(centreIds[0] ?? null)
+  const emails = (data.emails ?? []).map((email) => email.trim()).filter(Boolean)
+  const affiliations = (data.affiliations ?? []).map((raw) => raw.trim()).filter(Boolean)
+  return prisma.$transaction(async (tx) => {
+    await tx.authorCentre.deleteMany({ where: { authorId: data.id } })
+    await tx.authorAffiliation.deleteMany({ where: { authorId: data.id } })
+    return tx.author.update({
+      where: { id: data.id },
+      data: {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        degrees: data.degrees ?? null,
+        orcid: data.orcid ?? null,
+        userId: data.userId ?? null,
+        type,
+        emails,
+        email: emails[0] ?? null,
+        centreId: centreIds[0] ?? null,
+        centres: { create: centreIds.map((centreId, index) => ({ centreId, isPrimary: index === 0, order: index })) },
+        paperAffiliations: { create: affiliations.map((raw, index) => ({ raw, order: index })) },
+      },
+      select: { id: true },
+    })
   })
+}
+
+export type AuthorEditData = {
+  id: string
+  firstName: string
+  lastName: string
+  degrees: string[]
+  orcid: string | null
+  emails: string[]
+  userId: string | null
+  type: AuthorType
+  centres: { id: string; name: string; isOwn: boolean }[]
+  affiliations: string[]
+  publicationsCount: number
+}
+
+export async function getAuthorForEdit(id: string): Promise<AuthorEditData | null> {
+  const author = await prisma.author.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      degrees: true,
+      orcid: true,
+      emails: true,
+      userId: true,
+      type: true,
+      centres: { orderBy: { order: 'asc' }, select: { centre: { select: { id: true, name: true, isOwn: true } } } },
+      paperAffiliations: { orderBy: { order: 'asc' }, select: { raw: true } },
+      _count: { select: { authorships: true } },
+    },
+  })
+  if (!author) return null
+  return {
+    id: author.id,
+    firstName: author.firstName,
+    lastName: author.lastName,
+    degrees: author.degrees ? author.degrees.split(',').map((degree) => degree.trim()).filter(Boolean) : [],
+    orcid: author.orcid,
+    emails: author.emails,
+    userId: author.userId,
+    type: author.type,
+    centres: author.centres.map((link) => link.centre),
+    affiliations: author.paperAffiliations.map((affiliation) => affiliation.raw),
+    publicationsCount: author._count.authorships,
+  }
 }
 
 export type CreateAuthorInput = {

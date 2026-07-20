@@ -16,7 +16,7 @@ import {
   PUBLICATIONS_AUTHORS_TAG,
   PUBLICATIONS_ARTICLES_TAG,
 } from '@/lib/services/publications/import'
-import { updateAuthor, deleteAuthor, mergeAuthors, recomputeAuthorCentres, createAuthor, getAuthorDetail, isPrismaKnownError } from '@/lib/services/publications/authors'
+import { updateAuthor, deleteAuthor, mergeAuthors, recomputeAuthorCentres, createAuthor, getAuthorDetail, getAuthorForEdit, isPrismaKnownError } from '@/lib/services/publications/authors'
 import { findAuthorDuplicates, matchAuthorsAgainstBank, normalizeName } from '@/lib/services/publications/author-dedup'
 import { fetchPublicationByIdentifier } from '@/lib/services/publications/publication-lookup'
 import { backfillAffiliations, PUBLICATIONS_CENTRES_TAG, PUBLICATIONS_AFFILIATIONS_TAG } from '@/lib/services/publications/affiliations'
@@ -49,25 +49,35 @@ const AuthorInput = z.object({
   id: z.string().min(1),
   firstName: z.string().min(1),
   lastName: z.string().min(1),
-  degrees: z.string().optional().nullable(),
-  email: z.string().optional().nullable(),
-  orcid: z.string().optional().nullable(),
+  degrees: z.array(z.string()).default([]),
+  orcid: z.string().trim().optional().nullable(),
   userId: z.string().optional().nullable(),
-  centreId: z.string().optional().nullable(),
+  emails: z.array(z.string().email()).default([]),
+  centreIds: z.array(z.string()).default([]),
+  affiliations: z.array(z.string()).default([]),
 })
 
 export const updateAuthorAction = appAdminAction('PUBLICATIONS')
   .inputSchema(AuthorInput)
   .action(async ({ parsedInput }) => {
     const updated = await updateAuthor({
-      ...parsedInput,
-      email: parsedInput.email || null,
+      id: parsedInput.id,
+      firstName: parsedInput.firstName,
+      lastName: parsedInput.lastName,
+      degrees: parsedInput.degrees.length ? parsedInput.degrees.join(', ') : null,
+      orcid: parsedInput.orcid || null,
       userId: parsedInput.userId || null,
-      centreId: parsedInput.centreId || null,
+      emails: parsedInput.emails,
+      centreIds: parsedInput.centreIds,
+      affiliations: parsedInput.affiliations,
     })
     revalidateTag(PUBLICATIONS_AUTHORS_TAG)
     return updated
   })
+
+export const getAuthorForEditAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({ id: z.string().min(1) }))
+  .action(async ({ parsedInput }) => getAuthorForEdit(parsedInput.id))
 
 export const recomputeAuthorCentresAction = appAdminAction('PUBLICATIONS')
   .inputSchema(z.object({}))

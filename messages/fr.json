@@ -1047,7 +1047,7 @@
       "colOrcid": "ORCID",
       "colUser": "Utilisateur portail",
       "colActions": "Actions",
-      "edit": "Éditer",
+      "edit": "Modifier",
       "editTitle": "Éditer l'auteur",
       "firstName": "Prénom",
       "lastName": "Nom",
@@ -1179,6 +1179,13 @@
         "derivedFromRecent": "d’après les publications",
         "lastAuthor": "Dernier auteur",
         "authorRole": "auteur"
+      },
+      "editModal": {
+        "title": "Modifier l’auteur",
+        "linkedPublications": "{count} publications liées",
+        "typeCentre": "Type et centre",
+        "save": "Enregistrer",
+        "add": "Ajouter"
       }
     },
     "centres": {
