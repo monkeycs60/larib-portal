@@ -406,9 +406,11 @@ model Study {
   description String?
   domain      String?
   funding     String?
+  enrollment  Int?
   status      StudyStatus @default(PLANNED)
   startDate   DateTime?
   endDate     DateTime?
+  lastSyncedAt DateTime?
   createdById String
   createdBy   User        @relation("StudyCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
   createdAt   DateTime    @default(now())
@@ -427,6 +429,8 @@ model StudyInvestigator {
   authorId String
   author   Author    @relation(fields: [authorId], references: [id], onDelete: Cascade)
   role     StudyRole @default(CO_INVESTIGATOR)
+  centreId String?
+  centre   Centre?   @relation("StudyInvestigatorCentre", fields: [centreId], references: [id], onDelete: SetNull)
 
   @@id([studyId, authorId])
   @@map("StudyInvestigator")
@@ -484,10 +488,11 @@ model Centre {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
-  affiliations Affiliation[]
-  authors      Author[]       @relation("AuthorCentre")
-  studies      Study[]        @relation("StudyCentres")
-  authorLinks  AuthorCentre[] @relation("CentreAuthorLinks")
+  affiliations       Affiliation[]
+  authors            Author[]            @relation("AuthorCentre")
+  studies            Study[]             @relation("StudyCentres")
+  authorLinks        AuthorCentre[]      @relation("CentreAuthorLinks")
+  studyInvestigators StudyInvestigator[] @relation("StudyInvestigatorCentre")
 
   @@map("Centre")
 }

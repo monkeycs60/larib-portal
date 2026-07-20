@@ -6,6 +6,7 @@ export type ClinicalTrialPerson = {
   degrees: string | null
   email: string | null
   role: 'PI' | 'CO_INVESTIGATOR'
+  centreName: string | null
 }
 
 export type ClinicalTrialCentre = {
@@ -24,6 +25,7 @@ export type ClinicalTrialImport = {
   description: string | null
   domain: string | null
   funding: string | null
+  enrollment: number | null
   centres: ClinicalTrialCentre[]
   investigators: ClinicalTrialPerson[]
 }
@@ -52,7 +54,7 @@ function mapStatus(overallStatus: string | undefined): StudyStatusValue {
   }
 }
 
-function parsePerson(raw: string, email: string | null, role: ClinicalTrialPerson['role']): ClinicalTrialPerson | null {
+function parsePerson(raw: string, email: string | null, role: ClinicalTrialPerson['role'], centreName: string | null): ClinicalTrialPerson | null {
   const [namePart, ...degreeParts] = raw.split(',')
   const degrees = degreeParts.join(',').trim() || null
   const tokens = namePart.trim().split(/\s+/).filter(Boolean)
@@ -70,7 +72,7 @@ function parsePerson(raw: string, email: string | null, role: ClinicalTrialPerso
     lastName = tokens[tokens.length - 1]
     firstName = tokens.slice(0, -1).join(' ')
   }
-  return { firstName: firstName || lastName, lastName: lastName || firstName, degrees, email, role }
+  return { firstName: firstName || lastName, lastName: lastName || firstName, degrees, email, role, centreName }
 }
 
 type CtgovLocation = {
@@ -89,6 +91,7 @@ export function parseClinicalTrial(json: unknown): ClinicalTrialImport {
   const conditions = (protocol.conditionsModule ?? {}) as { conditions?: string[] }
   const sponsors = (protocol.sponsorCollaboratorsModule ?? {}) as { leadSponsor?: { name?: string }; collaborators?: Array<{ name?: string }> }
   const descriptionModule = (protocol.descriptionModule ?? {}) as { briefSummary?: string }
+  const designModule = (protocol.designModule ?? {}) as { enrollmentInfo?: { count?: number } }
   const contactsLocations = (protocol.contactsLocationsModule ?? {}) as { overallOfficials?: CtgovOfficial[]; locations?: CtgovLocation[] }
 
   const nctId = (identification.nctId ?? '').toUpperCase()
@@ -108,7 +111,7 @@ export function parseClinicalTrial(json: unknown): ClinicalTrialImport {
 
   for (const official of contactsLocations.overallOfficials ?? []) {
     if (!official.name) continue
-    const person = parsePerson(official.name, null, 'PI')
+    const person = parsePerson(official.name, null, 'PI', null)
     if (!person) continue
     const key = `${person.firstName}|${person.lastName}`.toLowerCase()
     if (seenPeople.has(key)) continue
@@ -123,7 +126,7 @@ export function parseClinicalTrial(json: unknown): ClinicalTrialImport {
     }
     for (const contact of location.contacts ?? []) {
       if (!contact.name) continue
-      const person = parsePerson(contact.name, contact.email?.trim() || null, 'CO_INVESTIGATOR')
+      const person = parsePerson(contact.name, contact.email?.trim() || null, 'CO_INVESTIGATOR', facility ?? null)
       if (!person) continue
       const key = `${person.firstName}|${person.lastName}`.toLowerCase()
       if (seenPeople.has(key)) continue
@@ -142,6 +145,7 @@ export function parseClinicalTrial(json: unknown): ClinicalTrialImport {
     description: descriptionModule.briefSummary?.trim() || null,
     domain,
     funding,
+    enrollment: typeof designModule.enrollmentInfo?.count === 'number' ? designModule.enrollmentInfo.count : null,
     centres: [...centreByName.values()],
     investigators,
   }

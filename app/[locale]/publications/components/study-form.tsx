@@ -24,6 +24,7 @@ const FormSchema = z.object({
   description: z.string().optional(),
   domain: z.string().optional(),
   funding: z.string().optional(),
+  enrollment: z.string().optional(),
   status: z.enum(STUDY_STATUSES),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
@@ -70,6 +71,7 @@ export function StudyForm({
       description: study?.description ?? '',
       domain: study?.domain ?? '',
       funding: study?.funding ?? '',
+      enrollment: study?.enrollment != null ? String(study.enrollment) : '',
       status: (study?.status as FormValues['status']) ?? 'PLANNED',
       startDate: toDateInput(study?.startDate),
       endDate: toDateInput(study?.endDate),
@@ -108,6 +110,7 @@ export function StudyForm({
       description: values.description?.trim() || null,
       domain: values.domain?.trim() || null,
       funding: values.funding?.trim() || null,
+      enrollment: values.enrollment && values.enrollment.trim() ? Number(values.enrollment) : null,
       status: values.status,
       startDate: values.startDate || null,
       endDate: values.endDate || null,
@@ -134,6 +137,7 @@ export function StudyForm({
         <div className="space-y-1"><label className="text-sm text-text-secondary">{t('studies.endDate')}</label><Input type="date" {...register('endDate')} /></div>
         <div className="space-y-1"><label className="text-sm text-text-secondary">{t('studies.domain')}</label><Input {...register('domain')} /></div>
         <div className="space-y-1"><label className="text-sm text-text-secondary">{t('studies.funding')}</label><Input {...register('funding')} /></div>
+        <div className="space-y-1"><label className="text-sm text-text-secondary">{t('studies.enrollment')}</label><Input type="number" min={0} {...register('enrollment')} /></div>
       </div>
       <div className="space-y-1"><label className="text-sm text-text-secondary">{t('studies.description')}</label><Textarea {...register('description')} /></div>
 

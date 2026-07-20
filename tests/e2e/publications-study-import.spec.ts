@@ -29,6 +29,16 @@ test('admin imports a study from ClinicalTrials.gov', async ({ page }) => {
 
   await dialog.getByRole('button', { name: /import study/i }).click()
 
-  // Study persisted and listed
-  await expect(page.getByRole('row', { name: /Multiple and Mixed Valvular/i })).toBeVisible({ timeout: 30000 })
+  // Study persisted and listed with imported enrollment
+  const row = page.getByRole('row', { name: /Multiple and Mixed Valvular/i })
+  await expect(row).toBeVisible({ timeout: 30000 })
+  await expect(row.getByText('1,500')).toBeVisible()
+
+  // Open the detail page and verify the rich sections rendered
+  await row.getByRole('link').last().click()
+  await expect(page.getByRole('heading', { level: 1, name: /Multiple and Mixed Valvular/i })).toBeVisible({ timeout: 20000 })
+  await expect(page.getByText('NCT06235385').first()).toBeVisible()
+  await expect(page.getByText(/Investigating centres/i)).toBeVisible()
+  await expect(page.getByText(/Assistance Publique Hôpitaux de Paris/i)).toBeVisible()
+  await expect(page.getByText(/PEZEL/i).first()).toBeVisible()
 })

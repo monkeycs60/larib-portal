@@ -26,7 +26,7 @@ import { ARTICLE_TYPE_VALUES } from '@/lib/publications/article-type'
 import { createJournal, updateJournal, deleteJournal, isPrismaKnownError as isJournalError } from '@/lib/services/publications/journals'
 import { searchCrossref } from '@/lib/services/publications/journals-catalog'
 import { refreshJournalSjr } from '@/lib/services/publications/sjr'
-import { createStudy, updateStudy, deleteStudy, importClinicalTrialStudy, STUDY_STATUSES, PUBLICATIONS_STUDIES_TAG } from '@/lib/services/publications/studies'
+import { createStudy, updateStudy, deleteStudy, importClinicalTrialStudy, setStudyStatus, linkCentreToStudy, unlinkCentreFromStudy, setStudyInvestigator, removeStudyInvestigator, linkArticleToStudy, unlinkArticleFromStudy, STUDY_STATUSES, PUBLICATIONS_STUDIES_TAG } from '@/lib/services/publications/studies'
 import { fetchClinicalTrial, normaliseNctId } from '@/lib/services/publications/clinicaltrials'
 
 export const searchBacklogAction = appAdminAction('PUBLICATIONS')
@@ -334,6 +334,7 @@ const StudyInputSchema = z.object({
   description: z.string().optional().nullable(),
   domain: z.string().optional().nullable(),
   funding: z.string().optional().nullable(),
+  enrollment: z.number().int().nonnegative().optional().nullable(),
   status: z.enum(STUDY_STATUSES),
   startDate: z.string().optional().nullable(),
   endDate: z.string().optional().nullable(),
@@ -365,6 +366,62 @@ export const deleteStudyAction = appAdminAction('PUBLICATIONS')
     const deleted = await deleteStudy(parsedInput.id)
     revalidateTag(PUBLICATIONS_STUDIES_TAG)
     return deleted
+  })
+
+export const setStudyStatusAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({ id: z.string().min(1), status: z.enum(STUDY_STATUSES) }))
+  .action(async ({ parsedInput }) => {
+    const updated = await setStudyStatus(parsedInput.id, parsedInput.status)
+    revalidateTag(PUBLICATIONS_STUDIES_TAG)
+    return updated
+  })
+
+export const linkStudyCentreAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({ studyId: z.string().min(1), centreId: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    const result = await linkCentreToStudy(parsedInput.studyId, parsedInput.centreId)
+    revalidateTag(PUBLICATIONS_STUDIES_TAG)
+    return result
+  })
+
+export const unlinkStudyCentreAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({ studyId: z.string().min(1), centreId: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    const result = await unlinkCentreFromStudy(parsedInput.studyId, parsedInput.centreId)
+    revalidateTag(PUBLICATIONS_STUDIES_TAG)
+    return result
+  })
+
+export const setStudyInvestigatorAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({ studyId: z.string().min(1), authorId: z.string().min(1), role: z.enum(['PI', 'CO_INVESTIGATOR']), centreId: z.string().optional().nullable() }))
+  .action(async ({ parsedInput }) => {
+    const result = await setStudyInvestigator(parsedInput.studyId, parsedInput.authorId, parsedInput.role, parsedInput.centreId ?? null)
+    revalidateTag(PUBLICATIONS_STUDIES_TAG)
+    return result
+  })
+
+export const removeStudyInvestigatorAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({ studyId: z.string().min(1), authorId: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    const result = await removeStudyInvestigator(parsedInput.studyId, parsedInput.authorId)
+    revalidateTag(PUBLICATIONS_STUDIES_TAG)
+    return result
+  })
+
+export const linkStudyArticleAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({ studyId: z.string().min(1), articleId: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    const result = await linkArticleToStudy(parsedInput.studyId, parsedInput.articleId)
+    revalidateTag(PUBLICATIONS_STUDIES_TAG)
+    return result
+  })
+
+export const unlinkStudyArticleAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({ studyId: z.string().min(1), articleId: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    const result = await unlinkArticleFromStudy(parsedInput.studyId, parsedInput.articleId)
+    revalidateTag(PUBLICATIONS_STUDIES_TAG)
+    return result
   })
 
 export const previewClinicalTrialAction = appAdminAction('PUBLICATIONS')

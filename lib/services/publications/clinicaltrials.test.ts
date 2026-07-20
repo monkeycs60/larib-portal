@@ -27,6 +27,7 @@ describe('parseClinicalTrial', () => {
     expect(result.description).toContain('multiple and mixed valvular')
     expect(result.domain).toContain('Heart Valve Diseases')
     expect(result.funding).toBe('Assistance Publique - Hôpitaux de Paris, European Association of Cardiovascular Imaging')
+    expect(result.enrollment).toBe(1500)
   })
 
   it('extracts centres from locations', () => {
@@ -42,6 +43,7 @@ describe('parseClinicalTrial', () => {
     expect(pezel?.degrees).toBe('MD PhD')
     expect(pezel?.email).toBe('theo.pezel@aphp.fr')
     expect(pezel?.role).toBe('CO_INVESTIGATOR')
+    expect(pezel?.centreName).toBe('Assistance Publique Hôpitaux de Paris')
   })
 
   it('handles a not-yet-recruiting study with no sites', () => {
