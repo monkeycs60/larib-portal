@@ -473,13 +473,15 @@ model Affiliation {
 }
 
 model Centre {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  city      String?
-  country   String?
-  isOwn     Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 String   @id @default(cuid())
+  name               String   @unique
+  shortCode          String?
+  parentOrganisation String?
+  city               String?
+  country            String?
+  isOwn              Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   affiliations Affiliation[]
   authors      Author[]       @relation("AuthorCentre")

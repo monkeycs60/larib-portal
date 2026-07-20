@@ -158,7 +158,7 @@ export const deleteCentreAction = appAdminAction('PUBLICATIONS')
   })
 
 export const createCentreAction = appAdminAction('PUBLICATIONS')
-  .inputSchema(z.object({ name: z.string().min(1), city: z.string().optional().nullable(), country: z.string().optional().nullable() }))
+  .inputSchema(z.object({ name: z.string().min(1), shortCode: z.string().optional().nullable(), parentOrganisation: z.string().optional().nullable(), city: z.string().optional().nullable(), country: z.string().optional().nullable() }))
   .action(async ({ parsedInput }) => {
     const result = await createCentre(parsedInput)
     revalidateTag(PUBLICATIONS_CENTRES_TAG)
@@ -166,7 +166,7 @@ export const createCentreAction = appAdminAction('PUBLICATIONS')
   })
 
 export const updateCentreAction = appAdminAction('PUBLICATIONS')
-  .inputSchema(z.object({ id: z.string().min(1), name: z.string().min(1), city: z.string().optional().nullable(), country: z.string().optional().nullable(), isOwn: z.boolean().default(false) }))
+  .inputSchema(z.object({ id: z.string().min(1), name: z.string().min(1), shortCode: z.string().optional().nullable(), parentOrganisation: z.string().optional().nullable(), city: z.string().optional().nullable(), country: z.string().optional().nullable(), isOwn: z.boolean().default(false) }))
   .action(async ({ parsedInput }) => {
     const result = await updateCentre(parsedInput)
     revalidateTag(PUBLICATIONS_CENTRES_TAG)

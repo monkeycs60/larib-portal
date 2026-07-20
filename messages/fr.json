@@ -1257,7 +1257,17 @@
       "created": "Centre ajouté",
       "saved": "Centre mis à jour",
       "colCity": "Ville",
-      "colCountry": "Pays"
+      "colCountry": "Pays",
+      "error": "Une erreur est survenue",
+      "sectionInstitution": "Institution",
+      "sectionLocation": "Localisation et rattachement",
+      "cShortCode": "Code court",
+      "cParent": "Organisation parente",
+      "optional": "optionnel",
+      "addToBank": "Ajouter à la banque",
+      "previewTitle": "Nouveau centre",
+      "previewHint": "Ajoutez un parent, une ville et un pays",
+      "cOwnHint": "Marquez les centres de votre groupe (Lariboisière, INSERM…). Ils reçoivent le badge « Ours »."
     },
     "articles": {
       "title": "Articles",

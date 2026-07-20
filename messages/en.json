@@ -1259,7 +1259,17 @@
       "created": "Centre added",
       "saved": "Centre updated",
       "colCity": "City",
-      "colCountry": "Country"
+      "colCountry": "Country",
+      "error": "Something went wrong",
+      "sectionInstitution": "Institution",
+      "sectionLocation": "Location & ownership",
+      "cShortCode": "Short code",
+      "cParent": "Parent organisation",
+      "optional": "optional",
+      "addToBank": "Add to bank",
+      "previewTitle": "New centre",
+      "previewHint": "Add a parent, city and country",
+      "cOwnHint": "Mark centres that belong to your group (Lariboisière, INSERM…). They get the “Ours” flag."
     },
     "articles": {
       "title": "Articles",

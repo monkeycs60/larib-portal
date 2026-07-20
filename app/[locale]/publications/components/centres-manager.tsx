@@ -213,8 +213,11 @@ export function CentresManager({ centres }: { centres: CentreRow[] }) {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-coral-50 text-[11px] font-bold text-coral-600">{centreInitials(centre.name)}</span>
-                      <span className="font-medium text-text-primary">{centre.name}</span>
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-coral-50 text-[11px] font-bold text-coral-600">{centre.shortCode?.trim() ? centre.shortCode.trim().slice(0, 4).toUpperCase() : centreInitials(centre.name)}</span>
+                      <span className="min-w-0">
+                        <span className="block font-medium text-text-primary">{centre.name}</span>
+                        {centre.parentOrganisation && <span className="block text-xs text-text-muted">{centre.parentOrganisation}</span>}
+                      </span>
                       {centre.isOwn && <span className="flex h-5 w-5 items-center justify-center rounded-md bg-gradient-to-b from-coral-500 to-coral-600 text-white"><Activity className="size-3" /></span>}
                     </div>
                   </TableCell>

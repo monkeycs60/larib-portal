@@ -4,6 +4,8 @@ import { Prisma, type AuthorType } from '@/app/generated/prisma'
 export type CentreRow = {
   id: string
   name: string
+  shortCode: string | null
+  parentOrganisation: string | null
   city: string | null
   country: string | null
   isOwn: boolean
@@ -13,7 +15,7 @@ export type CentreRow = {
 
 export async function listCentres(): Promise<CentreRow[]> {
   const [centres, authorCounts, pubRows] = await Promise.all([
-    prisma.centre.findMany({ orderBy: [{ name: 'asc' }], select: { id: true, name: true, city: true, country: true, isOwn: true } }),
+    prisma.centre.findMany({ orderBy: [{ name: 'asc' }], select: { id: true, name: true, shortCode: true, parentOrganisation: true, city: true, country: true, isOwn: true } }),
     prisma.author.groupBy({ by: ['centreId'], _count: { _all: true }, where: { centreId: { not: null } } }),
     prisma.$queryRaw<{ centreId: string; cnt: bigint }[]>`
       SELECT a."centreId" AS "centreId", COUNT(DISTINCT ash."articleId") AS cnt
@@ -58,9 +60,15 @@ export async function getCentreAuthors(centreId: string): Promise<CentreAuthor[]
   }))
 }
 
-export async function createCentre(data: { name: string; city?: string | null; country?: string | null }) {
+export async function createCentre(data: { name: string; shortCode?: string | null; parentOrganisation?: string | null; city?: string | null; country?: string | null }) {
   return prisma.centre.create({
-    data: { name: data.name, city: data.city ?? null, country: data.country ?? null },
+    data: {
+      name: data.name,
+      shortCode: data.shortCode ?? null,
+      parentOrganisation: data.parentOrganisation ?? null,
+      city: data.city ?? null,
+      country: data.country ?? null,
+    },
     select: { id: true },
   })
 }
@@ -69,10 +77,17 @@ export async function renameCentre(id: string, name: string) {
   return prisma.centre.update({ where: { id }, data: { name }, select: { id: true } })
 }
 
-export async function updateCentre(data: { id: string; name: string; city?: string | null; country?: string | null; isOwn?: boolean }) {
+export async function updateCentre(data: { id: string; name: string; shortCode?: string | null; parentOrganisation?: string | null; city?: string | null; country?: string | null; isOwn?: boolean }) {
   return prisma.centre.update({
     where: { id: data.id },
-    data: { name: data.name, city: data.city ?? null, country: data.country ?? null, isOwn: data.isOwn ?? false },
+    data: {
+      name: data.name,
+      shortCode: data.shortCode ?? null,
+      parentOrganisation: data.parentOrganisation ?? null,
+      city: data.city ?? null,
+      country: data.country ?? null,
+      isOwn: data.isOwn ?? false,
+    },
     select: { id: true },
   })
 }
