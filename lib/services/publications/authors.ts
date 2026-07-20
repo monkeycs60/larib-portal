@@ -263,10 +263,18 @@ export async function getAuthorForEdit(id: string): Promise<AuthorEditData | nul
       type: true,
       centres: { orderBy: { order: 'asc' }, select: { centre: { select: { id: true, name: true, isOwn: true } } } },
       paperAffiliations: { orderBy: { order: 'asc' }, select: { raw: true } },
+      authorships: {
+        select: {
+          article: { select: { publishedAt: true } },
+          affiliations: { orderBy: { order: 'asc' }, select: { affiliation: { select: { raw: true, name: true } } } },
+        },
+      },
       _count: { select: { authorships: true } },
     },
   })
   if (!author) return null
+  const stored = author.paperAffiliations.map((affiliation) => affiliation.raw)
+  const affiliations = stored.length > 0 ? stored : deriveAffiliations(author.authorships, () => false).map((affiliation) => affiliation.raw)
   return {
     id: author.id,
     firstName: author.firstName,
@@ -277,7 +285,7 @@ export async function getAuthorForEdit(id: string): Promise<AuthorEditData | nul
     userId: author.userId,
     type: author.type,
     centres: author.centres.map((link) => link.centre),
-    affiliations: author.paperAffiliations.map((affiliation) => affiliation.raw),
+    affiliations,
     publicationsCount: author._count.authorships,
   }
 }
