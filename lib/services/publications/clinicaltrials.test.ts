@@ -4,6 +4,7 @@ import { describe, it, expect } from 'vitest'
 import { parseClinicalTrial, normaliseNctId } from './clinicaltrials'
 
 const json = JSON.parse(readFileSync(resolve(process.cwd(), 'tests/e2e/fixtures/ctgov/NCT06235385.json'), 'utf8'))
+const noSitesJson = JSON.parse(readFileSync(resolve(process.cwd(), 'tests/e2e/fixtures/ctgov/NCT07157670.json'), 'utf8'))
 
 describe('normaliseNctId', () => {
   it('accepts and upper-cases valid ids, rejects junk', () => {
@@ -41,5 +42,14 @@ describe('parseClinicalTrial', () => {
     expect(pezel?.degrees).toBe('MD PhD')
     expect(pezel?.email).toBe('theo.pezel@aphp.fr')
     expect(pezel?.role).toBe('CO_INVESTIGATOR')
+  })
+
+  it('handles a not-yet-recruiting study with no sites', () => {
+    const result = parseClinicalTrial(noSitesJson)
+    expect(result.nctId).toBe('NCT07157670')
+    expect(result.title.length).toBeGreaterThan(0)
+    expect(result.status).toBe('PLANNED')
+    expect(result.centres).toEqual([])
+    expect(result.investigators).toEqual([])
   })
 })

@@ -156,12 +156,29 @@ async function loadClinicalTrialJson(nctId: string): Promise<unknown> {
     const raw = await readFile(join(CTGOV_FIXTURE_DIR, `${nctId}.json`), 'utf8')
     return JSON.parse(raw)
   }
-  const response = await fetch(`https://clinicaltrials.gov/api/v2/studies/${nctId}?format=json`, {
-    headers: { Accept: 'application/json' },
-  })
-  if (response.status === 404) throw new Error('NOT_FOUND')
-  if (!response.ok) throw new Error('FETCH_FAILED')
-  return response.json()
+  const url = `https://clinicaltrials.gov/api/v2/studies/${nctId}?format=json`
+  const requestInit: RequestInit & { cache: 'no-store' } = {
+    headers: { Accept: 'application/json', 'User-Agent': 'larib-portal/1.0 (publications import)' },
+    cache: 'no-store',
+    signal: AbortSignal.timeout(15000),
+  }
+
+  let lastError: unknown = null
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const response = await fetch(url, requestInit)
+      if (response.status === 404) throw new Error('NOT_FOUND')
+      if (response.status === 429 || response.status >= 500) throw new Error(`RETRYABLE_${response.status}`)
+      if (!response.ok) throw new Error('FETCH_FAILED')
+      return await response.json()
+    } catch (error) {
+      if (error instanceof Error && error.message === 'NOT_FOUND') throw error
+      lastError = error
+      if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 400 * (attempt + 1)))
+    }
+  }
+  console.error(`[clinicaltrials] fetch failed for ${nctId}:`, lastError instanceof Error ? lastError.message : lastError)
+  throw new Error('FETCH_FAILED')
 }
 
 export async function fetchClinicalTrial(nctId: string): Promise<ClinicalTrialImport> {
