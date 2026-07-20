@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 import { mergeCentresAction, deleteCentreAction, getCentreAuthorsAction } from '../actions'
-import type { CentreRow, CentreType, CentreAuthor } from '@/lib/services/publications/centres'
+import type { CentreRow, CentreAuthor } from '@/lib/services/publications/centres'
 import { CentreAuthorsPanel } from './centre-authors-panel'
 import { EditCentreDialog } from './edit-centre-dialog'
 
@@ -28,25 +28,21 @@ const TYPE_TABS = [
   { value: 'EXTERNAL' as const, key: 'tabExternal' },
 ]
 type OwnFilter = 'ALL' | 'OURS' | 'EXTERNAL'
-type SortKey = 'name' | 'type' | 'location' | 'authors' | 'publications'
+type SortKey = 'name' | 'city' | 'country' | 'authors' | 'publications'
 
 function centreInitials(name: string): string {
   const cleaned = name.replace(/^(hôpital|hopital|centre|institut|university|université|department|dept|the)\s+/i, '')
   return cleaned.replace(/[^a-zA-Z]/g, '').slice(0, 3).toUpperCase() || name.slice(0, 2).toUpperCase()
 }
 
-function typeLabelKey(type: CentreType): string {
-  return type === 'HOSPITAL' ? 'typeHospital' : type === 'RESEARCH_UNIT' ? 'typeResearch' : 'typeOther'
-}
-
 function sortValue(centre: CentreRow, key: SortKey): string | number {
   switch (key) {
     case 'name':
       return centre.name.toLowerCase()
-    case 'type':
-      return centre.type
-    case 'location':
-      return `${centre.country ?? ''} ${centre.city ?? ''}`.toLowerCase()
+    case 'city':
+      return centre.city?.toLowerCase() ?? ''
+    case 'country':
+      return centre.country?.toLowerCase() ?? ''
     case 'authors':
       return centre.authorsCount
     case 'publications':
@@ -60,7 +56,6 @@ export function CentresManager({ centres }: { centres: CentreRow[] }) {
   const router = useRouter()
   const [query, setQuery] = useState('')
   const [ownFilter, setOwnFilter] = useState<OwnFilter>('ALL')
-  const [typeFilter, setTypeFilter] = useState<'ALL' | CentreType>('ALL')
   const [sortKey, setSortKey] = useState<SortKey>('authors')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -82,11 +77,10 @@ export function CentresManager({ centres }: { centres: CentreRow[] }) {
     return centres.filter((centre) => {
       if (ownFilter === 'OURS' && !centre.isOwn) return false
       if (ownFilter === 'EXTERNAL' && centre.isOwn) return false
-      if (typeFilter !== 'ALL' && centre.type !== typeFilter) return false
       if (needle && !centre.name.toLowerCase().includes(needle) && !(centre.city ?? '').toLowerCase().includes(needle)) return false
       return true
     })
-  }, [centres, query, ownFilter, typeFilter])
+  }, [centres, query, ownFilter])
 
   const sorted = useMemo(() => {
     const direction = sortDir === 'asc' ? 1 : -1
@@ -190,15 +184,6 @@ export function CentresManager({ centres }: { centres: CentreRow[] }) {
             </button>
           ))}
         </div>
-        <div className="ml-auto flex items-center gap-1 rounded-2xl border border-line bg-bg-surface px-3 py-1.5 shadow-sm">
-          <span className="text-sm font-bold text-text-primary">{t('filterType')}</span>
-          <Select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value as 'ALL' | CentreType)} className="w-auto border-0 shadow-none">
-            <option value="ALL">{t('filterAll')}</option>
-            <option value="HOSPITAL">{t('typeHospital')}</option>
-            <option value="RESEARCH_UNIT">{t('typeResearch')}</option>
-            <option value="OTHER">{t('typeOther')}</option>
-          </Select>
-        </div>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto rounded-2xl border border-line bg-bg-surface shadow-sm">
@@ -207,8 +192,8 @@ export function CentresManager({ centres }: { centres: CentreRow[] }) {
             <TableRow>
               <TableHead className="w-10" />
               <SortHead sortKey="name" label={t('colCentre')} />
-              <SortHead sortKey="type" label={t('colType')} />
-              <SortHead sortKey="location" label={t('colLocation')} />
+              <SortHead sortKey="city" label={t('colCity')} />
+              <SortHead sortKey="country" label={t('colCountry')} />
               <SortHead sortKey="authors" label={t('colAuthors')} />
               <SortHead sortKey="publications" label={t('colPublications')} />
               <TableHead className="text-right">{t('colActions')}</TableHead>
@@ -233,20 +218,12 @@ export function CentresManager({ centres }: { centres: CentreRow[] }) {
                       {centre.isOwn && <span className="flex h-5 w-5 items-center justify-center rounded-md bg-gradient-to-b from-coral-500 to-coral-600 text-white"><Activity className="size-3" /></span>}
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <span className={centre.type === 'RESEARCH_UNIT'
-                      ? 'inline-block whitespace-nowrap rounded-full border border-[#DDD0FF] bg-[#EDE4FF] px-2.5 py-0.5 text-xs font-semibold text-[#7048E8]'
-                      : centre.type === 'HOSPITAL'
-                      ? 'inline-block whitespace-nowrap rounded-full border border-coral-200 bg-coral-50 px-2.5 py-0.5 text-xs font-semibold text-coral-600'
-                      : 'inline-block whitespace-nowrap rounded-full border border-line bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-600'}>
-                      {t(typeLabelKey(centre.type))}
-                    </span>
-                  </TableCell>
                   <TableCell className="text-text-primary">
-                    {centre.city || centre.country ? (
-                      <span className="inline-flex items-center gap-1.5"><MapPin className="size-4 text-text-muted" />{[centre.city, centre.country].filter(Boolean).join(', ')}</span>
+                    {centre.city ? (
+                      <span className="inline-flex items-center gap-1.5"><MapPin className="size-4 text-text-muted" />{centre.city}</span>
                     ) : '—'}
                   </TableCell>
+                  <TableCell className="text-text-primary">{centre.country ?? '—'}</TableCell>
                   <TableCell>
                     <span className="inline-flex items-center gap-1.5 text-text-primary"><Users className="size-4 text-text-muted" />{centre.authorsCount}</span>
                   </TableCell>

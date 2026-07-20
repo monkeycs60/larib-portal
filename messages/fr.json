@@ -1253,7 +1253,9 @@
       "hubDescription": "Institutions, auteurs liés et production de publications.",
       "viewCentres": "Voir les centres",
       "created": "Centre ajouté",
-      "saved": "Centre mis à jour"
+      "saved": "Centre mis à jour",
+      "colCity": "Ville",
+      "colCountry": "Pays"
     },
     "articles": {
       "title": "Articles",

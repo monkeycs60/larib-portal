@@ -1255,7 +1255,9 @@
       "hubDescription": "Institutions, linked authors and publication output.",
       "viewCentres": "View centres",
       "created": "Centre added",
-      "saved": "Centre updated"
+      "saved": "Centre updated",
+      "colCity": "City",
+      "colCountry": "Country"
     },
     "articles": {
       "title": "Articles",

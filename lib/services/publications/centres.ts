@@ -1,22 +1,12 @@
 import { prisma } from '@/lib/prisma'
 import { Prisma, type AuthorType } from '@/app/generated/prisma'
 
-export type CentreType = 'HOSPITAL' | 'RESEARCH_UNIT' | 'OTHER'
-
-export function deriveCentreType(name: string): CentreType {
-  const lowered = name.toLowerCase()
-  if (/\b(inserm|cnrs|umrs?|umr|u\d{3,}|laboratory|laboratoire|research unit|unit[eé] de recherche)\b/.test(lowered)) return 'RESEARCH_UNIT'
-  if (/(h[oô]pital|hospital|\bchu\b|\bchr\b|clinic|clinique|ap-?hp|centre hospitalier|medical cent)/.test(lowered)) return 'HOSPITAL'
-  return 'OTHER'
-}
-
 export type CentreRow = {
   id: string
   name: string
   city: string | null
   country: string | null
   isOwn: boolean
-  type: CentreType
   authorsCount: number
   publicationsCount: number
 }
@@ -37,7 +27,6 @@ export async function listCentres(): Promise<CentreRow[]> {
   const pubMap = new Map(pubRows.map((row) => [row.centreId, Number(row.cnt)]))
   return centres.map((centre) => ({
     ...centre,
-    type: deriveCentreType(centre.name),
     authorsCount: authorMap.get(centre.id) ?? 0,
     publicationsCount: pubMap.get(centre.id) ?? 0,
   }))
