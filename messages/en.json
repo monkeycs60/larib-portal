@@ -1099,6 +1099,8 @@
         "centreHint": "pick from your centre bank · first one is primary",
         "primary": "primary",
         "addCentre": "Add centre",
+        "searchCentre": "Search centre by name...",
+        "noCentreFound": "No centre found.",
         "linkedUser": "Linked portal user",
         "linkedUserHint": "optional",
         "affiliations": "Affiliations",

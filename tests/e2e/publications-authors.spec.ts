@@ -20,7 +20,18 @@ test('admin browses, edits and merges authors', async ({ page }) => {
 
   // Edit the first-author row
   await page.getByRole('row', { name: /Publications USER/i }).getByRole('button', { name: /^edit$/i }).click()
-  await expect(page.getByRole('dialog')).toBeVisible()
+  const dialog = page.getByRole('dialog')
+  await expect(dialog).toBeVisible()
+
+  // The centre picker is searchable by name
+  await dialog.getByRole('combobox').filter({ hasText: /add centre/i }).click()
+  const centreSearch = page.getByPlaceholder(/search centre/i)
+  await expect(centreSearch).toBeVisible()
+  await centreSearch.fill('lariboisi')
+  await expect(page.getByRole('option', { name: /Lariboisière/i })).toBeVisible()
+  await page.getByRole('option', { name: /Lariboisière/i }).click()
+  await expect(dialog.getByText(/Lariboisière/i)).toBeVisible()
+
   await page.getByRole('button', { name: /save changes/i }).click()
   await expect(page.getByText(/author updated/i)).toBeVisible()
 

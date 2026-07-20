@@ -11,6 +11,7 @@ import {
 	Command,
 	CommandEmpty,
 	CommandGroup,
+	CommandInput,
 	CommandItem,
 	CommandList,
 	CommandSeparator,
@@ -29,6 +30,9 @@ interface SingleSelectProps {
 	placeholder?: string;
 	className?: string;
 	disabled?: boolean;
+	searchable?: boolean;
+	searchPlaceholder?: string;
+	emptyLabel?: string;
 }
 
 export function SingleSelect({
@@ -38,6 +42,9 @@ export function SingleSelect({
 	placeholder = 'Select option',
 	className,
 	disabled = false,
+	searchable = false,
+	searchPlaceholder = 'Search...',
+	emptyLabel = 'No option found.',
 }: SingleSelectProps) {
 	const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
 
@@ -76,14 +83,16 @@ export function SingleSelect({
 			</PopoverTrigger>
 			<PopoverContent className='w-[var(--radix-popover-trigger-width)] p-0' align='start'>
 				<Command>
+					{searchable && <CommandInput placeholder={searchPlaceholder} />}
 					<CommandList className='max-h-[300px]'>
-						<CommandEmpty>No option found.</CommandEmpty>
+						<CommandEmpty>{emptyLabel}</CommandEmpty>
 						<CommandGroup>
 							{options.map((option) => {
 								const isSelected = option.value === value;
 								return (
 									<CommandItem
 										key={option.value}
+										value={option.label}
 										onSelect={() => handleSelect(option.value)}
 										disabled={option.disabled}
 										className={cn(

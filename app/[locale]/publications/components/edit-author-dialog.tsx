@@ -140,7 +140,10 @@ function EditAuthorForm({ data, centres, users, onClose, onSaved }: { data: Auth
                 value=""
                 onChange={(value) => value && setCentreIds([...centreIds, value])}
                 placeholder={t('add.addCentre')}
-                className="w-auto border-dashed"
+                searchable
+                searchPlaceholder={t('add.searchCentre')}
+                emptyLabel={t('add.noCentreFound')}
+                className="w-auto min-w-[16rem] border-dashed"
               />
             )}
           </div>

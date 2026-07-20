@@ -1097,6 +1097,8 @@
         "centreHint": "choisissez dans votre banque de centres · le premier est le centre principal",
         "primary": "principal",
         "addCentre": "Ajouter un centre",
+        "searchCentre": "Rechercher un centre par nom...",
+        "noCentreFound": "Aucun centre trouvé.",
         "linkedUser": "Utilisateur du portail lié",
         "linkedUserHint": "facultatif",
         "affiliations": "Affiliations",

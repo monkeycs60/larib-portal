@@ -180,7 +180,10 @@ export function ManualEntryForm({ centres, users }: Props) {
                 value=""
                 onChange={(value) => value && setCentreIds([...centreIds, value])}
                 placeholder={t('addCentre')}
-                className="border-dashed"
+                searchable
+                searchPlaceholder={t('searchCentre')}
+                emptyLabel={t('noCentreFound')}
+                className="min-w-[16rem] border-dashed"
               />
             </div>
           )}
