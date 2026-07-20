@@ -7,6 +7,8 @@ import {
   resolvePeriod,
   isAuthorizedCron,
   groupEmailsByLanguage,
+  mergeRecapRecipients,
+  ALWAYS_NOTIFIED_RECIPIENTS,
 } from './recap'
 
 describe('getWeekRange', () => {
@@ -88,6 +90,33 @@ describe('isAuthorizedCron', () => {
     expect(isAuthorizedCron('Bearer wrong', 'secret123')).toBe(false)
     expect(isAuthorizedCron(null, 'secret123')).toBe(false)
     expect(isAuthorizedCron('Bearer secret123', undefined)).toBe(false)
+  })
+})
+
+describe('mergeRecapRecipients', () => {
+  it('always adds the hardcoded addresses and de-duplicates case-insensitively', () => {
+    const merged = mergeRecapRecipients(
+      [
+        { email: 'Admin@Larib.fr', language: 'FR' },
+        { email: 'THEO.pezelccf@gmail.com', language: 'EN' },
+      ],
+      ALWAYS_NOTIFIED_RECIPIENTS,
+    )
+    const emails = merged.map((recipient) => recipient.email)
+
+    expect(emails).toContain('Admin@Larib.fr')
+    expect(emails).toContain('solenn.toupin@gmail.com')
+    expect(emails.filter((email) => email.toLowerCase() === 'theo.pezelccf@gmail.com')).toHaveLength(1)
+    expect(merged).toHaveLength(3)
+    expect(merged.find((recipient) => recipient.email === 'THEO.pezelccf@gmail.com')?.language).toBe('EN')
+  })
+
+  it('returns the hardcoded addresses even when the database has no CONGES admin', () => {
+    const merged = mergeRecapRecipients([], ALWAYS_NOTIFIED_RECIPIENTS)
+    expect(merged.map((recipient) => recipient.email)).toEqual([
+      'theo.pezelccf@gmail.com',
+      'solenn.toupin@gmail.com',
+    ])
   })
 })
 

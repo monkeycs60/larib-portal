@@ -479,24 +479,45 @@ export function renderLeaveRecapEmail({
   </table>`
 
   const listTitle = locale === 'fr' ? 'Détail des congés' : 'Leave details'
-  const sortedRows = [...rows].sort((first, second) => {
-    const byStart = first.startDate.getTime() - second.startDate.getTime()
-    return byStart !== 0 ? byStart : first.name.localeCompare(second.name)
-  })
 
-  const formatLeaveSpan = (row: RecapRow) => {
-    const dayCount = `${row.daysInRange} ${daysWord(row.daysInRange)}`
+  const whenPhrase = (row: RecapRow) => {
     const sameDay = format(row.startDate, 'yyyy-MM-dd') === format(row.endDate, 'yyyy-MM-dd')
     if (locale === 'fr') {
-      const when = sameDay
+      return sameDay
         ? `le ${format(row.endDate, 'd MMMM', { locale: dateLocale })}`
         : `du ${format(row.startDate, 'd', { locale: dateLocale })} au ${format(row.endDate, 'd MMMM', { locale: dateLocale })}`
-      return `${dayCount} ${when}`
     }
-    const when = sameDay
+    return sameDay
       ? `on ${format(row.endDate, 'MMMM d', { locale: dateLocale })}`
       : `from ${format(row.startDate, 'MMM d', { locale: dateLocale })} to ${format(row.endDate, 'MMM d', { locale: dateLocale })}`
-    return `${dayCount} ${when}`
+  }
+
+  type PersonSummary = { name: string; position: string | null; totalDays: number; remainingDays: number; firstStart: number; leaves: RecapRow[] }
+  const byPerson = new Map<string, PersonSummary>()
+  for (const row of rows) {
+    const existing = byPerson.get(row.userId)
+    if (existing) {
+      existing.totalDays += row.daysInRange
+      existing.firstStart = Math.min(existing.firstStart, row.startDate.getTime())
+      existing.leaves.push(row)
+    } else {
+      byPerson.set(row.userId, {
+        name: row.name,
+        position: row.position,
+        totalDays: row.daysInRange,
+        remainingDays: row.remainingDays,
+        firstStart: row.startDate.getTime(),
+        leaves: [row],
+      })
+    }
+  }
+  const people = [...byPerson.values()].sort(
+    (first, second) => first.firstStart - second.firstStart || first.name.localeCompare(second.name),
+  )
+
+  const personSpan = (person: PersonSummary) => {
+    const dayCount = `${person.totalDays} ${daysWord(person.totalDays)}`
+    return person.leaves.length === 1 ? `${dayCount} ${whenPhrase(person.leaves[0])}` : dayCount
   }
 
   const remainingLabel = (count: number) =>
@@ -507,12 +528,12 @@ export function renderLeaveRecapEmail({
   const balancesList = rows.length
     ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:26px;">
         <tr><td colspan="2" style="padding-bottom:8px;font-family:${FONT_SANS};font-size:12px;font-weight:600;color:${COLORS.mutedForeground};text-transform:uppercase;letter-spacing:0.5px;">${listTitle}</td></tr>
-        ${sortedRows
-          .map((row) => `<tr>
-          <td style="padding:10px 0;border-top:1px solid ${COLORS.secondary};font-family:${FONT_SANS};font-size:14px;color:${COLORS.foreground};vertical-align:top;">${row.name}${row.position ? ` <span style="color:${COLORS.mutedForeground};font-size:12px;">· ${row.position}</span>` : ''}</td>
+        ${people
+          .map((person) => `<tr>
+          <td style="padding:10px 0;border-top:1px solid ${COLORS.secondary};font-family:${FONT_SANS};font-size:14px;color:${COLORS.foreground};vertical-align:top;">${person.name}${person.position ? ` <span style="color:${COLORS.mutedForeground};font-size:12px;">· ${person.position}</span>` : ''}</td>
           <td style="padding:10px 0;border-top:1px solid ${COLORS.secondary};text-align:right;vertical-align:top;white-space:nowrap;">
-            <div style="font-family:${FONT_SANS};font-size:14px;color:${COLORS.foreground};">${formatLeaveSpan(row)}</div>
-            <div style="font-family:${FONT_SANS};font-size:11px;color:#9aa5b4;margin-top:2px;">${remainingLabel(row.remainingDays)}</div>
+            <div style="font-family:${FONT_SANS};font-size:14px;color:${COLORS.foreground};">${personSpan(person)}</div>
+            <div style="font-family:${FONT_SANS};font-size:11px;color:#9aa5b4;margin-top:2px;">${remainingLabel(person.remainingDays)}</div>
           </td>
         </tr>`)
           .join('')}

@@ -157,10 +157,28 @@ export async function getLeaveRecap(range: DateRange): Promise<RecapRow[]> {
   return buildRecapRows(inputs, range, frenchHolidays)
 }
 
+export const ALWAYS_NOTIFIED_RECIPIENTS: RecapRecipient[] = [
+  { email: 'theo.pezelccf@gmail.com', language: 'FR' },
+  { email: 'solenn.toupin@gmail.com', language: 'FR' },
+]
+
+export function mergeRecapRecipients(
+  fromDatabase: RecapRecipient[],
+  alwaysNotified: RecapRecipient[],
+): RecapRecipient[] {
+  const byEmail = new Map<string, RecapRecipient>()
+  for (const recipient of [...fromDatabase, ...alwaysNotified]) {
+    const key = recipient.email.trim().toLowerCase()
+    if (!byEmail.has(key)) byEmail.set(key, recipient)
+  }
+  return [...byEmail.values()]
+}
+
 export async function getCongesAdminRecipients(): Promise<RecapRecipient[]> {
   const admins = await prisma.user.findMany({
     where: { adminApplications: { has: 'CONGES' } },
     select: { email: true, language: true },
   })
-  return admins.map((admin) => ({ email: admin.email, language: admin.language }))
+  const fromDatabase = admins.map((admin) => ({ email: admin.email, language: admin.language }))
+  return mergeRecapRecipients(fromDatabase, ALWAYS_NOTIFIED_RECIPIENTS)
 }
