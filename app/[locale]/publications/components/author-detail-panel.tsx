@@ -18,7 +18,10 @@ export function AuthorDetailPanel({ detail }: { detail: AuthorDetail }) {
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <div className="space-y-4">
         <div className="rounded-xl border border-line bg-bg-surface p-4">
-          <h4 className="mb-3 text-xs font-bold uppercase tracking-[0.12em] text-coral-600">{t('affiliations')}</h4>
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <h4 className="text-xs font-bold uppercase tracking-[0.12em] text-coral-600">{t('affiliations')}</h4>
+            {detail.affiliationsDerived && <span className="text-[11px] italic text-text-muted">{t('derivedFromRecent')}</span>}
+          </div>
           {detail.affiliations.length === 0 ? (
             <p className="text-sm text-text-muted">{t('noAffiliations')}</p>
           ) : (

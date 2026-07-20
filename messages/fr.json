@@ -1175,7 +1175,8 @@
         "expand": "Afficher les détails",
         "appBestof": "Best-of formation",
         "appConges": "Gestion des congés",
-        "appPublications": "Publications"
+        "appPublications": "Publications",
+        "derivedFromRecent": "d’après la publication la plus récente"
       }
     },
     "centres": {

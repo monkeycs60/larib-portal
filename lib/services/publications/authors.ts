@@ -49,6 +49,7 @@ export async function countAuthors(): Promise<number> {
 
 export type AuthorDetail = {
   affiliations: { raw: string; isOurs: boolean }[]
+  affiliationsDerived: boolean
   publications: { id: string; title: string; journal: string | null; year: number | null; isFirstAuthor: boolean }[]
   portalUser: { name: string; email: string; position: string | null; active: boolean; applications: string[] } | null
 }
@@ -61,13 +62,17 @@ export async function getAuthorDetail(id: string): Promise<AuthorDetail> {
         paperAffiliations: { orderBy: { order: 'asc' }, select: { raw: true } },
         user: { select: { firstName: true, lastName: true, email: true, position: true, emailVerified: true, applications: true } },
         authorships: {
-          select: { order: true, article: { select: { id: true, title: true, publishedAt: true, publishedJournal: { select: { name: true } } } } },
+          select: {
+            order: true,
+            article: { select: { id: true, title: true, publishedAt: true, publishedJournal: { select: { name: true } } } },
+            affiliations: { orderBy: { order: 'asc' }, select: { affiliation: { select: { raw: true, name: true } } } },
+          },
         },
       },
     }),
     prisma.centre.findMany({ where: { isOwn: true }, select: { name: true } }),
   ])
-  if (!author) return { affiliations: [], publications: [], portalUser: null }
+  if (!author) return { affiliations: [], affiliationsDerived: false, publications: [], portalUser: null }
 
   const ownNames = ownCentres.map((centre) => centre.name.toLowerCase())
   const isOurs = (raw: string) => {
@@ -85,8 +90,29 @@ export async function getAuthorDetail(id: string): Promise<AuthorDetail> {
     }))
     .sort((first, second) => (second.year ?? 0) - (first.year ?? 0))
 
+  const storedAffiliations = author.paperAffiliations
+    .map((affiliation) => affiliation.raw.trim())
+    .filter(Boolean)
+    .map((raw) => ({ raw, isOurs: isOurs(raw) }))
+
+  let affiliations = storedAffiliations
+  let affiliationsDerived = false
+  if (affiliations.length === 0) {
+    const mostRecent = [...author.authorships]
+      .filter((authorship) => authorship.affiliations.length > 0)
+      .sort((first, second) => (second.article.publishedAt?.getTime() ?? 0) - (first.article.publishedAt?.getTime() ?? 0))[0]
+    if (mostRecent) {
+      affiliations = mostRecent.affiliations
+        .map((link) => (link.affiliation.raw ?? link.affiliation.name).trim())
+        .filter(Boolean)
+        .map((raw) => ({ raw, isOurs: isOurs(raw) }))
+      affiliationsDerived = affiliations.length > 0
+    }
+  }
+
   return {
-    affiliations: author.paperAffiliations.map((affiliation) => ({ raw: affiliation.raw, isOurs: isOurs(affiliation.raw) })),
+    affiliations,
+    affiliationsDerived,
     publications,
     portalUser: author.user
       ? {
