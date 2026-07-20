@@ -16,7 +16,7 @@ import {
   PUBLICATIONS_AUTHORS_TAG,
   PUBLICATIONS_ARTICLES_TAG,
 } from '@/lib/services/publications/import'
-import { updateAuthor, deleteAuthor, mergeAuthors, recomputeAuthorCentres, createAuthor, isPrismaKnownError } from '@/lib/services/publications/authors'
+import { updateAuthor, deleteAuthor, mergeAuthors, recomputeAuthorCentres, createAuthor, getAuthorDetail, isPrismaKnownError } from '@/lib/services/publications/authors'
 import { findAuthorDuplicates, matchAuthorsAgainstBank, normalizeName } from '@/lib/services/publications/author-dedup'
 import { fetchPublicationByIdentifier } from '@/lib/services/publications/publication-lookup'
 import { backfillAffiliations, PUBLICATIONS_CENTRES_TAG, PUBLICATIONS_AFFILIATIONS_TAG } from '@/lib/services/publications/affiliations'
@@ -89,6 +89,10 @@ export const deleteAuthorAction = appAdminAction('PUBLICATIONS')
       throw error
     }
   })
+
+export const getAuthorDetailAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({ id: z.string().min(1) }))
+  .action(async ({ parsedInput }) => getAuthorDetail(parsedInput.id))
 
 export const mergeAuthorsAction = appAdminAction('PUBLICATIONS')
   .inputSchema(z.object({ keepId: z.string().min(1), mergeIds: z.array(z.string().min(1)).min(1) }))

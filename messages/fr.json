@@ -1158,6 +1158,24 @@
         "keep": "Garder",
         "skip": "Ignorer",
         "merge": "Fusionner"
+      },
+      "detail": {
+        "affiliations": "Affiliations",
+        "noAffiliations": "Aucune affiliation enregistrée.",
+        "ours": "Nôtre",
+        "portalAccount": "Compte Larib Portal",
+        "active": "Actif",
+        "invited": "Invitation envoyée",
+        "openUserManagement": "Ouvrir dans la gestion des utilisateurs",
+        "linkedPublications": "Publications liées",
+        "noPublications": "Aucune publication liée.",
+        "firstAuthor": "Premier auteur",
+        "coAuthor": "Co-auteur",
+        "loading": "Chargement…",
+        "expand": "Afficher les détails",
+        "appBestof": "Best-of formation",
+        "appConges": "Gestion des congés",
+        "appPublications": "Publications"
       }
     },
     "centres": {

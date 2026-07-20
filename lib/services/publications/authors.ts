@@ -47,6 +47,59 @@ export async function countAuthors(): Promise<number> {
   return prisma.author.count()
 }
 
+export type AuthorDetail = {
+  affiliations: { raw: string; isOurs: boolean }[]
+  publications: { id: string; title: string; journal: string | null; year: number | null; isFirstAuthor: boolean }[]
+  portalUser: { name: string; email: string; position: string | null; active: boolean; applications: string[] } | null
+}
+
+export async function getAuthorDetail(id: string): Promise<AuthorDetail> {
+  const [author, ownCentres] = await Promise.all([
+    prisma.author.findUnique({
+      where: { id },
+      select: {
+        paperAffiliations: { orderBy: { order: 'asc' }, select: { raw: true } },
+        user: { select: { firstName: true, lastName: true, email: true, position: true, emailVerified: true, applications: true } },
+        authorships: {
+          select: { order: true, article: { select: { id: true, title: true, publishedAt: true, publishedJournal: { select: { name: true } } } } },
+        },
+      },
+    }),
+    prisma.centre.findMany({ where: { isOwn: true }, select: { name: true } }),
+  ])
+  if (!author) return { affiliations: [], publications: [], portalUser: null }
+
+  const ownNames = ownCentres.map((centre) => centre.name.toLowerCase())
+  const isOurs = (raw: string) => {
+    const lowered = raw.toLowerCase()
+    return ownNames.some((name) => lowered.includes(name)) || lowered.includes('lariboisi')
+  }
+
+  const publications = author.authorships
+    .map((authorship) => ({
+      id: authorship.article.id,
+      title: authorship.article.title,
+      journal: authorship.article.publishedJournal?.name ?? null,
+      year: authorship.article.publishedAt ? authorship.article.publishedAt.getFullYear() : null,
+      isFirstAuthor: authorship.order === 0,
+    }))
+    .sort((first, second) => (second.year ?? 0) - (first.year ?? 0))
+
+  return {
+    affiliations: author.paperAffiliations.map((affiliation) => ({ raw: affiliation.raw, isOurs: isOurs(affiliation.raw) })),
+    publications,
+    portalUser: author.user
+      ? {
+          name: `${author.user.firstName ?? ''} ${author.user.lastName ?? ''}`.trim(),
+          email: author.user.email,
+          position: author.user.position,
+          active: author.user.emailVerified,
+          applications: author.user.applications,
+        }
+      : null,
+  }
+}
+
 export type LinkableUser = { id: string; firstName: string | null; lastName: string | null; email: string }
 
 export async function listLinkableUsers(): Promise<LinkableUser[]> {

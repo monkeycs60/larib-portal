@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -8,9 +8,10 @@ import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useAction } from 'next-safe-action/hooks'
 import { toast } from 'sonner'
-import { Pencil, Trash2, GitMerge, FileText, ChevronUp, ChevronDown, ChevronsUpDown, Search, UserPlus, CopyCheck } from 'lucide-react'
+import { Pencil, Trash2, GitMerge, FileText, ChevronUp, ChevronDown, ChevronRight, ChevronsUpDown, Search, UserPlus, CopyCheck } from 'lucide-react'
 import { Link } from '@/app/i18n/navigation'
 import { DuplicateReviewDialog } from './duplicate-review-dialog'
+import { AuthorDetailPanel } from './author-detail-panel'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -29,8 +30,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
-import { updateAuthorAction, deleteAuthorAction, mergeAuthorsAction } from '../actions'
-import type { AuthorListItem, LinkableUser } from '@/lib/services/publications/authors'
+import { updateAuthorAction, deleteAuthorAction, mergeAuthorsAction, getAuthorDetailAction } from '../actions'
+import type { AuthorListItem, LinkableUser, AuthorDetail } from '@/lib/services/publications/authors'
 
 const EditSchema = z.object({
   firstName: z.string().min(1),
@@ -120,6 +121,8 @@ export function AuthorsManager({ authors, users, centres }: { authors: AuthorLis
   const [mergeOpen, setMergeOpen] = useState(false)
   const [keepId, setKeepId] = useState<string>('')
   const [dupOpen, setDupOpen] = useState(false)
+  const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  const [details, setDetails] = useState<Record<string, AuthorDetail>>({})
 
   const duplicateGroups = useMemo(() => {
     const byKey = new Map<string, AuthorListItem[]>()
@@ -211,6 +214,21 @@ export function AuthorsManager({ authors, users, centres }: { authors: AuthorLis
     onError({ error }) { toast.error(error?.serverError === 'AUTHOR_IN_USE' ? t('authors.errorInUse') : t('actionError')) },
   })
   const { executeAsync: execMerge, isExecuting: merging } = useAction(mergeAuthorsAction, { onError() { toast.error(t('actionError')) } })
+  const { executeAsync: execDetail } = useAction(getAuthorDetailAction, { onError() { toast.error(t('actionError')) } })
+
+  async function toggleExpand(id: string) {
+    const isOpen = expanded.has(id)
+    setExpanded((previous) => {
+      const next = new Set(previous)
+      if (isOpen) next.delete(id)
+      else next.add(id)
+      return next
+    })
+    if (!isOpen && !details[id]) {
+      const res = await execDetail({ id })
+      if (res?.data) setDetails((previous) => ({ ...previous, [id]: res.data as AuthorDetail }))
+    }
+  }
 
   const onSubmit = handleSubmit(async (values) => {
     if (!editing) return
@@ -362,14 +380,20 @@ export function AuthorsManager({ authors, users, centres }: { authors: AuthorLis
             {sorted.map((author) => {
               const status = portalStatus(author)
               return (
-                <TableRow key={author.id}>
+                <Fragment key={author.id}>
+                <TableRow>
                   <TableCell>
-                    <Checkbox
-                      checked={selected.has(author.id)}
-                      onCheckedChange={() => toggle(author.id)}
-                      aria-label={authorLabel(author)}
-                      className="data-[state=checked]:border-coral-600 data-[state=checked]:bg-coral-600"
-                    />
+                    <div className="flex items-center gap-1">
+                      <button type="button" onClick={() => toggleExpand(author.id)} aria-label={t('authors.detail.expand')} className="rounded p-0.5 text-text-muted hover:text-coral-600">
+                        {expanded.has(author.id) ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
+                      </button>
+                      <Checkbox
+                        checked={selected.has(author.id)}
+                        onCheckedChange={() => toggle(author.id)}
+                        aria-label={authorLabel(author)}
+                        className="data-[state=checked]:border-coral-600 data-[state=checked]:bg-coral-600"
+                      />
+                    </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-3">
@@ -420,6 +444,18 @@ export function AuthorsManager({ authors, users, centres }: { authors: AuthorLis
                     </div>
                   </TableCell>
                 </TableRow>
+                {expanded.has(author.id) && (
+                  <TableRow>
+                    <TableCell colSpan={7} className="bg-gray-25/60 p-4 dark:bg-white/5">
+                      {details[author.id] ? (
+                        <AuthorDetailPanel detail={details[author.id]} />
+                      ) : (
+                        <div className="py-6 text-center text-sm text-text-muted">{t('authors.detail.loading')}</div>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                )}
+                </Fragment>
               )
             })}
           </TableBody>

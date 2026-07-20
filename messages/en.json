@@ -1160,6 +1160,24 @@
         "keep": "Keep",
         "skip": "Skip",
         "merge": "Merge"
+      },
+      "detail": {
+        "affiliations": "Affiliations",
+        "noAffiliations": "No affiliations on record.",
+        "ours": "Ours",
+        "portalAccount": "Larib Portal account",
+        "active": "Active",
+        "invited": "Invitation sent",
+        "openUserManagement": "Open in user management",
+        "linkedPublications": "Linked publications",
+        "noPublications": "No linked publications.",
+        "firstAuthor": "First author",
+        "coAuthor": "Co-author",
+        "loading": "Loading…",
+        "expand": "Toggle details",
+        "appBestof": "Training Best-of",
+        "appConges": "Leave management",
+        "appPublications": "Publications"
       }
     },
     "centres": {
