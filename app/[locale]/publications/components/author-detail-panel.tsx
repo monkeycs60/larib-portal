@@ -39,9 +39,6 @@ export function AuthorDetailPanel({ detail }: { detail: AuthorDetail }) {
                 <li key={index} className="flex items-center gap-2 text-sm text-text-primary">
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-coral-50 text-xs font-bold text-coral-600">{index + 1}</span>
                   <span className="flex-1">{affiliation.raw}</span>
-                  {affiliation.isOurs && (
-                    <span className="shrink-0 rounded-full border border-coral-200 bg-coral-50 px-2 py-0.5 text-[11px] font-semibold text-coral-600">{t('ours')}</span>
-                  )}
                 </li>
               ))}
             </ol>
