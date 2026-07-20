@@ -373,6 +373,13 @@ const RECAP_STATUS_STYLE: Record<RecapStatus, { bgColor: string; label: Record<'
   PENDING: { bgColor: '#f59e0b', label: { fr: 'En attente', en: 'Pending' } },
 }
 
+function abbreviateFirstName(name: string): string {
+  const parts = name.trim().split(/\s+/)
+  if (parts.length < 2) return name
+  const [firstName, ...rest] = parts
+  return `${firstName.charAt(0).toUpperCase()}. ${rest.join(' ')}`
+}
+
 export function renderLeaveRecapEmail({
   locale,
   period,
@@ -382,10 +389,6 @@ export function renderLeaveRecapEmail({
 }: LeaveRecapEmailParams): { subject: string; text: string; html: string } {
   const dateLocale = locale === 'fr' ? fr : enUS
 
-  const subjects: Record<RecapPeriod, Record<'fr' | 'en', string>> = {
-    weekly: { fr: 'Récap congés — semaine en cours', en: 'Leave recap — current week' },
-    monthly: { fr: 'Récap congés — mois en cours', en: 'Leave recap — current month' },
-  }
   const titles: Record<RecapPeriod, Record<'fr' | 'en', string>> = {
     weekly: { fr: 'Congés de la semaine', en: "This week's leave" },
     monthly: { fr: 'Congés du mois', en: "This month's leave" },
@@ -395,7 +398,17 @@ export function renderLeaveRecapEmail({
     monthly: { fr: 'Personne en congé ce mois-ci.', en: 'No one is on leave this month.' },
   }
 
-  const subject = subjects[period][locale]
+  const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1)
+  const monthLabel = capitalize(format(rangeStart, 'LLLL yyyy', { locale: dateLocale }))
+  const weekDay = format(rangeStart, 'd', { locale: dateLocale })
+  const subjectByPeriod: Record<RecapPeriod, Record<'fr' | 'en', string>> = {
+    monthly: { fr: `Congés - ${monthLabel}`, en: `Leave - ${monthLabel}` },
+    weekly: {
+      fr: `Congés - Semaine du ${weekDay} ${monthLabel}`,
+      en: `Leave - Week of ${weekDay} ${monthLabel}`,
+    },
+  }
+  const subject = subjectByPeriod[period][locale]
   const title = titles[period][locale]
   const rangeLabel = `${format(rangeStart, 'd MMM', { locale: dateLocale })} → ${format(rangeEnd, 'd MMM yyyy', { locale: dateLocale })}`
 
@@ -407,7 +420,8 @@ export function renderLeaveRecapEmail({
         const dates = `${format(row.startDate, 'd MMM', { locale: dateLocale })} → ${format(row.endDate, 'd MMM', { locale: dateLocale })}`
         const statusLabel = RECAP_STATUS_STYLE[row.status].label[locale]
         const positionPart = row.position ? ` (${row.position})` : ''
-        return `- ${row.name}${positionPart} : ${dates}, ${row.daysInRange} ${daysWord(row.daysInRange)} [${statusLabel}]`
+        const remainingPart = locale === 'fr' ? `${row.remainingDays} j restants` : `${row.remainingDays} d left`
+        return `- ${row.name}${positionPart} : ${dates}, ${row.daysInRange} ${daysWord(row.daysInRange)} [${statusLabel}] — ${remainingPart}`
       })
     : [emptyStates[period][locale]]
   const text = `${title}\n${rangeLabel}\n\n${textLines.join('\n')}`
@@ -438,8 +452,12 @@ export function renderLeaveRecapEmail({
           const absentees = isActive
             ? rows.filter((row) => day >= startOfDay(row.startDate) && day <= endOfDay(row.endDate))
             : []
+          const useInitials = absentees.length > 2
           const pills = absentees
-            .map((row) => `<div style="margin:2px 0;background-color:${RECAP_STATUS_STYLE[row.status].bgColor};border-radius:4px;padding:2px 5px;font-family:${FONT_SANS};font-size:10px;line-height:13px;color:#ffffff;">${row.name}</div>`)
+            .map((row) => {
+              const displayName = useInitials ? abbreviateFirstName(row.name) : row.name
+              return `<div style="margin:2px 0;background-color:${RECAP_STATUS_STYLE[row.status].bgColor};border-radius:4px;padding:2px 5px;font-family:${FONT_SANS};font-size:10px;line-height:13px;color:#ffffff;">${displayName}</div>`
+            })
             .join('')
           const dayColor = isActive ? COLORS.foreground : '#c2cad6'
           const cellBg = isActive ? '#ffffff' : COLORS.secondary
@@ -460,6 +478,47 @@ export function renderLeaveRecapEmail({
     </tr>
   </table>`
 
+  const listTitle = locale === 'fr' ? 'Détail des congés' : 'Leave details'
+  const sortedRows = [...rows].sort((first, second) => {
+    const byStart = first.startDate.getTime() - second.startDate.getTime()
+    return byStart !== 0 ? byStart : first.name.localeCompare(second.name)
+  })
+
+  const formatLeaveSpan = (row: RecapRow) => {
+    const dayCount = `${row.daysInRange} ${daysWord(row.daysInRange)}`
+    const sameDay = format(row.startDate, 'yyyy-MM-dd') === format(row.endDate, 'yyyy-MM-dd')
+    if (locale === 'fr') {
+      const when = sameDay
+        ? `le ${format(row.endDate, 'd MMMM', { locale: dateLocale })}`
+        : `du ${format(row.startDate, 'd', { locale: dateLocale })} au ${format(row.endDate, 'd MMMM', { locale: dateLocale })}`
+      return `${dayCount} ${when}`
+    }
+    const when = sameDay
+      ? `on ${format(row.endDate, 'MMMM d', { locale: dateLocale })}`
+      : `from ${format(row.startDate, 'MMM d', { locale: dateLocale })} to ${format(row.endDate, 'MMM d', { locale: dateLocale })}`
+    return `${dayCount} ${when}`
+  }
+
+  const remainingLabel = (count: number) =>
+    locale === 'fr'
+      ? `${count} ${count > 1 ? 'jours restants' : 'jour restant'}`
+      : `${count} ${count > 1 ? 'days left' : 'day left'}`
+
+  const balancesList = rows.length
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:26px;">
+        <tr><td colspan="2" style="padding-bottom:8px;font-family:${FONT_SANS};font-size:12px;font-weight:600;color:${COLORS.mutedForeground};text-transform:uppercase;letter-spacing:0.5px;">${listTitle}</td></tr>
+        ${sortedRows
+          .map((row) => `<tr>
+          <td style="padding:10px 0;border-top:1px solid ${COLORS.secondary};font-family:${FONT_SANS};font-size:14px;color:${COLORS.foreground};vertical-align:top;">${row.name}${row.position ? ` <span style="color:${COLORS.mutedForeground};font-size:12px;">· ${row.position}</span>` : ''}</td>
+          <td style="padding:10px 0;border-top:1px solid ${COLORS.secondary};text-align:right;vertical-align:top;white-space:nowrap;">
+            <div style="font-family:${FONT_SANS};font-size:14px;color:${COLORS.foreground};">${formatLeaveSpan(row)}</div>
+            <div style="font-family:${FONT_SANS};font-size:11px;color:#9aa5b4;margin-top:2px;">${remainingLabel(row.remainingDays)}</div>
+          </td>
+        </tr>`)
+          .join('')}
+      </table>`
+    : ''
+
   const emptyNote = rows.length === 0
     ? `<p style="margin:0 0 16px 0;font-family:${FONT_SANS};font-size:14px;color:${COLORS.mutedForeground};">${emptyStates[period][locale]}</p>`
     : ''
@@ -478,7 +537,8 @@ export function renderLeaveRecapEmail({
       <thead><tr>${headerCells}</tr></thead>
       <tbody>${weekRows}</tbody>
     </table>
-    ${legend}`
+    ${legend}
+    ${balancesList}`
 
   const html = emailLayout(body, preheader)
   return { subject, text, html }

@@ -40,10 +40,12 @@ describe('buildRecapRows', () => {
         {
           userId: 'u2', firstName: 'Bob', lastName: 'B', email: 'bob@x.io', position: 'Nurse',
           startDate: new Date('2026-07-08T00:00:00'), endDate: new Date('2026-07-09T00:00:00'), status: 'PENDING',
+          remainingDays: 12,
         },
         {
           userId: 'u1', firstName: 'Alice', lastName: 'A', email: 'alice@x.io', position: 'Doctor',
           startDate: new Date('2026-07-01T00:00:00'), endDate: new Date('2026-07-31T00:00:00'), status: 'APPROVED',
+          remainingDays: 20,
         },
       ],
       range,
@@ -54,6 +56,7 @@ describe('buildRecapRows', () => {
     expect(rows[0].endDate.getTime()).toBe(range.end.getTime())
     expect(rows[0].daysInRange).toBe(5) // full Mon–Fri
     expect(rows[0].status).toBe('APPROVED')
+    expect(rows[0].remainingDays).toBe(20) // carried through from input
     expect(rows[1].daysInRange).toBe(2) // Wed–Thu
   })
 
@@ -61,7 +64,7 @@ describe('buildRecapRows', () => {
     const rows = buildRecapRows(
       [{
         userId: 'u3', firstName: null, lastName: null, email: 'noname@x.io', position: null,
-        startDate: range.start, endDate: range.start, status: 'APPROVED',
+        startDate: range.start, endDate: range.start, status: 'APPROVED', remainingDays: 0,
       }],
       range,
       {},

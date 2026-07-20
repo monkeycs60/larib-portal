@@ -12,13 +12,15 @@ describe('renderLeaveRecapEmail', () => {
       rows: [{
         userId: 'u1', name: 'Alice A', position: 'Doctor',
         startDate: new Date('2026-07-06T00:00:00'), endDate: new Date('2026-07-08T00:00:00'),
-        status: 'PENDING', daysInRange: 3,
+        status: 'PENDING', daysInRange: 3, remainingDays: 17,
       }],
     })
     expect(subject.toLowerCase()).toContain('semaine')
     expect(text).toContain('Alice A')
     expect(html).toContain('Alice A')
     expect(html).toContain('En attente')
+    expect(html).toContain('Détail des congés')
+    expect(html).toContain('17 jours restants')
   })
 
   it('shows an empty state when nobody is on leave (FR monthly)', () => {

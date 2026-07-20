@@ -17,6 +17,7 @@ export type RecapLeaveInput = {
   startDate: Date
   endDate: Date
   status: RecapStatus
+  remainingDays: number
 }
 
 export type RecapRow = {
@@ -27,6 +28,7 @@ export type RecapRow = {
   endDate: Date
   status: RecapStatus
   daysInRange: number
+  remainingDays: number
 }
 
 export type RecapRecipient = { email: string; language: 'EN' | 'FR' }
@@ -59,6 +61,7 @@ export function buildRecapRows(
         endDate: clippedEnd,
         status: leave.status,
         daysInRange: countWorkingDays(clippedStart, clippedEnd, frenchHolidays),
+        remainingDays: leave.remainingDays,
       }
     })
     .sort((first, second) => {
@@ -86,6 +89,35 @@ export function groupEmailsByLanguage(recipients: RecapRecipient[]): Map<'EN' | 
   return grouped
 }
 
+async function computeRemainingDaysByUser(
+  users: { userId: string; congesTotalDays: number }[],
+  frenchHolidays: Record<string, string>,
+): Promise<Map<string, number>> {
+  const totalByUser = new Map<string, number>()
+  for (const user of users) {
+    totalByUser.set(user.userId, user.congesTotalDays)
+  }
+  const userIds = [...totalByUser.keys()]
+  if (userIds.length === 0) return new Map()
+
+  const approvedLeaves = await prisma.leaveRequest.findMany({
+    where: { userId: { in: userIds }, status: LeaveRequestStatus.APPROVED },
+    select: { userId: true, startDate: true, endDate: true },
+  })
+
+  const approvedDaysByUser = new Map<string, number>()
+  for (const leave of approvedLeaves) {
+    const previous = approvedDaysByUser.get(leave.userId) ?? 0
+    approvedDaysByUser.set(leave.userId, previous + countWorkingDays(leave.startDate, leave.endDate, frenchHolidays))
+  }
+
+  const remainingByUser = new Map<string, number>()
+  for (const [userId, total] of totalByUser) {
+    remainingByUser.set(userId, Math.max(total - (approvedDaysByUser.get(userId) ?? 0), 0))
+  }
+  return remainingByUser
+}
+
 export async function getLeaveRecap(range: DateRange): Promise<RecapRow[]> {
   const leaves = await prisma.leaveRequest.findMany({
     where: {
@@ -99,12 +131,16 @@ export async function getLeaveRecap(range: DateRange): Promise<RecapRow[]> {
     },
     include: {
       user: {
-        select: { firstName: true, lastName: true, email: true, position: true },
+        select: { firstName: true, lastName: true, email: true, position: true, congesTotalDays: true },
       },
     },
   })
 
   const frenchHolidays = await fetchFrenchHolidays()
+  const remainingByUser = await computeRemainingDaysByUser(
+    leaves.map((leave) => ({ userId: leave.userId, congesTotalDays: leave.user.congesTotalDays })),
+    frenchHolidays,
+  )
 
   const inputs: RecapLeaveInput[] = leaves.map((leave) => ({
     userId: leave.userId,
@@ -115,6 +151,7 @@ export async function getLeaveRecap(range: DateRange): Promise<RecapRow[]> {
     startDate: leave.startDate,
     endDate: leave.endDate,
     status: leave.status === LeaveRequestStatus.APPROVED ? 'APPROVED' : 'PENDING',
+    remainingDays: remainingByUser.get(leave.userId) ?? 0,
   }))
 
   return buildRecapRows(inputs, range, frenchHolidays)
