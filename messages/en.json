@@ -1178,7 +1178,9 @@
         "appBestof": "Training Best-of",
         "appConges": "Leave management",
         "appPublications": "Publications",
-        "derivedFromRecent": "from the most recent publication"
+        "derivedFromRecent": "derived from publications",
+        "lastAuthor": "Last author",
+        "authorRole": "author"
       }
     },
     "centres": {

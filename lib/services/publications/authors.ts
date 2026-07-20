@@ -50,8 +50,60 @@ export async function countAuthors(): Promise<number> {
 export type AuthorDetail = {
   affiliations: { raw: string; isOurs: boolean }[]
   affiliationsDerived: boolean
-  publications: { id: string; title: string; journal: string | null; year: number | null; isFirstAuthor: boolean }[]
+  publications: { id: string; title: string; journal: string | null; year: number | null; position: number; authorsCount: number }[]
   portalUser: { name: string; email: string; position: string | null; active: boolean; applications: string[] } | null
+}
+
+const AFFILIATION_MAX = 6
+
+const AFFILIATION_STOPWORDS = new Set([
+  'the', 'and', 'for', 'of', 'de', 'des', 'du', 'la', 'le', 'les', 'et', 'cedex',
+  'university', 'universite', 'hospital', 'hopital', 'department', 'departement', 'dept',
+  'france', 'paris', 'assistance', 'publique', 'hopitaux', 'aphp', 'inc',
+])
+
+// Signature that collapses word-order / punctuation / accents / postal-code variants of the
+// same institution into one key (distinctive tokens only, sorted, deduped).
+function affiliationKey(raw: string): string {
+  const words = raw
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/\([^)]*\)/g, ' ')
+    .replace(/electronic address.*/i, ' ')
+    .replace(/[^a-z\s]/g, ' ')
+    .split(/\s+/)
+    .filter((word) => word.length > 2 && !AFFILIATION_STOPWORDS.has(word))
+  return [...new Set(words)].sort().join(' ')
+}
+
+type DerivableAuthorship = {
+  article: { publishedAt: Date | null }
+  affiliations: { affiliation: { raw: string | null; name: string } }[]
+}
+
+function deriveAffiliations(authorships: DerivableAuthorship[], isOurs: (raw: string) => boolean): { raw: string; isOurs: boolean }[] {
+  const byKey = new Map<string, { raw: string; count: number; recency: number }>()
+  const byRecency = [...authorships].sort(
+    (first, second) => (second.article.publishedAt?.getTime() ?? 0) - (first.article.publishedAt?.getTime() ?? 0),
+  )
+  byRecency.forEach((authorship, recencyIndex) => {
+    for (const link of authorship.affiliations) {
+      const rawFull = link.affiliation.raw ?? link.affiliation.name
+      for (const part of rawFull.split(';')) {
+        const raw = part.replace(/\s*Electronic address:.*$/i, '').trim().replace(/\.$/, '').trim()
+        const key = affiliationKey(raw)
+        if (raw.length < 6 || key.length < 4) continue
+        const existing = byKey.get(key)
+        if (existing) existing.count += 1
+        else byKey.set(key, { raw, count: 1, recency: recencyIndex })
+      }
+    }
+  })
+  return [...byKey.values()]
+    .sort((first, second) => second.count - first.count || first.recency - second.recency)
+    .slice(0, AFFILIATION_MAX)
+    .map((entry) => ({ raw: entry.raw, isOurs: isOurs(entry.raw) }))
 }
 
 export async function getAuthorDetail(id: string): Promise<AuthorDetail> {
@@ -64,7 +116,7 @@ export async function getAuthorDetail(id: string): Promise<AuthorDetail> {
         authorships: {
           select: {
             order: true,
-            article: { select: { id: true, title: true, publishedAt: true, publishedJournal: { select: { name: true } } } },
+            article: { select: { id: true, title: true, publishedAt: true, publishedJournal: { select: { name: true } }, _count: { select: { authorships: true } } } },
             affiliations: { orderBy: { order: 'asc' }, select: { affiliation: { select: { raw: true, name: true } } } },
           },
         },
@@ -86,7 +138,8 @@ export async function getAuthorDetail(id: string): Promise<AuthorDetail> {
       title: authorship.article.title,
       journal: authorship.article.publishedJournal?.name ?? null,
       year: authorship.article.publishedAt ? authorship.article.publishedAt.getFullYear() : null,
-      isFirstAuthor: authorship.order === 0,
+      position: authorship.order,
+      authorsCount: authorship.article._count.authorships,
     }))
     .sort((first, second) => (second.year ?? 0) - (first.year ?? 0))
 
@@ -98,16 +151,8 @@ export async function getAuthorDetail(id: string): Promise<AuthorDetail> {
   let affiliations = storedAffiliations
   let affiliationsDerived = false
   if (affiliations.length === 0) {
-    const mostRecent = [...author.authorships]
-      .filter((authorship) => authorship.affiliations.length > 0)
-      .sort((first, second) => (second.article.publishedAt?.getTime() ?? 0) - (first.article.publishedAt?.getTime() ?? 0))[0]
-    if (mostRecent) {
-      affiliations = mostRecent.affiliations
-        .map((link) => (link.affiliation.raw ?? link.affiliation.name).trim())
-        .filter(Boolean)
-        .map((raw) => ({ raw, isOurs: isOurs(raw) }))
-      affiliationsDerived = affiliations.length > 0
-    }
+    affiliations = deriveAffiliations(author.authorships, isOurs)
+    affiliationsDerived = affiliations.length > 0
   }
 
   return {

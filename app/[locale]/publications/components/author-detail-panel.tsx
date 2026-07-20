@@ -1,10 +1,18 @@
 'use client'
 
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Mail, ArrowRight, Star } from 'lucide-react'
 import { Link } from '@/app/i18n/navigation'
 import { Badge } from '@/components/ui/badge'
 import type { AuthorDetail } from '@/lib/services/publications/authors'
+
+function ordinal(position: number, locale: string): string {
+  if (locale.startsWith('fr')) return position === 1 ? '1er' : `${position}e`
+  const withinHundred = position % 100
+  const withinTen = position % 10
+  const suffix = withinHundred >= 11 && withinHundred <= 13 ? 'th' : withinTen === 1 ? 'st' : withinTen === 2 ? 'nd' : withinTen === 3 ? 'rd' : 'th'
+  return `${position}${suffix}`
+}
 
 const APP_LABEL_KEY: Record<string, string> = {
   BESTOF_LARIB: 'appBestof',
@@ -14,6 +22,7 @@ const APP_LABEL_KEY: Record<string, string> = {
 
 export function AuthorDetailPanel({ detail }: { detail: AuthorDetail }) {
   const t = useTranslations('publications.authors.detail')
+  const locale = useLocale()
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <div className="space-y-4">
@@ -77,13 +86,15 @@ export function AuthorDetailPanel({ detail }: { detail: AuthorDetail }) {
                   <p className="font-medium text-text-primary">{publication.title}</p>
                   <p className="text-sm text-text-secondary">{[publication.journal, publication.year].filter(Boolean).join(' · ')}</p>
                 </div>
-                {publication.isFirstAuthor ? (
+                {publication.position === 1 ? (
                   <span className="flex shrink-0 items-center gap-1 rounded-full border border-coral-200 bg-coral-50 px-2 py-0.5 text-xs font-semibold text-coral-600">
                     <Star className="size-3" />
                     {t('firstAuthor')}
                   </span>
+                ) : publication.authorsCount > 1 && publication.position === publication.authorsCount ? (
+                  <span className="shrink-0 rounded-full border border-coral-200 bg-coral-50/60 px-2 py-0.5 text-xs font-semibold text-coral-600">{t('lastAuthor')}</span>
                 ) : (
-                  <Badge variant="neutral" className="shrink-0">{t('coAuthor')}</Badge>
+                  <Badge variant="neutral" className="shrink-0">{`${ordinal(publication.position, locale)} ${t('authorRole')}`}</Badge>
                 )}
               </li>
             ))}
