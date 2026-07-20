@@ -77,6 +77,20 @@ function affiliationKey(raw: string): string {
   return [...new Set(words)].sort().join(' ')
 }
 
+// Strips a trailing author-initials parenthetical like "(J.H., S.T., J.-G.D., T.P.)"
+// while keeping real acronyms like "(AP-HP)" or "(ICPS)" (tokens without a trailing period).
+function stripAuthorInitials(text: string): string {
+  return text
+    .replace(/\s*\(([^)]*)\)/g, (match, inner: string) => {
+      const tokens = inner.split(',').map((token) => token.trim()).filter(Boolean)
+      const allInitials = tokens.length > 0 && tokens.every((token) => token.length <= 10 && /^[A-Z][A-Za-z.\-]*\.$/.test(token))
+      return allInitials ? '' : match
+    })
+    .replace(/\s+,/g, ',')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+}
+
 type DerivableAuthorship = {
   article: { publishedAt: Date | null }
   affiliations: { affiliation: { raw: string | null; name: string } }[]
@@ -91,7 +105,8 @@ function deriveAffiliations(authorships: DerivableAuthorship[], isOurs: (raw: st
     for (const link of authorship.affiliations) {
       const rawFull = link.affiliation.raw ?? link.affiliation.name
       for (const part of rawFull.split(';')) {
-        const raw = part.replace(/\s*Electronic address:.*$/i, '').trim().replace(/\.$/, '').trim()
+        const withoutAddress = part.replace(/\s*Electronic address:.*$/i, '').replace(/\.\s*$/, '').trim()
+        const raw = stripAuthorInitials(withoutAddress).replace(/\.\s*$/, '').trim()
         const key = affiliationKey(raw)
         if (raw.length < 6 || key.length < 4) continue
         const existing = byKey.get(key)
