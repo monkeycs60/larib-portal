@@ -401,6 +401,7 @@ enum StudyRole {
 model Study {
   id          String      @id @default(cuid())
   title       String
+  nctId       String?     @unique
   acronym     String?
   description String?
   domain      String?

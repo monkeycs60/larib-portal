@@ -1383,6 +1383,31 @@
         "ONGOING": "Ongoing",
         "COMPLETED": "Completed",
         "STOPPED": "Stopped"
+      },
+      "importTrial": {
+        "trigger": "Import from ClinicalTrials.gov",
+        "title": "Import a study from ClinicalTrials.gov",
+        "description": "Paste a ClinicalTrials.gov identifier (NCT number). We fetch the trial, then create the study with its centres and investigators.",
+        "nctLabel": "NCT identifier",
+        "fetch": "Fetch",
+        "fetching": "Fetching…",
+        "import": "Import study",
+        "importing": "Importing…",
+        "cancel": "Cancel",
+        "imported": "Study imported · {centres} new centre(s), {people} new author(s)",
+        "reviewHint": "Centres and investigators are matched to your bank when they already exist, and created otherwise. You can fine-tune the study afterwards.",
+        "fieldDates": "Dates",
+        "fieldFunding": "Funding",
+        "fieldDomain": "Conditions",
+        "centres": "Centres ({count})",
+        "investigators": "Investigators ({count})",
+        "errors": {
+          "INVALID_NCT_ID": "That does not look like a valid NCT identifier (e.g. NCT06235385).",
+          "DUPLICATE": "A study with this NCT identifier already exists.",
+          "NOT_FOUND": "No study found for this NCT identifier.",
+          "FETCH_FAILED": "Could not reach ClinicalTrials.gov. Please try again.",
+          "IMPORT_FAILED": "Could not import this study. Please try again."
+        }
       }
     }
   }

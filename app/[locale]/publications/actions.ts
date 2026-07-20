@@ -26,7 +26,8 @@ import { ARTICLE_TYPE_VALUES } from '@/lib/publications/article-type'
 import { createJournal, updateJournal, deleteJournal, isPrismaKnownError as isJournalError } from '@/lib/services/publications/journals'
 import { searchCrossref } from '@/lib/services/publications/journals-catalog'
 import { refreshJournalSjr } from '@/lib/services/publications/sjr'
-import { createStudy, updateStudy, deleteStudy, STUDY_STATUSES, PUBLICATIONS_STUDIES_TAG } from '@/lib/services/publications/studies'
+import { createStudy, updateStudy, deleteStudy, importClinicalTrialStudy, STUDY_STATUSES, PUBLICATIONS_STUDIES_TAG } from '@/lib/services/publications/studies'
+import { fetchClinicalTrial, normaliseNctId } from '@/lib/services/publications/clinicaltrials'
 
 export const searchBacklogAction = appAdminAction('PUBLICATIONS')
   .inputSchema(z.object({ anchor: z.string().min(1), retmax: z.number().int().min(1).max(500).optional() }))
@@ -364,6 +365,39 @@ export const deleteStudyAction = appAdminAction('PUBLICATIONS')
     const deleted = await deleteStudy(parsedInput.id)
     revalidateTag(PUBLICATIONS_STUDIES_TAG)
     return deleted
+  })
+
+export const previewClinicalTrialAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({ nctId: z.string().min(1) }))
+  .action(async ({ parsedInput }) => {
+    const normalised = normaliseNctId(parsedInput.nctId)
+    if (!normalised) return { ok: false as const, error: 'INVALID_NCT_ID' }
+    const existing = await prisma.study.findUnique({ where: { nctId: normalised }, select: { id: true } })
+    if (existing) return { ok: false as const, error: 'DUPLICATE' }
+    try {
+      const preview = await fetchClinicalTrial(normalised)
+      return { ok: true as const, preview }
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : 'FETCH_FAILED'
+      return { ok: false as const, error: reason }
+    }
+  })
+
+export const importClinicalTrialAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({ nctId: z.string().min(1) }))
+  .action(async ({ parsedInput, ctx }) => {
+    const normalised = normaliseNctId(parsedInput.nctId)
+    if (!normalised) return { ok: false as const, error: 'INVALID_NCT_ID' }
+    try {
+      const preview = await fetchClinicalTrial(normalised)
+      const result = await importClinicalTrialStudy(preview, ctx.userId)
+      revalidateTag(PUBLICATIONS_STUDIES_TAG)
+      revalidateTag(PUBLICATIONS_CENTRES_TAG)
+      return { ok: true as const, result }
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : 'IMPORT_FAILED'
+      return { ok: false as const, error: reason }
+    }
   })
 
 // ---- My Publications: submission tracking (user-owned) ----

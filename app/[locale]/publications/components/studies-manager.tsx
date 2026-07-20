@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useAction } from 'next-safe-action/hooks'
 import { toast } from 'sonner'
-import { Pencil, Trash2, Plus } from 'lucide-react'
+import { Pencil, Trash2, Plus, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 import { StudyForm } from './study-form'
+import { ImportTrialDialog } from './import-trial-dialog'
 import { deleteStudyAction } from '../actions'
 import type { StudyListItem } from '@/lib/services/publications/studies'
 import type { AuthorOption } from '@/lib/services/publications/authors'
@@ -39,6 +40,7 @@ export function StudiesManager({
   const router = useRouter()
   const [query, setQuery] = useState('')
   const [formOpen, setFormOpen] = useState(false)
+  const [importOpen, setImportOpen] = useState(false)
   const [editing, setEditing] = useState<StudyListItem | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<StudyListItem | null>(null)
 
@@ -72,8 +74,13 @@ export function StudiesManager({
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t('studies.search')} className="max-w-sm" />
-        <Button onClick={openNew}><Plus className="size-4" />{t('studies.new')}</Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setImportOpen(true)}><Download className="size-4" />{t('studies.importTrial.trigger')}</Button>
+          <Button onClick={openNew}><Plus className="size-4" />{t('studies.new')}</Button>
+        </div>
       </div>
+
+      <ImportTrialDialog open={importOpen} onClose={() => setImportOpen(false)} />
 
       <Table>
         <TableHeader>

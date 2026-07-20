@@ -1381,6 +1381,31 @@
         "ONGOING": "En cours",
         "COMPLETED": "Terminée",
         "STOPPED": "Arrêtée"
+      },
+      "importTrial": {
+        "trigger": "Importer depuis ClinicalTrials.gov",
+        "title": "Importer une étude depuis ClinicalTrials.gov",
+        "description": "Collez un identifiant ClinicalTrials.gov (numéro NCT). Nous récupérons l’essai, puis créons l’étude avec ses centres et investigateurs.",
+        "nctLabel": "Identifiant NCT",
+        "fetch": "Récupérer",
+        "fetching": "Récupération…",
+        "import": "Importer l’étude",
+        "importing": "Import en cours…",
+        "cancel": "Annuler",
+        "imported": "Étude importée · {centres} nouveau(x) centre(s), {people} nouvel(le)(s) auteur(s)",
+        "reviewHint": "Les centres et investigateurs sont rattachés à votre banque s’ils existent déjà, et créés sinon. Vous pourrez ajuster l’étude ensuite.",
+        "fieldDates": "Dates",
+        "fieldFunding": "Financement",
+        "fieldDomain": "Pathologies",
+        "centres": "Centres ({count})",
+        "investigators": "Investigateurs ({count})",
+        "errors": {
+          "INVALID_NCT_ID": "Cet identifiant NCT semble invalide (ex. NCT06235385).",
+          "DUPLICATE": "Une étude avec cet identifiant NCT existe déjà.",
+          "NOT_FOUND": "Aucune étude trouvée pour cet identifiant NCT.",
+          "FETCH_FAILED": "Impossible de joindre ClinicalTrials.gov. Veuillez réessayer.",
+          "IMPORT_FAILED": "Impossible d’importer cette étude. Veuillez réessayer."
+        }
       }
     }
   }
