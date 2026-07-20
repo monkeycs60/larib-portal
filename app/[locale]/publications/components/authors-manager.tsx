@@ -26,7 +26,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
+import { TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 import { deleteAuthorAction, mergeAuthorsAction, getAuthorDetailAction, getAuthorForEditAction } from '../actions'
 import type { AuthorListItem, LinkableUser, AuthorDetail, AuthorEditData } from '@/lib/services/publications/authors'
 import { EditAuthorDialog } from './edit-author-dialog'
@@ -253,8 +253,8 @@ export function AuthorsManager({ authors, users, centres }: { authors: AuthorLis
   const selectedAuthors = authors.filter((author) => selected.has(author.id))
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+    <div className="flex h-full min-h-0 flex-col gap-4">
+      <div className="flex shrink-0 flex-wrap items-start justify-between gap-4">
         <div className="flex gap-4">
           <span aria-hidden className="mt-1 w-[5px] shrink-0 rounded bg-gradient-to-b from-coral-500 to-coral-600" />
           <div className="space-y-1">
@@ -282,7 +282,7 @@ export function AuthorsManager({ authors, users, centres }: { authors: AuthorLis
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex shrink-0 flex-wrap items-center gap-3">
         <div className="relative w-full sm:max-w-xs">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-muted" />
           <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t('authors.search')} className="rounded-2xl bg-bg-surface pl-9 shadow-sm" />
@@ -324,9 +324,9 @@ export function AuthorsManager({ authors, users, centres }: { authors: AuthorLis
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-line bg-bg-surface shadow-sm">
-        <Table>
-          <TableHeader>
+      <div className="min-h-0 flex-1 overflow-y-auto rounded-2xl border border-line bg-bg-surface shadow-sm">
+        <table className="w-full caption-bottom text-sm">
+          <TableHeader className="[&_th]:sticky [&_th]:top-0 [&_th]:z-10 [&_th]:bg-bg-surface [&_th]:shadow-[0_1px_0_0_var(--color-line)]">
             <TableRow>
               <TableHead className="w-10" />
               <SortHead sortKey="name" label={t('authors.colName')} />
@@ -420,7 +420,7 @@ export function AuthorsManager({ authors, users, centres }: { authors: AuthorLis
               )
             })}
           </TableBody>
-        </Table>
+        </table>
       </div>
 
       <EditAuthorDialog

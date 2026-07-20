@@ -21,7 +21,7 @@ export default async function PublicationsAuthorsPage({ params }: PageParams) {
   const [authors, users, centres] = await Promise.all([listAuthors(), listLinkableUsers(), listCentres()])
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <div className="flex h-[100dvh] flex-col overflow-hidden p-4 md:p-6">
       <AuthorsManager authors={authors} users={users} centres={centres} />
     </div>
   )
