@@ -438,7 +438,7 @@ export function AuthorsManager({ authors, users, centres }: { authors: AuthorLis
           <p className="text-sm text-text-secondary">{t('authors.mergeChooseKeeper')}</p>
           <Select value={keepId} onChange={(event) => setKeepId(event.target.value)}>
             {selectedAuthors.map((author) => (
-              <option key={author.id} value={author.id}>{`${authorLabel(author)}${author.centre ? ` · ${author.centre.name}` : ''} (${author._count.authorships})`}</option>
+              <option key={author.id} value={author.id}>{`${authorLabel(author)}${author.centre ? ` · ${author.centre.name}` : ''}${author.orcid ? ` · ${author.orcid}` : ''} (${author._count.authorships})`}</option>
             ))}
           </Select>
           <DialogFooter>
