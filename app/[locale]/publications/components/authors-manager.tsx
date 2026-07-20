@@ -65,6 +65,10 @@ function authorInitials(author: AuthorListItem): string {
   return `${author.firstName.charAt(0)}${author.lastName.charAt(0)}`.toUpperCase()
 }
 
+function truncateName(name: string, max = 30): string {
+  return name.length > max ? `${name.slice(0, max).trimEnd()}…` : name
+}
+
 type PortalStatus = 'active' | 'invited' | 'none'
 
 function portalStatus(author: AuthorListItem): PortalStatus {
@@ -289,15 +293,15 @@ export function AuthorsManager({ authors, users, centres }: { authors: AuthorLis
         </div>
         <div className="ml-auto flex items-center gap-1 rounded-2xl border border-line bg-bg-surface px-3 py-1.5 shadow-sm">
           <span className="text-sm font-bold text-text-primary">{t('authors.filterCentre')}</span>
-          <Select value={centreFilter} onChange={(event) => setCentreFilter(event.target.value)} className="w-auto border-0 shadow-none">
+          <Select value={centreFilter} onChange={(event) => setCentreFilter(event.target.value)} className="w-40 truncate border-0 shadow-none">
             <option value="">{t('authors.filterAll')}</option>
             {centres.map((centre) => (
-              <option key={centre.id} value={centre.id}>{centre.name}</option>
+              <option key={centre.id} value={centre.id} title={centre.name}>{truncateName(centre.name)}</option>
             ))}
           </Select>
           <span className="mx-1 h-5 w-px bg-line" />
           <span className="text-sm font-bold text-text-primary">{t('authors.filterPortal')}</span>
-          <Select value={portalFilter} onChange={(event) => setPortalFilter(event.target.value as 'ALL' | PortalStatus)} className="w-auto border-0 shadow-none">
+          <Select value={portalFilter} onChange={(event) => setPortalFilter(event.target.value as 'ALL' | PortalStatus)} className="w-28 border-0 shadow-none">
             <option value="ALL">{t('authors.filterAll')}</option>
             <option value="active">{t('authors.portalActive')}</option>
             <option value="invited">{t('authors.portalInvited')}</option>
