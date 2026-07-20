@@ -7,7 +7,7 @@ export type CentreListItem = Prisma.CentreGetPayload<{
 
 export async function listCentres(): Promise<CentreListItem[]> {
   return prisma.centre.findMany({
-    orderBy: [{ isOwn: 'desc' }, { affiliations: { _count: 'desc' } }, { name: 'asc' }],
+    orderBy: [{ name: 'asc' }],
     select: { id: true, name: true, city: true, country: true, isOwn: true, _count: { select: { affiliations: true } } },
   })
 }
