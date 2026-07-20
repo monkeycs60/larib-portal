@@ -249,6 +249,10 @@ export async function importClinicalTrialStudy(data: ClinicalTrialImport, create
   }, { timeout: 20000 })
 }
 
+export async function countStudies(): Promise<number> {
+  return prisma.study.count()
+}
+
 export function isPrismaKnownError(error: unknown, code: string): boolean {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === code
 }

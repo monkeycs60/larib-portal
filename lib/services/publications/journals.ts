@@ -78,6 +78,10 @@ export async function deleteJournal(id: string) {
   return prisma.journal.delete({ where: { id }, select: { id: true } })
 }
 
+export async function countJournals(): Promise<number> {
+  return prisma.journal.count()
+}
+
 export function isPrismaKnownError(error: unknown, code: string): boolean {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === code
 }

@@ -1339,7 +1339,9 @@
       "deleted": "Journal deleted",
       "errorExists": "A journal with this name already exists.",
       "errorInUse": "This journal is referenced and cannot be deleted.",
-      "manageLink": "Manage journals"
+      "manageLink": "Manage journals",
+      "hubDescription": "Target journals, impact factors and abbreviations.",
+      "viewJournals": "View journals"
     },
     "studies": {
       "title": "Studies",
@@ -1408,7 +1410,13 @@
           "FETCH_FAILED": "Could not reach ClinicalTrials.gov. Please try again.",
           "IMPORT_FAILED": "Could not import this study. Please try again."
         }
-      }
+      },
+      "hubDescription": "Trials and registries, their centres and investigators.",
+      "viewStudies": "View studies"
+    },
+    "adminHome": {
+      "title": "Publications Admin Dashboard",
+      "subtitle": "Manage authors, centres, studies and journals for the Publications app."
     }
   }
 }

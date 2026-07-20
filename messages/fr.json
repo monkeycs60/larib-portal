@@ -1337,7 +1337,9 @@
       "deleted": "Journal supprimé",
       "errorExists": "Un journal avec ce nom existe déjà.",
       "errorInUse": "Ce journal est référencé et ne peut pas être supprimé.",
-      "manageLink": "Gérer les journaux"
+      "manageLink": "Gérer les journaux",
+      "hubDescription": "Revues cibles, facteurs d’impact et abréviations.",
+      "viewJournals": "Voir les revues"
     },
     "studies": {
       "title": "Études",
@@ -1406,7 +1408,13 @@
           "FETCH_FAILED": "Impossible de joindre ClinicalTrials.gov. Veuillez réessayer.",
           "IMPORT_FAILED": "Impossible d’importer cette étude. Veuillez réessayer."
         }
-      }
+      },
+      "hubDescription": "Essais et registres, leurs centres et investigateurs.",
+      "viewStudies": "Voir les études"
+    },
+    "adminHome": {
+      "title": "Publications Admin Dashboard",
+      "subtitle": "Gérez les auteurs, centres, études et revues de l’application Publications."
     }
   }
 }
