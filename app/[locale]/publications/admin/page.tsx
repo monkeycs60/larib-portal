@@ -7,7 +7,6 @@ import { Users, Building2, FlaskConical, BookOpen, ArrowRight } from 'lucide-rea
 import type { ComponentType } from 'react'
 import { PageHeader } from '@/app/[locale]/components/page-header'
 import { Link } from '@/app/i18n/navigation'
-import { BacklogImport } from '@/app/[locale]/publications/components/backlog-import'
 import { AdminAuthorRequests } from '@/app/[locale]/publications/components/admin-author-requests'
 import { listPendingAuthorRequests } from '@/lib/services/publications/author-requests'
 import { countAuthors } from '@/lib/services/publications/authors'
@@ -82,7 +81,6 @@ export default async function PublicationsAdminPage({ params }: PageParams) {
           {t('articles.manageLink')} →
         </Link>
       </div>
-      <BacklogImport />
     </div>
   )
 }
