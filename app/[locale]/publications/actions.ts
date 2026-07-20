@@ -20,7 +20,7 @@ import { updateAuthor, deleteAuthor, mergeAuthors, recomputeAuthorCentres, creat
 import { findAuthorDuplicates, matchAuthorsAgainstBank, normalizeName } from '@/lib/services/publications/author-dedup'
 import { fetchPublicationByIdentifier } from '@/lib/services/publications/publication-lookup'
 import { backfillAffiliations, PUBLICATIONS_CENTRES_TAG, PUBLICATIONS_AFFILIATIONS_TAG } from '@/lib/services/publications/affiliations'
-import { renameCentre, setCentreOwn, deleteCentre, mergeCentres } from '@/lib/services/publications/centres'
+import { renameCentre, setCentreOwn, deleteCentre, mergeCentres, getCentreAuthors, createCentre, updateCentre } from '@/lib/services/publications/centres'
 import { updateArticleStatus, updateArticleType, ARTICLE_STATUSES } from '@/lib/services/publications/articles'
 import { ARTICLE_TYPE_VALUES } from '@/lib/publications/article-type'
 import { createJournal, updateJournal, deleteJournal, isPrismaKnownError as isJournalError } from '@/lib/services/publications/journals'
@@ -156,6 +156,26 @@ export const deleteCentreAction = appAdminAction('PUBLICATIONS')
     revalidateTag(PUBLICATIONS_CENTRES_TAG)
     return result
   })
+
+export const createCentreAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({ name: z.string().min(1), city: z.string().optional().nullable(), country: z.string().optional().nullable() }))
+  .action(async ({ parsedInput }) => {
+    const result = await createCentre(parsedInput)
+    revalidateTag(PUBLICATIONS_CENTRES_TAG)
+    return result
+  })
+
+export const updateCentreAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({ id: z.string().min(1), name: z.string().min(1), city: z.string().optional().nullable(), country: z.string().optional().nullable(), isOwn: z.boolean().default(false) }))
+  .action(async ({ parsedInput }) => {
+    const result = await updateCentre(parsedInput)
+    revalidateTag(PUBLICATIONS_CENTRES_TAG)
+    return result
+  })
+
+export const getCentreAuthorsAction = appAdminAction('PUBLICATIONS')
+  .inputSchema(z.object({ id: z.string().min(1) }))
+  .action(async ({ parsedInput }) => getCentreAuthors(parsedInput.id))
 
 export const updateArticleStatusAction = appAdminAction('PUBLICATIONS')
   .inputSchema(z.object({ id: z.string().min(1), status: z.enum(ARTICLE_STATUSES) }))
